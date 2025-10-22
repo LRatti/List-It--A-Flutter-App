@@ -18,3 +18,5 @@ This is straight forward as it includes the themes and styles for the apps.
 
 Commons.dart: 
 This is a file we use as a main “import” for all the things used in the app. This way you just import a single file in your files which can also help with quick refactoring, changing or adding libraries.
+
+https://medium.com/@kanellopoulos.leo/a-simple-way-to-organize-your-code-in-flutter-e175e7004fb5
