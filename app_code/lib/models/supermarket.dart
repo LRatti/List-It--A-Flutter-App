@@ -1,5 +1,4 @@
 import 'package:app_code/models/category.dart';
-import 'package:app_code/models/supermarket_category.dart';
 import 'package:isar/isar.dart';
 
 @collection
@@ -8,9 +7,10 @@ class Supermarket {
   Id id = Isar.autoIncrement;
   String name = '';
   final int userId ;
-  List<SupermarketCategory> categories = [];
+  List<Category> categories = [];
 
-  Supermarket({this.name = '', this.userId = 0, List<SupermarketCategory>? categories})
+  //TODO: add default name
+  Supermarket({this.name = 'Supermarket', this.userId = 0, List<Category>? categories})
       : categories = categories ?? [];
 
   int getId() {
@@ -21,7 +21,7 @@ class Supermarket {
     return name;
   }
 
-  List<SupermarketCategory> getCategories() {
+  List<Category> getCategories() {
     return categories;
   }
 
@@ -33,16 +33,20 @@ class Supermarket {
     this.name = name;
   }
 
-  void modifyCategories(List<SupermarketCategory> categories) {
+  void modifyCategories(List<Category> categories) {
     this.categories = categories;
   }
 
+  void addCategory(Category category){
+      categories.add(category);
+  }
+  
   factory Supermarket.fromJson(Map<String, dynamic> json) {
     return Supermarket(
       name: json['name'] ?? '',
       userId: json['userId'] ?? 0,
       categories: (json['categories'] as List<dynamic>?)
-              ?.map((item) => SupermarketCategory.fromJson(item))
+              ?.map((item) => Category.fromJson(item))
               .toList() ??
           [],
     );

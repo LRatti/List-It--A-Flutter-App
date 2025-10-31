@@ -13,6 +13,7 @@ class ShoppingList {
   double? totalPrice;
   Image? image;
   List<PurchasedProduct>? products;
+  bool isRegistered = false;
 
   ShoppingList(
       {required this.id,
@@ -22,7 +23,8 @@ class ShoppingList {
       required this.userId,
       this.totalPrice,
       this.image,
-      this.products});
+      this.products,
+      this.isRegistered = false});
 
   int getId() {
     return id;
@@ -52,6 +54,10 @@ class ShoppingList {
     return products ?? [];
   }
 
+  bool getIsRegistered() {
+    return isRegistered;
+  }
+
   factory ShoppingList.fromJson(Map<String, dynamic> json) {
     return ShoppingList(
       id: json['id'],
@@ -62,6 +68,7 @@ class ShoppingList {
           : null,
       userId: json['user_id'],
       totalPrice: json['total_price'],
+      isRegistered: json['is_registered'] ?? false,
       // image and products deserialization can be added here if needed
     );
   }
@@ -74,6 +81,7 @@ class ShoppingList {
       'supermarket': supermarket?.toJson(),
       'user_id': userId,
       'total_price': totalPrice,
+      'is_registered': isRegistered,
       // image and products serialization can be added here if needed
     };
   }
@@ -118,6 +126,10 @@ class ShoppingList {
 
   void setImage(Image image) {
     this.image = image;
+  }
+
+  void setIsRegistered(bool isRegistered) {
+    this.isRegistered = isRegistered;
   }
 
 
