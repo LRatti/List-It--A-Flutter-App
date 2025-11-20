@@ -1,45 +1,40 @@
 class User {
 
-  final int id;
-  String? providerId;
-  String? email;
-  String? password;
-  String? userName;
+  final String id;
+  String? _providerId;
+  final String? email;
+  String? _password;
+  String? _userName;
 
-  User({required this.id, this.providerId, this.email, this.password, this.userName});
-
-  int getId() {
-    return id;
-  }
+  User({
+    required this.id, 
+    providerId, 
+    required this.email, 
+    password, 
+    userName
+  }): _providerId = providerId,
+      _password = password,
+      _userName = userName;
 
   String getProviderId() {
-    return providerId ?? '';
-  }
-
-  String getEmail() {
-    return email ?? '';
+    return _providerId ?? '';
   }
 
   String getPassword() {
-    return password ?? '';
+    return _password ?? '';
   }
 
   String getUserName() {
-    return userName ?? '';
+    return _userName ?? '';
   }
 
   int setPassword(String password) {
-    this.password = password;
-    return 1;
-  }
-
-  int setEmail(String email) {
-    this.email = email;
+    this._password = password;
     return 1;
   }
 
   int setUserName(String userName) {
-    this.userName = userName;
+    this._userName = userName;
     return 1;
   }
 
@@ -56,10 +51,10 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'provider_id': providerId,
+      'provider_id': _providerId,
       'email': email,
-      'password': password,
-      'user_name': userName,
+      'password': _password,
+      'user_name': _userName,
     };
   }
 

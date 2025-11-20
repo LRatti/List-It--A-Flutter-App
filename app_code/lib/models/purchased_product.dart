@@ -3,43 +3,29 @@ import 'package:isar/isar.dart';
 
 @collection
 class PurchasedProduct {
-
-  Id id = Isar.autoIncrement;
+  final String id;
   double price = 0.0;
   int quantity = 0;
-  Product? product;
+  final Product _product;
 
-
+  //TODO: generate random uuid for localId
   PurchasedProduct(
-      {this.price = 0.0,
-      this.quantity = 0,
-      this.product});
+      {
+        required this.id,
+        this.price = 0.0,
+        this.quantity = 0,
+        required product,
+      }
+  ):  
+    _product = product;
 
-  int getId() {
-    return id;
-  }
-
-  double getPrice() {
-    return price;
-  }
-
-  int getquantity() {
-    return quantity;
-  }
-
-  void setPrice(double price) {
-    this.price = price;
-  }
-
-  void setquantity(int quantity) {
-    this.quantity = quantity;
-  }
 
   factory PurchasedProduct.fromJson(Map<String, dynamic> json) {
     return PurchasedProduct(
-      //id: json['id'],
+      id: json['id'],
       price: json['price'],
       quantity: json['quantity'],
+      product: json['product'],
     );
   }
 
@@ -48,16 +34,11 @@ class PurchasedProduct {
       'id': id,
       'price': price,
       'quantity': quantity,
+      'product': _product
     };
   }
 
   double getTotalPrice() {
-    return (price ?? 0.0) * (quantity ?? 0);
+    return (price) * (quantity);
   }
-
-  Product? getProduct() {
-    return product;
-  }
-
-
 }

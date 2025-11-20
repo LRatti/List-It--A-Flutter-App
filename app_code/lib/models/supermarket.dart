@@ -4,47 +4,42 @@ import 'package:isar/isar.dart';
 @collection
 class Supermarket {
 
-  Id id = Isar.autoIncrement;
-  String name = '';
-  final int userId ;
-  List<Category> categories = [];
-
-  //TODO: add default name
-  Supermarket({this.name = 'Supermarket', this.userId = 0, List<Category>? categories})
-      : categories = categories ?? [];
-
-  int getId() {
-    return id;
-  }
+  final String id;
+  String _name;
+  List<Category> _categories;
+  
+  Supermarket({
+    required this.id,
+    //TODO: add default name
+    name = 'Supermarket', 
+    required categories,
+  }) :  _categories = categories,
+        _name = name;
 
   String getName() {
-    return name;
+    return _name;
   }
 
   List<Category> getCategories() {
-    return categories;
-  }
-
-  int getUserId() {
-    return userId;
+    return _categories;
   }
 
   void setName(String name) {
-    this.name = name;
+    _name = name;
   }
 
   void modifyCategories(List<Category> categories) {
-    this.categories = categories;
+    this._categories = categories;
   }
 
   void addCategory(Category category){
-      categories.add(category);
+      _categories.add(category);
   }
   
   factory Supermarket.fromJson(Map<String, dynamic> json) {
     return Supermarket(
+      id: json['id'],
       name: json['name'] ?? '',
-      userId: json['userId'] ?? 0,
       categories: (json['categories'] as List<dynamic>?)
               ?.map((item) => Category.fromJson(item))
               .toList() ??
@@ -55,12 +50,8 @@ class Supermarket {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
-      'userId': userId,
-      'categories': categories.map((category) => category.toJson()).toList(),
+      'name': _name,
+      'categories': _categories.map((category) => category.toJson()).toList(),
     };
   }
-
-
-
 }
