@@ -1,0 +1,1 @@
+dart run build_runner watch -> generates providers automatically
