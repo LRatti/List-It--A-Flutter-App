@@ -30,6 +30,7 @@ Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': _name,
+      'is_default': isDefault ? 1 : 0,
     };
   }
 }
