@@ -2,14 +2,14 @@ class User {
 
   final String uid;
   String? _providerId;
-  final String email;
+  String? email;
   String? _password;
   String? _userName;
 
   User({
     required this.uid, 
     providerId, 
-    required this.email, 
+    email, 
     password, 
     userName
   }): _providerId = providerId,

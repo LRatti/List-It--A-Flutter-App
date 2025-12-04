@@ -7,6 +7,9 @@ final authProvider = StreamProvider.autoDispose<User?>((ref) async* {
   // create a stream provides continues values (user/null)
   final Stream<User?> userStream = firebase_auth.FirebaseAuth.instance.authStateChanges().map((user) {
     if (user != null) {
+      if (user.email == null) {
+        return User(uid: user.uid);
+      }
       return User(uid: user.uid, email: user.email!);
     }
     return null;

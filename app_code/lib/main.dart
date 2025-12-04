@@ -2,6 +2,8 @@ import 'package:app_code/models/user.dart';
 import 'package:app_code/providers/auth_provider.dart';
 import 'package:app_code/screens/auth/welcome.dart';
 import 'package:app_code/screens/home/profile.dart';
+import 'package:app_code/screens/settings/settings.dart';
+import 'package:app_code/services/auth_service.dart';
 import 'package:flutter/material.dart';
 // firebase
 import 'package:firebase_core/firebase_core.dart';
@@ -14,6 +16,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Automatically sign in anonymously only if no user is signed in
+  await AuthService.ensureAuthenticated();
 
   runApp(
     const ProviderScope(
@@ -35,7 +40,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      debugShowCheckedModeBanner: false ,
+      debugShowCheckedModeBanner: false,
+      routes: {
+        '/settings': (context) => const SettingsScreen(),
+        '/signin': (context) => const WelcomeScreen(),
+      },
       home: Consumer(
         builder: (context, ref, child) {
           final AsyncValue<User?> user = ref.watch(authProvider);
