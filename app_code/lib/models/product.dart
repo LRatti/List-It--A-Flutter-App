@@ -1,3 +1,5 @@
+import 'package:app_code/utils/helper.dart';
+
 class Product {
 
   final String id; 
@@ -5,10 +7,11 @@ class Product {
   int? categoryId;
 
   Product({
-    required this.id,
+    String?id,
     required name, 
     this.categoryId, 
-  }): this._name = name;
+  }): this._name = name,
+      this.id = id ?? Helper.generateId();
  
   String getName() {
     return this._name;

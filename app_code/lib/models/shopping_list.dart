@@ -2,6 +2,7 @@ import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:flutter/material.dart';
+import 'package:app_code/utils/helper.dart';
 
 class ShoppingList {
  
@@ -15,7 +16,7 @@ class ShoppingList {
   bool _isRegistered = false;
 
   ShoppingList(
-      {required this.id,
+      {String? id,
       required name,
       required this.createdAt,
       supermarket,
@@ -26,7 +27,8 @@ class ShoppingList {
   }) :  _name = name,
         _totalPrice = totalPrice,
         _supermarket = supermarket,
-        _isRegistered = isRegistered;
+        _isRegistered = isRegistered,
+        this.id = id ?? Helper.generateId();
 
   String getName() {
     return this._name;

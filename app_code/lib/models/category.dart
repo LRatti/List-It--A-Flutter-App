@@ -1,3 +1,5 @@
+import 'package:app_code/utils/helper.dart';
+
 class Category {
 
   final String id;
@@ -5,10 +7,11 @@ class Category {
   final bool isDefault;
 
   Category({
-    required this.id,
-    required name,
+    String? id,
+    required String name,
     this.isDefault = false,
-  }): _name = name;
+  })  : id = id ?? Helper.generateId(),
+        _name = name;
 
   //this method might not be used
   void setName(String newName){
