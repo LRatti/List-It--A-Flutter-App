@@ -25,6 +25,7 @@ class DatabaseHelper {
   }
 
   Future<void> _createDb(Database db, int version) async {
+    //shopping_list
     await db.execute('''
       CREATE TABLE shopping_list(
         id TEXT PRIMARY KEY,
@@ -37,6 +38,7 @@ class DatabaseHelper {
       )
     ''');
 
+    //purchased_product
     await db.execute('''
       CREATE TABLE purchased_product(
         id TEXT PRIMARY KEY,
@@ -45,6 +47,54 @@ class DatabaseHelper {
         price REAL NOT NULL,
         quantity INTEGER NOT NULL,
         FOREIGN KEY(list_id) REFERENCES shopping_list(id)
+      )
+    ''');
+
+    // Product
+    await db.execute('''
+      CREATE TABLE product(
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        category_id TEXT
+      )
+    ''');
+
+    // Category
+    await db.execute('''
+      CREATE TABLE category(
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        is_default INTEGER NOT NULL
+      )
+    ''');
+
+    // Supermarket
+    await db.execute('''
+      CREATE TABLE supermarket(
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL
+      )
+    ''');
+
+    // Supermarket → Category (N:N)
+    await db.execute('''
+      CREATE TABLE supermarket_category(
+        supermarket_id TEXT NOT NULL,
+        category_id TEXT NOT NULL,
+        PRIMARY KEY (supermarket_id, category_id),
+        FOREIGN KEY (supermarket_id) REFERENCES supermarket(id),
+        FOREIGN KEY (category_id) REFERENCES category(id)
+      )
+    ''');
+
+    // User
+    await db.execute('''
+      CREATE TABLE user(
+        id TEXT PRIMARY KEY,
+        provider_id TEXT,
+        email TEXT NOT NULL,
+        password TEXT,
+        user_name TEXT
       )
     ''');
   }
