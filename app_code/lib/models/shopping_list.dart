@@ -84,7 +84,8 @@ class ShoppingList {
       id: product.id,
       price: 0.0,
       quantity: 1,
-      product: product,
+      product: product, 
+      listId: id,
     );
     products ??= [];
     products!.add(purchasedProduct);
