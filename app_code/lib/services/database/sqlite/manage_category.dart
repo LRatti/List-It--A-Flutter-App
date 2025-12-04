@@ -7,8 +7,8 @@ class ManageCategory {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // Create
-  Future<int> addCategory(Category category) async {
-    final db = await _dbHelper.database;
+  static Future<int> addCategory(Category category) async {
+    final db = await DatabaseHelper.database;
     return await db.insert(
       'category',
       category.toJson(),
@@ -17,8 +17,8 @@ class ManageCategory {
   }
 
   // Delete
-  Future<int> deleteCategory(String categoryId) async {
-    final db = await _dbHelper.database;
+  static Future<int> deleteCategory(String categoryId) async {
+    final db = await DatabaseHelper.database;
     return await db.delete(
       'category',
       where: 'id = ?',
@@ -27,8 +27,8 @@ class ManageCategory {
   }
 
   // Update
-  Future<int> updateCategory(Category category) async {
-    final db = await _dbHelper.database;
+  static Future<int> updateCategory(Category category) async {
+    final db = await DatabaseHelper.database;
     return await db.update(
       'category',
       category.toJson(),
@@ -38,8 +38,8 @@ class ManageCategory {
   }
 
   // Read all
-  Future<List<Category>> getAllCategories() async {
-    final db = await _dbHelper.database;
+  static Future<List<Category>> getAllCategories() async {
+    final db = await DatabaseHelper.database;
     final result = await db.query('category');
 
     return result.map((row) => Category.fromJson(row)).toList();

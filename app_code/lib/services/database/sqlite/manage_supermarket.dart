@@ -7,8 +7,8 @@ class ManageSupermarket {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // Create supermarket
-  Future<void> addSupermarket(Supermarket market) async {
-    final db = await _dbHelper.database;
+  static Future<void> addSupermarket(Supermarket market) async {
+    final db = await DatabaseHelper.database;
 
     // insert supermarket
     await db.insert(
@@ -40,8 +40,8 @@ class ManageSupermarket {
   }
 
   // Delete supermarket
-  Future<void> deleteSupermarket(String id) async {
-    final db = await _dbHelper.database;
+  static Future<void> deleteSupermarket(String id) async {
+    final db = await DatabaseHelper.database;
 
     await db.delete(
       'supermarket_category',
@@ -57,8 +57,8 @@ class ManageSupermarket {
   }
 
   // Update supermarket (basic info + categories)
-  Future<void> updateSupermarket(Supermarket market) async {
-    final db = await _dbHelper.database;
+  static Future<void> updateSupermarket(Supermarket market) async {
+    final db = await DatabaseHelper.database;
 
     // update basic fields
     await db.update(
@@ -95,8 +95,8 @@ class ManageSupermarket {
   }
 
   // Read supermarket + categories
-  Future<Supermarket?> getSupermarketById(String id) async {
-    final db = await _dbHelper.database;
+  static Future<Supermarket?> getSupermarketById(String id) async {
+    final db = await DatabaseHelper.database;
 
     final result = await db.query(
       'supermarket',
@@ -118,8 +118,8 @@ class ManageSupermarket {
   }
 
   // Read all supermarkets
-  Future<List<Supermarket>> getAllSupermarkets() async {
-    final db = await _dbHelper.database;
+  static Future<List<Supermarket>> getAllSupermarkets() async {
+    final db = await DatabaseHelper.database;
 
     final result = await db.query('supermarket');
 
@@ -141,8 +141,8 @@ class ManageSupermarket {
   }
 
   // Utility: load categories for supermarket
-  Future<List<Category>> _getCategoriesForSupermarket(String id) async {
-    final db = await _dbHelper.database;
+  static Future<List<Category>> _getCategoriesForSupermarket(String id) async {
+    final db = await DatabaseHelper.database;
 
     final result = await db.rawQuery('''
       SELECT category.*

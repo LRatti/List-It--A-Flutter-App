@@ -6,8 +6,8 @@ class ManageProduct {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // Create
-  Future<int> addProduct(Product product) async {
-    final db = await _dbHelper.database;
+  static Future<int> addProduct(Product product) async {
+    final db = await DatabaseHelper.database;
     return await db.insert(
       'product',
       product.toJson(),
@@ -16,8 +16,8 @@ class ManageProduct {
   }
 
   // Delete
-  Future<int> deleteProduct(String productId) async {
-    final db = await _dbHelper.database;
+  static Future<int> deleteProduct(String productId) async {
+    final db = await DatabaseHelper.database;
     return await db.delete(
       'product',
       where: 'id = ?',
@@ -26,8 +26,8 @@ class ManageProduct {
   }
 
   // Update
-  Future<int> updateProduct(Product product) async {
-    final db = await _dbHelper.database;
+  static Future<int> updateProduct(Product product) async {
+    final db = await DatabaseHelper.database;
     return await db.update(
       'product',
       product.toJson(),
@@ -37,15 +37,15 @@ class ManageProduct {
   }
 
   // Read all
-  Future<List<Product>> getAllProducts() async {
-    final db = await _dbHelper.database;
+  static Future<List<Product>> getAllProducts() async {
+    final db = await DatabaseHelper.database;
     final result = await db.query('product');
     return result.map((row) => Product.fromJson(row)).toList();
   }
 
   // Read by ID
-  Future<Product?> getProductById(String id) async {
-    final db = await _dbHelper.database;
+  static Future<Product?> getProductById(String id) async {
+    final db = await DatabaseHelper.database;
     final result = await db.query(
       'product',
       where: 'id = ?',

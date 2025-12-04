@@ -5,8 +5,8 @@ import 'package:app_code/services/database/sqlite/database_helper.dart';
 class ManageShoppingList {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-  Future<void> addShoppingList(ShoppingList list) async {
-    final db = await _dbHelper.database;
+  static Future<void> addShoppingList(ShoppingList list) async {
+    final db = await DatabaseHelper.database;
 
     await db.insert(
       'shopping_list',
@@ -15,8 +15,8 @@ class ManageShoppingList {
     );
   }
 
-  Future<void> deleteShoppingList(ShoppingList list) async {
-    final db = await _dbHelper.database;
+  static Future<void> deleteShoppingList(ShoppingList list) async {
+    final db = await DatabaseHelper.database;
 
     await db.delete(
       'shopping_list',
@@ -32,8 +32,8 @@ class ManageShoppingList {
     );
   }
 
-  Future<void> updateShoppingList(ShoppingList list) async {
-    final db = await _dbHelper.database;
+  static Future<void> updateShoppingList(ShoppingList list) async {
+    final db = await DatabaseHelper.database;
 
     await db.update(
       'shopping_list',
@@ -43,8 +43,8 @@ class ManageShoppingList {
     );
   }
 
-  Future<List<ShoppingList>> getAllShoppingLists() async {
-    final db = await _dbHelper.database;
+  static Future<List<ShoppingList>> getAllShoppingLists() async {
+    final db = await DatabaseHelper.database;
 
     final List<Map<String, dynamic>> maps =
         await db.query('shopping_list');
@@ -52,8 +52,8 @@ class ManageShoppingList {
     return maps.map((json) => ShoppingList.fromJson(json)).toList();
   }
 
-  Future<ShoppingList?> getShoppingListById(String id) async {
-    final db = await _dbHelper.database;
+  static Future<ShoppingList?> getShoppingListById(String id) async {
+    final db = await DatabaseHelper.database;
 
     final List<Map<String, dynamic>> maps = await db.query(
       'shopping_list',

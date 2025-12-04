@@ -7,13 +7,13 @@ class DatabaseHelper {
 
   DatabaseHelper._internal();
 
-  Future<Database> get database async {
+  static Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDb();
     return _database!;
   }
 
-  Future<Database> _initDb() async {
+  static Future<Database> _initDb() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'shopping_app.db');
 
@@ -24,7 +24,7 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> _createDb(Database db, int version) async {
+  static Future<void> _createDb(Database db, int version) async {
     //shopping_list
     await db.execute('''
       CREATE TABLE shopping_list(

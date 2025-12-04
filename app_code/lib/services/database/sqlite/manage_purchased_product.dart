@@ -7,8 +7,8 @@ class ManagePurchasedProduct {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // Create
-  Future<int> addPurchasedProduct(PurchasedProduct purchasedProduct) async {
-    final db = await _dbHelper.database;
+  static Future<int> addPurchasedProduct(PurchasedProduct purchasedProduct) async {
+    final db = await DatabaseHelper.database;
 
     return await db.insert(
       'purchased_product',
@@ -18,8 +18,8 @@ class ManagePurchasedProduct {
   }
 
   // Delete
-  Future<int> deletePurchasedProduct(String purchasedProductId) async {
-    final db = await _dbHelper.database;
+  static Future<int> deletePurchasedProduct(String purchasedProductId) async {
+    final db = await DatabaseHelper.database;
 
     return await db.delete(
       'purchased_product',
@@ -29,8 +29,8 @@ class ManagePurchasedProduct {
   }
 
   // Update
-  Future<int> updatePurchasedProduct(PurchasedProduct purchasedProduct) async {
-    final db = await _dbHelper.database;
+  static Future<int> updatePurchasedProduct(PurchasedProduct purchasedProduct) async {
+    final db = await DatabaseHelper.database;
 
     return await db.update(
       'purchased_product',
@@ -41,8 +41,8 @@ class ManagePurchasedProduct {
   }
 
   // Read all
-  Future<List<PurchasedProduct>> getAllPurchasedProducts() async {
-    final db = await _dbHelper.database;
+  static Future<List<PurchasedProduct>> getAllPurchasedProducts() async {
+    final db = await DatabaseHelper.database;
 
     final results = await db.rawQuery('''
       SELECT pp.*, p.name, p.category_id
@@ -68,9 +68,8 @@ class ManagePurchasedProduct {
   }
 
   // Read all purchased products in a specific list
-  Future<List<PurchasedProduct>> getPurchasedProductsByList(String listId) async {
-    final db = await _dbHelper.database;
-
+  static Future<List<PurchasedProduct>> getPurchasedProductsByList(String listId) async {
+    final db = await DatabaseHelper.database;
     final results = await db.rawQuery('''
       SELECT pp.*, p.name, p.category_id
       FROM purchased_product pp
@@ -96,8 +95,8 @@ class ManagePurchasedProduct {
   }
 
   // Read one by ID
-  Future<PurchasedProduct?> getPurchasedProductById(String id) async {
-    final db = await _dbHelper.database;
+  static Future<PurchasedProduct?> getPurchasedProductById(String id) async {
+    final db = await DatabaseHelper.database;
 
     final result = await db.rawQuery('''
       SELECT pp.*, p.name, p.category_id
