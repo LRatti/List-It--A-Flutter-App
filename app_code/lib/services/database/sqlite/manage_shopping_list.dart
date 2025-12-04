@@ -1,20 +1,67 @@
 import 'package:app_code/models/shopping_list.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:app_code/services/database/sqlite/database_helper.dart';
 
 class ManageShoppingList {
-  void addShoppingList(ShoppingList category) {
-    // Code to add a shopping list to the database
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+
+  Future<void> addShoppingList(ShoppingList list) async {
+    final db = await _dbHelper.database;
+
+    await db.insert(
+      'shopping_list',
+      list.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
-  void deleteShoppingList(ShoppingList category) {
-    // Code to delete a shopping list from the database
+  Future<void> deleteShoppingList(ShoppingList list) async {
+    final db = await _dbHelper.database;
+
+    await db.delete(
+      'shopping_list',
+      where: 'id = ?',
+      whereArgs: [list.id],
+    );
+
+    // delete purchased products related to list
+    await db.delete(
+      'purchased_product',
+      where: 'list_id = ?',
+      whereArgs: [list.id],
+    );
   }
 
-  void updateShoppingList(ShoppingList category) {
-    // Code to update a shopping list in the database
+  Future<void> updateShoppingList(ShoppingList list) async {
+    final db = await _dbHelper.database;
+
+    await db.update(
+      'shopping_list',
+      list.toJson(),
+      where: 'id = ?',
+      whereArgs: [list.id],
+    );
   }
 
-  List<ShoppingList> getAllShoppingLists() {
-    // Code to retrieve all shopping lists from the database
-    return [];
+  Future<List<ShoppingList>> getAllShoppingLists() async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> maps =
+        await db.query('shopping_list');
+
+    return maps.map((json) => ShoppingList.fromJson(json)).toList();
+  }
+
+  Future<ShoppingList?> getShoppingListById(String id) async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'shopping_list',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isEmpty) return null;
+    return ShoppingList.fromJson(maps.first);
   }
 }
