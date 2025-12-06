@@ -15,7 +15,7 @@
     the `--base-href` argument provided to `flutter build`.
   -->
   <base href="$FLUTTER_BASE_HREF">
-
+  <meta name="google-signin-client_id" content="1085697654596-l9jihcikn9rut9n84t30a6k9veh2tv0k.apps.googleusercontent.com">
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
@@ -31,8 +31,28 @@
 
   <title>app_code</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Google Identity Services Library -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+  <!-- Google Sign-In Button Container -->
+  <div id="g_id_onload"
+       data-client_id="1085697654596-l9jihcikn9rut9n84t30a6k9veh2tv0k.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse">
+  </div>
+  <div class="g_id_signin" data-type="standard"></div>
+
+  <script>
+    window.handleCredentialResponse = function(response) {
+      // This will be called when the user authenticates via Google Sign-In button
+      // The response.credential contains the JWT token
+      if (window.googleSignInCallback) {
+        window.googleSignInCallback(response.credential);
+      }
+    };
+  </script>
+  
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

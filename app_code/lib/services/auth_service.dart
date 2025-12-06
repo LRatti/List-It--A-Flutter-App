@@ -89,11 +89,27 @@ class AuthService {
     }
   }
 
-  //google sign in
+  //google sign in - always prompts for account selection
+  //TODO: test on IOS simulator
   static Future<User?> signInWithGoogle() async {
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+      
+      // Sign out first to force account selection every time
+      await googleSignIn.signOut();
+      
+      // Perform interactive sign-in to let user choose account
+      GoogleSignInAccount? googleUser;
+      try {
+        googleUser = await googleSignIn.signIn();
+      } catch (e) {
+        // On web, signIn is deprecated and may fail - that's expected
+        // Users should authenticate via the Google Sign-In button in index.html
+        print('Interactive sign-in unavailable (expected on web): ${e.toString()}');
+        return null;
+      }
       
       if (googleUser == null) return null; // User cancelled
       

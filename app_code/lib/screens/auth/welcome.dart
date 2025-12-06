@@ -64,7 +64,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ]
                 ),
               ElevatedButton(
-                onPressed: () => AuthService.signInWithGoogle(), 
+                onPressed: () async {
+                  final user = await AuthService.signInWithGoogle();
+                  if (user != null && context.mounted) {
+                    // Navigate back to profile screen after successful sign-in
+                    Navigator.of(context).pop();
+                  }
+                }, 
                 child: Text("Sign in with Google"),
               )   
             ]
