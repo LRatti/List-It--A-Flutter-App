@@ -16,7 +16,7 @@ class ProfileScreen extends StatelessWidget {
         backgroundColor: Colors.blue[500],
         centerTitle: true,
         actions: [
-          if (user.email != null && user.email!.isNotEmpty) ...[
+          if (!user.isAnonymous) ...[
             IconButton(
               icon: Icon(Icons.logout),
               onPressed: () async{

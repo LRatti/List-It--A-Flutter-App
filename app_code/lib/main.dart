@@ -56,8 +56,32 @@ class MyApp extends StatelessWidget {
               }
               return ProfileScreen(user: user);
             }, 
-            error: (error, __) => const Text('error loading auth status.'), 
-            loading: () => const Text('loading...'),
+            error: (error, __) => Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    const Text('Error loading auth status'),
+                    const SizedBox(height: 8),
+                    Text(error.toString(), textAlign: TextAlign.center),
+                  ],
+                ),
+              ),
+            ),
+            loading: () => Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    const Text('Loading...'),
+                  ],
+                ),
+              ),
+            ),
           );
         }
       ),

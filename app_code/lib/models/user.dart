@@ -1,13 +1,15 @@
 class User {
 
   final String uid;
+  final bool isAnonymous;
   String? _providerId;
   String? email;
   String? _password;
   String? _userName;
 
   User({
-    required this.uid, 
+    required this.uid,
+    this.isAnonymous = false,
     providerId, 
     email, 
     password, 
@@ -41,6 +43,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       uid: json['id'],
+      isAnonymous: json['is_anonymous'] ?? false,
       providerId: json['provider_id'],
       email: json['email'],
       password: json['password'],
@@ -51,6 +54,7 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'id': uid,
+      'is_anonymous': isAnonymous,
       'provider_id': _providerId,
       'email': email,
       'password': _password,

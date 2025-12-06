@@ -83,7 +83,8 @@ class _SignInFormState extends State<SignInForm> {
                     setState(() {
                       _errorFeedback = 'Incorrect login credentials.';
                     });
-                  }
+                  } 
+                  Navigator.of(context).pop();
                 }
               },
               child: const Text('Sign In'),

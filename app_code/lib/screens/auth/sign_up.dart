@@ -87,6 +87,7 @@ class _SignUpFormState extends State<SignUpForm> {
                       _errorFeedback = 'Could not sign up with those details.';
                     });
                   }
+                  Navigator.of(context).pop();
                 }
               },
               child: const Text('Sign Up'),

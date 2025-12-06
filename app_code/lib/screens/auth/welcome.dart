@@ -1,5 +1,6 @@
 import 'package:app_code/screens/auth/sign_in.dart';
 import 'package:app_code/screens/auth/sign_up.dart';
+import 'package:app_code/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
 
@@ -62,6 +63,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     )
                   ]
                 ),
+              ElevatedButton(
+                onPressed: () => AuthService.signInWithGoogle(), 
+                child: Text("Sign in with Google"),
+              )   
             ]
           )
         ),

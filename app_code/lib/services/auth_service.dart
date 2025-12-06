@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:app_code/models/user.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
 
@@ -12,6 +13,7 @@ class AuthService {
       // User is already signed in, return existing user
       return User(
         uid: _firebaseAuth.currentUser!.uid,
+        isAnonymous: _firebaseAuth.currentUser!.isAnonymous,
         email: _firebaseAuth.currentUser!.email,
       );
     }
@@ -28,6 +30,7 @@ class AuthService {
       if (credential.user != null) {
         return User(
           uid: credential.user!.uid,
+          isAnonymous: credential.user!.isAnonymous,
         );
       }
       return null;
@@ -50,6 +53,7 @@ class AuthService {
       if (credential.user != null) {
         return User(
             uid: credential.user!.uid,
+            isAnonymous: credential.user!.isAnonymous,
             email: credential.user!.email!,
         );
       }
@@ -72,7 +76,8 @@ class AuthService {
 
       if (credential.user != null) {
         return User(
-          uid: credential.user!.uid, 
+          uid: credential.user!.uid,
+          isAnonymous: credential.user!.isAnonymous,
           email: credential.user!.email!
         );
       }
@@ -80,6 +85,69 @@ class AuthService {
 
     } catch (e) {
       print('Error signing in with email and password: ${e.toString()}');
+      return null;
+    }
+  }
+
+  //google sign in
+  static Future<User?> signInWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      
+      if (googleUser == null) return null; // User cancelled
+      
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      
+      final firebase_auth.UserCredential userCredential = 
+          await _firebaseAuth.signInWithCredential(credential);
+      
+      if (userCredential.user != null) {
+        return User(
+          uid: userCredential.user!.uid,
+          isAnonymous: userCredential.user!.isAnonymous,
+          email: userCredential.user!.email!,
+        );
+      }
+      return null;
+    } catch (e) {
+      print('Error signing in with Google: ${e.toString()}');
+      return null;
+    }
+  }
+
+  // Convert anonymous user to permanent account with email/password
+  static Future<User?> linkAnonymousWithEmailPassword(String email, String password) async {
+    try {
+      final currentUser = _firebaseAuth.currentUser;
+      
+      if (currentUser == null || !currentUser.isAnonymous) {
+        throw Exception('No anonymous user to link');
+      }
+
+      final credential = firebase_auth.EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+
+      final firebase_auth.UserCredential userCredential = 
+          await currentUser.linkWithCredential(credential);
+
+      if (userCredential.user != null) {
+        return User(
+          uid: userCredential.user!.uid,
+          isAnonymous: userCredential.user!.isAnonymous,
+          email: userCredential.user!.email!,
+        );
+      }
+      return null;
+    } catch (e) {
+      print('Error linking anonymous user: ${e.toString()}');
       return null;
     }
   }
