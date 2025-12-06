@@ -54,6 +54,7 @@ class MyApp extends StatelessWidget {
               // User is always authenticated (either anonymously or with credentials)
               // so we always show the ProfileScreen
               if (user != null) {
+                print('User ID: ${user.uid}, Anonymous: ${user.isAnonymous}');
                 return ProfileScreen(user: user);
               }
               // Fallback to loading in case user is somehow null
