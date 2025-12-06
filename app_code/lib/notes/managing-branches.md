@@ -241,9 +241,18 @@ git push origin --delete feature/my-feature
 
 ---
 
-If you want, I can:
+# 🔍 To see all remote branches
 
-* Give a short cheat-sheet file you can download (bash commands + VS Code steps).
-* Or walk you through creating a feature branch step-by-step live: tell me which OS you use (Windows/macOS/Linux) and whether you prefer GUI or terminal and I’ll tailor exact key presses.
+```bash
+git branch -r
+```
 
-Which would you like next?
+This shows something like:
+
+```
+origin/main
+origin/feature/login
+origin/bugfix/fix-auth
+```
+
+---
