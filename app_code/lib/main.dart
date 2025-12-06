@@ -51,10 +51,17 @@ class MyApp extends StatelessWidget {
           
           return user.when(
             data: (user) {
-              if (user == null) {
-                return const WelcomeScreen();
+              // User is always authenticated (either anonymously or with credentials)
+              // so we always show the ProfileScreen
+              if (user != null) {
+                return ProfileScreen(user: user);
               }
-              return ProfileScreen(user: user);
+              // Fallback to loading in case user is somehow null
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
             }, 
             error: (error, __) => Scaffold(
               body: Center(

@@ -152,9 +152,10 @@ class AuthService {
     }
   }
 
-  // logging out
+  // logging out - signs out and transitions to anonymous authentication
   static Future<void> signOut() async {
     await _firebaseAuth.signOut();
+    await signInAnonymously();
   }
 
 }
