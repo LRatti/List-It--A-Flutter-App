@@ -1,3 +1,5 @@
+import 'package:app_code/utils/helper.dart';
+
 class User {
 
   final String id;
@@ -7,14 +9,15 @@ class User {
   String? _userName;
 
   User({
-    required this.id, 
+    String? id, 
     providerId, 
     required this.email, 
     password, 
     userName
   }): _providerId = providerId,
       _password = password,
-      _userName = userName;
+      _userName = userName,
+      this.id = id ?? Helper.generateId();
 
   String getProviderId() {
     return _providerId ?? '';
