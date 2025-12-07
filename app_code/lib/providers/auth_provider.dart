@@ -4,8 +4,10 @@ import 'package:app_code/models/user.dart';
 
 final authProvider = StreamProvider.autoDispose<User?>((ref) async* {
     
-  // create a stream provides continues values (user/null)
-  final Stream<User?> userStream = firebase_auth.FirebaseAuth.instance.authStateChanges().map((user) {
+  // Use userChanges() instead of authStateChanges() to detect credential linking
+  // userChanges() emits when user properties change (like isAnonymous, email, etc.)
+  // authStateChanges() only emits on sign-in/sign-out events
+  final Stream<User?> userStream = firebase_auth.FirebaseAuth.instance.userChanges().map((user) {
     if (user != null) {
       return User(
         uid: user.uid,

@@ -1,4 +1,5 @@
 import 'package:app_code/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 
 class SignUpForm extends StatefulWidget {
@@ -78,18 +79,24 @@ class _SignUpFormState extends State<SignUpForm> {
 
                   final email = _emailController.text.trim();
                   final password = _passwordController.text.trim();
+                  final user = await AuthService.linkAnonymousWithEmailPassword(email, password);
 
-                  final user = await AuthService.signUp(email, password);
+                  // // Check if current user is anonymous - if so, link the account to preserve data
+                  // final currentUser = firebase_auth.FirebaseAuth.instance.currentUser;
+                  // final user = currentUser?.isAnonymous ?? false
+                  //     ? await AuthService.linkAnonymousWithEmailPassword(email, password)
+                  //     : await AuthService.signUp(email, password);
 
-                  // error feedback here later
                   if (user == null) {
                     setState(() {
                       _errorFeedback = 'Could not sign up with those details.';
                     });
                   } else {
-                    Navigator.of(context).pop();
+                    // Small delay to ensure Firebase state propagates to listeners
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
                   }
-                  
                 }
               },
               child: const Text('Sign Up'),

@@ -1,5 +1,3 @@
-import 'package:app_code/models/user.dart';
-import 'package:app_code/providers/auth_provider.dart';
 import 'package:app_code/screens/auth/welcome.dart';
 import 'package:app_code/screens/home/profile.dart';
 import 'package:app_code/screens/settings/settings.dart';
@@ -45,55 +43,7 @@ class MyApp extends StatelessWidget {
         '/settings': (context) => const SettingsScreen(),
         '/signin': (context) => const WelcomeScreen(),
       },
-      home: Consumer(
-        builder: (context, ref, child) {
-          final AsyncValue<User?> user = ref.watch(authProvider);
-          
-          return user.when(
-            data: (user) {
-              // User is always authenticated (either anonymously or with credentials)
-              // so we always show the ProfileScreen
-              if (user != null) {
-                //testing changes to pull request
-                print('User ID: ${user.uid}, Anonymous: ${user.isAnonymous}');
-                return ProfileScreen(user: user);
-              }
-              // Fallback to loading in case user is somehow null
-              return const Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            }, 
-            error: (error, __) => Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                    const SizedBox(height: 16),
-                    const Text('Error loading auth status'),
-                    const SizedBox(height: 8),
-                    Text(error.toString(), textAlign: TextAlign.center),
-                  ],
-                ),
-              ),
-            ),
-            loading: () => Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 16),
-                    const Text('Loading...'),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
-      ),
+      home: const ProfileScreen(),
     );
   }
 }

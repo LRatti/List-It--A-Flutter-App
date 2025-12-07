@@ -65,7 +65,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
               ElevatedButton(
                 onPressed: () async {
-                  final user = await AuthService.signInWithGoogle();
+                  // Check if user is anonymous and link account, otherwise sign in normally
+                  final currentUser = await AuthService.ensureAuthenticated();
+                  final user = currentUser?.isAnonymous == true
+                      ? await AuthService.linkAnonymousWithGoogle()
+                      : await AuthService.signInWithGoogle();
+                  
                   if (user != null && context.mounted) {
                     // Navigate back to profile screen after successful sign-in
                     Navigator.of(context).pop();

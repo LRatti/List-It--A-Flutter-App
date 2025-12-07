@@ -155,6 +155,7 @@ class AuthService {
           await currentUser.linkWithCredential(credential);
 
       if (userCredential.user != null) {
+        print(userCredential.user!.isAnonymous);
         return User(
           uid: userCredential.user!.uid,
           isAnonymous: userCredential.user!.isAnonymous,
@@ -164,6 +165,57 @@ class AuthService {
       return null;
     } catch (e) {
       print('Error linking anonymous user: ${e.toString()}');
+      return null;
+    }
+  }
+
+  // Convert anonymous user to permanent account with Google
+  static Future<User?> linkAnonymousWithGoogle() async {
+    try {
+      final currentUser = _firebaseAuth.currentUser;
+      
+      if (currentUser == null || !currentUser.isAnonymous) {
+        throw Exception('No anonymous user to link');
+      }
+
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+      
+      // Sign out first to force account selection
+      await googleSignIn.signOut();
+      
+      // Perform interactive sign-in
+      GoogleSignInAccount? googleUser;
+      try {
+        googleUser = await googleSignIn.signIn();
+      } catch (e) {
+        print('Interactive sign-in unavailable (expected on web): ${e.toString()}');
+        return null;
+      }
+      
+      if (googleUser == null) return null; // User cancelled
+      
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      
+      final firebase_auth.UserCredential userCredential = 
+          await currentUser.linkWithCredential(credential);
+      
+      if (userCredential.user != null) {
+        return User(
+          uid: userCredential.user!.uid,
+          isAnonymous: userCredential.user!.isAnonymous,
+          email: userCredential.user!.email!,
+        );
+      }
+      return null;
+    } catch (e) {
+      print('Error linking anonymous user with Google: ${e.toString()}');
       return null;
     }
   }
