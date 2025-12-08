@@ -1,3 +1,4 @@
+import 'package:app_code/services/database/firebase/manage_user.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:app_code/models/user.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -124,6 +125,13 @@ class AuthService {
           await _firebaseAuth.signInWithCredential(credential);
       
       if (userCredential.user != null) {
+        await FirebaseUserManager().createUpdateUser(
+          User(
+            uid: userCredential.user!.uid,
+            email: userCredential.user!.email!,
+            userName: userCredential.user!.displayName ?? '',
+          )
+        );
         return User(
           uid: userCredential.user!.uid,
           isAnonymous: userCredential.user!.isAnonymous,
@@ -138,7 +146,7 @@ class AuthService {
   }
 
   // Convert anonymous user to permanent account with email/password
-  static Future<User?> linkAnonymousWithEmailPassword(String email, String password) async {
+  static Future<User?> linkAnonymousWithEmailPassword(String email, String password, String username) async {
     try {
       final currentUser = _firebaseAuth.currentUser;
       
@@ -155,7 +163,13 @@ class AuthService {
           await currentUser.linkWithCredential(credential);
 
       if (userCredential.user != null) {
-        print(userCredential.user!.isAnonymous);
+        await FirebaseUserManager().createUpdateUser(
+          User(
+            uid: userCredential.user!.uid,
+            email: email,
+            userName: username,
+          )
+        );
         return User(
           uid: userCredential.user!.uid,
           isAnonymous: userCredential.user!.isAnonymous,
@@ -207,6 +221,13 @@ class AuthService {
           await currentUser.linkWithCredential(credential);
       
       if (userCredential.user != null) {
+        await FirebaseUserManager().createUpdateUser(
+          User(
+            uid: userCredential.user!.uid,
+            email: userCredential.user!.email!,
+            userName: userCredential.user!.displayName ?? '',
+          )
+        );
         return User(
           uid: userCredential.user!.uid,
           isAnonymous: userCredential.user!.isAnonymous,

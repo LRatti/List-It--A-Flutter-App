@@ -14,6 +14,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
 
   String? _errorFeedback;
 
@@ -28,6 +29,19 @@ class _SignUpFormState extends State<SignUpForm> {
           children: [
             // intro text
             const Center(child: Text('Sign up for a new account.')),
+            const SizedBox(height: 16.0),
+
+            // username
+            TextFormField(
+              controller: _usernameController,
+              decoration: const InputDecoration(labelText: 'How would you like to be called?'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a username';
+                }
+                return null;
+              },
+            ),
             const SizedBox(height: 16.0),
 
             // email address
@@ -79,13 +93,9 @@ class _SignUpFormState extends State<SignUpForm> {
 
                   final email = _emailController.text.trim();
                   final password = _passwordController.text.trim();
-                  final user = await AuthService.linkAnonymousWithEmailPassword(email, password);
+                  final username = _usernameController.text.trim();
+                  final user = await AuthService.linkAnonymousWithEmailPassword(email, password, username);
 
-                  // // Check if current user is anonymous - if so, link the account to preserve data
-                  // final currentUser = firebase_auth.FirebaseAuth.instance.currentUser;
-                  // final user = currentUser?.isAnonymous ?? false
-                  //     ? await AuthService.linkAnonymousWithEmailPassword(email, password)
-                  //     : await AuthService.signUp(email, password);
 
                   if (user == null) {
                     setState(() {
