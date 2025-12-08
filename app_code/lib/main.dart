@@ -1,6 +1,6 @@
 import 'package:app_code/screens/auth/welcome.dart';
 import 'package:app_code/screens/home/profile.dart';
-import 'package:app_code/screens/settings/settings.dart';
+import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/services/auth_service.dart';
 import 'package:flutter/material.dart';
 // firebase

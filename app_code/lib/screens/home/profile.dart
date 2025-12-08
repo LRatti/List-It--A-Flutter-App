@@ -1,5 +1,5 @@
-import 'package:app_code/models/user.dart';
 import 'package:app_code/providers/auth_provider.dart';
+import 'package:app_code/providers/user_details_provider.dart';
 import 'package:app_code/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +11,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch the auth provider to get real-time updates
     final authState = ref.watch(authProvider);
+    final userDetails = ref.watch(userDetailsProvider);
     
     return authState.when(
       data: (currentUser) {
@@ -63,6 +64,12 @@ class ProfileScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text('Profile'),
+                const SizedBox(height: 16),
+                userDetails.when(
+                  data: (user) => Text(user?.getUserName() ?? 'Anonymous'),
+                  loading: () => const CircularProgressIndicator(),
+                  error: (err, stack) => Text('Error: $err'),
+                ),
                 const SizedBox(height: 16),
                 if (currentUser.email != null)
                   Text('Email: ${currentUser.email}'),

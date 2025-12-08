@@ -25,7 +25,6 @@ class User {
   }
 
   factory User.fromJson(DocumentSnapshot<Map<String, dynamic>> json) {
-    final data = json.data()!;
     return User(
       uid: json.id,
       email: json['email'],
