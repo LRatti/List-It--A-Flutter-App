@@ -1,5 +1,6 @@
 import 'package:app_code/models/category.dart';
 import 'package:isar/isar.dart';
+import 'package:app_code/utils/helper.dart';
 
 @collection
 class Supermarket {
@@ -9,12 +10,13 @@ class Supermarket {
   List<Category> _categories;
   
   Supermarket({
-    required this.id,
+    String? id,
     //TODO: add default name
     name = 'Supermarket', 
     required categories,
   }) :  _categories = categories,
-        _name = name;
+        _name = name,
+        this.id = id ?? Helper.generateId();
 
   String getName() {
     return _name;

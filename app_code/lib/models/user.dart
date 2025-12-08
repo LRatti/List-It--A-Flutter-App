@@ -1,19 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:app_code/utils/helper.dart';
 
 class User {
 
-  final String uid;
+  String? uid;
   final bool isAnonymous;
   String? email;
   String? _userName;
 
   User({
-    required this.uid,
+    String? uid,
     this.isAnonymous = false,
     this.email, 
-    userName, 
+    String? userName, 
   }): 
-      _userName = userName;
+      _userName = userName,
+      uid = uid ?? Helper.generateId() {
+    this.uid = uid;
+  }
+      
+      
+      
 
   String getUserName() {
     return _userName ?? '';

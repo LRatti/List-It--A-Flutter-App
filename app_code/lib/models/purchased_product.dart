@@ -1,44 +1,44 @@
 import 'package:app_code/models/product.dart';
 import 'package:isar/isar.dart';
+import 'package:app_code/utils/helper.dart';
 
 @collection
 class PurchasedProduct {
   final String id;
-  double price = 0.0;
-  int quantity = 0;
-  final Product _product;
+  final String listId;
+  double price;
+  int quantity;
+  final Product product;
 
-  //TODO: generate random uuid for localId
-  PurchasedProduct(
-      {
-        required this.id,
-        this.price = 0.0,
-        this.quantity = 0,
-        required product,
-      }
-  ):  
-    _product = product;
-
+  PurchasedProduct({
+    String? id,
+    required this.listId,
+    required this.product,
+    this.price = 0.0,
+    this.quantity = 0,
+  }) : this.id = id ?? Helper.generateId();
 
   factory PurchasedProduct.fromJson(Map<String, dynamic> json) {
     return PurchasedProduct(
       id: json['id'],
+      listId: json['list_id'],
+      product: Product.fromJson(json['product']),
       price: json['price'],
       quantity: json['quantity'],
-      product: json['product'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'list_id': listId,
+      'product_id': product.id,
       'price': price,
       'quantity': quantity,
-      'product': _product
     };
   }
 
   double getTotalPrice() {
-    return (price) * (quantity);
+    return price * quantity;
   }
 }
