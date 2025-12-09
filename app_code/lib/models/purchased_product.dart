@@ -18,11 +18,11 @@ class PurchasedProduct {
     this.quantity = 0,
   }) : this.id = id ?? Helper.generateId();
 
-  factory PurchasedProduct.fromJson(Map<String, dynamic> json) {
+  factory PurchasedProduct.fromJson(Map<String, dynamic> json, Product product) {
     return PurchasedProduct(
       id: json['id'],
       listId: json['list_id'],
-      product: Product.fromJson(json['product']),
+      product: product,
       price: json['price'],
       quantity: json['quantity'],
     );

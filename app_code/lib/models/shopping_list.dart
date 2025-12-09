@@ -54,15 +54,13 @@ class ShoppingList {
     return _isRegistered;
   }
 
-  factory ShoppingList.fromJson(Map<String, dynamic> json) {
+  factory ShoppingList.fromJson(Map<String, dynamic> json, Supermarket supermarket) {
     return ShoppingList(
       id: json['id'],
       name: json['name'],
       //WARN: can be null from import check date.
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
-      supermarket: json['supermarket'] != null
-          ? Supermarket.fromJson(json['supermarket'])
-          : null,
+      supermarket: supermarket,
       totalPrice: json['total_price'],
       isRegistered: json['is_registered'] ?? false,
       // image and products deserialization can be added here if needed
@@ -74,7 +72,7 @@ class ShoppingList {
       'id': id,
       'name': _name,
       'created_at': createdAt.toIso8601String(),
-      'supermarket': _supermarket.toJson(),
+      'supermarket': _supermarket.id,
       'total_price': _totalPrice,
       'is_registered': _isRegistered,
       // image and products serialization can be added here if needed
