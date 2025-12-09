@@ -287,5 +287,31 @@ origin/bugfix/fix-auth
 ```
 
 ---
+The smoothest and cleanest solution is to **use Git stash properly** — specifically with *named* stashes or *stashing only changed files* — so you can jump between branches without committing unfinished work *and without losing track of multiple stashes*.
+
+Below are the **recommended workflows**, depending on what you prefer.
+---
+# ⭐ **Recommended Minimal Sequence (Most Efficient)**
+
+If you want one single smooth “daily-use” sequence:
+
+```sh
+# Save your incomplete work
+git stash push -u -m "wip"
+
+# Switch to colleague's branch
+git checkout colleague-branch
+
+# After you're done
+git checkout my-branch
+
+# Restore your work
+git stash pop
+```
+
+This is the cleanest workflow used by most teams.
+
+---
+
 
 
