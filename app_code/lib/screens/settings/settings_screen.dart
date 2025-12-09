@@ -73,14 +73,16 @@ class _SettingsScreenState extends SettingsController {
           decoration: const InputDecoration(labelText: 'Username'),
         ),
         const SizedBox(height: 20),
-        TextFormField(
-          controller: emailController,
-          decoration: const InputDecoration(labelText: 'Email'),
-        ),
-        const SizedBox(height: 20),
+        // TextFormField(
+        //   controller: emailController,
+        //   decoration: const InputDecoration(labelText: 'Email'),
+        // ),
+        // const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
+            //TODO: update flow so that when values are updated they reflect immediatly in the profile page
+            //TODO: change logic so that the changed email affects the authentication email as well
             onPressed: isSaving ? null : () => saveChanges(user),
             child: isSaving
                 ? const SizedBox(
