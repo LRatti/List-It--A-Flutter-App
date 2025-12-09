@@ -2,25 +2,25 @@
 
 import 'package:app_code/models/category.dart';
 
-class ManageCategory {
-  void addCategory(Category category) {
+class FirebaseCategoryManager {
+  Future<void> addCategory(Category category) async {
     // Code to add a category to the database
   }
 
-  void deleteCategory(Category category) {
+  Future<void> deleteCategory(Category category) async {
     // Code to delete a category from the database
   }
 
-  void updateCategory(Category category) {
+  Future<void> updateCategory(Category category) async {
     // Code to update a category in the database
   }
 
-  void pushAllCategories() {
+  Future<void> pushAllCategories() async {
     // Code to push all categories to the database
     
   }
 
-  List<Category> getAllCategories() {
+  Future<List<Category>> getAllCategories() async {
     // Code to retrieve all categories from the database
     return [];
   }
