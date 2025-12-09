@@ -8,6 +8,7 @@ class UserManager {
 
 
   Future<dynamic> getUserData() async {
+    //Firebase
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid != null) {
       return FirebaseUserManager().getUserDetails(uid);
@@ -17,6 +18,7 @@ class UserManager {
   }
 
   Future<void> createOrUpdateUserData(User user) async {
+    //Firebase
     await FirebaseUserManager().createUpdateUser(user);
   }
 
