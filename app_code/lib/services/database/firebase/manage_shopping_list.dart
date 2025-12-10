@@ -7,8 +7,18 @@ class FirebaseShoppingListManager {
   // Class implementation
 
   static final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
-  final _shoppingLists = FirebaseFirestore.instance.collection("Users").doc(_firebaseAuth.currentUser?.uid).collection("Shopping Lists");
-  final _supermarkets = FirebaseFirestore.instance.collection("Users").doc(_firebaseAuth.currentUser?.uid).collection("Supermarkets");
+  
+  CollectionReference<Map<String, dynamic>> get _shoppingLists {
+    final uid = _firebaseAuth.currentUser?.uid;
+    if (uid == null) throw Exception('User not authenticated');
+    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Shopping Lists");
+  }
+  
+  CollectionReference<Map<String, dynamic>> get _supermarkets {
+    final uid = _firebaseAuth.currentUser?.uid;
+    if (uid == null) throw Exception('User not authenticated');
+    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Supermarkets");
+  }
 
   Future<void> setShoppingList(ShoppingList shoppingList) async {
     // Code to add a shopping list to the databases
@@ -17,23 +27,43 @@ class FirebaseShoppingListManager {
       .catchError((error) => print("Failed to add shopping list: $error"));
   }
 
-  Future<ShoppingList?> getShoppingListById(String id) async {
+  Future<void> setAllShoppingLists(List<ShoppingList> shoppingLists) async {
+    // Code to add multiple shopping lists to the database using batch writes
+    if (shoppingLists.isEmpty) return;
+    
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+    for (var shoppingList in shoppingLists) {
+      batch.set(_shoppingLists.doc(shoppingList.id), shoppingList.toJson());
+      
+      // Also batch the purchased products for this shopping list
+      for (var product in shoppingList.getProducts()) {
+        final docRef = _shoppingLists.doc(shoppingList.id).collection("Purchased Products").doc(product.id);
+        batch.set(docRef, product.toJson());
+      }
+    }
+    
+    await batch.commit()
+      .whenComplete(() => print("${shoppingLists.length} Shopping Lists with products added successfully"))
+      .catchError((error) => print("Failed to add shopping lists: $error"));
+  }
+
+  //TO CHECK utility
+  Future<ShoppingList?> getShoppingListById(String listId) async {
     // Code to retrieve a shopping list by its ID from the database
     try {
-      DocumentSnapshot<Map<String, dynamic>> doc = await _shoppingLists.doc(id).get();
+      DocumentSnapshot<Map<String, dynamic>> doc = await _shoppingLists.doc(listId).get();
       if (doc.exists) {
         Supermarket supermarket;
         if (doc.data() != null && doc.data()!['supermarket'] != null) {
-          supermarket = Supermarket.fromJson(doc.data()!['supermarket']);
+          supermarket = await _supermarkets.doc(doc.data()!['supermarket']).get().then((supermarketDoc) => Supermarket.fromJson(supermarketDoc.data()!));
           return ShoppingList.fromJson(doc.data()!, supermarket);
         } else {
           // Handle case where supermarket data is missing
-          print(  "Supermarket data is missing for shopping list with id $id.");
+          print(  "Supermarket data is missing for shopping list with id $listId.");
           return null;
         }
-        
       } else {
-        print("Shopping List with id $id does not exist.");
+        print("Shopping List with id $listId does not exist.");
         return null;
       }
     } catch (e) {
@@ -42,32 +72,25 @@ class FirebaseShoppingListManager {
     }
   }
 
-  Future<void> deleteShoppingList(String id) async {
-    // Code to delete a shopping list from the database
-    await _shoppingLists.doc(id).delete()
-      .whenComplete(() => print("Shopping List deleted successfully"))
-      .catchError((error) => print("Failed to delete shopping list: $error"));
-  }
-
   Future<List<ShoppingList>?> getAllShoppingLists() async {
     // Code to retrieve all shopping lists from the database
     try {
       QuerySnapshot<Map<String, dynamic>> querySnapshot = await _shoppingLists.get();
-      List<ShoppingList> shoppingLists = [];
-      for (var doc in querySnapshot.docs) {
-        Supermarket supermarket;
-        if (doc.data()['supermarket'] != null) {
-          supermarket = Supermarket.fromJson(doc.data()['supermarket']);
-          shoppingLists.add(ShoppingList.fromJson(doc.data(), supermarket));
-        } else {
-          // Handle case where supermarket data is missing
-          print("Supermarket data is missing for shopping list with id ${doc.id}.");
-        }
-      }
+      // Fetch all shopping lists in parallel
+      List<ShoppingList> shoppingLists = await Future.wait(
+        querySnapshot.docs.map((doc) => getShoppingListById(doc.id).then((shoppingList) => shoppingList ?? ShoppingList(id: doc.id, supermarket: Supermarket(id: '', categories: []), name: null, createdAt: null)))
+      );
+      return shoppingLists;
     } catch (e) {
       print("Error fetching shopping lists: $e");
       return null;
     }
-    
+  }
+
+   Future<void> deleteShoppingList(String id) async {
+    // Code to delete a shopping list from the database
+    await _shoppingLists.doc(id).delete()
+      .whenComplete(() => print("Shopping List deleted successfully"))
+      .catchError((error) => print("Failed to delete shopping list: $error"));
   }
 }

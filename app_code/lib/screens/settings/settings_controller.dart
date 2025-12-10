@@ -42,7 +42,7 @@ abstract class SettingsController extends State<SettingsScreen> {
     setState(() => _isSaving = true);
     try {
       final modifiedUser = _createModifiedUser(user);
-      await _userManager.createOrUpdateUserData(modifiedUser);
+      await _userManager.setUserData(modifiedUser);
       
       if (mounted) {
         showSnackBar('Changes saved successfully!');

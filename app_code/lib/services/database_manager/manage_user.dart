@@ -11,16 +11,14 @@ class UserManager {
     //Firebase
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid != null) {
-      return FirebaseUserManager().getUserDetails(uid);
+      return FirebaseUserManager().getUserById(uid);
     } else {
       return null;
     }
   }
 
-  Future<void> createOrUpdateUserData(User user) async {
+  Future<void> setUserData(User user) async {
     //Firebase
-    await FirebaseUserManager().createUpdateUser(user);
+    await FirebaseUserManager().setUser(user);
   }
-
-  
 }

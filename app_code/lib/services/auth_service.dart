@@ -125,7 +125,7 @@ class AuthService {
           await _firebaseAuth.signInWithCredential(credential);
       
       if (userCredential.user != null) {
-        await FirebaseUserManager().createUpdateUser(
+        await FirebaseUserManager().setUser(
           User(
             uid: userCredential.user!.uid,
             email: userCredential.user!.email!,
@@ -163,7 +163,7 @@ class AuthService {
           await currentUser.linkWithCredential(credential);
 
       if (userCredential.user != null) {
-        await FirebaseUserManager().createUpdateUser(
+        await FirebaseUserManager().setUser(
           User(
             uid: userCredential.user!.uid,
             email: email,
@@ -221,7 +221,7 @@ class AuthService {
           await currentUser.linkWithCredential(credential);
       
       if (userCredential.user != null) {
-        await FirebaseUserManager().createUpdateUser(
+        await FirebaseUserManager().setUser(
           User(
             uid: userCredential.user!.uid,
             email: userCredential.user!.email!,

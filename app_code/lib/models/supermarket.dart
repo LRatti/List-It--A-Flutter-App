@@ -38,14 +38,11 @@ class Supermarket {
       _categories.add(category);
   }
   
-  factory Supermarket.fromJson(Map<String, dynamic> json) {
+  factory Supermarket.fromJson(Map<String, dynamic> json, {List<Category>? categories}) {
     return Supermarket(
       id: json['id'],
       name: json['name'] ?? '',
-      categories: (json['categories'] as List<dynamic>?)
-              ?.map((item) => Category.fromJson(item))
-              .toList() ??
-          [],
+      categories: categories ?? [],
     );
   }
 
@@ -53,7 +50,7 @@ class Supermarket {
     return {
       'id': id,
       'name': _name,
-      'categories': _categories.map((category) => category.toJson()).toList(),
+      'categoryIds': _categories.map((cat) => cat.id).toList(),
     };
   }
 }

@@ -8,7 +8,7 @@ class ShoppingList {
  
   final String id;
   String _name;
-  final DateTime createdAt;
+  final DateTime? createdAt;
   Supermarket _supermarket;
   double? _totalPrice;
   Image? image;
@@ -34,7 +34,7 @@ class ShoppingList {
     return this._name;
   }
 
-  DateTime getCreatedAt() {
+  DateTime? getCreatedAt() {
     return createdAt;
   }
 
@@ -71,7 +71,7 @@ class ShoppingList {
     return {
       'id': id,
       'name': _name,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt?.toIso8601String(),
       'supermarket': _supermarket.id,
       'total_price': _totalPrice,
       'is_registered': _isRegistered,

@@ -5,13 +5,13 @@ class FirebaseUserManager {
 
   final _db = FirebaseFirestore.instance.collection("Users");
 
-  Future<void> createUpdateUser(User user) async { //to be awaited when called
+  Future<void> setUser(User user) async { //to be awaited when called
     await _db.doc(user.uid).set(user.toJson())
       .whenComplete(  () => print("User created successfully"))
       .catchError((error) => print("Failed to create user: $error"));
   }
 
-  Future<User?> getUserDetails(String uid) async {
+  Future<User?> getUserById(String uid) async {
     try {
       DocumentSnapshot<Map<String, dynamic>> doc = await _db.doc(uid).get();
       if (doc.exists) {
@@ -25,5 +25,4 @@ class FirebaseUserManager {
       return null;
     }
   }
-
 }
