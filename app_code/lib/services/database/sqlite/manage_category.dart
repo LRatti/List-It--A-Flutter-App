@@ -1,23 +1,47 @@
 
-
+import 'package:app_code/services/database/sqlite/database_helper.dart';
 import 'package:app_code/models/category.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ManageCategory {
-  void addCategory(Category category) {
-    // Code to add a category to the database
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+
+  // Create
+  static Future<int> addCategory(Category category) async {
+    final db = await DatabaseHelper.database;
+    return await db.insert(
+      'category',
+      category.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace
+    );
   }
 
-  void deleteCategory(Category category) {
-    // Code to delete a category from the database
+  // Delete
+  static Future<int> deleteCategory(String categoryId) async {
+    final db = await DatabaseHelper.database;
+    return await db.delete(
+      'category',
+      where: 'id = ?',
+      whereArgs: [categoryId],
+    );
   }
 
-  void updateCategory(Category category) {
-    // Code to update a category in the database
+  // Update
+  static Future<int> updateCategory(Category category) async {
+    final db = await DatabaseHelper.database;
+    return await db.update(
+      'category',
+      category.toJson(),
+      where: 'id = ?',
+      whereArgs: [category.id],
+    );
   }
 
-  List<Category> getAllCategories() {
-    // Code to retrieve all categories from the database
-    return [];
-  }
+  // Read all
+  static Future<List<Category>> getAllCategories() async {
+    final db = await DatabaseHelper.database;
+    final result = await db.query('category');
 
+    return result.map((row) => Category.fromJson(row)).toList();
+  }
 }
