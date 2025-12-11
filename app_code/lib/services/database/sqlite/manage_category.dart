@@ -4,15 +4,15 @@ import 'package:app_code/models/category.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ManageCategory {
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // Create
   static Future<int> addCategory(Category category) async {
     final db = await DatabaseHelper.database;
+
     return await db.insert(
       'category',
       category.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace
+      conflictAlgorithm: ConflictAlgorithm.rollback,
     );
   }
 
@@ -29,12 +29,13 @@ class ManageCategory {
   // Update
   static Future<int> updateCategory(Category category) async {
     final db = await DatabaseHelper.database;
+
     return await db.update(
       'category',
       category.toJson(),
-      where: 'id = ?',
-      whereArgs: [category.id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
   }
 
   // Read all
@@ -43,5 +44,18 @@ class ManageCategory {
     final result = await db.query('category');
 
     return result.map((row) => Category.fromJson(row)).toList();
+  }
+
+  // Read by name
+  static Future<Category?> getCategoryByName(String name) async {
+    final db = await DatabaseHelper.database;
+    final result = await db.query(
+      'category',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+
+    if (result.isEmpty) return null;
+    return Category.fromJson(result.first);
   }
 }

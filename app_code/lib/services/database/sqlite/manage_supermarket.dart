@@ -4,8 +4,6 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
 
 class ManageSupermarket {
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-
   // Create supermarket
   static Future<void> addSupermarket(Supermarket market) async {
     final db = await DatabaseHelper.database;
@@ -22,12 +20,6 @@ class ManageSupermarket {
 
     // insert categories and associations
     for (final cat in market.getCategories()) {
-      await db.insert(
-        'category',
-        cat.toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-
       await db.insert(
         'supermarket_category',
         {
@@ -56,7 +48,7 @@ class ManageSupermarket {
     );
   }
 
-  // Update supermarket (basic info + categories)
+  // Update supermarket (basic info + categories associations)
   static Future<void> updateSupermarket(Supermarket market) async {
     final db = await DatabaseHelper.database;
 
@@ -138,6 +130,28 @@ class ManageSupermarket {
     }
 
     return markets;
+  }
+
+  // Read by name
+  static Future<Supermarket?> getSupermarketByName(String name) async {
+    final db = await DatabaseHelper.database;
+
+    final result = await db.query(
+      'supermarket',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+
+    if (result.isEmpty) return null;
+
+    final data = result.first;
+    final categories = await _getCategoriesForSupermarket(data['id'] as String);
+
+    return Supermarket(
+      id: data['id'] as String,
+      name: data['name'] as String,
+      categories: categories,
+    );
   }
 
   // Utility: load categories for supermarket

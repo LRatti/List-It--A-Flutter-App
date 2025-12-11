@@ -4,8 +4,6 @@ import 'package:app_code/services/database/sqlite/database_helper.dart';
 import 'package:app_code/models/product.dart';
 
 class ManagePurchasedProduct {
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-
   // Create
   static Future<int> addPurchasedProduct(PurchasedProduct purchasedProduct) async {
     final db = await DatabaseHelper.database;
@@ -37,6 +35,7 @@ class ManagePurchasedProduct {
       purchasedProduct.toJson(),
       where: 'id = ?',
       whereArgs: [purchasedProduct.id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
@@ -104,6 +103,39 @@ class ManagePurchasedProduct {
       JOIN product p ON pp.product_id = p.id
       WHERE pp.id = ?
     ''', [id]);
+
+    if (result.isEmpty) return null;
+
+    final row = result.first;
+
+    final product = Product(
+      id: row['product_id'] as String,
+      name: row['name'],
+      categoryId: row['category_id'] as int?,
+    );
+
+    return PurchasedProduct(
+      id: row['id'] as String,
+      listId: row['list_id'] as String,
+      price: row['price'] as double,
+      quantity: row['quantity'] as int,
+      product: product,
+    );
+  }
+
+  // Read by list ID and product name
+  static Future<PurchasedProduct?> getPurchasedProductByName(
+    String listId,
+    String productName,
+  ) async {
+    final db = await DatabaseHelper.database;
+
+    final result = await db.rawQuery('''
+      SELECT pp.*, p.name, p.category_id
+      FROM purchased_product pp
+      JOIN product p ON pp.product_id = p.id
+      WHERE pp.list_id = ? AND p.name = ?
+    ''', [listId, productName]);
 
     if (result.isEmpty) return null;
 
