@@ -50,11 +50,24 @@ class FirebaseProductManager {
     }
   }
 
-  Future<void> deleteProduct(String pid) async {
-    // Code to delete a product from the database
-    await _products.doc(pid).delete()
-      .whenComplete(() => print("Product deleted successfully"))
-      .catchError((error) => print("Failed to delete product: $error"));
+  Future<Product?> getProductByName(String name) async {
+    // Code to retrieve a product by its name from the database
+    try {
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _products
+          .where('name', isEqualTo: name)
+          .limit(1)
+          .get();
+      
+      if (querySnapshot.docs.isNotEmpty) {
+        return Product.fromJson(querySnapshot.docs.first.data());
+      } else {
+        print("Product with name $name does not exist.");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching product: $e");
+      return null;
+    }
   }
 
   Future<List<Product>> getAllProducts() async {

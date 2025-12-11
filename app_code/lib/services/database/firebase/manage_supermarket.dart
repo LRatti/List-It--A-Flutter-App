@@ -1,5 +1,6 @@
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/supermarket.dart';
+import 'package:app_code/utils/app_logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
@@ -21,10 +22,17 @@ class FirebaseSupermarketManager {
   
   // Methods to manage supermarket data in Firebase
   Future<void> setSupermarket(Supermarket supermarket) async {
-    // Code to add a supermarket to the database
-    await _supermarkets.doc(supermarket.id).set(supermarket.toJson())
-      .whenComplete(() => print("Supermarket added successfully"))
-      .catchError((error) => print("Failed to add supermarket: $error"));
+    try {
+      await _supermarkets.doc(supermarket.id).set(supermarket.toJson());
+      AppLogger.info('Supermarket added successfully', data: {'id': supermarket.id});
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to add supermarket',
+        error: error,
+        stackTrace: stackTrace,
+        data: {'id': supermarket.id},
+      );
+    }
   }
 
   Future<void> setAllSupermarkets(List<Supermarket> supermarkets) async {
@@ -36,9 +44,17 @@ class FirebaseSupermarketManager {
       batch.set(_supermarkets.doc(supermarket.id), supermarket.toJson());
     }
     
-    await batch.commit()
-      .whenComplete(() => print("${supermarkets.length} Supermarkets added successfully"))
-      .catchError((error) => print("Failed to add supermarkets: $error"));
+    try {
+      await batch.commit();
+      AppLogger.info('Supermarkets batch added successfully', data: {'count': supermarkets.length});
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to add supermarkets batch',
+        error: error,
+        stackTrace: stackTrace,
+        data: {'count': supermarkets.length},
+      );
+    }
   }
 
   Future<Supermarket?> getSupermarketById(String sid) async {
@@ -50,21 +66,51 @@ class FirebaseSupermarketManager {
         List<Category> categories = [];
         if (doc.data() != null && doc.data()!['categoryIds'] != null) {
           // Fetch all categories in parallel
-          categories = await Future.wait(
+          categories = (await Future.wait(
             (doc.data()!['categoryIds'] as List).map((catId) async {
-              return await _categories.doc(catId).get().then((catDoc) => Category.fromJson(catDoc.data()!));
+              try {
+                final catDoc = await _categories.doc(catId).get();
+                if (catDoc.exists && catDoc.data() != null) {
+                  return Category.fromJson(catDoc.data()!);
+                }
+              } catch (e) {
+                // Category not found, skip it
+                AppLogger.error('Error fetching category', error: e, data: {'categoryId': catId});
+              }
+              return null;
             })
-          );
+          )).whereType<Category>().toList();
         }
         supermarket = Supermarket.fromJson(doc.data()!);
         supermarket.setCategories(categories);
         return supermarket;
+      }
+      else {
+        AppLogger.warning('Supermarket not found', data: {'id': sid});
+        return null;
+      } 
+    } catch (e) {
+      AppLogger.error('Error fetching supermarket', error: e, data: {'id': sid});
+      return null;
+    }
+  }
+
+  Future<Supermarket?> getSupermarketByName(String name) async {
+    // Code to retrieve a supermarket by its name from the database
+    try {
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _supermarkets
+          .where('name', isEqualTo: name)
+          .limit(1)
+          .get();
+      
+      if (querySnapshot.docs.isNotEmpty) {
+        return getSupermarketById(querySnapshot.docs.first.id);
       } else {
-        print("Supermarket with id $sid does not exist.");
+        AppLogger.warning('Supermarket with specified name not found', data: {'name': name});
         return null;
       }
     } catch (e) {
-      print("Error fetching supermarket: $e");
+      AppLogger.error('Error fetching supermarket by name', error: e, data: {'name': name});
       return null;
     }
   }
@@ -79,16 +125,23 @@ class FirebaseSupermarketManager {
       );
       return supermarkets;
     } catch (e) {
-      print("Error fetching supermarkets: $e");
+      AppLogger.error('Error fetching supermarkets', error: e);
     }
     return [];
   }
 
    Future<void> deleteSupermarket(String id) async {
     // Code to delete a supermarket from the database
-    await _supermarkets.doc(id).delete()
-      .whenComplete(() => print("Supermarket deleted successfully"))
-      .catchError((error) => print("Failed to delete supermarket: $error"));
+    try {
+      await _supermarkets.doc(id).delete();
+      AppLogger.info('Supermarket deleted successfully', data: {'id': id});
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to delete supermarket',
+        error: error,
+        stackTrace: stackTrace,
+        data: {'id': id},
+      );
+    }
   }
-
 }

@@ -97,10 +97,21 @@ class FirebaseShoppingListManager {
     }
   }
 
-   Future<void> deleteShoppingList(String id) async {
-    // Code to delete a shopping list from the database
-    await _shoppingLists.doc(id).delete()
-      .whenComplete(() => print("Shopping List deleted successfully"))
-      .catchError((error) => print("Failed to delete shopping list: $error"));
+  Future<void> deleteShoppingList(String id) async {
+    // Code to delete a shopping list and all related subcollections from the database
+    try {
+      // Delete all purchased products in the subcollection first
+      QuerySnapshot<Map<String, dynamic>> purchasedProducts = 
+        await _shoppingLists.doc(id).collection("Purchased Products").get();
+      
+      for (DocumentSnapshot<Map<String, dynamic>> doc in purchasedProducts.docs) {
+        await doc.reference.delete();
+      }
+      
+      // Delete the shopping list document
+      await _shoppingLists.doc(id).delete();
+    } catch (error) {
+      rethrow;
+    }
   }
 }
