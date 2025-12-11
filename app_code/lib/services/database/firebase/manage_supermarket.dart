@@ -46,6 +46,7 @@ class FirebaseSupermarketManager {
     try {
       DocumentSnapshot<Map<String, dynamic>> doc = await _supermarkets.doc(sid).get();
       if (doc.exists) {
+        Supermarket supermarket;
         List<Category> categories = [];
         if (doc.data() != null && doc.data()!['categoryIds'] != null) {
           // Fetch all categories in parallel
@@ -55,7 +56,9 @@ class FirebaseSupermarketManager {
             })
           );
         }
-        return Supermarket.fromJson(doc.data()!, categories: categories);
+        supermarket = Supermarket.fromJson(doc.data()!);
+        supermarket.setCategories(categories);
+        return supermarket;
       } else {
         print("Supermarket with id $sid does not exist.");
         return null;

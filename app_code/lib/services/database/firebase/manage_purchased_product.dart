@@ -47,8 +47,18 @@ class FirebasePurchasedProductManager {
     try {
       DocumentSnapshot<Map<String, dynamic>> doc = await _shoppingLists.doc(listId).collection("Purchased Products").doc(purchasedProductId).get();
       if (doc.exists) {
-        final product = await _products.doc(doc.data()!['product_id']).get().then((prodDoc) => Product.fromJson(prodDoc.data()!));
-        return PurchasedProduct.fromJson(doc.data()!, product);
+        final data = doc.data()!;
+        final productId = data['product_id'];
+        
+        if (productId == null) return null;
+        
+        final prodDoc = await _products.doc(productId).get();
+        if (!prodDoc.exists) return null;
+        
+        final Product product = Product.fromJson(prodDoc.data()!);
+        final PurchasedProduct purchased = PurchasedProduct.fromJson(data);
+        purchased.setProduct = product;
+        return purchased;
       } else {
         print("Purchased Product with id $purchasedProductId does not exist.");
         return null;
@@ -65,13 +75,12 @@ class FirebasePurchasedProductManager {
       QuerySnapshot<Map<String, dynamic>> querySnapshot = await _shoppingLists.doc(listId).collection("Purchased Products").get();
       
       // Fetch all products in parallel
-      List<PurchasedProduct> purchasedProducts = await Future.wait(
+      List<PurchasedProduct?> purchasedProducts = await Future.wait(
         querySnapshot.docs.map((doc) async {
-          final product = await _products.doc(doc.data()['product_id']).get().then((prodDoc) => Product.fromJson(prodDoc.data()!));
-          return PurchasedProduct.fromJson(doc.data(), product);
+          return await getPurchasedProductById(listId, doc.id);
         })
       );
-      return purchasedProducts;
+      return purchasedProducts.whereType<PurchasedProduct>().toList();
     } catch (e) {
       print("Error fetching purchased products: $e");
     }

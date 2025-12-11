@@ -13,8 +13,8 @@ class Supermarket {
     String? id,
     //TODO: add default name
     name = 'Supermarket', 
-    required categories,
-  }) :  _categories = categories,
+    List<Category>? categories,
+  }) :  _categories = categories ?? [],
         _name = name,
         this.id = id ?? Helper.generateId();
 
@@ -30,7 +30,7 @@ class Supermarket {
     _name = name;
   }
 
-  void modifyCategories(List<Category> categories) {
+  void setCategories(List<Category> categories) {
     this._categories = categories;
   }
 
@@ -38,11 +38,10 @@ class Supermarket {
       _categories.add(category);
   }
   
-  factory Supermarket.fromJson(Map<String, dynamic> json, {List<Category>? categories}) {
+  factory Supermarket.fromJson(Map<String, dynamic> json) {
     return Supermarket(
       id: json['id'],
-      name: json['name'] ?? '',
-      categories: categories ?? [],
+      name: json['name'] ?? 'Supermarket',
     );
   }
 

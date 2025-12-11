@@ -15,9 +15,9 @@ class FirebaseCategoryManager {
   }
 
   Future<void> setCategory(Category category) async {
-    // Code to add and update a user category to the database
-    await _categories.doc(category.id).set(category.toJson())
-      .whenComplete(() => print("Category added successfully"))
+    // Code to add a new category to the database
+    await _categories.add(category.toJson())
+      .then((_) => print("Category added successfully"))
       .catchError((error) => print("Failed to add category: $error"));
   }
 
@@ -60,13 +60,6 @@ class FirebaseCategoryManager {
       print("Error fetching categories: $e");
     }
     return [];
-  }
-
-    Future<void> deleteCategory(Category category) async {
-    // Code to delete a category from the database
-    await _categories.doc(category.id).delete()
-      .whenComplete(() => print("Category deleted successfully"))
-      .catchError((error) => print("Failed to delete category: $error"));
   }
 
 }

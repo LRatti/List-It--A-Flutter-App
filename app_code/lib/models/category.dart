@@ -13,11 +13,6 @@ class Category {
   })  : id = id ?? Helper.generateId(),
         _name = name;
 
-  //this method might not be used
-  void setName(String newName){
-    this._name = newName;
-  }
-
   String getName(){
     return this._name;
   }

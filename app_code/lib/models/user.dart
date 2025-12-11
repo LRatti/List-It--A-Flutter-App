@@ -19,9 +19,6 @@ class User {
     this.uid = uid;
   }
       
-      
-      
-
   String getUserName() {
     return _userName ?? '';
   }

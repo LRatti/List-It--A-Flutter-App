@@ -54,13 +54,12 @@ class ShoppingList {
     return _isRegistered;
   }
 
-  factory ShoppingList.fromJson(Map<String, dynamic> json, Supermarket supermarket) {
+  factory ShoppingList.fromJson(Map<String, dynamic> json) {
     return ShoppingList(
       id: json['id'],
       name: json['name'],
       //WARN: can be null from import check date.
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
-      supermarket: supermarket,
       totalPrice: json['total_price'],
       isRegistered: json['is_registered'] ?? false,
       // image and products deserialization can be added here if needed
@@ -91,12 +90,20 @@ class ShoppingList {
     products!.add(purchasedProduct);
   }
 
+  void setPurchasedProducts(List<PurchasedProduct> products) {
+    this.products = products;
+  }
+
   void removeProduct(PurchasedProduct product) {
     products?.remove(product);
   }
 
   void removeProductById(String productId) {
     products?.removeWhere((product) => product.id == productId);
+  }
+
+  void removeAllProducts() {
+    products?.clear();
   }
   
   void setName(String newName) {

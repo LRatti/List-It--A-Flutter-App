@@ -1,7 +1,10 @@
+import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
+import 'package:app_code/services/database/firebase/manage_purchased_product.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_core/firebase_core.dart';
 
 class FirebaseShoppingListManager {
   // Class implementation
@@ -54,9 +57,16 @@ class FirebaseShoppingListManager {
       DocumentSnapshot<Map<String, dynamic>> doc = await _shoppingLists.doc(listId).get();
       if (doc.exists) {
         Supermarket supermarket;
+        ShoppingList shoppingList;
+        List<PurchasedProduct> purchasedProducts = [];
         if (doc.data() != null && doc.data()!['supermarket'] != null) {
           supermarket = await _supermarkets.doc(doc.data()!['supermarket']).get().then((supermarketDoc) => Supermarket.fromJson(supermarketDoc.data()!));
-          return ShoppingList.fromJson(doc.data()!, supermarket);
+          shoppingList = ShoppingList.fromJson(doc.data()!);
+          shoppingList.setSupermarket(supermarket);
+          // Fetch and set purchased products
+          purchasedProducts = await FirebasePurchasedProductManager().getPurchasedProductByList(listId);
+          shoppingList.setPurchasedProducts(purchasedProducts);
+          return shoppingList;
         } else {
           // Handle case where supermarket data is missing
           print(  "Supermarket data is missing for shopping list with id $listId.");

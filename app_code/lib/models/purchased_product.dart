@@ -8,21 +8,20 @@ class PurchasedProduct {
   final String listId;
   double price;
   int quantity;
-  final Product product;
+  Product? product;
 
   PurchasedProduct({
     String? id,
     required this.listId,
-    required this.product,
+    this.product,
     this.price = 0.0,
     this.quantity = 0,
   }) : this.id = id ?? Helper.generateId();
 
-  factory PurchasedProduct.fromJson(Map<String, dynamic> json, Product product) {
+  factory PurchasedProduct.fromJson(Map<String, dynamic> json) {
     return PurchasedProduct(
       id: json['id'],
       listId: json['list_id'],
-      product: product,
       price: json['price'],
       quantity: json['quantity'],
     );
@@ -32,10 +31,15 @@ class PurchasedProduct {
     return {
       'id': id,
       'list_id': listId,
-      'product_id': product.id,
+      'product_id': product?.id,
       'price': price,
       'quantity': quantity,
     };
+  }
+
+  set setProduct(Product product) {
+    // ignore: unnecessary_this
+    this.product = product;
   }
 
   double getTotalPrice() {
