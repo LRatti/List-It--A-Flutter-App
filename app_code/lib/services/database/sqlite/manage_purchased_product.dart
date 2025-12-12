@@ -1,12 +1,14 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
+import 'package:app_code/services/database/sqlite/manage_product.dart';
 import 'package:app_code/models/product.dart';
 
 class ManagePurchasedProduct {
   // Create
   static Future<int> addPurchasedProduct(PurchasedProduct purchasedProduct) async {
     final db = await DatabaseHelper.database;
+    await ManageProduct.addProduct(purchasedProduct.product!);
 
     return await db.insert(
       'purchased_product',
@@ -29,6 +31,9 @@ class ManagePurchasedProduct {
   // Update
   static Future<int> updatePurchasedProduct(PurchasedProduct purchasedProduct) async {
     final db = await DatabaseHelper.database;
+
+    // Keep the linked product in sync; upsert to handle both existing and missing products.
+    await ManageProduct.updateProduct(purchasedProduct.product!);
 
     return await db.update(
       'purchased_product',
