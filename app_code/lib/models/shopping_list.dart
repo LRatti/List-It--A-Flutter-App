@@ -23,10 +23,10 @@ class ShoppingList {
       totalPrice,
       this.image,
       this.products,
-      isRegistered,
+      isRegistered = false,
   }) :  _name = name,
         _totalPrice = totalPrice,
-        _supermarket = supermarket,
+        _supermarket = supermarket ?? _getDefaultSupermarket(),
         _isRegistered = isRegistered,
         this.id = id ?? Helper.generateId();
 
@@ -61,7 +61,7 @@ class ShoppingList {
       //WARN: can be null from import check date.
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
       totalPrice: json['total_price'],
-      isRegistered: json['is_registered'] ?? false,
+      isRegistered: json['is_registered'] == 1,
       // image and products deserialization can be added here if needed
     );
   }
@@ -71,9 +71,9 @@ class ShoppingList {
       'id': id,
       'name': _name,
       'created_at': createdAt?.toIso8601String(),
-      'supermarket': _supermarket.id,
+      'supermarket_id': _supermarket.id,
       'total_price': _totalPrice,
-      'is_registered': _isRegistered,
+      'is_registered': _isRegistered ? 1 : 0,
       // image and products serialization can be added here if needed
     };
   }
@@ -128,5 +128,13 @@ class ShoppingList {
 
   void setIsRegistered(bool isRegistered) {
     _isRegistered = isRegistered;
+  }
+
+  //TODO: take the supermarket from the json file containing the default one
+  static Supermarket _getDefaultSupermarket() {
+    return Supermarket(
+      id: 'default',
+      name: 'Default Supermarket',
+    );
   }
 }
