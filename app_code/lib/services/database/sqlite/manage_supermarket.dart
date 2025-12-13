@@ -20,6 +20,14 @@ class ManageSupermarket {
 
     // insert categories and associations
     for (final cat in market.getCategories()) {
+      // First insert the category into the category table
+      await db.insert(
+        'category',
+        cat.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      // Then insert the association
       await db.insert(
         'supermarket_category',
         {
