@@ -134,9 +134,11 @@ class ShoppingList {
       name: 'Default Category',
     );
 
+    List<Category> categories = [defaultCategory];
+
     return Supermarket(
       id: 'default',
-      name: 'Default Supermarket', categories: defaultCategory,
+      name: 'Default Supermarket', categories: categories,
     );
   }
 }
