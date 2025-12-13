@@ -25,7 +25,7 @@ class FirebaseShoppingListManager {
 
   Future<void> setShoppingList(ShoppingList shoppingList) async {
     // Code to add a shopping list to the databases
-    await _shoppingLists.doc(shoppingList.id).set(shoppingList.toJson())
+    await _shoppingLists.doc(shoppingList.id).set(shoppingList.toDatabase())
       .whenComplete(() => print("Shopping List added successfully"))
       .catchError((error) => print("Failed to add shopping list: $error"));
   }
@@ -36,12 +36,12 @@ class FirebaseShoppingListManager {
     
     WriteBatch batch = FirebaseFirestore.instance.batch();
     for (var shoppingList in shoppingLists) {
-      batch.set(_shoppingLists.doc(shoppingList.id), shoppingList.toJson());
+      batch.set(_shoppingLists.doc(shoppingList.id), shoppingList.toDatabase());
       
       // Also batch the purchased products for this shopping list
       for (var product in shoppingList.getProducts()) {
         final docRef = _shoppingLists.doc(shoppingList.id).collection("Purchased Products").doc(product.id);
-        batch.set(docRef, product.toJson());
+        batch.set(docRef, product.toDatabase());
       }
     }
     
@@ -60,8 +60,8 @@ class FirebaseShoppingListManager {
         ShoppingList shoppingList;
         List<PurchasedProduct> purchasedProducts = [];
         if (doc.data() != null && doc.data()!['supermarket'] != null) {
-          supermarket = await _supermarkets.doc(doc.data()!['supermarket']).get().then((supermarketDoc) => Supermarket.fromJson(supermarketDoc.data()!));
-          shoppingList = ShoppingList.fromJson(doc.data()!);
+          supermarket = await _supermarkets.doc(doc.data()!['supermarket']).get().then((supermarketDoc) => Supermarket.fromDatabase(supermarketDoc.data()!));
+          shoppingList = ShoppingList.fromDatabase(doc.data()!);
           shoppingList.setSupermarket(supermarket);
           // Fetch and set purchased products
           purchasedProducts = await FirebasePurchasedProductManager().getPurchasedProductByList(listId);

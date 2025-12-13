@@ -23,7 +23,7 @@ class FirebaseSupermarketManager {
   // Methods to manage supermarket data in Firebase
   Future<void> setSupermarket(Supermarket supermarket) async {
     try {
-      await _supermarkets.doc(supermarket.id).set(supermarket.toJson());
+      await _supermarkets.doc(supermarket.id).set(supermarket.toDatabase());
       AppLogger.info('Supermarket added successfully', data: {'id': supermarket.id});
     } catch (error, stackTrace) {
       AppLogger.error(
@@ -41,7 +41,7 @@ class FirebaseSupermarketManager {
     
     WriteBatch batch = FirebaseFirestore.instance.batch();
     for (var supermarket in supermarkets) {
-      batch.set(_supermarkets.doc(supermarket.id), supermarket.toJson());
+      batch.set(_supermarkets.doc(supermarket.id), supermarket.toDatabase());
     }
     
     try {
@@ -81,7 +81,7 @@ class FirebaseSupermarketManager {
             })
           )).whereType<Category>().toList();
         }
-        supermarket = Supermarket.fromJson(doc.data()!);
+        supermarket = Supermarket.fromDatabase(doc.data()!);
         supermarket.setCategories(categories);
         return supermarket;
       }
@@ -130,18 +130,24 @@ class FirebaseSupermarketManager {
     return [];
   }
 
-   Future<void> deleteSupermarket(String id) async {
-    // Code to delete a supermarket from the database
-    try {
-      await _supermarkets.doc(id).delete();
-      AppLogger.info('Supermarket deleted successfully', data: {'id': id});
-    } catch (error, stackTrace) {
-      AppLogger.error(
-        'Failed to delete supermarket',
-        error: error,
-        stackTrace: stackTrace,
-        data: {'id': id},
-      );
-    }
+  Future<List<Supermarket>> getVisibleSupermarkets() async {
+    List<Supermarket> allSupermarkets = await getAllSupermarkets();
+    return allSupermarkets.where((supermarket) => supermarket.isVisible).toList();
   }
+
+  // Future<void> deleteSupermarket(String id) async {
+  //   // Code to delete a supermarket from the database
+  //   try {
+  //     await _supermarkets.doc(id).delete();
+  //     AppLogger.info('Supermarket deleted successfully', data: {'id': id});
+  //   } catch (error, stackTrace) {
+  //     AppLogger.error(
+  //       'Failed to delete supermarket',
+  //       error: error,
+  //       stackTrace: stackTrace,
+  //       data: {'id': id},
+  //     );
+  //   }
+  // }
+
 }

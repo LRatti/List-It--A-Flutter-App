@@ -18,7 +18,7 @@ class PurchasedProduct {
     this.quantity = 0,
   }) : this.id = id ?? Helper.generateId();
 
-  factory PurchasedProduct.fromJson(Map<String, dynamic> json) {
+  factory PurchasedProduct.fromDatabase(Map<String, dynamic> json) {
     return PurchasedProduct(
       id: json['id'],
       listId: json['list_id'],
@@ -27,7 +27,7 @@ class PurchasedProduct {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toDatabase() {
     return {
       'id': id,
       'list_id': listId,
@@ -37,12 +37,28 @@ class PurchasedProduct {
     };
   }
 
+  factory PurchasedProduct.fromJson(Map<String, dynamic> json) {
+    return PurchasedProduct(
+      id: json['id'],
+      listId: json['list_id'],
+      price: json['price'],
+      quantity: json['quantity'],
+      product: json['product'] != null ? Product.fromJson(json['product']) : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'list_id': listId,
+      'product': product?.toJson(),
+      'price': price,
+      'quantity': quantity,
+    };
+  }
+
   set setProduct(Product product) {
     // ignore: unnecessary_this
     this.product = product;
-  }
-
-  double getTotalPrice() {
-    return price * quantity;
   }
 }

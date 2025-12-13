@@ -22,7 +22,7 @@ class FirebasePurchasedProductManager {
 
   Future<void> setPurchasedProduct(PurchasedProduct product) async {
     // Code to add a purchased product to the database
-    await _shoppingLists.doc(product.listId).collection("Purchased Products").doc(product.id).set(product.toJson())
+    await _shoppingLists.doc(product.listId).collection("Purchased Products").doc(product.id).set(product.toDatabase())
       .whenComplete(() => print("Purchased Product added successfully"))
       .catchError((error) => print("Failed to add purchased product: $error"));
   }
@@ -34,7 +34,7 @@ class FirebasePurchasedProductManager {
     WriteBatch batch = FirebaseFirestore.instance.batch();
     for (var product in products) {
       final docRef = _shoppingLists.doc(product.listId).collection("Purchased Products").doc(product.id);
-      batch.set(docRef, product.toJson());
+      batch.set(docRef, product.toDatabase());
     }
     
     await batch.commit()
@@ -56,7 +56,7 @@ class FirebasePurchasedProductManager {
         if (!prodDoc.exists) return null;
         
         final Product product = Product.fromJson(prodDoc.data()!);
-        final PurchasedProduct purchased = PurchasedProduct.fromJson(data);
+        final PurchasedProduct purchased = PurchasedProduct.fromDatabase(data);
         purchased.setProduct = product;
         return purchased;
       } else {

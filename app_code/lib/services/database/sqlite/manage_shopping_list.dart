@@ -10,7 +10,7 @@ class ManageShoppingList {
 
     await db.insert(
       'shopping_list',
-      list.toJson(),
+      list.toDatabase(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -37,7 +37,7 @@ class ManageShoppingList {
 
     await db.update(
       'shopping_list',
-      list.toJson(),
+      list.toDatabase(),
       where: 'id = ?',
       whereArgs: [list.id],
       conflictAlgorithm: ConflictAlgorithm.replace,
@@ -81,7 +81,7 @@ class ManageShoppingList {
     final products = await ManagePurchasedProduct
         .getPurchasedProductsByList(row['id'] as String);
 
-    final list = ShoppingList.fromJson(row);
+    final list = ShoppingList.fromDatabase(row);
 
     if (supermarket != null) {
       list.setSupermarket(supermarket);

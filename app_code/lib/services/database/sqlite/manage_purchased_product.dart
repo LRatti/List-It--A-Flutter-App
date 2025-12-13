@@ -12,7 +12,7 @@ class ManagePurchasedProduct {
 
     return await db.insert(
       'purchased_product',
-      purchasedProduct.toJson(),
+      purchasedProduct.toDatabase(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -37,7 +37,7 @@ class ManagePurchasedProduct {
 
     return await db.update(
       'purchased_product',
-      purchasedProduct.toJson(),
+      purchasedProduct.toDatabase(),
       where: 'id = ?',
       whereArgs: [purchasedProduct.id],
       conflictAlgorithm: ConflictAlgorithm.replace,

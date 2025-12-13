@@ -4,12 +4,14 @@ class Product {
 
   final String id; 
   String _name;
-  int? categoryId;
+  List<String> categoryIds;
+  bool isVisible;
 
   Product({
     String?id,
     required name, 
-    this.categoryId, 
+    this.categoryIds = const [], 
+    this.isVisible = true,
   }): this._name = name,
       this.id = id ?? Helper.generateId();
  
@@ -17,23 +19,28 @@ class Product {
     return this._name;
   }
 
-  int getCategoryId() {
-    return categoryId ?? 0;
+  List<String> getCategoryIds() {
+    return categoryIds;
   }
 
   void setName(String name) {
     this._name = name;
   }
 
-  void setCategoryId(int categoryId) {
-    this.categoryId = categoryId;
+  void setCategoryIds(List<String> categoryIds) {
+    this.categoryIds = categoryIds;
+  }
+
+  void setVisibility(bool visibility) {
+    isVisible = visibility;
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'],
       name: json['name'],
-      categoryId: json['category_id'],
+      categoryIds: List<String>.from(json['categoryIds'] ?? []),
+      isVisible: json['isVisible'] ?? true,
     );
   }
 
@@ -41,7 +48,8 @@ class Product {
     return {
       'id': id, 
       'name': _name,
-      'category_id': categoryId,
+      'categoryIds': categoryIds,
+      'isVisible': isVisible,
     };
   }
 }

@@ -6,7 +6,7 @@ class FirebaseUserManager {
   final _db = FirebaseFirestore.instance.collection("Users");
 
   Future<void> setUser(User user) async { //to be awaited when called
-    await _db.doc(user.uid).set(user.toJson())
+    await _db.doc(user.uid).set(user.toDatabase())
       .whenComplete(  () => print("User created successfully"))
       .catchError((error) => print("Failed to create user: $error"));
   }
@@ -15,7 +15,7 @@ class FirebaseUserManager {
     try {
       DocumentSnapshot<Map<String, dynamic>> doc = await _db.doc(uid).get();
       if (doc.exists) {
-        return User.fromJson(doc);
+        return User.fromDatabase(doc);
       } else {
         print("User with uid $uid does not exist.");
         return null;

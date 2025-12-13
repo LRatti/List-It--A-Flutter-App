@@ -81,5 +81,16 @@ class FirebaseProductManager {
     return [];
   }
 
-
+  Future<List<Product>> getVisibleProducts() async {
+    // Code to retrieve all visible products from the database
+    try {
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _products
+          .where('isVisible', isEqualTo: true)
+          .get();
+      return querySnapshot.docs.map((doc) => Product.fromJson(doc.data())).toList();
+    } catch (e) {
+      print("Error fetching visible products: $e");
+    }
+    return [];
+  }
 }
