@@ -85,7 +85,7 @@ class ShoppingList {
       totalPrice: json['total_price'],
       image: json['image'],
       products: (json['products'] as List<dynamic>?)
-          ?.map((item) => PurchasedProduct.fromDatabase(item))
+          ?.map((item) => PurchasedProduct.fromJson(item))
           .toList(),
       isRegistered: json['is_registered'] == 1,
     );
@@ -104,11 +104,12 @@ class ShoppingList {
     };
   }
 
-  void addProduct(Product product) {
+  void addProduct(Product product, Category category) {
     PurchasedProduct purchasedProduct = PurchasedProduct(
       id: product.id,
       price: 0.0,
       quantity: 1,
+      category: category,
       product: product, 
       listId: id,
     );

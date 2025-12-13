@@ -1,3 +1,4 @@
+import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -49,15 +50,21 @@ class FirebasePurchasedProductManager {
       if (doc.exists) {
         final data = doc.data()!;
         final productId = data['product_id'];
+        final catId = data['category_id'];
         
         if (productId == null) return null;
+
+        if (catId == null) return null;
         
         final prodDoc = await _products.doc(productId).get();
         if (!prodDoc.exists) return null;
         
+        final catDoc = await _products.doc(catId).get();
+        if (!catDoc.exists) return null;
+
+        final Category category = Category.fromJson(catDoc.data()!);
         final Product product = Product.fromJson(prodDoc.data()!);
-        final PurchasedProduct purchased = PurchasedProduct.fromDatabase(data);
-        purchased.setProduct = product;
+        final PurchasedProduct purchased = PurchasedProduct.fromDatabase(data, category, product);
         return purchased;
       } else {
         print("Purchased Product with id $purchasedProductId does not exist.");

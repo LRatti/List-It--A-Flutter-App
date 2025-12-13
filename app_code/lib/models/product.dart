@@ -5,22 +5,20 @@ class Product {
   final String id; 
   String _name;
   List<String> categoryIds;
+  Map<String, String>? associations; 
   bool isVisible;
 
   Product({
     String?id,
     required name, 
     this.categoryIds = const [], 
+    this.associations = const {},
     this.isVisible = true,
   }): this._name = name,
       this.id = id ?? Helper.generateId();
  
   String getName() {
     return this._name;
-  }
-
-  List<String> getCategoryIds() {
-    return categoryIds;
   }
 
   void setName(String name) {
@@ -31,6 +29,10 @@ class Product {
     this.categoryIds = categoryIds;
   }
 
+  void setAssociations(Map<String, String> associations) {
+    this.associations = associations;
+  }
+  
   void setVisibility(bool visibility) {
     isVisible = visibility;
   }
@@ -40,6 +42,7 @@ class Product {
       id: json['id'],
       name: json['name'],
       categoryIds: List<String>.from(json['categoryIds'] ?? []),
+      associations: Map<String, String>.from(json['associations'] ?? {}),
       isVisible: json['isVisible'] ?? true,
     );
   }
@@ -49,6 +52,7 @@ class Product {
       'id': id, 
       'name': _name,
       'categoryIds': categoryIds,
+      'associations': associations,
       'isVisible': isVisible,
     };
   }
