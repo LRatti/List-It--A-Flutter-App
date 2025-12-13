@@ -1,8 +1,10 @@
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/supermarket.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:app_code/utils/helper.dart';
+import 'package:app_code/models/category.dart';
 
 class ShoppingList {
  
@@ -132,9 +134,14 @@ class ShoppingList {
 
   //TODO: take the supermarket from the json file containing the default one
   static Supermarket _getDefaultSupermarket() {
+    Category defaultCategory = Category(
+      id: 'default_category',
+      name: 'Default Category',
+    );
+
     return Supermarket(
       id: 'default',
-      name: 'Default Supermarket',
+      name: 'Default Supermarket', categories: defaultCategory,
     );
   }
 }
