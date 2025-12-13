@@ -26,6 +26,7 @@ class Category {
     return Category(
       id: json['id'],
       name: json['name'],
+      isDefault: json['is_default'] == 1,
     );
   }
 
