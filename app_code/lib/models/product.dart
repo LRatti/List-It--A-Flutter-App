@@ -3,7 +3,6 @@ import 'package:app_code/utils/helper.dart';
 class Product {
   final String id;
   String _name;
-  List<String> categoryIds;
   Map<String, String> associations;
   bool isVisible;
 
@@ -15,7 +14,6 @@ class Product {
     bool isVisible = true,
   })  : id = id ?? Helper.generateId(),
         _name = name,
-        categoryIds = categoryIds ?? [],
         associations = associations ?? {},
         isVisible = isVisible;
 
@@ -27,16 +25,16 @@ class Product {
     _name = name;
   }
 
-  void setCategoryIds(List<String> categoryIds) {
-    this.categoryIds = categoryIds;
-  }
-
   void setAssociations(Map<String, String> associations) {
     this.associations = associations;
   }
 
   void setVisibility(bool visibility) {
     isVisible = visibility;
+  }
+
+  void addAssociation(String supermarketId, String categoryId) {
+    associations[supermarketId] = categoryId;
   }
 
   factory Product.fromDatabase(
@@ -75,7 +73,6 @@ class Product {
     return {
       'id': id,
       'name': _name,
-      'categoryIds': categoryIds,
       'associations': associations,
       'isVisible': isVisible,
     };

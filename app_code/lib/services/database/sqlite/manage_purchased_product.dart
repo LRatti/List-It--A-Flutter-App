@@ -1,3 +1,4 @@
+import 'package:app_code/models/supermarket.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/product.dart';
@@ -8,16 +9,17 @@ import 'package:app_code/services/database/sqlite/manage_category.dart';
 
 class ManagePurchasedProduct {
   static Future<void> addPurchasedProduct(PurchasedProduct item) async {
-    final db = await DatabaseHelper.database;
+  final db = await DatabaseHelper.database;
 
-    await ManageProduct.addProduct(item.product);
-    await ManageCategory.addCategory(item.category);
+  await ManageProduct.addProduct(item.product);
+  await ManageCategory.addCategory(item.category);
 
-    await db.insert(
-      'purchased_product', 
-      item.toDatabase(),
-      conflictAlgorithm: ConflictAlgorithm.replace);
-  }
+  await db.insert(
+    'purchased_product',
+    item.toDatabase(),
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+}
 
   static Future<List<PurchasedProduct>> getPurchasedProductsByList(
       String listId) async {

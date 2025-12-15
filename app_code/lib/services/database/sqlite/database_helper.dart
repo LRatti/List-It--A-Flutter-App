@@ -52,12 +52,16 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
-      CREATE TABLE product_category(
+      CREATE TABLE associations (
         product_id TEXT NOT NULL,
+        supermarket_id TEXT NOT NULL,
         category_id TEXT NOT NULL,
-        PRIMARY KEY (product_id, category_id),
-        FOREIGN KEY(product_id) REFERENCES product(id),
-        FOREIGN KEY(category_id) REFERENCES category(id)
+
+        PRIMARY KEY (product_id, supermarket_id),
+
+        FOREIGN KEY (product_id) REFERENCES product(id),
+        FOREIGN KEY (supermarket_id) REFERENCES supermarket(id),
+        FOREIGN KEY (category_id) REFERENCES category(id)
       )
     ''');
 

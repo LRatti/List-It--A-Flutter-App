@@ -4,26 +4,36 @@ import 'package:app_code/services/database/sqlite/database_helper.dart';
 
 class ManageProduct {
   static Future<void> addProduct(Product product) async {
-    final db = await DatabaseHelper.database;
+  final db = await DatabaseHelper.database;
 
-    // Inserisci il prodotto nella tabella principale
-    await db.insert(
-      'product', 
-      product.toDatabase(),
-      conflictAlgorithm: ConflictAlgorithm.replace);
+  await db.insert(
+    'product',
+    product.toDatabase(),
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
 
-    // Inserisci le categorie nella tabella product_category
-    for (final catId in product.categoryIds) {
-      await db.insert(
-        'product_category',
-        {
-          'product_id': product.id,
-          'category_id': catId,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
+  for (final entry in product.associations.entries) {
+    final supermarketId = entry.key;
+    final categoryId = entry.value;
+
+    if (supermarketId.isEmpty || categoryId.isEmpty) {
+      throw Exception(
+        'Invalid association for product ${product.id}: '
+        'supermarketId=$supermarketId, categoryId=$categoryId',
       );
     }
+
+    await db.insert(
+      'associations',
+      {
+        'product_id': product.id,
+        'supermarket_id': supermarketId,
+        'category_id': categoryId,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
+}
 
   static Future<void> updateProduct(Product product) async {
     final db = await DatabaseHelper.database;
@@ -35,29 +45,51 @@ class ManageProduct {
       whereArgs: [product.id],
     );
 
-    // Aggiorna le categorie
+    // Remove old associations
     await db.delete(
-      'product_category',
+      'associations',
       where: 'product_id = ?',
       whereArgs: [product.id],
     );
 
-    for (final catId in product.categoryIds) {
+    // Insert new associations (product + supermarket + category)
+    for (final entry in product.associations.entries) {
+      final supermarketId = entry.key;
+      final categoryId = entry.value;
+
+      if (supermarketId.isEmpty || categoryId.isEmpty) {
+        throw Exception(
+          'Invalid association for product ${product.id}',
+        );
+      }
+
       await db.insert(
-        'product_category',
+        'associations',
         {
           'product_id': product.id,
-          'category_id': catId,
+          'supermarket_id': supermarketId,
+          'category_id': categoryId,
         },
+        conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
   }
 
   static Future<void> deleteProduct(String id) async {
-    final db = await DatabaseHelper.database;
-    await db.delete('product_category', where: 'product_id = ?', whereArgs: [id]);
-    await db.delete('product', where: 'id = ?', whereArgs: [id]);
-  }
+  final db = await DatabaseHelper.database;
+
+  await db.delete(
+    'associations',
+    where: 'product_id = ?',
+    whereArgs: [id],
+  );
+
+  await db.delete(
+    'product',
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
 
   static Future<Product?> getProductById(String id) async {
     final db = await DatabaseHelper.database;
@@ -66,13 +98,12 @@ class ManageProduct {
     if (productRows.isEmpty) return null;
 
     final categoryRows = await db.query(
-      'product_category',
+      'associations',
       where: 'product_id = ?',
       whereArgs: [id],
     );
     final categoryIds = categoryRows.map((e) => e['category_id'] as String).toList();
 
-    // Passa le categorie come parametro a fromDatabase
     return Product.fromDatabase(productRows.first, categoryIds: categoryIds);
   }
 
@@ -84,7 +115,7 @@ class ManageProduct {
 
     for (final row in productRows) {
       final categoryRows = await db.query(
-        'product_category',
+        'associations',
         where: 'product_id = ?',
         whereArgs: [row['id']],
       );
@@ -105,7 +136,7 @@ class ManageProduct {
 
     final productId = rows.first['id'] as String;
     final categoryRows = await db.query(
-      'product_category',
+      'associations',
       where: 'product_id = ?',
       whereArgs: [productId],
     );
