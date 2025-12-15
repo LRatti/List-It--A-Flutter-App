@@ -157,6 +157,7 @@ void main() {
         'list_id': 'list1',
         'price': 10.0,
         'quantity': 2,
+        'category_id': 'c1',
       },
     );
 
