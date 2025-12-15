@@ -87,11 +87,12 @@ class FirebasePurchasedProductManager {
           return await getPurchasedProductById(listId, doc.id);
         })
       );
+      //Returns a list without null values. If no products found, returns an empty list.
       return purchasedProducts.whereType<PurchasedProduct>().toList();
     } catch (e) {
       print("Error fetching purchased products: $e");
+      return [];
     }
-    return [];
   }
 
   Future<void> deletePurchasedProduct(PurchasedProduct product) async {

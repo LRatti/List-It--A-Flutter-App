@@ -37,7 +37,7 @@ class PurchasedProduct {
     return {
       'id': id,
       'list_id': listId,
-      'product_id': product?.id,
+      'product_id': product.id,
       'category_id': category.id,
       'price': price,
       'quantity': quantity,
@@ -59,7 +59,7 @@ class PurchasedProduct {
     return {
       'id': id,
       'list_id': listId,
-      'product': product?.toJson(),
+      'product': product.toJson(),
       'category': category.toJson(),
       'price': price,
       'quantity': quantity,

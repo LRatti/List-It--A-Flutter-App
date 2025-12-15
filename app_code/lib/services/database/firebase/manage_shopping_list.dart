@@ -49,7 +49,6 @@ class FirebaseShoppingListManager {
       .catchError((error) => print("Failed to add shopping lists: $error"));
   }
 
-  //TO CHECK utility
   Future<ShoppingList?> getShoppingListById(String listId) async {
     // Code to retrieve a shopping list by its ID from the database
     try {
@@ -81,18 +80,33 @@ class FirebaseShoppingListManager {
     }
   }
 
-  Future<List<ShoppingList>?> getAllShoppingLists() async {
+
+  /// Retrieves all shopping lists from the database.
+  ///
+  /// This method fetches all shopping lists by querying the database
+  /// and returns a list of `ShoppingList` objects. 
+  /// 
+  /// Returns:
+  /// A `Future<List<ShoppingList>>` containing all the shopping lists
+  /// retrieved from the database. If no lists are found or an error
+  /// occurs, an empty list is returned.
+  Future<List<ShoppingList>> getAllShoppingLists() async {
     // Code to retrieve all shopping lists from the database
     try {
       QuerySnapshot<Map<String, dynamic>> querySnapshot = await _shoppingLists.get();
-      // Fetch all shopping lists in parallel
-      List<ShoppingList> shoppingLists = await Future.wait(
-        querySnapshot.docs.map((doc) => getShoppingListById(doc.id).then((shoppingList) => shoppingList ?? ShoppingList(id: doc.id, supermarket: Supermarket(id: '', categories: []), name: null, createdAt: null)))
+
+      List<ShoppingList?> shoppingLists = await Future.wait(
+        querySnapshot.docs.map(
+          (doc) => getShoppingListById(doc.id)
+        )
       );
-      return shoppingLists;
+
+      // Filter out null values and return only found shopping lists
+      return shoppingLists.whereType<ShoppingList>().toList();
+
     } catch (e) {
       print("Error fetching shopping lists: $e");
-      return null;
+      return [];
     }
   }
 
@@ -113,4 +127,5 @@ class FirebaseShoppingListManager {
       rethrow;
     }
   }
+
 }

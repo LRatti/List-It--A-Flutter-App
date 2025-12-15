@@ -120,9 +120,9 @@ class FirebaseSupermarketManager {
     try {
       QuerySnapshot<Map<String, dynamic>> querySnapshot = await _supermarkets.get();
       // Fetch all supermarkets in parallel
-      List<Supermarket> supermarkets = await Future.wait(
-        querySnapshot.docs.map((doc) => getSupermarketById(doc.id).then((supermarket) => supermarket ?? Supermarket(id: doc.id, categories: [])))
-      );
+      List<Supermarket> supermarkets = (await Future.wait(
+        querySnapshot.docs.map((doc) => getSupermarketById(doc.id))
+      )).whereType<Supermarket>().toList();
       return supermarkets;
     } catch (e) {
       AppLogger.error('Error fetching supermarkets', error: e);
@@ -134,20 +134,5 @@ class FirebaseSupermarketManager {
     List<Supermarket> allSupermarkets = await getAllSupermarkets();
     return allSupermarkets.where((supermarket) => supermarket.isVisible).toList();
   }
-
-  // Future<void> deleteSupermarket(String id) async {
-  //   // Code to delete a supermarket from the database
-  //   try {
-  //     await _supermarkets.doc(id).delete();
-  //     AppLogger.info('Supermarket deleted successfully', data: {'id': id});
-  //   } catch (error, stackTrace) {
-  //     AppLogger.error(
-  //       'Failed to delete supermarket',
-  //       error: error,
-  //       stackTrace: stackTrace,
-  //       data: {'id': id},
-  //     );
-  //   }
-  // }
 
 }
