@@ -76,7 +76,7 @@ class ManagePurchasedProduct {
     final db = await DatabaseHelper.database;
 
     await ManageProduct.updateProduct(item.product);
-    await ManageCategory.addCategory(item.category);
+    await ManageCategory.updateCategory(item.category);
 
     await db.update(
       'purchased_product',

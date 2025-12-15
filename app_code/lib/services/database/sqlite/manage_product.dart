@@ -4,36 +4,36 @@ import 'package:app_code/services/database/sqlite/database_helper.dart';
 
 class ManageProduct {
   static Future<void> addProduct(Product product) async {
-  final db = await DatabaseHelper.database;
-
-  await db.insert(
-    'product',
-    product.toDatabase(),
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
-
-  for (final entry in product.associations.entries) {
-    final supermarketId = entry.key;
-    final categoryId = entry.value;
-
-    if (supermarketId.isEmpty || categoryId.isEmpty) {
-      throw Exception(
-        'Invalid association for product ${product.id}: '
-        'supermarketId=$supermarketId, categoryId=$categoryId',
-      );
-    }
+    final db = await DatabaseHelper.database;
 
     await db.insert(
-      'associations',
-      {
-        'product_id': product.id,
-        'supermarket_id': supermarketId,
-        'category_id': categoryId,
-      },
+      'product',
+      product.toDatabase(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
+    for (final entry in product.associations.entries) {
+      final supermarketId = entry.key;
+      final categoryId = entry.value;
+
+      if (supermarketId.isEmpty || categoryId.isEmpty) {
+        throw Exception(
+          'Invalid association for product ${product.id}: '
+          'supermarketId=$supermarketId, categoryId=$categoryId',
+        );
+      }
+
+      await db.insert(
+        'associations',
+        {
+          'product_id': product.id,
+          'supermarket_id': supermarketId,
+          'category_id': categoryId,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
   }
-}
 
   static Future<void> updateProduct(Product product) async {
     final db = await DatabaseHelper.database;
@@ -76,20 +76,20 @@ class ManageProduct {
   }
 
   static Future<void> deleteProduct(String id) async {
-  final db = await DatabaseHelper.database;
+    final db = await DatabaseHelper.database;
 
-  await db.delete(
-    'associations',
-    where: 'product_id = ?',
-    whereArgs: [id],
-  );
+    await db.delete(
+      'associations',
+      where: 'product_id = ?',
+      whereArgs: [id],
+    );
 
-  await db.delete(
-    'product',
-    where: 'id = ?',
-    whereArgs: [id],
-  );
-}
+    await db.delete(
+      'product',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 
   static Future<Product?> getProductById(String id) async {
     final db = await DatabaseHelper.database;
