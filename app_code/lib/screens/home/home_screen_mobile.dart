@@ -6,7 +6,7 @@ import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/services/database/sqlite/manage_shopping_list.dart';
 import 'package:app_code/widgets/shopping_list_widget.dart';
 
-void main() async{
+void main() async {
   runApp(const MyApp());
 }
 
@@ -32,13 +32,16 @@ class MobileHomeListPage extends StatefulWidget {
 class _MobileHomeListPageState extends State<MobileHomeListPage> {
   List<ShoppingList> _shoppingLists = [];
 
+  // Index of currently selected bottom navigation item
+  int _selectedIndex = 0;
+
   @override
   void initState() {
     super.initState();
     _loadShoppingLists();
   }
 
-  /// Loads all shopping lists from database.
+  /// Loads all shopping lists from database
   Future<void> _loadShoppingLists() async {
     final shoppingLists = await ManageShoppingList.getAllShoppingLists();
     setState(() {
@@ -46,77 +49,50 @@ class _MobileHomeListPageState extends State<MobileHomeListPage> {
     });
   }
 
-  /// Creates a new empty shopping list
+  /// Creates a new shopping list with mock products
   Future<void> _addShoppingList(String title) async {
     if (title.trim().isEmpty) return;
-    //TODO: delete testing mock data
-    
+
     final List<PurchasedProduct> productsList = [
       PurchasedProduct(
         listId: title,
-        product: Product(
-          id: 'p1',
-          name: 'Potatoes',
-        ),
-        category: Category(
-          id: 'c1',
-          name: 'Vegetables',
-        ),
+        product: Product(id: 'p1', name: 'Potatoes'),
+        category: Category(id: 'c1', name: 'Vegetables'),
         price: 1.50,
         quantity: 2,
       ),
       PurchasedProduct(
         listId: title,
-        product: Product(
-          id: 'p2',
-          name: 'Tomatoes',
-        ),
-        category: Category(
-          id: 'c1',
-          name: 'Vegetables',
-        ),
+        product: Product(id: 'p2', name: 'Tomatoes'),
+        category: Category(id: 'c1', name: 'Vegetables'),
         price: 2.30,
         quantity: 1,
       ),
       PurchasedProduct(
         listId: title,
-        product: Product(
-          id: 'p3',
-          name: 'Milk',
-        ),
-        category: Category(
-          id: 'c2',
-          name: 'Dairy',
-        ),
+        product: Product(id: 'p3', name: 'Milk'),
+        category: Category(id: 'c2', name: 'Dairy'),
         price: 1.20,
         quantity: 1,
       ),
       PurchasedProduct(
         listId: title,
-        product: Product(
-          id: 'p4',
-          name: 'Bread',
-        ),
-        category: Category(
-          id: 'c3',
-          name: 'Bakery',
-        ),
+        product: Product(id: 'p4', name: 'Bread'),
+        category: Category(id: 'c3', name: 'Bakery'),
         price: 0.90,
         quantity: 1,
       ),
     ];
 
-
     final shoppingList = ShoppingList(
       id: title,
       name: title,
       createdAt: DateTime.now(),
-      products: productsList
+      products: productsList,
     );
 
     await ManageShoppingList.addShoppingList(shoppingList);
 
-    // Reload to keep DB and UI in sync
     await _loadShoppingLists();
   }
 
@@ -131,9 +107,7 @@ class _MobileHomeListPageState extends State<MobileHomeListPage> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("List '${shoppingList.getName()}' deleted."),
-      ),
+      SnackBar(content: Text("List '${shoppingList.getName()}' deleted.")),
     );
   }
 
@@ -152,10 +126,7 @@ class _MobileHomeListPageState extends State<MobileHomeListPage> {
           autofocus: true,
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
           TextButton(
             onPressed: () async {
               if (controller.text.trim().isNotEmpty) {
@@ -172,24 +143,19 @@ class _MobileHomeListPageState extends State<MobileHomeListPage> {
     );
   }
 
-  /// Opens list detail page and reloads data when returning
+  /// Opens shopping list detail (mock for now)
   Future<void> _openShoppingListDetail(ShoppingList shoppingList) async {
-    // TODO: Replace with real detail page
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Text(shoppingList.getName()),
         content: const Text("Shopping list detail here"),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Close"),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Close")),
         ],
       ),
     );
 
-    // Reload lists to refresh preview after modifications
     await _loadShoppingLists();
   }
 
@@ -207,10 +173,7 @@ class _MobileHomeListPageState extends State<MobileHomeListPage> {
           autofocus: true,
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
           ElevatedButton(
             onPressed: () {
               _addShoppingList(controller.text);
@@ -223,40 +186,103 @@ class _MobileHomeListPageState extends State<MobileHomeListPage> {
     );
   }
 
+  /// Handles bottom navigation item tap
+  void _onBottomNavTap(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  /// Returns the content widget for the selected tab
+  Widget _getSelectedTabContent() {
+    switch (_selectedIndex) {
+      case 0: // Lists
+        return _shoppingLists.isEmpty
+            ? const Center(
+                child: Text(
+                  "No lists yet.\nTap + to create one.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+              )
+            : GridView.builder(
+                padding: const EdgeInsets.all(8),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: _shoppingLists.length,
+                itemBuilder: (context, index) {
+                  final shoppingList = _shoppingLists[index];
+                  return ShoppingListCard(
+                    shoppingList: shoppingList,
+                    onTap: () => _openShoppingListDetail(shoppingList),
+                    onEdit: () => _editShoppingListTitle(index),
+                    onDelete: () => _deleteShoppingList(index),
+                  );
+                },
+              );
+      case 1:
+        return const Center(child: Text("History - mock screen"));
+      case 2:
+        return const Center(child: Text("Supermarkets - mock screen"));
+      case 3:
+        return const Center(child: Text("Statistics - mock screen"));
+      default:
+        return const Center(child: Text("Unknown tab"));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddShoppingListDialog,
-        child: const Icon(Icons.add),
+      appBar: AppBar(
+        title: const Text("My Shopping App"),
+        actions: [
+          IconButton(onPressed: () {}, icon: const Icon(Icons.settings)), // Settings button
+          IconButton(onPressed: () {}, icon: const Icon(Icons.person)),   // Profile button
+        ],
       ),
-      body: _shoppingLists.isEmpty
-          ? const Center(
-              child: Text(
-                "No lists yet.\nTap + to create one.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 16),
-              ),
-            )
-          : GridView.builder(
-              padding: const EdgeInsets.all(8),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 0.8,
-              ),
-              itemCount: _shoppingLists.length,
-              itemBuilder: (context, index) {
-                final shoppingList = _shoppingLists[index];
-                return ShoppingListCard(
-                  shoppingList: shoppingList,
-                  onTap: () => _openShoppingListDetail(shoppingList),
-                  onEdit: () => _editShoppingListTitle(index),
-                  onDelete: () => _deleteShoppingList(index),
-                );
-              },
+      body: Column(
+        children: [
+          // Top space for nearest supermarket link
+          Container(
+            width: double.infinity,
+            color: Colors.grey[200],
+            padding: const EdgeInsets.all(12),
+            child: const Text(
+              "Nearest supermarket: internet not available",
+              style: TextStyle(fontSize: 16),
             ),
+          ),
+          // Expanded area for selected tab content
+          Expanded(child: _getSelectedTabContent()),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onBottomNavTap,
+        backgroundColor: Colors.white, // Background color of the bar
+        selectedItemColor: Colors.blue, // Color of selected item
+        unselectedItemColor: Colors.grey, // Color of unselected items
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed, // Ensures all labels are shown
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Lists"),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: "History"),
+          BottomNavigationBarItem(icon: Icon(Icons.store), label: "Supermarkets"),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Statistics"),
+        ],
+      ),
+
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: _showAddShoppingListDialog,
+              child: const Icon(Icons.add),
+            )
+          : null, // Only show FAB on Lists tab
     );
   }
 }
