@@ -1,39 +1,26 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:app_code/utils/helper.dart';
 
 class User {
 
-  final String id;
-  String? _providerId;
-  final String? email;
-  String? _password;
+  String? uid;
+  final bool isAnonymous;
+  String? email;
   String? _userName;
 
   User({
-    String? id, 
-    providerId, 
-    required this.email, 
-    password, 
-    userName
-  }): _providerId = providerId,
-      _password = password,
+    String? uid,
+    this.isAnonymous = false,
+    this.email, 
+    String? userName, 
+  }): 
       _userName = userName,
-      this.id = id ?? Helper.generateId();
-
-  String getProviderId() {
-    return _providerId ?? '';
+      uid = uid ?? Helper.generateId() {
+    this.uid = uid;
   }
-
-  String getPassword() {
-    return _password ?? '';
-  }
-
+      
   String getUserName() {
     return _userName ?? '';
-  }
-
-  int setPassword(String password) {
-    this._password = password;
-    return 1;
   }
 
   int setUserName(String userName) {
@@ -41,24 +28,37 @@ class User {
     return 1;
   }
 
-  factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromDatabase(DocumentSnapshot<Map<String, dynamic>> json) {
     return User(
-      id: json['id'],
-      providerId: json['provider_id'],
+      uid: json.id,
       email: json['email'],
-      password: json['password'],
+      userName: json['user_name'],
+    );
+  }
+
+  Map<String, dynamic> toDatabase() {
+    return {
+      'id': uid,
+      'email': email,
+      'user_name': _userName,
+    };
+  }
+
+  factory User.fromJson(DocumentSnapshot<Map<String, dynamic>> json) {
+    return User(
+      uid: json.id,
+      isAnonymous: json['is_anonymous'] ?? false,
+      email: json['email'],
       userName: json['user_name'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'provider_id': _providerId,
+      'id': uid,
+      'is_anonymous': isAnonymous,
       'email': email,
-      'password': _password,
       'user_name': _userName,
     };
   }
-
 }

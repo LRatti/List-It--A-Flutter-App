@@ -8,15 +8,16 @@ class Supermarket {
   final String id;
   String _name;
   List<Category> _categories;
+  bool isVisible;
   
   Supermarket({
     String? id,
-    //TODO: add default name
-    name = 'Supermarket', 
-    required categories,
-  }) :  _categories = categories,
-        _name = name,
-        this.id = id ?? Helper.generateId();
+    name = 'Default Supermarket', 
+    List<Category>? categories,
+    this.isVisible = true,
+  }) :  this.id = id ?? Helper.generateId(),
+        _categories = categories ?? [],
+        _name = name;
 
   String getName() {
     return _name;
@@ -30,22 +31,43 @@ class Supermarket {
     _name = name;
   }
 
-  void modifyCategories(List<Category> categories) {
+  void setVisibility(bool visibility) {
+    isVisible = visibility;
+  }
+
+  void setCategories(List<Category> categories) {
     this._categories = categories;
   }
 
   void addCategory(Category category){
       _categories.add(category);
   }
+
+  factory Supermarket.fromDatabase(Map<String, dynamic> json) {
+    return Supermarket(
+      id: json['id'],
+      name: json['name'] ?? 'Supermarket',
+      isVisible: json['is_visible'],
+    );
+  }
+
+  Map<String, dynamic> toDatabase() {
+    return {
+      'id': id,
+      'name': _name,
+      'categoryIds': _categories.map((cat) => cat.id).toList(),
+      'is_visible': isVisible,
+    };
+  }
   
   factory Supermarket.fromJson(Map<String, dynamic> json) {
     return Supermarket(
       id: json['id'],
-      name: json['name'] ?? '',
+      name: json['name'] ?? 'Supermarket',
       categories: (json['categories'] as List<dynamic>?)
-              ?.map((item) => Category.fromJson(item))
-              .toList() ??
-          [],
+          ?.map((item) => Category.fromJson(item))
+          .toList() ?? [],
+      isVisible: json['is_visible'],
     );
   }
 
@@ -53,7 +75,8 @@ class Supermarket {
     return {
       'id': id,
       'name': _name,
-      'categories': _categories.map((category) => category.toJson()).toList(),
+      'categories': _categories.map((cat) => cat.toJson()).toList(),
+      'is_visible': isVisible,
     };
   }
 }

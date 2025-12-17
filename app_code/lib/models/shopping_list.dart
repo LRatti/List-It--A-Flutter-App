@@ -1,8 +1,6 @@
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/supermarket.dart';
-import 'package:flutter/foundation.dart' hide Category;
-import 'package:flutter/material.dart';
 import 'package:app_code/utils/helper.dart';
 import 'package:app_code/models/category.dart';
 
@@ -10,10 +8,10 @@ class ShoppingList {
  
   final String id;
   String _name;
-  final DateTime createdAt;
+  final DateTime? createdAt;
   Supermarket _supermarket;
   double? _totalPrice;
-  Image? image;
+  String? image;
   List<PurchasedProduct>? products;
   bool _isRegistered = false;
 
@@ -36,7 +34,7 @@ class ShoppingList {
     return this._name;
   }
 
-  DateTime getCreatedAt() {
+  DateTime? getCreatedAt() {
     return createdAt;
   }
 
@@ -56,18 +54,40 @@ class ShoppingList {
     return _isRegistered;
   }
 
+  factory ShoppingList.fromDatabase(Map<String, dynamic> json) {
+    return ShoppingList(
+      id: json['id'],
+      name: json['name'],
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      totalPrice: json['total_price'],
+      image: json['image'],
+      isRegistered: json['is_registered'] == 1,
+    );
+  }
+
+  Map<String, dynamic> toDatabase() {
+    return {
+      'id': id,
+      'name': _name,
+      'created_at': createdAt?.toIso8601String(),
+      'supermarket_id': _supermarket.id,
+      'total_price': _totalPrice,
+      'image': image,
+      'is_registered': _isRegistered ? 1 : 0,
+    };
+  }
+
   factory ShoppingList.fromJson(Map<String, dynamic> json) {
     return ShoppingList(
       id: json['id'],
       name: json['name'],
-      //WARN: can be null from import check date.
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
-      supermarket: json['supermarket'] != null
-          ? Supermarket.fromJson(json['supermarket'])
-          : null,
       totalPrice: json['total_price'],
+      image: json['image'],
+      products: (json['products'] as List<dynamic>?)
+          ?.map((item) => PurchasedProduct.fromJson(item))
+          .toList(),
       isRegistered: json['is_registered'] == 1,
-      // image and products deserialization can be added here if needed
     );
   }
 
@@ -78,21 +98,27 @@ class ShoppingList {
       'created_at': createdAt?.toIso8601String(),
       'supermarket_id': _supermarket.id,
       'total_price': _totalPrice,
+      'image': image,
+      'products': products?.map((product) => product.toDatabase()).toList(),
       'is_registered': _isRegistered ? 1 : 0,
-      // image and products serialization can be added here if needed
     };
   }
 
-  void addProduct(Product product) {
+  void addProduct(Product product, Category category) {
     PurchasedProduct purchasedProduct = PurchasedProduct(
       id: product.id,
       price: 0.0,
       quantity: 1,
+      category: category,
       product: product, 
       listId: id,
     );
     products ??= [];
     products!.add(purchasedProduct);
+  }
+
+  void setPurchasedProducts(List<PurchasedProduct> products) {
+    this.products = products;
   }
 
   void removeProduct(PurchasedProduct product) {
@@ -101,6 +127,10 @@ class ShoppingList {
 
   void removeProductById(String productId) {
     products?.removeWhere((product) => product.id == productId);
+  }
+
+  void removeAllProducts() {
+    products?.clear();
   }
   
   void setName(String newName) {
@@ -116,10 +146,12 @@ class ShoppingList {
   }
 
   void computeTotalPrice() {
-    _totalPrice = products?.fold(0, (sum, product) => sum! + (product.getTotalPrice())) ?? 0.0;
+    // _totalPrice = products?.fold(0, (sum, product) => sum! + (product.getTotalPrice())) ?? 0.0;
+    _totalPrice = products?.fold(0, (sum, product) => sum! + (product.price)) ?? 0.0;
+
   } 
 
-  void setImage(Image image) {
+  void setImage(String image) {
     this.image = image;
   }
 
@@ -138,7 +170,8 @@ class ShoppingList {
 
     return Supermarket(
       id: 'default',
-      name: 'Default Supermarket', categories: categories,
+      name: 'Default Supermarket', 
+      categories: categories,
     );
   }
 }
