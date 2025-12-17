@@ -54,7 +54,7 @@ class _MobileHomeListPageState extends State<MobileHomeListPage> {
 
   Future<void> _deleteShoppingList(int index) async {
     final shoppingList = _shoppingLists[index];
-    if (shoppingList.id != null) await ManageShoppingList.deleteShoppingList(shoppingList);
+    await ManageShoppingList.deleteShoppingList(shoppingList);
     setState(() => _shoppingLists.removeAt(index));
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text("Note '${shoppingList.getName()}' deleted.")));
