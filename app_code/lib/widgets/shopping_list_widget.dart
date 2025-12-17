@@ -1,5 +1,5 @@
-import 'package:app_code/models/shopping_list.dart';
 import 'package:flutter/material.dart';
+import 'package:app_code/models/shopping_list.dart';
 
 class ShoppingListCard extends StatelessWidget {
   final ShoppingList shoppingList;
@@ -17,6 +17,12 @@ class ShoppingListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get all purchased products of the list
+    final products = shoppingList.getProducts();
+
+    // Limit preview to max 3 products
+    final previewProducts = products.take(3).toList();
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -25,18 +31,18 @@ class ShoppingListCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.yellow[100],
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black,
+              color: Colors.black26,
               blurRadius: 4,
-              offset: const Offset(2, 2),
+              offset: Offset(2, 2),
             )
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Titolo della nota
+            // List title
             Text(
               shoppingList.getName(),
               style: const TextStyle(
@@ -46,31 +52,54 @@ class ShoppingListCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
+
             const SizedBox(height: 8),
-            // Contenuto della nota (anteprima)
-            Text(
-              shoppingList.getName().isEmpty ? "No content yet..." : shoppingList.getName(),
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-            // Bottoni
+
+            // Products preview (only if list is not empty)
+            if (products.isNotEmpty) ...[
+              ...previewProducts.map(
+              (purchasedProduct) {
+                return Text(
+                "• ${purchasedProduct.product.getName()}",
+                style: const TextStyle(fontSize: 14),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                );
+              },
+              ),
+
+              // Show "+N more" if there are additional products
+              if (products.length > previewProducts.length)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    "+${products.length - previewProducts.length} more",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
+            ],
+
+            const Spacer(),
+
+            // Action buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: onEdit,
                   iconSize: 20,
+                  onPressed: onEdit,
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: onDelete,
                   iconSize: 20,
+                  onPressed: onDelete,
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

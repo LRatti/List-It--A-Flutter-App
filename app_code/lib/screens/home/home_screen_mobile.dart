@@ -1,7 +1,10 @@
-import 'package:app_code/models/shopping_list.dart';
-import 'package:app_code/widgets/shopping_list.dart';
+import 'package:app_code/models/category.dart';
+import 'package:app_code/models/product.dart';
+import 'package:app_code/models/purchased_product.dart';
 import 'package:flutter/material.dart';
+import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/services/database/sqlite/manage_shopping_list.dart';
+import 'package:app_code/widgets/shopping_list_widget.dart';
 
 void main() async{
   runApp(const MyApp());
@@ -35,51 +38,130 @@ class _MobileHomeListPageState extends State<MobileHomeListPage> {
     _loadShoppingLists();
   }
 
+  /// Loads all shopping lists from database.
   Future<void> _loadShoppingLists() async {
     final shoppingLists = await ManageShoppingList.getAllShoppingLists();
-    setState(() => _shoppingLists = shoppingLists);
+    setState(() {
+      _shoppingLists = shoppingLists;
+    });
   }
 
+  /// Creates a new empty shopping list
   Future<void> _addShoppingList(String title) async {
-    if (title.isEmpty) return;
-    ShoppingList shoppingList = ShoppingList(
+    if (title.trim().isEmpty) return;
+    //TODO: delete testing mock data
+    
+    final List<PurchasedProduct> productsList = [
+      PurchasedProduct(
+        listId: title,
+        product: Product(
+          id: 'p1',
+          name: 'Potatoes',
+        ),
+        category: Category(
+          id: 'c1',
+          name: 'Vegetables',
+        ),
+        price: 1.50,
+        quantity: 2,
+      ),
+      PurchasedProduct(
+        listId: title,
+        product: Product(
+          id: 'p2',
+          name: 'Tomatoes',
+        ),
+        category: Category(
+          id: 'c1',
+          name: 'Vegetables',
+        ),
+        price: 2.30,
+        quantity: 1,
+      ),
+      PurchasedProduct(
+        listId: title,
+        product: Product(
+          id: 'p3',
+          name: 'Milk',
+        ),
+        category: Category(
+          id: 'c2',
+          name: 'Dairy',
+        ),
+        price: 1.20,
+        quantity: 1,
+      ),
+      PurchasedProduct(
+        listId: title,
+        product: Product(
+          id: 'p4',
+          name: 'Bread',
+        ),
+        category: Category(
+          id: 'c3',
+          name: 'Bakery',
+        ),
+        price: 0.90,
+        quantity: 1,
+      ),
+    ];
+
+
+    final shoppingList = ShoppingList(
+      id: title,
       name: title,
       createdAt: DateTime.now(),
+      products: productsList
     );
 
     await ManageShoppingList.addShoppingList(shoppingList);
-    
-    setState(() => _shoppingLists.insert(0, shoppingList));
+
+    // Reload to keep DB and UI in sync
+    await _loadShoppingLists();
   }
 
+  /// Deletes a shopping list
   Future<void> _deleteShoppingList(int index) async {
     final shoppingList = _shoppingLists[index];
+
     await ManageShoppingList.deleteShoppingList(shoppingList);
-    setState(() => _shoppingLists.removeAt(index));
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Note '${shoppingList.getName()}' deleted.")));
+
+    setState(() {
+      _shoppingLists.removeAt(index);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("List '${shoppingList.getName()}' deleted."),
+      ),
+    );
   }
 
+  /// Edits shopping list title
   Future<void> _editShoppingListTitle(int index) async {
     final shoppingList = _shoppingLists[index];
-    TextEditingController controller = TextEditingController(text: shoppingList.getName());
+    final controller = TextEditingController(text: shoppingList.getName());
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Edit note title"),
+        title: const Text("Edit list title"),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: "Note title"),
+          decoration: const InputDecoration(hintText: "List title"),
+          autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
           TextButton(
             onPressed: () async {
-              if (controller.text.isNotEmpty) {
-                shoppingList.setName(controller.text);
+              if (controller.text.trim().isNotEmpty) {
+                shoppingList.setName(controller.text.trim());
                 await ManageShoppingList.updateShoppingList(shoppingList);
-                setState(() {});
+                await _loadShoppingLists();
               }
               Navigator.pop(context);
             },
@@ -90,36 +172,45 @@ class _MobileHomeListPageState extends State<MobileHomeListPage> {
     );
   }
 
-  void _openShoppingListDetail(ShoppingList shoppingList) {
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: Text(shoppingList.getName()),
-      content: const Text("Details here..."),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("Close"),
-        )
-      ],
-    ),
-  );
-}
+  /// Opens list detail page and reloads data when returning
+  Future<void> _openShoppingListDetail(ShoppingList shoppingList) async {
+    // TODO: Replace with real detail page
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(shoppingList.getName()),
+        content: const Text("Shopping list detail here"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Close"),
+          ),
+        ],
+      ),
+    );
 
+    // Reload lists to refresh preview after modifications
+    await _loadShoppingLists();
+  }
+
+  /// Shows dialog to create a new list
   void _showAddShoppingListDialog() {
-    TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Add New Note"),
+        title: const Text("Add new list"),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: "Enter note title"),
+          decoration: const InputDecoration(hintText: "List name"),
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
           ElevatedButton(
             onPressed: () {
               _addShoppingList(controller.text);
@@ -142,9 +233,9 @@ class _MobileHomeListPageState extends State<MobileHomeListPage> {
       body: _shoppingLists.isEmpty
           ? const Center(
               child: Text(
-                "No Lists added yet. Tap '+' to add one!",
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                "No lists yet.\nTap + to create one.",
                 textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
             )
           : GridView.builder(
