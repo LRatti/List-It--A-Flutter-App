@@ -24,10 +24,8 @@ class ShoppingList {
       this.image,
       this.products,
       isRegistered = false,
-      isRegistered = false,
   }) :  _name = name,
         _totalPrice = totalPrice,
-        _supermarket = supermarket ?? _getDefaultSupermarket(),
         _supermarket = supermarket ?? _getDefaultSupermarket(),
         _isRegistered = isRegistered,
         this.id = id ?? Helper.generateId();
