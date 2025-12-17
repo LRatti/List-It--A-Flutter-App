@@ -11,6 +11,14 @@ class ManageShoppingList {
       'shopping_list', 
       list.toDatabase(),
       conflictAlgorithm: ConflictAlgorithm.replace);
+
+    // Add products linked to this list, if any
+    final products = list.getProducts();
+    if (products.isNotEmpty) {
+      for (final item in products) {
+        await ManagePurchasedProduct.addPurchasedProduct(item);
+      }
+    }
   }
 
   static Future<ShoppingList?> getShoppingListById(String id) async {
@@ -81,5 +89,20 @@ class ManageShoppingList {
       where: 'id = ?',
       whereArgs: [list.id],
     );
+
+    // Sync products for this list: update existing and add new
+    final products = list.getProducts();
+    if (products.isNotEmpty) {
+      final existing = await ManagePurchasedProduct.getPurchasedProductsByList(list.id);
+      final existingIds = existing.map((pp) => pp.id).toSet();
+
+      for (final item in products) {
+        if (existingIds.contains(item.id)) {
+          await ManagePurchasedProduct.updatePurchasedProduct(item);
+        } else {
+          await ManagePurchasedProduct.addPurchasedProduct(item);
+        }
+      }
+    }
   }
 }
