@@ -1,33 +1,73 @@
-import 'package:app_code/models/shopping_list.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
+import 'package:app_code/services/database/sqlite/manage_purchased_product.dart';
+import 'package:app_code/services/database/sqlite/manage_supermarket.dart';
 
 class ManageShoppingList {
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-
   static Future<void> addShoppingList(ShoppingList list) async {
     final db = await DatabaseHelper.database;
-
     await db.insert(
-      'shopping_list',
-      list.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+      'shopping_list', 
+      list.toDatabase(),
+      conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<ShoppingList?> getShoppingListById(String id) async {
+    final db = await DatabaseHelper.database;
+
+    final rows =
+        await db.query('shopping_list', where: 'id = ?', whereArgs: [id]);
+    if (rows.isEmpty) return null;
+
+    final list = ShoppingList.fromDatabase(rows.first);
+
+    final supermarket =
+        await ManageSupermarket.getSupermarketById(rows.first['supermarket_id'] as String);
+    if (supermarket != null) list.setSupermarket(supermarket);
+
+    final products =
+        await ManagePurchasedProduct.getPurchasedProductsByList(id);
+    list.setPurchasedProducts(products);
+
+    return list;
+  }
+
+  static Future<List<ShoppingList>> getAllShoppingLists() async {
+    final db = await DatabaseHelper.database;
+    final rows = await db.query('shopping_list');
+
+    List<ShoppingList> result = [];
+
+    for (final row in rows) {
+      final list = ShoppingList.fromDatabase(row);
+
+      final supermarket = await ManageSupermarket.getSupermarketById(
+          row['supermarket_id'] as String);
+      if (supermarket != null) list.setSupermarket(supermarket);
+
+      final products =
+          await ManagePurchasedProduct.getPurchasedProductsByList(list.id);
+      list.setPurchasedProducts(products);
+
+      result.add(list);
+    }
+
+    return result;
   }
 
   static Future<void> deleteShoppingList(ShoppingList list) async {
     final db = await DatabaseHelper.database;
 
     await db.delete(
-      'shopping_list',
-      where: 'id = ?',
+      'purchased_product',
+      where: 'list_id = ?',
       whereArgs: [list.id],
     );
 
-    // delete purchased products related to list
     await db.delete(
-      'purchased_product',
-      where: 'list_id = ?',
+      'shopping_list',
+      where: 'id = ?',
       whereArgs: [list.id],
     );
   }
@@ -37,31 +77,9 @@ class ManageShoppingList {
 
     await db.update(
       'shopping_list',
-      list.toJson(),
+      list.toDatabase(),
       where: 'id = ?',
       whereArgs: [list.id],
     );
-  }
-
-  static Future<List<ShoppingList>> getAllShoppingLists() async {
-    final db = await DatabaseHelper.database;
-
-    final List<Map<String, dynamic>> maps =
-        await db.query('shopping_list');
-
-    return maps.map((json) => ShoppingList.fromJson(json)).toList();
-  }
-
-  static Future<ShoppingList?> getShoppingListById(String id) async {
-    final db = await DatabaseHelper.database;
-
-    final List<Map<String, dynamic>> maps = await db.query(
-      'shopping_list',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-
-    if (maps.isEmpty) return null;
-    return ShoppingList.fromJson(maps.first);
   }
 }
