@@ -1,8 +1,7 @@
 import 'package:uuid/uuid.dart';
 
-class Helper{
+class Helper {
   static String generateId() {
-    final uuid = Uuid();
-    return uuid.v4();
+    return const Uuid().v4();
   }
 }

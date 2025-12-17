@@ -24,8 +24,10 @@ class ShoppingList {
       this.image,
       this.products,
       isRegistered = false,
+      isRegistered = false,
   }) :  _name = name,
         _totalPrice = totalPrice,
+        _supermarket = supermarket ?? _getDefaultSupermarket(),
         _supermarket = supermarket ?? _getDefaultSupermarket(),
         _isRegistered = isRegistered,
         this.id = id ?? Helper.generateId();
@@ -95,6 +97,8 @@ class ShoppingList {
     return {
       'id': id,
       'name': _name,
+      'created_at': createdAt?.toIso8601String(),
+      'supermarket_id': _supermarket.id,
       'created_at': createdAt?.toIso8601String(),
       'supermarket_id': _supermarket.id,
       'total_price': _totalPrice,
