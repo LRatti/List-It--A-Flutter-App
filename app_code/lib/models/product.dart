@@ -1,47 +1,80 @@
 import 'package:app_code/utils/helper.dart';
 
 class Product {
-
-  final String id; 
+  final String id;
   String _name;
-  int? categoryId;
+  Map<String, String> associations;
+  bool isVisible;
 
   Product({
-    String?id,
-    required name, 
-    this.categoryId, 
-  }): this._name = name,
-      this.id = id ?? Helper.generateId();
- 
-  String getName() {
-    return this._name;
-  }
+    String? id,
+    required String name,
+    List<String>? categoryIds,
+    Map<String, String>? associations,
+    bool isVisible = true,
+  })  : id = id ?? Helper.generateId(),
+        _name = name,
+        associations = associations ?? {},
+        isVisible = isVisible;
 
-  int getCategoryId() {
-    return categoryId ?? 0;
+  String getName() {
+    return _name;
   }
 
   void setName(String name) {
-    this._name = name;
+    _name = name;
   }
 
-  void setCategoryId(int categoryId) {
-    this.categoryId = categoryId;
+  void setAssociations(Map<String, String> associations) {
+    this.associations = associations;
+  }
+
+  void setVisibility(bool visibility) {
+    isVisible = visibility;
+  }
+
+  void addAssociation(String supermarketId, String categoryId) {
+    associations[supermarketId] = categoryId;
+  }
+
+  factory Product.fromDatabase(
+    Map<String, dynamic> json, {
+    List<String>? categoryIds,
+    Map<String, String>? associations,
+  }) {
+    return Product(
+      id: json['id'],
+      name: json['name'],
+      isVisible: (json['is_visible'] ?? 1) == 1,
+      categoryIds: categoryIds,
+      associations: associations,
+    );
+  }
+
+  Map<String, dynamic> toDatabase() {
+    return {
+      'id': id,
+      'name': _name,
+      'is_visible': isVisible ? 1 : 0,
+    };
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'],
       name: json['name'],
-      categoryId: json['category_id'],
+      categoryIds: List<String>.from(json['categoryIds'] ?? []),
+      associations: Map<String, String>.from(json['associations'] ?? {}),
+      isVisible: json['isVisible'] ?? true,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id, 
+      'id': id,
       'name': _name,
-      'category_id': categoryId,
+      'associations': associations,
+      'isVisible': isVisible,
     };
   }
 }
