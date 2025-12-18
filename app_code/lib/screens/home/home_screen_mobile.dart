@@ -5,7 +5,7 @@ import 'package:app_code/screens/home/supermarkets_screen_mobile.dart';
 import 'package:app_code/screens/home/history_screen_mobile.dart';
 import 'package:app_code/screens/home/statistics_screen_mobile.dart';
 import 'package:app_code/controllers/lists_controller.dart';
-import 'package:app_code/repositories_impl/real_app/shopping_list_repository_sqlite.dart';
+import 'package:app_code/repositories/real_app/shopping_list_repository_sqlite.dart';
 
 class MobileHomePage extends StatefulWidget {
   final ListsController? listsController;

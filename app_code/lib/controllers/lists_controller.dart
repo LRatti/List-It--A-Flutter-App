@@ -1,5 +1,5 @@
 import 'package:app_code/models/shopping_list.dart';
-import 'package:app_code/repositories/shopping_list_repository.dart';
+import 'package:app_code/repositories/abstract/shopping_list_repository.dart';
 
 class ListsController {
   final ShoppingListRepository repository;

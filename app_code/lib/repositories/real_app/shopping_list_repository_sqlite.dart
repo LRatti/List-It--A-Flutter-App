@@ -1,5 +1,5 @@
 import 'package:app_code/models/shopping_list.dart';
-import 'package:app_code/repositories/shopping_list_repository.dart';
+import 'package:app_code/repositories/abstract/shopping_list_repository.dart';
 import 'package:app_code/services/database/sqlite/manage_shopping_list.dart';
 
 //TODO: the class will call the methods in database_manager instead of SQlite
