@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
 import 'package:app_code/controllers/lists_controller.dart';
-import '../../../lib/repositories_impl/test/in_memory_shopping_list_repository.dart';
+import 'package:app_code/repositories/test/in_memory_shopping_list_repository.dart';
 
 void main() {
   testWidgets('HomePage switches tabs correctly', (tester) async {

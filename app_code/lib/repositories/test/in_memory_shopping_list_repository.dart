@@ -1,5 +1,5 @@
 import 'package:app_code/models/shopping_list.dart';
-import 'package:app_code/repositories/shopping_list_repository.dart';
+import 'package:app_code/repositories/abstract/shopping_list_repository.dart';
 
 /// In-memory implementation used only for widget tests.
 /// It behaves like a real repository but without persistence.
