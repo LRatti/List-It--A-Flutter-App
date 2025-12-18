@@ -1,140 +1,82 @@
-import 'package:app_code/models/shopping_list.dart';
 import 'package:flutter/material.dart';
+import 'package:app_code/widgets/top_bar_with_navbar.dart';
+import 'package:app_code/screens/home/lists_screen_mobile.dart';
+import 'package:app_code/screens/home/supermarkets_screen_mobile.dart';
+import 'package:app_code/screens/home/history_screen_mobile.dart';
+import 'package:app_code/screens/home/statistics_screen_mobile.dart';
+import 'package:app_code/controllers/lists_controller.dart';
+import 'package:app_code/repositories/real_app/shopping_list_repository_sqlite.dart';
 
-class MobileHomeListPage extends StatefulWidget {
-  const MobileHomeListPage({super.key});
+class MobileHomePage extends StatefulWidget {
+  final ListsController? listsController;
+
+  const MobileHomePage({super.key, this.listsController});
 
   @override
-  State<MobileHomeListPage> createState() => _MobileHomeListPageState();
+  State<MobileHomePage> createState() => _MobileHomePageState();
 }
 
-class _MobileHomeListPageState extends State<MobileHomeListPage> {
-  List<ShoppingList> _shoppingLists = [];
+class _MobileHomePageState extends State<MobileHomePage> {
+  int _selectedIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadShoppingLists();
+  /// Create a single controller instance with real repository (if not injected)
+  late final ListsController _listsController = widget.listsController ?? ListsController(ShoppingListRepositorySqlite());
+
+  /// Return the selected tab widget
+  Widget _getSelectedTabContent() {
+  switch (_selectedIndex) {
+    case 0:
+      return KeyedSubtree(
+        key: const Key('lists_tab'),
+        child: ListsScreenMobile(controller: _listsController),
+      );
+    case 1:
+      return const KeyedSubtree(
+        key: Key('history_tab'),
+        child: HistoryScreenMobile(),
+      );
+    case 2:
+      return const KeyedSubtree(
+        key: Key('supermarkets_tab'),
+        child: SupermarketsScreenMobile(),
+      );
+    case 3:
+      return const KeyedSubtree(
+        key: Key('statistics_tab'),
+        child: StatisticsScreenMobile(),
+      );
+    default:
+      return const SizedBox.shrink();
   }
+}
 
-  Future<void> _loadShoppingLists() async {
-    /*final shoppingLists = await DatabaseHelper.loadShoppingLists();
-    setState(() => _shoppingLists = shoppingLists);*/
-  }
 
-  Future<void> _addShoppingList(String title) async {
-    /*if (title.isEmpty) return;
-    ShoppingList shoppingList;
-    shoppingList.id = await DatabaseHelper.addShoppingList(shoppingList);
-    setState(() => _shoppingLists.insert(0, shoppingList));*/
-  }
-
-  Future<void> _deleteShoppingList(int index) async {
-    /*final note = _notes[index];
-    if (note.id != null) await DatabaseHelper.deleteNote(note.id!);
-    setState(() => _notes.removeAt(index));
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Note '${note.title}' deleted.")));*/
-  }
-
-  Future<void> _editShoppingListTitle(int index) async {
-    /*final note = _notes[index];
-    TextEditingController controller = TextEditingController(text: note.title);
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Edit note title"),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: "Note title"),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
-          TextButton(
-            onPressed: () async {
-              if (controller.text.isNotEmpty) {
-                note.title = controller.text;
-                await DatabaseHelper.updateNote(note);
-                setState(() {});
-              }
-              Navigator.pop(context);
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
-    );*/
-  }
-
-  void _openShoppingListDetail(ShoppingList shopping_list) {
-    /*Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => MobileNoteDetailPage(note: note)),
-    ).then((_) => _loadNotes()); // ricarica le note quando ritorna*/
-  }
-
-  void _showAddShoppingListDialog() {
-    /*TextEditingController controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Add New Note"),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: "Enter note title"),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
-          ElevatedButton(
-            onPressed: () {
-              _addNote(controller.text);
-              Navigator.pop(context);
-            },
-            child: const Text("Add"),
-          ),
-        ],
-      ),
-    );*/
+  void _onBottomNavTap(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddShoppingListDialog,
-        child: const Icon(Icons.add),
+      appBar: const TopBarWithNavBar(),
+      body: _getSelectedTabContent(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onBottomNavTap,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Lists"),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: "History"),
+          BottomNavigationBarItem(icon: Icon(Icons.store), label: "Supermarkets"),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Statistics"),
+        ],
       ),
-      body: _shoppingLists.isEmpty
-          ? const Center(
-              child: Text(
-                "No notes added yet. Tap '+' to add one!",
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-            )
-          : GridView.builder(
-              padding: const EdgeInsets.all(8),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // due note per riga
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 0.8, // rettangolo verticale
-              ),
-              itemCount: _shoppingLists.length,
-              itemBuilder: (context, index) {
-                /*final note = _notes[index];
-                return NoteCard(
-                  note: note,
-                  onTap: () => _openNoteDetail(note),
-                  onEdit: () => _editNoteTitle(index),
-                  onDelete: () => _deleteNote(index),
-                );*/
-                return null;
-              },
-            ),
     );
   }
 }
