@@ -8,12 +8,7 @@ flutter test --coverage
 ----------------------------------------------
 Print the total coverage results in terminal:
 ----------------------------------------------
-cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code" ; 
-$coverageFile = Get-Content coverage\lcov.info ; 
-$totalLines = ($coverageFile | Where-Object {$_ -match '^DA:'} | Measure-Object).Count ; 
-$coveredLines = ($coverageFile | Where-Object {$_ -match '^DA:.*,[1-9]'} | Measure-Object).Count ; 
-$percentage = [math]::Round(($coveredLines / $totalLines) * 100, 2) ; Write-Host "Total Executable Lines: $totalLines" ; 
-Write-Host "Covered Lines: $coveredLines" ; Write-Host "Code Coverage: $percentage%"
+cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"; $lcov = Get-Content coverage\lcov.info; $total = ($lcov | Where-Object {$_ -match '^DA:'} | Measure-Object).Count; $covered = ($lcov | Where-Object {$_ -match '^DA:.*,[1-9]'} | Measure-Object).Count; $pct = [math]::Round(($covered / $total) * 100, 2); Write-Host "Total: $total | Covered: $covered | Coverage: $pct%"
 
 --------------------------------------------
 Print the covererage results per file in terminal:
