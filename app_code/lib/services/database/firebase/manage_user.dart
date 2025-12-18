@@ -3,10 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirebaseUserManager {
 
-  final _db = FirebaseFirestore.instance.collection("Users");
+  FirebaseUserManager({
+    FirebaseFirestore? firestore,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore;
+
+  CollectionReference<Map<String, dynamic>> get _db => _firestore.collection("Users");
 
   Future<void> setUser(User user) async { //to be awaited when called
-    await _db.doc(user.uid).set(user.toJson())
+    await _db.doc(user.uid).set(user.toDatabase())
       .whenComplete(  () => print("User created successfully"))
       .catchError((error) => print("Failed to create user: $error"));
   }
@@ -15,7 +21,7 @@ class FirebaseUserManager {
     try {
       DocumentSnapshot<Map<String, dynamic>> doc = await _db.doc(uid).get();
       if (doc.exists) {
-        return User.fromJson(doc);
+        return User.fromDatabase(doc);
       } else {
         print("User with uid $uid does not exist.");
         return null;

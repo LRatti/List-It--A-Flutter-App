@@ -1,0 +1,71 @@
+-----------
+First Run:
+-----------
+cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"
+flutter test --coverage
+
+
+----------------------------------------------
+Print the total coverage results in terminal:
+----------------------------------------------
+cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code" ; 
+$coverageFile = Get-Content coverage\lcov.info ; 
+$totalLines = ($coverageFile | Where-Object {$_ -match '^DA:'} | Measure-Object).Count ; 
+$coveredLines = ($coverageFile | Where-Object {$_ -match '^DA:.*,[1-9]'} | Measure-Object).Count ; 
+$percentage = [math]::Round(($coveredLines / $totalLines) * 100, 2) ; Write-Host "Total Executable Lines: $totalLines" ; 
+Write-Host "Covered Lines: $coveredLines" ; Write-Host "Code Coverage: $percentage%"
+
+--------------------------------------------
+Print the covererage results per file in terminal:
+--------------------------------------------
+cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"
+$lcov = Get-Content coverage\lcov.info
+$files = @()
+$file = ""
+foreach ($line in $lcov) {
+    if ($line -match "^SF:(.*)") { $file = $matches[1] }
+    elseif ($line -match "^LF:(\d+)") { $totalLines = [int]$matches[1] }
+    elseif ($line -match "^LH:(\d+)") {
+        $coveredLines = [int]$matches[1]
+        $coverage = if ($totalLines -gt 0) { [math]::Round(($coveredLines / $totalLines) * 100, 2) } else { 0 }
+        $files += [PSCustomObject]@{ File = $file; Covered = $coveredLines; Total = $totalLines; Coverage = "$coverage%" }
+    }
+}
+$files | Sort-Object Coverage -Descending | Format-Table -AutoSize
+
+
+------------------------------------------
+Open summary HTML:
+------------------------------------------
+cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"
+$lcov = Get-Content coverage\lcov.info
+$items = @()
+$file=""; $total=0
+foreach ($line in $lcov) {
+  if ($line -match "^SF:(.*)") { $file = $matches[1] }
+  elseif ($line -match "^LF:(\d+)") { $total = [int]$matches[1] }
+  elseif ($line -match "^LH:(\d+)") {
+    $covered = [int]$matches[1]
+    $pct = if ($total) { [math]::Round(($covered/$total)*100,2) } else { 0 }
+    $items += [PSCustomObject]@{ File=$file; Covered=$covered; Total=$total; Pct=$pct }
+  }
+}
+$rows = $items | ForEach-Object {
+  "<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>
+    <div style='background:#eee;border-radius:6px;height:14px;'>
+      <div style='width:{3}%;background:#4caf50;height:14px;border-radius:6px;'></div>
+    </div>
+    <div style='font-size:12px;color:#555;'>{3}%</div>
+  </td></tr>" -f $_.File, $_.Covered, $_.Total, $_.Pct
+}
+$html = @"
+<html><head><meta charset='UTF-8'><title>Coverage</title>
+<style>body{font-family:Segoe UI, sans-serif;padding:20px;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #ddd;padding:8px;}th{background:#f5f5f5;}</style>
+</head><body><h2>Coverage Report</h2>
+<table><tr><th>File</th><th>Covered</th><th>Total</th><th>Coverage</th></tr>
+$rows
+</table></body></html>
+"@
+$out = "lib/notes/coverage_report.html"
+$html | Set-Content $out -Encoding UTF8
+Start-Process $out

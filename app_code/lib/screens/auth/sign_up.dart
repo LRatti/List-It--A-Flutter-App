@@ -1,8 +1,12 @@
+import 'package:app_code/controllers/auth_controller.dart';
+import 'package:app_code/repositories/real_app/firebase_auth_repository.dart';
 import 'package:app_code/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
 class SignUpForm extends StatefulWidget {
-  const SignUpForm({super.key});
+  final AuthController? authController;
+
+  const SignUpForm({super.key, this.authController});
 
   @override
   State<SignUpForm> createState() => _SignUpFormState();
@@ -10,12 +14,20 @@ class SignUpForm extends StatefulWidget {
 
 class _SignUpFormState extends State<SignUpForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late final AuthController _controller;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
 
   String? _errorFeedback;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.authController ?? 
+        AuthController(FirebaseAuthRepository());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +45,7 @@ class _SignUpFormState extends State<SignUpForm> {
             // username
             TextFormField(
               controller: _usernameController,
+              key: const Key('username_field'),
               decoration: const InputDecoration(labelText: 'How would you like to be called?'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -46,6 +59,7 @@ class _SignUpFormState extends State<SignUpForm> {
             // email address
             TextFormField(
               controller: _emailController,
+              key: const Key('email_field'),
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(labelText: 'Email'),
               validator: (value) {
@@ -60,6 +74,7 @@ class _SignUpFormState extends State<SignUpForm> {
             // password
             TextFormField(
               controller: _passwordController,
+              key: const Key('password_field'),
               obscureText: true,
               decoration: const InputDecoration(labelText: 'Password'),
               validator: (value) {
@@ -78,12 +93,14 @@ class _SignUpFormState extends State<SignUpForm> {
             if (_errorFeedback != null)
               Text(
                 _errorFeedback!,
+                key: const Key('error_text'),
                 style: const TextStyle(color: Colors.red),
               ),
             const SizedBox(height: 16.0),
 
             // submit button
             ElevatedButton(
+              key: const Key('sign_up_button'),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
                   setState(() {
@@ -93,7 +110,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   final email = _emailController.text.trim();
                   final password = _passwordController.text.trim();
                   final username = _usernameController.text.trim();
-                  final user = await AuthService.linkAnonymousWithEmailPassword(email, password, username);
+                  final user = await _controller.linkAnonymousWithEmailPassword(email, password, username);
 
 
                   if (user == null) {

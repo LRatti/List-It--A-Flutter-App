@@ -1,3 +1,4 @@
+import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,23 +7,36 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 class FirebasePurchasedProductManager {
   // Implementation for managing purchased products in Firebase
 
-  static final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  FirebasePurchasedProductManager({
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+  })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
   
   CollectionReference<Map<String, dynamic>> get _shoppingLists {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Shopping Lists");
+    return _firestore.collection("Users").doc(uid).collection("Shopping Lists");
   }
   
   CollectionReference<Map<String, dynamic>> get _products {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Products");
+    return _firestore.collection("Users").doc(uid).collection("Products");
+  }
+
+  CollectionReference<Map<String, dynamic>> get _categories {
+    final uid = _firebaseAuth.currentUser?.uid;
+    if (uid == null) throw Exception('User not authenticated');
+    return _firestore.collection("Users").doc(uid).collection("Categories");
   }
 
   Future<void> setPurchasedProduct(PurchasedProduct product) async {
     // Code to add a purchased product to the database
-    await _shoppingLists.doc(product.listId).collection("Purchased Products").doc(product.id).set(product.toJson())
+    await _shoppingLists.doc(product.listId).collection("Purchased Products").doc(product.id).set(product.toDatabase())
       .whenComplete(() => print("Purchased Product added successfully"))
       .catchError((error) => print("Failed to add purchased product: $error"));
   }
@@ -31,10 +45,10 @@ class FirebasePurchasedProductManager {
     // Code to add multiple purchased products to the database using batch writes
     if (products.isEmpty) return;
     
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
     for (var product in products) {
       final docRef = _shoppingLists.doc(product.listId).collection("Purchased Products").doc(product.id);
-      batch.set(docRef, product.toJson());
+      batch.set(docRef, product.toDatabase());
     }
     
     await batch.commit()
@@ -49,15 +63,21 @@ class FirebasePurchasedProductManager {
       if (doc.exists) {
         final data = doc.data()!;
         final productId = data['product_id'];
+        final catId = data['category_id'];
         
         if (productId == null) return null;
+
+        if (catId == null) return null;
         
         final prodDoc = await _products.doc(productId).get();
         if (!prodDoc.exists) return null;
         
-        final Product product = Product.fromJson(prodDoc.data()!);
-        final PurchasedProduct purchased = PurchasedProduct.fromJson(data);
-        purchased.setProduct = product;
+        final catDoc = await _categories.doc(catId).get();
+        if (!catDoc.exists) return null;
+
+        final Category category = Category.fromJson(catDoc.data()!);
+        final Product product = Product.fromDatabase(prodDoc.data()!);
+        final PurchasedProduct purchased = PurchasedProduct.fromDatabase(data, category, product);
         return purchased;
       } else {
         print("Purchased Product with id $purchasedProductId does not exist.");
@@ -80,11 +100,12 @@ class FirebasePurchasedProductManager {
           return await getPurchasedProductById(listId, doc.id);
         })
       );
+      //Returns a list without null values. If no products found, returns an empty list.
       return purchasedProducts.whereType<PurchasedProduct>().toList();
     } catch (e) {
       print("Error fetching purchased products: $e");
+      return [];
     }
-    return [];
   }
 
   Future<void> deletePurchasedProduct(PurchasedProduct product) async {

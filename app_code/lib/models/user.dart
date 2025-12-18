@@ -28,9 +28,26 @@ class User {
     return 1;
   }
 
+  factory User.fromDatabase(DocumentSnapshot<Map<String, dynamic>> json) {
+    return User(
+      uid: json.id,
+      email: json['email'],
+      userName: json['user_name'],
+    );
+  }
+
+  Map<String, dynamic> toDatabase() {
+    return {
+      'id': uid,
+      'email': email,
+      'user_name': _userName,
+    };
+  }
+
   factory User.fromJson(DocumentSnapshot<Map<String, dynamic>> json) {
     return User(
       uid: json.id,
+      isAnonymous: json['is_anonymous'] ?? false,
       email: json['email'],
       userName: json['user_name'],
     );
@@ -39,9 +56,9 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'id': uid,
+      'is_anonymous': isAnonymous,
       'email': email,
       'user_name': _userName,
     };
   }
-
 }
