@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:app_code/widgets/top_bar_with_navbar.dart';
-import 'package:app_code/screens/home/lists_screen_mobile.dart';
-import 'package:app_code/screens/home/supermarkets_screen_mobile.dart';
-import 'package:app_code/screens/home/history_screen_mobile.dart';
-import 'package:app_code/screens/home/statistics_screen_mobile.dart';
+import 'package:app_code/screens/lists/lists_screen_mobile.dart';
+import 'package:app_code/screens/supermarket/supermarkets_screen_mobile.dart';
+import 'package:app_code/screens/history/history_screen_mobile.dart';
+import 'package:app_code/screens/stats/statistics_screen_mobile.dart';
 import 'package:app_code/controllers/lists_controller.dart';
 import 'package:app_code/repositories/real_app/shopping_list_repository_sqlite.dart';
 
