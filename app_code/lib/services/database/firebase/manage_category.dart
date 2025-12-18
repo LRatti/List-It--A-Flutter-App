@@ -1,27 +1,64 @@
 
 
 import 'package:app_code/models/category.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
-class ManageCategory {
-  void addCategory(Category category) {
-    // Code to add a category to the database
+class FirebaseCategoryManager {
+
+  static final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  
+  CollectionReference<Map<String, dynamic>> get _categories {
+    final uid = _firebaseAuth.currentUser?.uid;
+    if (uid == null) throw Exception('User not authenticated');
+    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Categories");
   }
 
-  void deleteCategory(Category category) {
-    // Code to delete a category from the database
+  Future<void> setCategory(Category category) async {
+    // Code to add a new category to the database
+    await _categories.add(category.toJson())
+      .then((_) => print("Category added successfully"))
+      .catchError((error) => print("Failed to add category: $error"));
   }
 
-  void updateCategory(Category category) {
-    // Code to update a category in the database
-  }
-
-  void pushAllCategories() {
-    // Code to push all categories to the database
+  Future<void> setAllCategories(List<Category> categories) async {
+    // Code to add multiple categories to the database using batch writes
+    if (categories.isEmpty) return;
     
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+    for (var category in categories) {
+      batch.set(_categories.doc(category.id), category.toJson());
+    }
+    
+    await batch.commit()
+      .whenComplete(() => print("${categories.length} Categories added successfully"))
+      .catchError((error) => print("Failed to add categories: $error"));
   }
 
-  List<Category> getAllCategories() {
+  Future<Category?> getCategoryById(String cid) async {
+    // Code to retrieve a category by its ID from the database
+    try {
+      DocumentSnapshot<Map<String, dynamic>> doc = await _categories.doc(cid).get();
+      if (doc.exists) {
+        return Category.fromJson(doc.data()!);
+      } else {
+        print("Category with id $cid does not exist.");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching category: $e");
+      return null;
+    }
+  }
+
+  Future<List<Category>> getAllCategories() async {
     // Code to retrieve all categories from the database
+    try {
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _categories.get();
+      return querySnapshot.docs.map((doc) => Category.fromJson(doc.data())).toList();
+    } catch (e) {
+      print("Error fetching categories: $e");
+    }
     return [];
   }
 

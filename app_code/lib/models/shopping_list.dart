@@ -97,6 +97,8 @@ class ShoppingList {
       'name': _name,
       'created_at': createdAt?.toIso8601String(),
       'supermarket_id': _supermarket.id,
+      'created_at': createdAt?.toIso8601String(),
+      'supermarket_id': _supermarket.id,
       'total_price': _totalPrice,
       'image': image,
       'products': products?.map((product) => product.toDatabase()).toList(),
