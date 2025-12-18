@@ -5,23 +5,30 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 class FirebaseProductManager {
   
   // Methods to manage products in Firebase
-  static final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  FirebaseProductManager({
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+  })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
   
   CollectionReference<Map<String, dynamic>> get _products {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Products");
+    return _firestore.collection("Users").doc(uid).collection("Products");
   }
 
   CollectionReference<Map<String, dynamic>> get _associations {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Associations");
+    return _firestore.collection("Users").doc(uid).collection("Associations");
   }
 
   Future<void> setProduct(Product product) async {
     // Code to add and update a user product to the database
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
     
     // Save product data
     batch.set(_products.doc(product.id), product.toDatabase());
@@ -45,7 +52,7 @@ class FirebaseProductManager {
     // Code to add multiple products to the database using batch writes
     if (products.isEmpty) return;
     
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
     
     for (var product in products) {
       // Save product data
@@ -77,7 +84,7 @@ class FirebaseProductManager {
         
         var productData = doc.data()!;
         productData['associations'] = associations;
-        return Product.fromJson(productData);
+        return Product.fromDatabase(productData, associations: associations);
       } else {
         print("Product with id $pid does not exist.");
         return null;
@@ -129,8 +136,8 @@ class FirebaseProductManager {
   Future<List<Product>> getVisibleProducts() async {
     // Code to retrieve all visible products from the database
     try {
-      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _products
-          .where('isVisible', isEqualTo: true)
+        QuerySnapshot<Map<String, dynamic>> querySnapshot = await _products
+          .where('is_visible', isEqualTo: 1)
           .get();
       
       // Fetch all visible products with their associations in parallel

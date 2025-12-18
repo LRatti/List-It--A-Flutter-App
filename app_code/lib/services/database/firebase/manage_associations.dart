@@ -3,12 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 class FirebaseManageAssociations {
   // This class manages associations between products, supermarkets and categories in Firebase
-  static final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  FirebaseManageAssociations({
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+  })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
 
   CollectionReference<Map<String, dynamic>> get _associations {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Associations");
+    return _firestore.collection("Users").doc(uid).collection("Associations");
   }
 
   // Set a single association using composite key: productId_supermarketId
@@ -37,7 +44,7 @@ class FirebaseManageAssociations {
           .where('productId', isEqualTo: productId)
           .get();
       
-      WriteBatch batch = FirebaseFirestore.instance.batch();
+        WriteBatch batch = _firestore.batch();
       for (var doc in querySnapshot.docs) {
         batch.delete(doc.reference);
       }
