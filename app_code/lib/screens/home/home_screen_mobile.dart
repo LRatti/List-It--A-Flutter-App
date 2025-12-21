@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/widgets/top_bar_with_navbar.dart';
 import 'package:app_code/screens/lists/lists_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarkets_screen_mobile.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
 import 'package:app_code/screens/stats/statistics_screen_mobile.dart';
-import 'package:app_code/controllers/lists_controller.dart';
-import 'package:app_code/repositories/real_app/shopping_list_repository_sqlite.dart';
 
 class MobileHomePage extends StatefulWidget {
-  final ListsController? listsController;
-
-  const MobileHomePage({super.key, this.listsController});
+  const MobileHomePage({super.key});
 
   @override
   State<MobileHomePage> createState() => _MobileHomePageState();
@@ -19,37 +16,32 @@ class MobileHomePage extends StatefulWidget {
 class _MobileHomePageState extends State<MobileHomePage> {
   int _selectedIndex = 0;
 
-  /// Create a single controller instance with real repository (if not injected)
-  late final ListsController _listsController = widget.listsController ?? ListsController(ShoppingListRepositorySqlite());
-
-  /// Return the selected tab widget
   Widget _getSelectedTabContent() {
-  switch (_selectedIndex) {
-    case 0:
-      return KeyedSubtree(
-        key: const Key('lists_tab'),
-        child: ListsScreenMobile(controller: _listsController),
-      );
-    case 1:
-      return const KeyedSubtree(
-        key: Key('history_tab'),
-        child: HistoryScreenMobile(),
-      );
-    case 2:
-      return const KeyedSubtree(
-        key: Key('supermarkets_tab'),
-        child: SupermarketsScreenMobile(),
-      );
-    case 3:
-      return const KeyedSubtree(
-        key: Key('statistics_tab'),
-        child: StatisticsScreenMobile(),
-      );
-    default:
-      return const SizedBox.shrink();
+    switch (_selectedIndex) {
+      case 0:
+        return const KeyedSubtree(
+          key: Key('lists_tab'),
+          child: ListsScreenMobile(),
+        );
+      case 1:
+        return const KeyedSubtree(
+          key: Key('history_tab'),
+          child: HistoryScreenMobile(),
+        );
+      case 2:
+        return const KeyedSubtree(
+          key: Key('supermarkets_tab'),
+          child: SupermarketsScreenMobile(),
+        );
+      case 3:
+        return const KeyedSubtree(
+          key: Key('statistics_tab'),
+          child: StatisticsScreenMobile(),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
   }
-}
-
 
   void _onBottomNavTap(int index) {
     setState(() {

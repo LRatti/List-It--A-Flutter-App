@@ -3,7 +3,7 @@ import 'package:app_code/repositories/abstract/shopping_list_repository.dart';
 import 'package:app_code/services/database/sqlite/manage_shopping_list.dart';
 
 //TODO: the class will call the methods in database_manager instead of SQlite
-class ShoppingListRepositorySqlite implements ShoppingListRepository {
+class ShoppingListRepositoryDb implements ShoppingListRepository {
   @override
   Future<List<ShoppingList>> getAll() {
     return ManageShoppingList.getAllShoppingLists();

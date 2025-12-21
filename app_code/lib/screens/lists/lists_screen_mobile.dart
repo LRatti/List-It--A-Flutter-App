@@ -1,39 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
-import 'package:app_code/controllers/lists_controller.dart';
 import 'package:app_code/widgets/shopping_list_widget.dart';
+import 'package:app_code/providers/shopping_lists_notifier.dart';
 
-/// Lists page showing all shopping lists with add/edit/delete functionality
-class ListsScreenMobile extends StatefulWidget {
-  final ListsController controller;
+class ListsScreenMobile extends ConsumerWidget {
+  const ListsScreenMobile({super.key});
 
-  const ListsScreenMobile({super.key, required this.controller});
-
-  @override
-  State<ListsScreenMobile> createState() => _ListsScreenMobileState();
-}
-
-class _ListsScreenMobileState extends State<ListsScreenMobile> {
-  List<ShoppingList> _shoppingLists = [];
-  bool _initialLoading = true; // suppress empty-state flicker on first load
-
-  @override
-  void initState() {
-    super.initState();
-    _loadShoppingLists();
-  }
-
-  Future<void> _loadShoppingLists() async {
-    final lists = await widget.controller.loadLists();
-    setState(() {
-      _shoppingLists = lists;
-      _initialLoading = false;
-    });
-  }
-
-  void _showAddShoppingListDialog() {
+  Future<void> _showAddShoppingListDialog(BuildContext context, WidgetRef ref,) async {
     final controller = TextEditingController();
-    showDialog(
+    await showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("Add new list"),
@@ -55,8 +31,9 @@ class _ListsScreenMobileState extends State<ListsScreenMobile> {
                   name: name,
                   createdAt: DateTime.now(),
                 );
-                await widget.controller.addList(newList);
-                await _loadShoppingLists();
+                await ref
+                    .read(shoppingListsProvider.notifier)
+                    .addList(newList);
               }
               Navigator.pop(context);
             },
@@ -67,7 +44,8 @@ class _ListsScreenMobileState extends State<ListsScreenMobile> {
     );
   }
 
-  Future<void> _deleteShoppingList(ShoppingList list) async {
+  Future<void> _deleteShoppingList(BuildContext context, WidgetRef ref, ShoppingList list,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -88,76 +66,75 @@ class _ListsScreenMobileState extends State<ListsScreenMobile> {
     );
 
     if (confirmed == true) {
-      await widget.controller.deleteList(list);
-      await _loadShoppingLists();
+      await ref.read(shoppingListsProvider.notifier).deleteList(list);
     }
   }
 
-  Future<void> _updateListName(ShoppingList list, String newName) async {
+  Future<void> _updateListName(WidgetRef ref, ShoppingList list, String newName,
+  ) async {
     list.setName(newName);
-    await widget.controller.updateList(list);
-    await _loadShoppingLists();
+    await ref.read(shoppingListsProvider.notifier).updateList(list);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _initialLoading
-          ? const SizedBox.shrink()
-          : _shoppingLists.isEmpty
-          ? const Center(
-              child: Text(
-                "No lists yet.\nTap + to create one.",
-                textAlign: TextAlign.center,
-              ),
-            )
-          : LayoutBuilder(
-              builder: (context, constraints) {
-                // Config for 3 columns
-                const crossAxisCount = 3;
-                const spacing = 12.0;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shoppingListsAsync = ref.watch(shoppingListsProvider);
 
-                // Calculate item width based on screen width
-                final totalWidth = constraints.maxWidth;
-                final itemWidth =
-                    (totalWidth - (crossAxisCount + 1) * spacing) /
-                    crossAxisCount;
-
-                // Fixed heights for layout elements inside the card
-                const nameRowHeight = 48.0; // Height of the name/delete row
-                const verticalGap = 8.0; // Gap between yellow box and name
-                const safeBuffer = 2.0; // Extra buffer
-
-                // Total height calculation
-                final itemHeight =
-                    itemWidth + nameRowHeight + verticalGap + safeBuffer;
-
-                return GridView.builder(
-                  padding: const EdgeInsets.all(spacing),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: spacing,
-                    mainAxisSpacing: spacing,
-                    childAspectRatio: itemWidth / itemHeight,
-                  ),
-                  itemCount: _shoppingLists.length,
-                  itemBuilder: (context, index) {
-                    final shoppingList = _shoppingLists[index];
-                    return ShoppingListCard(
-                      shoppingList: shoppingList,
-                      onTap: () {}, // TODO: implement detail screen
-                      onNameChanged: (newName) =>
-                          _updateListName(shoppingList, newName),
-                      onDelete: () => _deleteShoppingList(shoppingList),
-                    );
-                  },
-                );
-              },
+    return shoppingListsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (error, _) => Center(child: Text(error.toString())),
+      data: (lists) {
+        if (lists.isEmpty) {
+          return const Center(
+            child: Text(
+              "No lists yet.\nTap + to create one.",
+              textAlign: TextAlign.center,
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddShoppingListDialog,
-        child: const Icon(Icons.add),
-      ),
+          );
+        }
+
+        return Scaffold(
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              const crossAxisCount = 3;
+              const spacing = 12.0;
+              final totalWidth = constraints.maxWidth;
+              final itemWidth =
+                  (totalWidth - (crossAxisCount + 1) * spacing) / crossAxisCount;
+              const nameRowHeight = 48.0;
+              const verticalGap = 8.0;
+              const safeBuffer = 2.0;
+              final itemHeight = itemWidth + nameRowHeight + verticalGap + safeBuffer;
+
+              return GridView.builder(
+                padding: const EdgeInsets.all(spacing),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: spacing,
+                  mainAxisSpacing: spacing,
+                  childAspectRatio: itemWidth / itemHeight,
+                ),
+                itemCount: lists.length,
+                itemBuilder: (context, index) {
+                  final shoppingList = lists[index];
+                  return ShoppingListCard(
+                    shoppingList: shoppingList,
+                    onTap: () {},
+                    onNameChanged: (newName) =>
+                        _updateListName(ref, shoppingList, newName),
+                    onDelete: () =>
+                        _deleteShoppingList(context, ref, shoppingList),
+                  );
+                },
+              );
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _showAddShoppingListDialog(context, ref),
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 }
