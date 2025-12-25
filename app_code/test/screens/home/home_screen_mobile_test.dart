@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
-import 'package:app_code/controllers/lists_controller.dart';
-import 'package:app_code/repositories/test/in_memory_shopping_list_repository.dart';
+import 'package:app_code/repositories/test_repo/test_shopping_list_repository.dart';
+import 'package:app_code/providers/shopping_lists_notifier.dart';
 
 void main() {
   testWidgets('HomePage switches tabs correctly', (tester) async {
-    final controller = ListsController(InMemoryShoppingListRepository());
-
     await tester.pumpWidget(
-      MaterialApp(
-        home: MobileHomePage(listsController: controller),
+      ProviderScope(
+        overrides: [
+          shoppingListRepositoryProvider
+              .overrideWithValue(TestShoppingListRepository()),
+        ],
+        child: const MaterialApp(
+          home: MobileHomePage(),
+        ),
       ),
     );
+
     await tester.pumpAndSettle();
 
     // Starts on Lists tab
