@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/screens/auth/welcome.dart';
-import 'package:app_code/controllers/auth_controller.dart';
-import 'package:app_code/repositories/test/in_memory_auth_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/providers/auth_provider.dart';
+import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
 
 void main() {
   late InMemoryAuthRepository repository;
-  late AuthController controller;
 
   setUp(() async {
     repository = InMemoryAuthRepository();
-    controller = AuthController(repository);
     // Ensure anonymous user is signed in (simulating app behavior)
-    await controller.signInAnonymously();
+    await repository.signInAnonymously();
   });
 
   tearDown(() {
@@ -21,8 +20,13 @@ void main() {
 
   Future<void> pumpWelcomeScreen(WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: WelcomeScreen(authController: controller),
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: const MaterialApp(
+          home: WelcomeScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -106,7 +110,7 @@ void main() {
 
   testWidgets('Google sign in links anonymous user', (tester) async {
     // Verify starting with anonymous user
-    final initialUser = controller.getCurrentUser();
+    final initialUser = repository.getCurrentUser();
     expect(initialUser, isNotNull);
     expect(initialUser!.isAnonymous, true);
 
@@ -116,19 +120,19 @@ void main() {
     await tester.tap(find.byKey(const Key('google_sign_in_button')));
     await tester.pumpAndSettle();
 
-    // Verify user is linked with Google account
-    final linkedUser = controller.getCurrentUser();
+    // Verify user is signed in with Google account (new UID)
+    final linkedUser = repository.getCurrentUser();
     expect(linkedUser, isNotNull);
-    expect(linkedUser!.uid, initialUser.uid); // Same user ID (linked)
+    expect(linkedUser!.uid, isNot(equals(initialUser.uid))); // Different user ID
     expect(linkedUser.isAnonymous, false);
     expect(linkedUser.email, 'testuser@gmail.com');
   });
 
   testWidgets('Google sign in works for non-anonymous user', (tester) async {
     // Sign out to clear anonymous user
-    await controller.signOut();
+    await repository.signOut();
     // Create a non-anonymous user
-    await controller.signUp('existing@example.com', 'password123');
+    await repository.signUp('existing@example.com', 'password123');
 
     await pumpWelcomeScreen(tester);
 
@@ -137,7 +141,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Google sign in succeeded
-    final user = controller.getCurrentUser();
+    final user = repository.getCurrentUser();
     expect(user, isNotNull);
     expect(user!.isAnonymous, false);
     expect(user.email, 'testuser@gmail.com');
@@ -157,7 +161,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify user is signed up
-    final user = controller.getCurrentUser();
+    final user = repository.getCurrentUser();
     expect(user, isNotNull);
     expect(user!.email, 'welcome@example.com');
     expect(user.getUserName(), 'welcomeuser');
@@ -183,7 +187,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify user is signed in
-    final user = controller.getCurrentUser();
+    final user = repository.getCurrentUser();
     expect(user, isNotNull);
     expect(user!.email, 'signedin@example.com');
   });

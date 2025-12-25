@@ -1,7 +1,7 @@
 import 'package:app_code/screens/auth/welcome.dart';
 import 'package:app_code/screens/home/profile.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
-import 'package:app_code/services/auth_service.dart';
+import 'package:app_code/repositories/real_app_repo/firebase_auth_repository.dart';
 import 'package:flutter/material.dart';
 // firebase
 import 'package:firebase_core/firebase_core.dart';
@@ -16,7 +16,7 @@ void main() async {
   );
 
   // Automatically sign in anonymously only if no user is signed in
-  await AuthService.ensureAuthenticated();
+  await FirebaseAuthRepository().ensureAuthenticated();
 
   runApp(
     const ProviderScope(

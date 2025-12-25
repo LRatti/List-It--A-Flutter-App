@@ -1,20 +1,18 @@
-import 'package:app_code/controllers/auth_controller.dart';
-import 'package:app_code/repositories/real_app/firebase_auth_repository.dart';
-import 'package:app_code/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/providers/auth_provider.dart';
 
-class SignUpForm extends StatefulWidget {
-  final AuthController? authController;
+class SignUpForm extends ConsumerStatefulWidget {
+  final dynamic authNotifier; // Keep for backward compatibility with tests
 
-  const SignUpForm({super.key, this.authController});
+  const SignUpForm({super.key, this.authNotifier});
 
   @override
-  State<SignUpForm> createState() => _SignUpFormState();
+  ConsumerState<SignUpForm> createState() => _SignUpFormState();
 }
 
-class _SignUpFormState extends State<SignUpForm> {
+class _SignUpFormState extends ConsumerState<SignUpForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late final AuthController _controller;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -23,14 +21,8 @@ class _SignUpFormState extends State<SignUpForm> {
   String? _errorFeedback;
 
   @override
-  void initState() {
-    super.initState();
-    _controller = widget.authController ?? 
-        AuthController(FirebaseAuthRepository());
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final authNotifier = ref.read(authProvider.notifier);
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Form(
@@ -110,18 +102,17 @@ class _SignUpFormState extends State<SignUpForm> {
                   final email = _emailController.text.trim();
                   final password = _passwordController.text.trim();
                   final username = _usernameController.text.trim();
-                  final user = await _controller.linkAnonymousWithEmailPassword(email, password, username);
+                  
+                  try {
+                    await authNotifier.linkAnonymousWithEmailPassword(email, password, username);
 
-
-                  if (user == null) {
-                    setState(() {
-                      _errorFeedback = 'Could not sign up with those details.';
-                    });
-                  } else {
-                    // Small delay to ensure Firebase state propagates to listeners
                     if (context.mounted) {
                       Navigator.of(context).pop();
                     }
+                  } catch (e) {
+                    setState(() {
+                      _errorFeedback = 'Could not sign up with those details.';
+                    });
                   }
                 }
               },

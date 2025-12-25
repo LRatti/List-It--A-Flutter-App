@@ -1,33 +1,26 @@
 import 'package:app_code/screens/auth/sign_in.dart';
 import 'package:app_code/screens/auth/sign_up.dart';
-import 'package:app_code/controllers/auth_controller.dart';
-import 'package:app_code/repositories/real_app/firebase_auth_repository.dart';
-import 'package:app_code/services/auth_service.dart';
+import 'package:app_code/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
-class WelcomeScreen extends StatefulWidget {
-  final AuthController? authController;
+class WelcomeScreen extends ConsumerStatefulWidget {
+  final dynamic authNotifier; // Keep for backward compatibility with tests
 
-  const WelcomeScreen({super.key, this.authController});
+  const WelcomeScreen({super.key, this.authNotifier});
 
   @override
-  State<WelcomeScreen> createState() => _WelcomeScreenState();
+  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> {
+class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   bool isSignUpForm = true;
-    late final AuthController _controller;
-
-    @override
-    void initState() {
-      super.initState();
-      _controller = widget.authController ?? 
-          AuthController(FirebaseAuthRepository());
-    }
 
   @override
   Widget build(BuildContext context) {
+    final authNotifier = ref.read(authProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Flutter Auth'),
@@ -47,7 +40,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   Column(
                     key: const Key('sign_up_section'),
                   children: [
-                      SignUpForm(authController: _controller),
+                      SignUpForm(authNotifier: authNotifier),
                     const Text('Already have an account?'),
                     TextButton(
                       key: const Key('switch_to_sign_in'),
@@ -66,7 +59,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   Column(
                     key: const Key('sign_in_section'),
                   children: [
-                      SignInForm(authController: _controller),
+                      SignInForm(authNotifier: authNotifier),
                     const Text('Need an account?'),
                     TextButton(
                       key: const Key('switch_to_sign_up'),
@@ -82,19 +75,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ElevatedButton(
                   key: const Key('google_sign_in_button'),
                 onPressed: () async {
-                  // Check if user is anonymous and link account, otherwise sign in normally
-                    final currentUser = await _controller.ensureAuthenticated();
-                  final user = currentUser?.isAnonymous == true
-                        ? await _controller.linkAnonymousWithGoogle()
-                        : await _controller.signInWithGoogle();
+                  // Always defer to repository logic for Google sign-in.
+                  // It will upgrade anonymous accounts or sign in existing ones.
+                  await authNotifier.signInWithGoogle();
                   
-                  if (user != null && context.mounted) {
+                  if (context.mounted) {
                     // Navigate back to profile screen after successful sign-in
                     Navigator.of(context).pop();
                   }
                 }, 
                   child: const Text("Sign in with Google"),
-              )   
+              )
             ]
           )
         ),

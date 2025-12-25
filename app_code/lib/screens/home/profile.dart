@@ -1,6 +1,5 @@
 import 'package:app_code/providers/auth_provider.dart';
 import 'package:app_code/providers/user_details_provider.dart';
-import 'package:app_code/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,6 +11,7 @@ class ProfileScreen extends ConsumerWidget {
     // Watch the auth provider to get real-time updates
     final authState = ref.watch(authProvider);
     final userDetails = ref.watch(userDetailsProvider);
+    final authNotifier = ref.read(authProvider.notifier);
     
     return authState.when(
       data: (currentUser) {
@@ -34,7 +34,7 @@ class ProfileScreen extends ConsumerWidget {
                   icon: const Icon(Icons.logout),
                   onPressed: () async {
                     // Implement logout functionality here
-                    await AuthService.signOut();
+                    await authNotifier.signOut();
                   },
                 ),
                 IconButton(

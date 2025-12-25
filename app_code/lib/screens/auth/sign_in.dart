@@ -1,20 +1,18 @@
-import 'package:app_code/controllers/auth_controller.dart';
-import 'package:app_code/repositories/real_app/firebase_auth_repository.dart';
-import 'package:app_code/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/providers/auth_provider.dart';
 
-class SignInForm extends StatefulWidget {
-  final AuthController? authController;
+class SignInForm extends ConsumerStatefulWidget {
+  final dynamic authNotifier; // Keep for backward compatibility with tests
 
-  const SignInForm({super.key, this.authController});
+  const SignInForm({super.key, this.authNotifier});
 
   @override
-  State<SignInForm> createState() => _SignInFormState();
+  ConsumerState<SignInForm> createState() => _SignInFormState();
 }
 
-class _SignInFormState extends State<SignInForm> {
+class _SignInFormState extends ConsumerState<SignInForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late final AuthController _controller;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -22,14 +20,8 @@ class _SignInFormState extends State<SignInForm> {
   String? _errorFeedback;
 
   @override
-  void initState() {
-    super.initState();
-    _controller = widget.authController ?? 
-        AuthController(FirebaseAuthRepository());
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final authNotifier = ref.read(authProvider.notifier);
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Form(
@@ -92,15 +84,15 @@ class _SignInFormState extends State<SignInForm> {
                   final email = _emailController.text.trim();
                   final password = _passwordController.text.trim();
 
-                  final user = await _controller.signIn(email, password);
-
-                  // error feedback here later
-                  if (user == null) {
+                  try {
+                    await authNotifier.signIn(email, password);
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  } catch (e) {
                     setState(() {
                       _errorFeedback = 'Incorrect login credentials.';
                     });
-                  } else {
-                    Navigator.of(context).pop();
                   }
                 }
               },

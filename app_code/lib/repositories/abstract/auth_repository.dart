@@ -21,9 +21,6 @@ abstract class AuthRepository {
   /// Convert anonymous user to permanent account with email/password
   Future<User?> linkAnonymousWithEmailPassword(String email, String password, String username);
 
-  /// Convert anonymous user to permanent account with Google
-  Future<User?> linkAnonymousWithGoogle();
-
   /// Sign out and transition to anonymous authentication
   Future<void> signOut();
 

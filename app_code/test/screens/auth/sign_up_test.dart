@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/screens/auth/sign_up.dart';
-import 'package:app_code/controllers/auth_controller.dart';
-import 'package:app_code/repositories/test/in_memory_auth_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/providers/auth_provider.dart';
+import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
 
 void main() {
   late InMemoryAuthRepository repository;
-  late AuthController controller;
 
   setUp(() async {
     repository = InMemoryAuthRepository();
-    controller = AuthController(repository);
     // Ensure anonymous user is signed in (simulating app behavior)
-    await controller.signInAnonymously();
+    await repository.signInAnonymously();
   });
 
   tearDown(() {
@@ -21,9 +20,14 @@ void main() {
 
   Future<void> pumpSignUpForm(WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SignUpForm(authController: controller),
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: const MaterialApp(
+          home: Scaffold(
+            body: SignUpForm(),
+          ),
         ),
       ),
     );
@@ -81,7 +85,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify user is signed up and no longer anonymous
-    final user = controller.getCurrentUser();
+    final user = repository.getCurrentUser();
     expect(user, isNotNull);
     expect(user!.email, 'newuser@example.com');
     expect(user.getUserName(), 'testuser');
@@ -104,7 +108,7 @@ void main() {
     await tester.tap(find.byKey(const Key('sign_up_button')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('error_text')), findsOneWidget);
+    // When the repository returns null, it should be handled and error shown
     expect(find.text('Could not sign up with those details.'), findsOneWidget);
   });
 
@@ -121,14 +125,15 @@ void main() {
     await tester.tap(find.byKey(const Key('sign_up_button')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('error_text')), findsOneWidget);
+    // Error should be shown
+    expect(find.text('Could not sign up with those details.'), findsOneWidget);
 
     // Retry (should succeed since flag is reset after first use)
     await tester.tap(find.byKey(const Key('sign_up_button')));
     await tester.pumpAndSettle();
 
-    // Error should be cleared
-    expect(find.byKey(const Key('error_text')), findsNothing);
+    // Error should be cleared and user should be signed up
+    expect(find.text('Could not sign up with those details.'), findsNothing);
   });
 
   testWidgets('username field accepts input', (tester) async {
@@ -160,7 +165,7 @@ void main() {
 
   testWidgets('links anonymous user to email account', (tester) async {
     // Verify starting with anonymous user
-    final initialUser = controller.getCurrentUser();
+    final initialUser = repository.getCurrentUser();
     expect(initialUser, isNotNull);
     expect(initialUser!.isAnonymous, true);
 
@@ -174,7 +179,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify anonymous user is now linked
-    final linkedUser = controller.getCurrentUser();
+    final linkedUser = repository.getCurrentUser();
     expect(linkedUser, isNotNull);
     expect(linkedUser!.uid, initialUser.uid); // Same user ID
     expect(linkedUser.isAnonymous, false); // No longer anonymous

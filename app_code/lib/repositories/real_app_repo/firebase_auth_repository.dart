@@ -1,55 +1,260 @@
 import 'package:app_code/models/user.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
-import 'package:app_code/services/auth_service.dart';
+import 'package:app_code/services/database/firebase/manage_user.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:google_sign_in/google_sign_in.dart';
 
 /// Firebase implementation of AuthRepository.
-/// Wraps the existing AuthService static methods.
+/// Directly handles all authentication operations with Firebase.
 class FirebaseAuthRepository implements AuthRepository {
+  final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+
   @override
-  Future<User?> ensureAuthenticated() {
-    return AuthService.ensureAuthenticated();
+  Future<User?> ensureAuthenticated() async {
+    // Check if a user is already signed in
+    if (_firebaseAuth.currentUser != null) {
+      // User is already signed in, return existing user
+      return User(
+        uid: _firebaseAuth.currentUser!.uid,
+        isAnonymous: _firebaseAuth.currentUser!.isAnonymous,
+        email: _firebaseAuth.currentUser!.email,
+      );
+    }
+
+    // No user signed in, sign in anonymously
+    return await signInAnonymously();
   }
 
   @override
-  Future<User?> signInAnonymously() {
-    return AuthService.signInAnonymously();
+  Future<User?> signInAnonymously() async {
+    try {
+      final firebase_auth.UserCredential credential =
+          await _firebaseAuth.signInAnonymously();
+
+      if (credential.user != null) {
+        return User(
+          uid: credential.user!.uid,
+          isAnonymous: credential.user!.isAnonymous,
+        );
+      }
+      return null;
+    } catch (e) {
+      print('Error signing in anonymously: ${e.toString()}');
+      return null;
+    }
   }
 
   @override
-  Future<User?> signUp(String email, String password) {
-    return AuthService.signUp(email, password);
+  Future<User?> signUp(String email, String password) async {
+    try {
+      final firebase_auth.UserCredential credential =
+          await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (credential.user != null) {
+        return User(
+          uid: credential.user!.uid,
+          isAnonymous: credential.user!.isAnonymous,
+          email: credential.user!.email!,
+        );
+      }
+      return null;
+    } catch (e) {
+      print('Error signing up with email and password: ${e.toString()}');
+      return null;
+    }
   }
 
   @override
-  Future<User?> signIn(String email, String password) {
-    return AuthService.signIn(email, password);
+  Future<User?> signIn(String email, String password) async {
+    try {
+      final firebase_auth.UserCredential credential =
+          await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (credential.user != null) {
+        return User(
+          uid: credential.user!.uid,
+          isAnonymous: credential.user!.isAnonymous,
+          email: credential.user!.email!,
+        );
+      }
+      return null;
+    } catch (e) {
+      print('Error signing in with email and password: ${e.toString()}');
+      return null;
+    }
   }
 
   @override
-  Future<User?> signInWithGoogle() {
-    return AuthService.signInWithGoogle();
+  Future<User?> signInWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+
+      // Sign out first to force account selection every time
+      await googleSignIn.signOut();
+
+      // Perform interactive sign-in to let user choose account
+      GoogleSignInAccount? googleUser;
+      try {
+        googleUser = await googleSignIn.signIn();
+      } catch (e) {
+        // On web, signIn is deprecated and may fail - that's expected
+        // Users should authenticate via the Google Sign-In button in index.html
+        print('Interactive sign-in unavailable (expected on web): ${e.toString()}');
+        return null;
+      }
+
+      if (googleUser == null) return null; // User cancelled
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final currentUser = _firebaseAuth.currentUser;
+
+      // If the current user is anonymous, try upgrading by linking first.
+      if (currentUser != null && currentUser.isAnonymous) {
+        try {
+          final firebase_auth.UserCredential linked =
+              await currentUser.linkWithCredential(credential);
+
+          if (linked.user != null) {
+            await FirebaseUserManager().setUser(
+              User(
+                uid: linked.user!.uid,
+                email: linked.user!.email!,
+                userName: linked.user!.displayName ?? '',
+              ),
+            );
+            return User(
+              uid: linked.user!.uid,
+              isAnonymous: linked.user!.isAnonymous,
+              email: linked.user!.email!,
+            );
+          }
+          return null;
+        } on firebase_auth.FirebaseAuthException catch (e) {
+          // If this Google credential already belongs to an existing account,
+          // sign into that account instead of forcing a registration.
+          if (e.code == 'credential-already-in-use') {
+            final firebase_auth.UserCredential signedIn =
+                await _firebaseAuth.signInWithCredential(credential);
+
+            if (signedIn.user != null) {
+              await FirebaseUserManager().setUser(
+                User(
+                  uid: signedIn.user!.uid,
+                  email: signedIn.user!.email!,
+                  userName: signedIn.user!.displayName ?? '',
+                ),
+              );
+              return User(
+                uid: signedIn.user!.uid,
+                isAnonymous: signedIn.user!.isAnonymous,
+                email: signedIn.user!.email!,
+              );
+            }
+            return null;
+          }
+
+          print('Error upgrading anonymous user with Google: ${e.code}');
+          return null;
+        }
+      }
+
+      // Otherwise, perform a normal Google sign-in
+      final firebase_auth.UserCredential userCredential =
+          await _firebaseAuth.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
+        await FirebaseUserManager().setUser(
+          User(
+            uid: userCredential.user!.uid,
+            email: userCredential.user!.email!,
+            userName: userCredential.user!.displayName ?? '',
+          ),
+        );
+        return User(
+          uid: userCredential.user!.uid,
+          isAnonymous: userCredential.user!.isAnonymous,
+          email: userCredential.user!.email!,
+        );
+      }
+      return null;
+    } catch (e) {
+      print('Error signing in with Google: ${e.toString()}');
+      return null;
+    }
   }
 
   @override
   Future<User?> linkAnonymousWithEmailPassword(
-      String email, String password, String username) {
-    return AuthService.linkAnonymousWithEmailPassword(email, password, username);
+      String email, String password, String username) async {
+    try {
+      final currentUser = _firebaseAuth.currentUser;
+
+      if (currentUser == null || !currentUser.isAnonymous) {
+        throw Exception('No anonymous user to link');
+      }
+
+      final credential = firebase_auth.EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+
+      final firebase_auth.UserCredential userCredential =
+          await currentUser.linkWithCredential(credential);
+
+      if (userCredential.user != null) {
+        await FirebaseUserManager().setUser(
+          User(
+            uid: userCredential.user!.uid,
+            email: email,
+            userName: username,
+          ),
+        );
+        return User(
+          uid: userCredential.user!.uid,
+          isAnonymous: userCredential.user!.isAnonymous,
+          email: userCredential.user!.email!,
+        );
+      }
+      return null;
+    } catch (e) {
+      print('Error linking anonymous user: ${e.toString()}');
+      return null;
+    }
   }
 
-  @override
-  Future<User?> linkAnonymousWithGoogle() {
-    return AuthService.linkAnonymousWithGoogle();
-  }
+  // Removed: linkAnonymousWithGoogle(). Anonymous upgrade is handled inside signInWithGoogle.
 
   @override
-  Future<void> signOut() {
-    return AuthService.signOut();
+  Future<void> signOut() async {
+    await _firebaseAuth.signOut();
+    await signInAnonymously();
   }
 
   @override
   User? getCurrentUser() {
-    // AuthService doesn't have a getCurrentUser method, so return null
-    // In production, you might want to add this to AuthService
+    final currentUser = _firebaseAuth.currentUser;
+    if (currentUser != null) {
+      return User(
+        uid: currentUser.uid,
+        isAnonymous: currentUser.isAnonymous,
+        email: currentUser.email,
+      );
+    }
     return null;
   }
 }

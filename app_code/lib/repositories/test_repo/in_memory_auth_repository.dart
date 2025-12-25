@@ -83,7 +83,7 @@ class InMemoryAuthRepository implements AuthRepository {
   Future<User?> signIn(String email, String password) async {
     if (_shouldFailSignIn) {
       _shouldFailSignIn = false; // Reset after use
-      return null;
+      throw Exception('Sign in failed');
     }
 
     if (_userCredentials[email] == password) {
@@ -91,7 +91,7 @@ class InMemoryAuthRepository implements AuthRepository {
       return _currentUser;
     }
 
-    return null; // Invalid credentials
+    throw Exception('Invalid credentials'); // Invalid credentials
   }
 
   @override
@@ -135,28 +135,6 @@ class InMemoryAuthRepository implements AuthRepository {
     _registeredUsers[email] = user;
     _currentUser = user;
 
-    return user;
-  }
-
-  @override
-  Future<User?> linkAnonymousWithGoogle() async {
-    if (_currentUser == null || !_currentUser!.isAnonymous) {
-      return null;
-    }
-
-    if (_shouldFailGoogleSignIn) {
-      _shouldFailGoogleSignIn = false;
-      return null;
-    }
-
-    final user = User(
-      uid: _currentUser!.uid,
-      email: 'testuser@gmail.com',
-      userName: 'Test User',
-      isAnonymous: false,
-    );
-
-    _currentUser = user;
     return user;
   }
 

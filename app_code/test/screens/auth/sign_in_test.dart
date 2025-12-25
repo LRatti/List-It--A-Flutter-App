@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/screens/auth/sign_in.dart';
-import 'package:app_code/controllers/auth_controller.dart';
-import 'package:app_code/repositories/test/in_memory_auth_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/providers/auth_provider.dart';
+import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
 
 void main() {
   late InMemoryAuthRepository repository;
-  late AuthController controller;
 
   setUp(() {
     repository = InMemoryAuthRepository();
-    controller = AuthController(repository);
   });
 
   tearDown(() {
@@ -19,9 +18,14 @@ void main() {
 
   Future<void> pumpSignInForm(WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SignInForm(authController: controller),
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: const MaterialApp(
+          home: Scaffold(
+            body: SignInForm(),
+          ),
         ),
       ),
     );
@@ -80,7 +84,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify user is signed in
-    final user = controller.getCurrentUser();
+    final user = repository.getCurrentUser();
     expect(user, isNotNull);
     expect(user!.email, 'test@example.com');
     expect(user.isAnonymous, false);
