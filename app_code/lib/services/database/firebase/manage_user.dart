@@ -31,4 +31,14 @@ class FirebaseUserManager {
       return null;
     }
   }
+
+  Future<void> deleteUser(String uid) async {
+    try {
+      await _db.doc(uid).delete();
+      print("User with uid $uid deleted successfully");
+    } catch (e) {
+      print("Error deleting user: $e");
+      throw Exception('Failed to delete user: $e');
+    }
+  }
 }

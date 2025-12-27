@@ -114,7 +114,10 @@ class InMemoryAuthRepository implements AuthRepository {
 
   @override
   Future<User?> linkAnonymousWithEmailPassword(
-      String email, String password, String username) async {
+    String email,
+    String password,
+    String username,
+  ) async {
     if (_currentUser == null || !_currentUser!.isAnonymous) {
       return null;
     }
@@ -147,6 +150,84 @@ class InMemoryAuthRepository implements AuthRepository {
   @override
   User? getCurrentUser() {
     return _currentUser;
+  }
+
+  @override
+  bool canUpdateCredentials() {
+    // In-memory implementation always allows credential updates for non-anonymous users
+    return _currentUser != null && !_currentUser!.isAnonymous;
+  }
+
+  @override
+  Future<void> updateEmail({
+    required String newEmail,
+    required String currentPassword,
+  }) async {
+    if (_currentUser == null || _currentUser!.isAnonymous) {
+      throw Exception('No authenticated user');
+    }
+
+    final currentEmail = _currentUser!.email;
+    if (currentEmail == null) {
+      throw Exception('Current email not available');
+    }
+
+    // Verify current password
+    if (_userCredentials[currentEmail] != currentPassword) {
+      throw Exception('Invalid password');
+    }
+
+    // Update email
+    final updatedUser = User(
+      uid: _currentUser!.uid,
+      email: newEmail,
+      userName: _currentUser!.getUserName(),
+      isAnonymous: false,
+    );
+
+    // Update internal maps
+    _userCredentials.remove(currentEmail);
+    _userCredentials[newEmail] = currentPassword;
+    _registeredUsers.remove(currentEmail);
+    _registeredUsers[newEmail] = updatedUser;
+    _currentUser = updatedUser;
+  }
+
+  @override
+  Future<void> updatePassword({
+    required String newPassword,
+    required String currentPassword,
+  }) async {
+    if (_currentUser == null || _currentUser!.isAnonymous) {
+      throw Exception('No authenticated user');
+    }
+
+    final currentEmail = _currentUser!.email;
+    if (currentEmail == null) {
+      throw Exception('Current email not available');
+    }
+
+    // Verify current password
+    if (_userCredentials[currentEmail] != currentPassword) {
+      throw Exception('Invalid password');
+    }
+
+    // Update password
+    _userCredentials[currentEmail] = newPassword;
+
+    // Sign out after password change (matching Firebase behavior)
+    await signOut();
+  }
+
+  @override
+  Future<void> abortEmailVerification({required bool isNewSignup}) async {
+    if (isNewSignup) {
+      // For new signup: clear the current user and sign in anonymously
+      _currentUser = null;
+      await signInAnonymously();
+    } else {
+      // For email update: just do nothing, user stays signed in with original email
+    }
   }
 
   /// Clear all state (useful for test cleanup)

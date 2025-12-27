@@ -7,7 +7,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 /// Firebase implementation of AuthRepository.
 /// Directly handles all authentication operations with Firebase.
 class FirebaseAuthRepository implements AuthRepository {
-  final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  final firebase_auth.FirebaseAuth _firebaseAuth =
+      firebase_auth.FirebaseAuth.instance;
 
   @override
   Future<User?> ensureAuthenticated() async {
@@ -28,8 +29,8 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<User?> signInAnonymously() async {
     try {
-      final firebase_auth.UserCredential credential =
-          await _firebaseAuth.signInAnonymously();
+      final firebase_auth.UserCredential credential = await _firebaseAuth
+          .signInAnonymously();
 
       if (credential.user != null) {
         return User(
@@ -47,11 +48,8 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<User?> signUp(String email, String password) async {
     try {
-      final firebase_auth.UserCredential credential =
-          await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      final firebase_auth.UserCredential credential = await _firebaseAuth
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       if (credential.user != null) {
         return User(
@@ -70,11 +68,8 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<User?> signIn(String email, String password) async {
     try {
-      final firebase_auth.UserCredential credential =
-          await _firebaseAuth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      final firebase_auth.UserCredential credential = await _firebaseAuth
+          .signInWithEmailAndPassword(email: email, password: password);
 
       if (credential.user != null) {
         return User(
@@ -107,7 +102,9 @@ class FirebaseAuthRepository implements AuthRepository {
       } catch (e) {
         // On web, signIn is deprecated and may fail - that's expected
         // Users should authenticate via the Google Sign-In button in index.html
-        print('Interactive sign-in unavailable (expected on web): ${e.toString()}');
+        print(
+          'Interactive sign-in unavailable (expected on web): ${e.toString()}',
+        );
         return null;
       }
 
@@ -126,8 +123,8 @@ class FirebaseAuthRepository implements AuthRepository {
       // If the current user is anonymous, try upgrading by linking first.
       if (currentUser != null && currentUser.isAnonymous) {
         try {
-          final firebase_auth.UserCredential linked =
-              await currentUser.linkWithCredential(credential);
+          final firebase_auth.UserCredential linked = await currentUser
+              .linkWithCredential(credential);
 
           if (linked.user != null) {
             await FirebaseUserManager().setUser(
@@ -148,8 +145,8 @@ class FirebaseAuthRepository implements AuthRepository {
           // If this Google credential already belongs to an existing account,
           // sign into that account instead of forcing a registration.
           if (e.code == 'credential-already-in-use') {
-            final firebase_auth.UserCredential signedIn =
-                await _firebaseAuth.signInWithCredential(credential);
+            final firebase_auth.UserCredential signedIn = await _firebaseAuth
+                .signInWithCredential(credential);
 
             if (signedIn.user != null) {
               await FirebaseUserManager().setUser(
@@ -174,8 +171,8 @@ class FirebaseAuthRepository implements AuthRepository {
       }
 
       // Otherwise, perform a normal Google sign-in
-      final firebase_auth.UserCredential userCredential =
-          await _firebaseAuth.signInWithCredential(credential);
+      final firebase_auth.UserCredential userCredential = await _firebaseAuth
+          .signInWithCredential(credential);
 
       if (userCredential.user != null) {
         await FirebaseUserManager().setUser(
@@ -200,7 +197,10 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<User?> linkAnonymousWithEmailPassword(
-      String email, String password, String username) async {
+    String email,
+    String password,
+    String username,
+  ) async {
     try {
       final currentUser = _firebaseAuth.currentUser;
 
@@ -213,16 +213,15 @@ class FirebaseAuthRepository implements AuthRepository {
         password: password,
       );
 
-      final firebase_auth.UserCredential userCredential =
-          await currentUser.linkWithCredential(credential);
+      final firebase_auth.UserCredential userCredential = await currentUser
+          .linkWithCredential(credential);
 
       if (userCredential.user != null) {
+        // Send email verification
+        await userCredential.user!.sendEmailVerification();
+
         await FirebaseUserManager().setUser(
-          User(
-            uid: userCredential.user!.uid,
-            email: email,
-            userName: username,
-          ),
+          User(uid: userCredential.user!.uid, email: email, userName: username),
         );
         return User(
           uid: userCredential.user!.uid,
@@ -256,5 +255,120 @@ class FirebaseAuthRepository implements AuthRepository {
       );
     }
     return null;
+  }
+
+  @override
+  bool canUpdateCredentials() {
+    final user = _firebaseAuth.currentUser;
+    if (user == null || user.isAnonymous) return false;
+    final providers = user.providerData.map((p) => p.providerId).toList();
+    final isGoogle = providers.contains('google.com');
+    final isPassword = providers.contains('password');
+    return !isGoogle && isPassword;
+  }
+
+  @override
+  Future<void> updateEmail({
+    required String newEmail,
+    required String currentPassword,
+  }) async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user');
+    }
+    if (!canUpdateCredentials()) {
+      throw Exception('Email update not allowed for Google accounts');
+    }
+
+    final email = user.email;
+    if (email == null) {
+      throw Exception('Current email not available');
+    }
+
+    // Reauthenticate with current email and password
+    final credential = firebase_auth.EmailAuthProvider.credential(
+      email: email,
+      password: currentPassword,
+    );
+    await user.reauthenticateWithCredential(credential);
+
+    // Update email in Firebase Auth and send verification email
+    await user.verifyBeforeUpdateEmail(newEmail);
+
+    // Update Firestore user document preserving username
+    final uid = user.uid;
+    final manager = FirebaseUserManager();
+    final existing = await manager.getUserById(uid);
+    final updated = User(
+      uid: uid,
+      email: newEmail,
+      userName: existing?.getUserName() ?? '',
+    );
+    await manager.setUser(updated);
+
+    // Do NOT sign out - user will be navigated to verification screen
+  }
+
+  @override
+  Future<void> updatePassword({
+    required String newPassword,
+    required String currentPassword,
+  }) async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user');
+    }
+    if (!canUpdateCredentials()) {
+      throw Exception('Password update not allowed for Google accounts');
+    }
+
+    final email = user.email;
+    if (email == null) {
+      throw Exception('Current email not available');
+    }
+
+    // Reauthenticate first
+    final credential = firebase_auth.EmailAuthProvider.credential(
+      email: email,
+      password: currentPassword,
+    );
+    await user.reauthenticateWithCredential(credential);
+
+    // Update password in Firebase Auth
+    await user.updatePassword(newPassword);
+
+    // Force reauthentication by signing out
+    await signOut();
+  }
+
+  @override
+  Future<void> abortEmailVerification({required bool isNewSignup}) async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user');
+    }
+
+    if (isNewSignup) {
+      // For new signup: delete the account and sign in anonymously
+      try {
+        // Delete user from Firestore first
+        await FirebaseUserManager().deleteUser(user.uid);
+        
+        // Delete the Firebase Auth account
+        await user.delete();
+        
+        // Sign in anonymously
+        await signInAnonymously();
+      } catch (e) {
+        print('Error aborting new signup: ${e.toString()}');
+        throw Exception('Failed to abort signup: $e');
+      }
+    } else {
+      // For email update: just cancel the verification process
+      // The user remains signed in with their old email
+      // The verification link becomes invalid as the user is still technically
+      // on their original email in the app
+      // No action needed - user just navigates back
+    }
   }
 }

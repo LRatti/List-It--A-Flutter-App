@@ -79,6 +79,9 @@ class AuthNotifier extends AsyncNotifier<User?> {
     final user = await _repository.signIn(email, password);
     if (user != null) {
       state = AsyncData(user);
+    } else {
+      // Surface an error so callers can avoid navigating on failed login
+      throw Exception('Invalid email or password');
     }
   }
 
@@ -104,6 +107,22 @@ class AuthNotifier extends AsyncNotifier<User?> {
   /// Sign out and transition to anonymous authentication
   Future<void> signOut() async {
     await _repository.signOut();
-    state = AsyncData(null);
+    // signOut() signs in anonymously inside the repository; refresh state accordingly
+    final user = _repository.getCurrentUser();
+    state = AsyncData(user);
+  }
+
+  /// Abort email verification process
+  /// If [isNewSignup] is true, deletes the account and signs in anonymously
+  /// If [isNewSignup] is false, just stays signed in with original email
+  Future<void> abortEmailVerification({required bool isNewSignup}) async {
+    await _repository.abortEmailVerification(isNewSignup: isNewSignup);
+    
+    if (isNewSignup) {
+      // After deleting account and signing in anonymously
+      final user = _repository.getCurrentUser();
+      state = AsyncData(user);
+    }
+    // For email updates, user state remains unchanged
   }
 }

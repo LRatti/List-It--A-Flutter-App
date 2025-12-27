@@ -1,6 +1,7 @@
 import 'package:app_code/screens/auth/welcome.dart';
 import 'package:app_code/screens/home/profile.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
+import 'package:app_code/screens/settings/verification_screen.dart';
 import 'package:app_code/repositories/real_app_repo/firebase_auth_repository.dart';
 import 'package:flutter/material.dart';
 // firebase
@@ -10,28 +11,21 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Automatically sign in anonymously only if no user is signed in
   await FirebaseAuthRepository().ensureAuthenticated();
 
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-  
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -42,6 +36,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/settings': (context) => const SettingsScreen(),
         '/signin': (context) => const WelcomeScreen(),
+        '/verification': (context) => const VerificationScreen(),
       },
       home: const ProfileScreen(),
     );

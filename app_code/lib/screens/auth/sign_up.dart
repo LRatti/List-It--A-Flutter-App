@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/auth_provider.dart';
+import 'package:app_code/providers/email_verification_provider.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {
   final dynamic authNotifier; // Keep for backward compatibility with tests
@@ -38,7 +39,9 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             TextFormField(
               controller: _usernameController,
               key: const Key('username_field'),
-              decoration: const InputDecoration(labelText: 'How would you like to be called?'),
+              decoration: const InputDecoration(
+                labelText: 'How would you like to be called?',
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a username';
@@ -102,12 +105,27 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   final email = _emailController.text.trim();
                   final password = _passwordController.text.trim();
                   final username = _usernameController.text.trim();
-                  
+
                   try {
-                    await authNotifier.linkAnonymousWithEmailPassword(email, password, username);
+                    await authNotifier.linkAnonymousWithEmailPassword(
+                      email,
+                      password,
+                      username,
+                    );
 
                     if (context.mounted) {
-                      Navigator.of(context).pop();
+                      // Set email verification session to indicate new signup
+                      ref
+                          .read(emailVerificationSessionProvider.notifier)
+                          .state = EmailVerificationSession(
+                        isNewSignup: true,
+                        email: email,
+                      );
+
+                      // Navigate to verification screen
+                      Navigator.of(
+                        context,
+                      ).pushReplacementNamed('/verification');
                     }
                   } catch (e) {
                     setState(() {

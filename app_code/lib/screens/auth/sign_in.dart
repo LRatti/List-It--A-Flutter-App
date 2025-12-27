@@ -87,7 +87,8 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                   try {
                     await authNotifier.signIn(email, password);
                     if (context.mounted) {
-                      Navigator.of(context).pop();
+                      // Navigate to home screen after successful login
+                      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
                     }
                   } catch (e) {
                     setState(() {
