@@ -116,7 +116,21 @@ void main() {
     // Configure repository to fail on first attempt
     repository.setSignUpFailure(true);
 
-    await pumpSignUpForm(tester);
+    // Use an app with the verification route to allow navigation after success
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp(
+          routes: {
+            '/verification': (context) => const Scaffold(body: Text('Verification')),
+          },
+          home: const Scaffold(body: SignUpForm()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
 
     // First attempt
     await tester.enterText(find.byKey(const Key('username_field')), 'testuser');
@@ -185,5 +199,32 @@ void main() {
     expect(linkedUser.isAnonymous, false); // No longer anonymous
     expect(linkedUser.email, 'linked@example.com');
     expect(linkedUser.getUserName(), 'linkeduser');
+  });
+
+  testWidgets('sets verification session and navigates to verification screen', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp(
+          routes: {
+            '/verification': (context) => const Scaffold(body: Text('Verification')),
+          },
+          home: const Scaffold(body: SignUpForm()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('username_field')), 'tester');
+    await tester.enterText(find.byKey(const Key('email_field')), 'verify@example.com');
+    await tester.enterText(find.byKey(const Key('password_field')), 'password123');
+
+    await tester.tap(find.byKey(const Key('sign_up_button')));
+    await tester.pumpAndSettle();
+
+    // Navigates to verification screen
+    expect(find.text('Verification'), findsOneWidget);
   });
 }

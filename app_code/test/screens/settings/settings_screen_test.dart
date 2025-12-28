@@ -17,10 +17,8 @@ void main() {
 		);
 	}
 
-	Finder emailFieldFinder() {
-		return find.byWidgetPredicate(
-			(widget) => widget is InputDecorator && widget.decoration.labelText == 'Email',
-		);
+	Finder currentEmailText() {
+		return find.byWidgetPredicate((widget) => widget is Text && widget.data == 'Current Email');
 	}
 
 	testWidgets('shows current email when available', (tester) async {
@@ -29,8 +27,9 @@ void main() {
 		await tester.pumpWidget(buildScreen(user: user));
 		await tester.pumpAndSettle();
 
-		final field = tester.widget<TextFormField>(emailFieldFinder());
-		expect(field.controller?.text, 'user@example.com');
+		// Verify the current email label exists and the email text is shown
+		expect(currentEmailText(), findsOneWidget);
+		expect(find.text('user@example.com'), findsWidgets);
 	});
 
 	testWidgets('shows empty email when not provided', (tester) async {
@@ -39,8 +38,14 @@ void main() {
 		await tester.pumpWidget(buildScreen(user: user));
 		await tester.pumpAndSettle();
 
-		final field = tester.widget<TextFormField>(emailFieldFinder());
-		expect(field.controller?.text, '');
+		// Current email section exists, but no non-empty email text is displayed
+		expect(currentEmailText(), findsOneWidget);
+		expect(
+			find.byWidgetPredicate(
+				(w) => w is Text && (w.data?.contains('@') ?? false),
+			),
+			findsNothing,
+		);
 	});
 }
 

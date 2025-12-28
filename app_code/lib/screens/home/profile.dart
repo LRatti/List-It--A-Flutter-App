@@ -23,7 +23,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _checkEmailVerification() {
     // Use Riverpod auth state instead of direct Firebase access
-    final authState = ref.read(authProvider);
     final currentUser = firebase_auth.FirebaseAuth.instance.currentUser;
 
     // Only redirect if user has an email (not anonymous) and email is not verified
