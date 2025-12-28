@@ -1,18 +1,24 @@
 import 'package:app_code/models/user.dart';
+import 'package:app_code/providers/auth_provider.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/services/database_manager/manage_user.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
 	TestWidgetsFlutterBinding.ensureInitialized();
 
 	Widget buildScreen({required User? user}) {
-		return MaterialApp(
-			home: SettingsScreen(
-				userManager: _FakeUserManager(user),
-				authRepository: _FakeAuthRepository(),
+		return ProviderScope(
+			overrides: [
+				authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
+			],
+			child: MaterialApp(
+				home: SettingsScreen(
+					userManager: _FakeUserManager(user),
+				),
 			),
 		);
 	}
