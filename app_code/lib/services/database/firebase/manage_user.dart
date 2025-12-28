@@ -2,19 +2,21 @@ import 'package:app_code/models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirebaseUserManager {
-
-  FirebaseUserManager({
-    FirebaseFirestore? firestore,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirebaseUserManager({FirebaseFirestore? firestore})
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
-  CollectionReference<Map<String, dynamic>> get _db => _firestore.collection("Users");
+  CollectionReference<Map<String, dynamic>> get _db =>
+      _firestore.collection("Users");
 
-  Future<void> setUser(User user) async { //to be awaited when called
-    await _db.doc(user.uid).set(user.toDatabase())
-      .whenComplete(  () => print("User created successfully"))
-      .catchError((error) => print("Failed to create user: $error"));
+  Future<void> setUser(User user) async {
+    //to be awaited when called
+    await _db
+        .doc(user.uid)
+        .set(user.toDatabase())
+        .whenComplete(() => print("User created successfully"))
+        .catchError((error) => print("Failed to create user: $error"));
   }
 
   Future<User?> getUserById(String uid) async {

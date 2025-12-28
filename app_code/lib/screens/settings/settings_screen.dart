@@ -1,7 +1,6 @@
 import 'package:app_code/models/user.dart';
 import 'package:app_code/services/database_manager/manage_user.dart';
-import 'package:app_code/repositories/abstract/auth_repository.dart';
-import 'package:app_code/repositories/real_app_repo/firebase_auth_repository.dart';
+import 'package:app_code/providers/auth_provider.dart';
 import 'package:app_code/providers/email_verification_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,14 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 part 'settings_controller.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({
-    super.key,
-    this.userManager,
-    this.authRepository,
-  });
+  const SettingsScreen({super.key, this.userManager});
 
   final UserManager? userManager;
-  final AuthRepository? authRepository;
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -42,9 +36,7 @@ class _SettingsScreenState extends SettingsController {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
-              );
+              return Center(child: Text('Error: ${snapshot.error}'));
             } else if (snapshot.connectionState == ConnectionState.done) {
               final User? user = snapshot.data;
               if (user != null) {
@@ -57,14 +49,10 @@ class _SettingsScreenState extends SettingsController {
 
                 return _buildEditForm(user);
               } else {
-                return const Center(
-                  child: Text('No user data found.'),
-                );
+                return const Center(child: Text('No user data found.'));
               }
             } else {
-              return const Center(
-                child: Text('Something went wrong.'),
-              );
+              return const Center(child: Text('Something went wrong.'));
             }
           },
         ),
@@ -105,16 +93,16 @@ class _SettingsScreenState extends SettingsController {
               children: [
                 Text(
                   'Current Email',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Colors.grey[700],
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelMedium?.copyWith(color: Colors.grey[700]),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   user.email ?? '',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -130,9 +118,7 @@ class _SettingsScreenState extends SettingsController {
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Text('Save Profile Changes'),
             ),
@@ -153,17 +139,14 @@ class _SettingsScreenState extends SettingsController {
               child: Text(
                 'Email and password are managed via your Google account. Changes are disabled.',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.blue[900],
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.blue[900]),
               ),
             )
           else ...[
             // Email Update Section
-            Text(
-              'Update Email',
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+            Text('Update Email', style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 12),
             TextFormField(
               controller: emailController,
@@ -216,10 +199,7 @@ class _SettingsScreenState extends SettingsController {
             ),
             const SizedBox(height: 24),
             // Current Password Verification
-            Text(
-              'Verification',
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+            Text('Verification', style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 12),
             TextFormField(
               controller: currentPasswordController,
@@ -258,16 +238,12 @@ class _SettingsScreenState extends SettingsController {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Container(
-          height: 2,
-          width: 60,
-          color: Colors.blue[500],
-        ),
+        Container(height: 2, width: 60, color: Colors.blue[500]),
       ],
     );
   }

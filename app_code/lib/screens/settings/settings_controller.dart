@@ -10,7 +10,6 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
   late final UserManager _userManager;
   bool _isSaving = false;
   bool _canEditCredentials = false;
-  late final AuthRepository _authRepository;
 
   // Public getters for UI access
   TextEditingController get usernameController => _usernameController;
@@ -35,8 +34,17 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
     _newPasswordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
     _userManager = widget.userManager ?? UserManager();
-    _authRepository = widget.authRepository ?? FirebaseAuthRepository();
-    _canEditCredentials = _authRepository.canUpdateCredentials();
+    // canEditCredentials will be set after first build when ref is available
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialize canEditCredentials using authProvider after ref is available
+    if (!_canEditCredentials) {
+      final authNotifier = ref.read(authProvider.notifier);
+      _canEditCredentials = authNotifier.canUpdateCredentials();
+    }
   }
 
   @override
@@ -91,7 +99,7 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
       userName: _usernameController.text,
     );
   }
-  
+
   /// Update authentication email and/or password based on filled inputs.
   Future<void> updateAuthCredentials(User user) async {
     if (!canEditCredentials) {
@@ -158,25 +166,24 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
 
     setState(() => _isSaving = true);
     try {
+      final authNotifier = ref.read(authProvider.notifier);
+
       if (wantsEmailUpdate) {
-        await _authRepository.updateEmail(
+        await authNotifier.updateEmail(
           newEmail: newEmail,
           currentPassword: currentPassword,
         );
         if (mounted) {
           // Set email verification session to indicate email update
           ref.read(emailVerificationSessionProvider.notifier).state =
-              EmailVerificationSession(
-            isNewSignup: false,
-            email: newEmail,
-          );
+              EmailVerificationSession(isNewSignup: false, email: newEmail);
 
           showSnackBar('Verification email sent to new address!');
           // Navigate to verification screen
           Navigator.pushReplacementNamed(context, '/verification');
         }
       } else if (wantsPasswordUpdate) {
-        await _authRepository.updatePassword(
+        await authNotifier.updatePassword(
           newPassword: newPassword,
           currentPassword: currentPassword,
         );

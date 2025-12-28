@@ -364,11 +364,19 @@ class FirebaseAuthRepository implements AuthRepository {
         throw Exception('Failed to abort signup: $e');
       }
     } else {
-      // For email update: just cancel the verification process
-      // The user remains signed in with their old email
-      // The verification link becomes invalid as the user is still technically
-      // on their original email in the app
-      // No action needed - user just navigates back
+        final email = user.email;
+        if (email == null) {
+          throw Exception('Current email not available');
+        } 
+        //Restore the original email in firestore
+        final manager = FirebaseUserManager();
+        final existing = await manager.getUserById(user.uid);
+        final updated = User(
+          uid: user.uid,
+          email: email,
+          userName: existing?.getUserName() ?? '',
+        );
+        await manager.setUser(updated);
     }
   }
 }

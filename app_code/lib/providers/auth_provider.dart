@@ -22,22 +22,24 @@ class AuthNotifier extends AsyncNotifier<User?> {
   @override
   Future<User?> build() async {
     _repository = ref.read(authRepositoryProvider);
-    
+
     // Listen to Firebase auth state changes
     // Use userChanges() instead of authStateChanges() to detect credential linking
     // userChanges() emits when user properties change (like isAnonymous, email, etc.)
     firebase_auth.FirebaseAuth.instance.userChanges().listen((firebaseUser) {
       if (firebaseUser != null) {
-        state = AsyncData(User(
-          uid: firebaseUser.uid,
-          isAnonymous: firebaseUser.isAnonymous,
-          email: firebaseUser.email,
-        ));
+        state = AsyncData(
+          User(
+            uid: firebaseUser.uid,
+            isAnonymous: firebaseUser.isAnonymous,
+            email: firebaseUser.email,
+          ),
+        );
       } else {
         state = AsyncData(null);
       }
     });
-    
+
     // Return the current user on initial load
     final currentUser = firebase_auth.FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
@@ -95,8 +97,15 @@ class AuthNotifier extends AsyncNotifier<User?> {
 
   /// Convert anonymous user to permanent account with email/password
   Future<void> linkAnonymousWithEmailPassword(
-      String email, String password, String username) async {
-    final user = await _repository.linkAnonymousWithEmailPassword(email, password, username);
+    String email,
+    String password,
+    String username,
+  ) async {
+    final user = await _repository.linkAnonymousWithEmailPassword(
+      email,
+      password,
+      username,
+    );
     if (user != null) {
       state = AsyncData(user);
     } else {
@@ -117,12 +126,42 @@ class AuthNotifier extends AsyncNotifier<User?> {
   /// If [isNewSignup] is false, just stays signed in with original email
   Future<void> abortEmailVerification({required bool isNewSignup}) async {
     await _repository.abortEmailVerification(isNewSignup: isNewSignup);
-    
+
     if (isNewSignup) {
       // After deleting account and signing in anonymously
       final user = _repository.getCurrentUser();
       state = AsyncData(user);
     }
     // For email updates, user state remains unchanged
+  }
+
+  /// Whether current user can update email/password (non-Google, non-anonymous)
+  bool canUpdateCredentials() {
+    return _repository.canUpdateCredentials();
+  }
+
+  /// Update the user's email in FirebaseAuth and Firestore.
+  /// Must reauthenticate using the current password before updating.
+  Future<void> updateEmail({
+    required String newEmail,
+    required String currentPassword,
+  }) async {
+    await _repository.updateEmail(
+      newEmail: newEmail,
+      currentPassword: currentPassword,
+    );
+    // State will be updated by userChanges() listener
+  }
+
+  /// Update the user's password in FirebaseAuth.
+  /// Must reauthenticate using the current password before updating.
+  Future<void> updatePassword({
+    required String newPassword,
+    required String currentPassword,
+  }) async {
+    await _repository.updatePassword(
+      newPassword: newPassword,
+      currentPassword: currentPassword,
+    );
   }
 }

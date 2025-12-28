@@ -5,6 +5,7 @@ abstract class VerificationController
   Timer? _pollTimer;
   bool _isResending = false;
   bool _isCheckingVerification = false;
+  DateTime? _lastResendAt;
 
   // Public getters for UI access
   bool get isResending => _isResending;
@@ -209,19 +210,61 @@ abstract class VerificationController
 
   /// Resend verification email
   Future<void> resendVerificationEmail() async {
+    // Local cooldown to avoid Firebase rate limiting
+    const cooldown = Duration(seconds: 60);
+    final now = DateTime.now();
+    if (_lastResendAt != null && now.difference(_lastResendAt!) < cooldown) {
+      final remaining = cooldown - now.difference(_lastResendAt!);
+      if (mounted) {
+        showSnackBar('Please wait ${remaining.inSeconds}s before resending.', isError: true);
+      }
+      return;
+    }
+
     setState(() => _isResending = true);
 
     try {
+      // Determine context: new signup vs email update
+      final verificationSession = ref.read(emailVerificationSessionProvider);
+      final isNewSignup = verificationSession?.isNewSignup ?? true;
+      final newEmail = verificationSession?.email;
+
       final currentUser = firebase_auth.FirebaseAuth.instance.currentUser;
-      if (currentUser != null && !currentUser.emailVerified) {
+      if (currentUser == null) {
+        if (mounted) {
+          showSnackBar('No authenticated user found.', isError: true);
+        }
+        return;
+      }
+
+      if (isNewSignup) {
+        // New signup: resend to the current user's email if not verified yet
         await currentUser.sendEmailVerification();
         if (mounted) {
           showSnackBar('Verification email sent! Please check your inbox.');
         }
+        _lastResendAt = DateTime.now();
+      } else {
+        // Email update flow: resend to the NEW email address
+        if (newEmail == null || newEmail.isEmpty) {
+          if (mounted) {
+            showSnackBar('Cannot resend: new email not available.', isError: true);
+          }
+          return;
+        }
+        await currentUser.verifyBeforeUpdateEmail(newEmail);
+        if (mounted) {
+          showSnackBar('Verification email re-sent to your new address.');
+        }
+        _lastResendAt = DateTime.now();
       }
     } catch (e) {
       if (mounted) {
-        showSnackBar('Error sending verification email: $e', isError: true);
+        if (e is firebase_auth.FirebaseAuthException && e.code == 'too-many-requests') {
+          showSnackBar('Too many requests. Please wait a few minutes and try again.', isError: true);
+        } else {
+          showSnackBar('Error sending verification email: $e', isError: true);
+        }
       }
     } finally {
       if (mounted) {
