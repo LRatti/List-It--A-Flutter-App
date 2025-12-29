@@ -5,17 +5,45 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 class FirebaseProductManager {
   
   // Methods to manage products in Firebase
-  static final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  FirebaseProductManager({
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+  })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
   
   CollectionReference<Map<String, dynamic>> get _products {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Products");
+    return _firestore.collection("Users").doc(uid).collection("Products");
+  }
+
+  CollectionReference<Map<String, dynamic>> get _associations {
+    final uid = _firebaseAuth.currentUser?.uid;
+    if (uid == null) throw Exception('User not authenticated');
+    return _firestore.collection("Users").doc(uid).collection("Associations");
   }
 
   Future<void> setProduct(Product product) async {
     // Code to add and update a user product to the database
-    await _products.doc(product.id).set(product.toJson())
+    WriteBatch batch = _firestore.batch();
+    
+    // Save product data
+    batch.set(_products.doc(product.id), product.toDatabase());
+    
+    // Save associations separately
+    product.associations.forEach((supermarketId, categoryId) {
+      final associationId = '${product.id}_$supermarketId';
+      batch.set(_associations.doc(associationId), {
+        'productId': product.id,
+        'supermarketId': supermarketId,
+        'categoryId': categoryId,
+      });
+    });
+    
+    await batch.commit()
       .whenComplete(() => print("Product added successfully"))
       .catchError((error) => print("Failed to add product: $error"));
   }
@@ -24,9 +52,21 @@ class FirebaseProductManager {
     // Code to add multiple products to the database using batch writes
     if (products.isEmpty) return;
     
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
+    
     for (var product in products) {
-      batch.set(_products.doc(product.id), product.toJson());
+      // Save product data
+      batch.set(_products.doc(product.id), product.toDatabase());
+      
+      // Save associations separately
+      product.associations.forEach((supermarketId, categoryId) {
+        final associationId = '${product.id}_$supermarketId';
+        batch.set(_associations.doc(associationId), {
+          'productId': product.id,
+          'supermarketId': supermarketId,
+          'categoryId': categoryId,
+        });
+      });
     }
     
     await batch.commit()
@@ -39,7 +79,12 @@ class FirebaseProductManager {
     try {
       DocumentSnapshot<Map<String, dynamic>> doc = await _products.doc(pid).get();
       if (doc.exists) {
-        return Product.fromJson(doc.data()!);
+        // Fetch associations for this product
+        Map<String, String> associations = await _getProductAssociations(pid);
+        
+        var productData = doc.data()!;
+        productData['associations'] = associations;
+        return Product.fromDatabase(productData, associations: associations);
       } else {
         print("Product with id $pid does not exist.");
         return null;
@@ -59,7 +104,8 @@ class FirebaseProductManager {
           .get();
       
       if (querySnapshot.docs.isNotEmpty) {
-        return Product.fromJson(querySnapshot.docs.first.data());
+        String pid = querySnapshot.docs.first.id;
+        return getProductById(pid);
       } else {
         print("Product with name $name does not exist.");
         return null;
@@ -74,7 +120,13 @@ class FirebaseProductManager {
     // Code to retrieve all products from the database
     try {
       QuerySnapshot<Map<String, dynamic>> querySnapshot = await _products.get();
-      return querySnapshot.docs.map((doc) => Product.fromJson(doc.data())).toList();
+      
+      // Fetch all products with their associations in parallel
+      List<Product> products = await Future.wait(
+        querySnapshot.docs.map((doc) => getProductById(doc.id))
+      ).then((results) => results.whereType<Product>().toList());
+      
+      return products;
     } catch (e) {
       print("Error fetching products: $e");
     }
@@ -84,13 +136,40 @@ class FirebaseProductManager {
   Future<List<Product>> getVisibleProducts() async {
     // Code to retrieve all visible products from the database
     try {
-      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _products
-          .where('isVisible', isEqualTo: true)
+        QuerySnapshot<Map<String, dynamic>> querySnapshot = await _products
+          .where('is_visible', isEqualTo: 1)
           .get();
-      return querySnapshot.docs.map((doc) => Product.fromJson(doc.data())).toList();
+      
+      // Fetch all visible products with their associations in parallel
+      List<Product> products = await Future.wait(
+        querySnapshot.docs.map((doc) => getProductById(doc.id))
+      ).then((results) => results.whereType<Product>().toList());
+      
+      return products;
     } catch (e) {
       print("Error fetching visible products: $e");
     }
     return [];
+  }
+  
+  // Helper method to fetch associations for a product
+  Future<Map<String, String>> _getProductAssociations(String productId) async {
+    try {
+      // Query associations where the document ID starts with productId
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _associations
+          .where('productId', isEqualTo: productId)
+          .get();
+      
+      Map<String, String> associations = {};
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        associations[data['supermarketId']] = data['categoryId'];
+      }
+      
+      return associations;
+    } catch (e) {
+      print("Error fetching associations for product $productId: $e");
+      return {};
+    }
   }
 }

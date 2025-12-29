@@ -1,4 +1,3 @@
-import 'package:app_code/models/supermarket.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/product.dart';

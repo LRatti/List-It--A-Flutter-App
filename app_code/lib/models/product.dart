@@ -9,7 +9,6 @@ class Product {
   Product({
     String? id,
     required String name,
-    List<String>? categoryIds,
     Map<String, String>? associations,
     bool isVisible = true,
   })  : id = id ?? Helper.generateId(),
@@ -39,14 +38,12 @@ class Product {
 
   factory Product.fromDatabase(
     Map<String, dynamic> json, {
-    List<String>? categoryIds,
     Map<String, String>? associations,
   }) {
     return Product(
       id: json['id'],
       name: json['name'],
       isVisible: (json['is_visible'] ?? 1) == 1,
-      categoryIds: categoryIds,
       associations: associations,
     );
   }
@@ -63,7 +60,6 @@ class Product {
     return Product(
       id: json['id'],
       name: json['name'],
-      categoryIds: List<String>.from(json['categoryIds'] ?? []),
       associations: Map<String, String>.from(json['associations'] ?? {}),
       isVisible: json['isVisible'] ?? true,
     );
@@ -73,7 +69,6 @@ class Product {
     return {
       'id': id,
       'name': _name,
-      'associations': associations,
       'isVisible': isVisible,
     };
   }

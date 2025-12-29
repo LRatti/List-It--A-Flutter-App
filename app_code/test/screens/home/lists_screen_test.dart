@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:app_code/screens/home/lists_screen_mobile.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/screens/lists/lists_screen_mobile.dart';
 import 'package:app_code/models/shopping_list.dart';
-import 'package:app_code/repositories/test/in_memory_shopping_list_repository.dart';
-import 'package:app_code/controllers/lists_controller.dart';
+import 'package:app_code/repositories/test_repo/test_shopping_list_repository.dart';
+import 'package:app_code/providers/shopping_lists_notifier.dart';
 
 void main() {
-  late InMemoryShoppingListRepository repository;
-  late ListsController controller;
+  late TestShoppingListRepository repository;
 
   setUp(() {
-    repository = InMemoryShoppingListRepository();
-    controller = ListsController(repository);
+    repository = TestShoppingListRepository();
   });
 
   Future<void> pumpListsScreen(WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: ListsScreenMobile(controller: controller),
+      ProviderScope(
+        overrides: [
+          shoppingListRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: const MaterialApp(
+          home: ListsScreenMobile(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -25,12 +29,16 @@ void main() {
 
   testWidgets('shows empty state when there are no shopping lists', (tester) async {
     await pumpListsScreen(tester);
+
     expect(find.textContaining('No lists yet'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
   testWidgets('renders shopping list card when a list exists', (tester) async {
-    await controller.addList(ShoppingList(name: 'Groceries', createdAt: DateTime.now()));
+    await repository.add(
+      ShoppingList(name: 'Groceries', createdAt: DateTime.now()),
+    );
+
     await pumpListsScreen(tester);
 
     expect(find.text('Groceries'), findsOneWidget);
@@ -49,8 +57,9 @@ void main() {
   });
 
   testWidgets('delete button removes a shopping list', (tester) async {
-    final list = ShoppingList(name: 'To delete', createdAt: DateTime.now());
-    await controller.addList(list);
+    await repository.add(
+      ShoppingList(name: 'To delete', createdAt: DateTime.now()),
+    );
 
     await pumpListsScreen(tester);
 
@@ -65,27 +74,21 @@ void main() {
   });
 
   testWidgets('edit button opens edit dialog and modifies list name', (tester) async {
-    final list = ShoppingList(name: 'Editable list', createdAt: DateTime.now());
-    await controller.addList(list);
+    await repository.add(
+      ShoppingList(name: 'Editable list', createdAt: DateTime.now()),
+    );
 
     await pumpListsScreen(tester);
 
-    // Tap edit icon
     await tester.tap(find.byIcon(Icons.edit));
     await tester.pumpAndSettle();
 
     expect(find.text('Edit list'), findsOneWidget);
-    expect(find.byType(TextField), findsOneWidget);
 
-    // Modify the list name
     await tester.enterText(find.byType(TextField), 'Modified list');
-    await tester.pumpAndSettle();
-
-    // Tap Save button
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
-    // Verify the new name appears and old name is gone
     expect(find.text('Modified list'), findsOneWidget);
     expect(find.text('Editable list'), findsNothing);
   });
