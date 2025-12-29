@@ -189,7 +189,7 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
         );
         if (mounted) {
           showSnackBar('Password updated. Please sign in again.');
-          Navigator.pop(context); // Leave settings
+          Navigator.of(context).pushNamedAndRemoveUntil('/signin', (route) => false);
         }
       }
     } catch (e) {

@@ -29,7 +29,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
           },
         ),
       ),
