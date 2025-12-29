@@ -3,6 +3,7 @@ import 'package:app_code/screens/home/profile.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/screens/settings/verification_screen.dart';
 import 'package:app_code/repositories/real_app_repo/firebase_auth_repository.dart';
+import 'package:app_code/screens/home/home_screen_mobile.dart';
 import 'package:flutter/material.dart';
 // firebase
 import 'package:firebase_core/firebase_core.dart';
@@ -12,12 +13,15 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // Automatically sign in anonymously only if no user is signed in
-  await FirebaseAuthRepository().ensureAuthenticated();
-
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -38,7 +42,8 @@ class MyApp extends StatelessWidget {
         '/signin': (context) => const WelcomeScreen(),
         '/verification': (context) => const VerificationScreen(),
       },
-      home: const ProfileScreen(),
+      //home: const ProfileScreen(),
+      home: const MobileHomePage(),
     );
   }
 }
