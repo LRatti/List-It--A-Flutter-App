@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:app_code/models/user.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
@@ -210,6 +211,16 @@ class _SettingsScreenState extends SettingsController {
                 ),
               ),
               obscureText: true,
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: 
+                    () => sendPasswordResetFromSettings(user.email),
+                child: Text(
+                  'Forgot Password?',
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             SizedBox(

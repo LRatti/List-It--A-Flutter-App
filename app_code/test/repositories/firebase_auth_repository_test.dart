@@ -296,4 +296,7 @@ class _TestAuthRepository implements AuthRepository {
 
   @override
   Future<void> abortEmailVerification({required bool isNewSignup}) async {}
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {}
 }

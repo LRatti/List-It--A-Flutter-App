@@ -159,6 +159,13 @@ class InMemoryAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    // In memory: simulate success without leaking if the email exists.
+    // No-op to mirror Firebase's behavior.
+    return;
+  }
+
+  @override
   Future<void> updateEmail({
     required String newEmail,
     required String currentPassword,

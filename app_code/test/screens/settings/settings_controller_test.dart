@@ -10,8 +10,6 @@ import 'package:app_code/providers/real_app_providers/email_verification_provide
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
 
-class _MockNavigatorObserver extends Mock implements NavigatorObserver {}
-
 class _FakeUserManager extends UserManager {
   _FakeUserManager(this.user);
   final User user;
@@ -47,6 +45,9 @@ class _RecordingAuthRepository implements AuthRepository {
     updatedPassword = newPassword;
   }
 
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {}
+
   // Unused in these tests
   @override
   Future<User?> ensureAuthenticated() async => null;
@@ -60,6 +61,7 @@ class _RecordingAuthRepository implements AuthRepository {
   ) async => null;
   @override
   Future<void> signOut() async {}
+
   @override
   Future<User?> signIn(String email, String password) async => null;
   @override
@@ -98,6 +100,7 @@ void main() {
         routes: {
           '/verification': (context) =>
               const Scaffold(body: Text('Verification')),
+          '/signin': (context) => const Scaffold(body: Text('Sign In Screen')),
         },
         home: child,
         navigatorObservers: [if (observer != null) observer],
@@ -110,11 +113,9 @@ void main() {
   ) async {
     final user = User(uid: 'u1', email: 'old@example.com', userName: 'User');
     final repo = _RecordingAuthRepository();
-    final navObserver = _MockNavigatorObserver();
 
     await tester.pumpWidget(
       _buildApp(
-        observer: navObserver,
         authRepository: repo,
         child: SettingsScreen(userManager: _FakeUserManager(user)),
       ),
@@ -122,14 +123,21 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Find TextFormFields by their index
-    // Username field (index 0)
-    // New Email field (index 1)
-    await tester.enterText(find.byType(TextFormField).at(1), 'new@example.com');
-    // Confirm Email field (index 2)
-    await tester.enterText(find.byType(TextFormField).at(2), 'new@example.com');
-    // Current Password field (index 5)
-    await tester.enterText(find.byType(TextFormField).at(5), 'currentPass');
+    // Enter new email
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'New Email'),
+      'new@example.com',
+    );
+    // Confirm email
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Confirm New Email'),
+      'new@example.com',
+    );
+    // Current password
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter Current Password to Confirm Changes'),
+      'currentPass',
+    );
 
     // Scroll down to make the button visible
     await tester.pumpAndSettle();
@@ -173,16 +181,21 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Enter new password details and current password
-    // Username field (index 0)
-    // New Email field (index 1)
-    // Confirm Email field (index 2)
-    // New Password field (index 3)
-    await tester.enterText(find.byType(TextFormField).at(3), 'newPassword123');
-    // Confirm New Password field (index 4)
-    await tester.enterText(find.byType(TextFormField).at(4), 'newPassword123');
-    // Current Password field (index 5)
-    await tester.enterText(find.byType(TextFormField).at(5), 'currentPass');
+    // Enter new password
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'New Password'),
+      'newPassword123',
+    );
+    // Confirm new password
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Confirm New Password'),
+      'newPassword123',
+    );
+    // Current password
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter Current Password to Confirm Changes'),
+      'currentPass',
+    );
 
     // Scroll down to make the button visible
     await tester.pumpAndSettle();
@@ -197,5 +210,214 @@ void main() {
 
     // Verify repository received password update
     expect(repo.updatedPassword, 'newPassword123');
+
+    // Verify navigation to sign in after password update
+    expect(find.text('Sign In Screen'), findsOneWidget);
+  });
+
+  testWidgets('prevents simultaneous email and password updates', (
+    tester,
+  ) async {
+    final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
+    final repo = _RecordingAuthRepository();
+
+    await tester.pumpWidget(
+      _buildApp(
+        authRepository: repo,
+        child: SettingsScreen(userManager: _FakeUserManager(user)),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Enter both email and password fields
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'New Email'),
+      'new@example.com',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Confirm New Email'),
+      'new@example.com',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'New Password'),
+      'newPassword123',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Confirm New Password'),
+      'newPassword123',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter Current Password to Confirm Changes'),
+      'currentPass',
+    );
+
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -800),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Update Security Settings'));
+    await tester.pumpAndSettle();
+
+    // Should show error message about updating separately
+    expect(
+      find.text('Please update email and password separately.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('shows error when email fields do not match', (tester) async {
+    final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
+    final repo = _RecordingAuthRepository();
+
+    await tester.pumpWidget(
+      _buildApp(
+        authRepository: repo,
+        child: SettingsScreen(userManager: _FakeUserManager(user)),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Enter mismatched emails
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'New Email'),
+      'new@example.com',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Confirm New Email'),
+      'different@example.com',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter Current Password to Confirm Changes'),
+      'currentPass',
+    );
+
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -800),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Update Security Settings'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Email addresses do not match.'), findsOneWidget);
+  });
+
+  testWidgets('shows error when password is too short', (tester) async {
+    final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
+    final repo = _RecordingAuthRepository();
+
+    await tester.pumpWidget(
+      _buildApp(
+        authRepository: repo,
+        child: SettingsScreen(userManager: _FakeUserManager(user)),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Enter short password
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'New Password'),
+      'short',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Confirm New Password'),
+      'short',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter Current Password to Confirm Changes'),
+      'currentPass',
+    );
+
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -800),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Update Security Settings'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Password must be at least 6 characters.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('shows error when current password is missing', (tester) async {
+    final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
+    final repo = _RecordingAuthRepository();
+
+    await tester.pumpWidget(
+      _buildApp(
+        authRepository: repo,
+        child: SettingsScreen(userManager: _FakeUserManager(user)),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Enter new password but no current password
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'New Password'),
+      'newPassword123',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Confirm New Password'),
+      'newPassword123',
+    );
+
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -800),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Update Security Settings'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enter current password to proceed.'), findsOneWidget);
+  });
+
+  testWidgets('shows error when canEditCredentials is false', (tester) async {
+    final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
+    final repo = _RecordingAuthRepository();
+    repo.canEdit = false;
+
+    await tester.pumpWidget(
+      _buildApp(
+        authRepository: repo,
+        child: SettingsScreen(userManager: _FakeUserManager(user)),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    // Verify that the Google-managed banner is shown
+    expect(
+      find.text(
+        'Email and password are managed via your Google account. Changes are disabled.',
+      ),
+      findsOneWidget,
+    );
+
+    // Verify that credential fields and update button are not present
+    expect(find.widgetWithText(TextFormField, 'New Email'), findsNothing);
+    expect(find.widgetWithText(TextFormField, 'Confirm New Email'), findsNothing);
+    expect(find.widgetWithText(TextFormField, 'New Password'), findsNothing);
+    expect(find.widgetWithText(TextFormField, 'Confirm New Password'), findsNothing);
+    expect(
+      find.widgetWithText(TextFormField, 'Enter Current Password to Confirm Changes'),
+      findsNothing,
+    );
+    expect(find.text('Update Security Settings'), findsNothing);
   });
 }

@@ -189,7 +189,9 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
         );
         if (mounted) {
           showSnackBar('Password updated. Please sign in again.');
-          Navigator.of(context).pushNamedAndRemoveUntil('/signin', (route) => false);
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil('/signin', (route) => false);
         }
       }
     } catch (e) {
@@ -198,6 +200,33 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> sendPasswordResetFromSettings(String? email) async {
+    if (email == null || email.isEmpty) {
+      showSnackBar('No email associated with this account.', isError: true);
+      return;
+    }
+
+    try {
+      final authNotifier = ref.read(authProvider.notifier);
+      await authNotifier.sendPasswordResetEmail(email);
+      if (!mounted) return;
+      showSnackBar('Recovery email sent. You will be signed out.');
+      await authNotifier.signOut();
+      if (mounted) {
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/signin', (route) => false);
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnackBar(
+          'Could not send reset email. Try again later.',
+          isError: true,
+        );
+      }
     }
   }
 }

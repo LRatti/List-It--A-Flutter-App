@@ -1,6 +1,7 @@
 import 'package:app_code/screens/auth/auth_gate.dart';
 import 'package:app_code/screens/auth/welcome.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
+import 'package:app_code/screens/auth/forgot_password.dart';
 import 'package:app_code/screens/settings/verification_screen.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         '/settings': (context) => const SettingsScreen(),
         '/signin': (context) => const WelcomeScreen(),
         '/verification': (context) => const VerificationScreen(),
+        '/forgot-password': (context) => const ForgotPasswordScreen(),
       },
       initialRoute: '/',
     );

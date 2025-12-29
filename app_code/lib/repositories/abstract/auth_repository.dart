@@ -19,7 +19,11 @@ abstract class AuthRepository {
   Future<User?> signInWithGoogle();
 
   /// Convert anonymous user to permanent account with email/password
-  Future<User?> linkAnonymousWithEmailPassword(String email, String password, String username);
+  Future<User?> linkAnonymousWithEmailPassword(
+    String email,
+    String password,
+    String username,
+  );
 
   /// Sign out and transition to anonymous authentication
   Future<void> signOut();
@@ -30,13 +34,24 @@ abstract class AuthRepository {
   /// Whether current user can update email/password (non-Google, non-anonymous)
   bool canUpdateCredentials();
 
+  /// Send a password reset email via Firebase Authentication.
+  /// If the email is registered, Firebase will send a reset link.
+  /// This method should not leak whether the email exists.
+  Future<void> sendPasswordResetEmail(String email);
+
   /// Update the user's email in FirebaseAuth and Firestore.
   /// Must reauthenticate using the current password before updating.
-  Future<void> updateEmail({required String newEmail, required String currentPassword});
+  Future<void> updateEmail({
+    required String newEmail,
+    required String currentPassword,
+  });
 
   /// Update the user's password in FirebaseAuth.
   /// Must reauthenticate using the current password before updating.
-  Future<void> updatePassword({required String newPassword, required String currentPassword});
+  Future<void> updatePassword({
+    required String newPassword,
+    required String currentPassword,
+  });
 
   /// Abort the email verification process
   /// If [isNewSignup] is true, deletes the user account and signs in anonymously

@@ -95,6 +95,11 @@ class AuthNotifier extends AsyncNotifier<User?> {
     }
   }
 
+  /// Send a password reset email
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _repository.sendPasswordResetEmail(email);
+  }
+
   /// Convert anonymous user to permanent account with email/password
   Future<void> linkAnonymousWithEmailPassword(
     String email,

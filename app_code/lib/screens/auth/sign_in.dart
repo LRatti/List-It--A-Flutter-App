@@ -88,7 +88,9 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                     await authNotifier.signIn(email, password);
                     if (context.mounted) {
                       // Navigate to home screen after successful login
-                      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+                      Navigator.of(
+                        context,
+                      ).pushNamedAndRemoveUntil('/home', (route) => false);
                     }
                   } catch (e) {
                     setState(() {
@@ -98,6 +100,17 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 }
               },
               child: const Text('Sign In'),
+            ),
+            const SizedBox(height: 8.0),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                key: const Key('forgot_password_button'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/forgot-password');
+                },
+                child: const Text('Forgot password?'),
+              ),
             ),
           ],
         ),
