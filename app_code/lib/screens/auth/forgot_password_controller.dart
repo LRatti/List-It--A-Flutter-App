@@ -18,6 +18,18 @@ abstract class ForgotPasswordController extends ConsumerState<ForgotPasswordScre
     super.initState();
     emailController = TextEditingController();
     confirmEmailController = TextEditingController();
+    
+    // Schedule cooldown check after frame to avoid issues with timers in tests
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _initializeCooldown();
+      }
+    });
+  }
+
+  Future<void> _initializeCooldown() async {
+    final cooldownNotifier = ref.read(passwordResetCooldownNotifierProvider.notifier);
+    await cooldownNotifier.checkCooldown();
   }
 
   @override
@@ -48,6 +60,18 @@ abstract class ForgotPasswordController extends ConsumerState<ForgotPasswordScre
   Future<void> onSubmit(BuildContext context, AuthNotifier authNotifier) async {
     if (!formKey.currentState!.validate()) return;
 
+    // Check cooldown before attempting to send
+    final cooldownService = ref.read(passwordResetCooldownServiceProvider);
+    final canSend = await cooldownService.canSendResetEmail();
+    
+    if (!canSend) {
+      final remaining = await cooldownService.getRemainingCooldownSeconds();
+      setState(() {
+        _errorText = 'Please wait $remaining seconds before requesting another reset email.';
+      });
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
       _errorText = null;
@@ -58,6 +82,10 @@ abstract class ForgotPasswordController extends ConsumerState<ForgotPasswordScre
     try {
       await authNotifier.sendPasswordResetEmail(email);
       if (!mounted) return;
+
+      // Record the email was sent and start cooldown
+      final cooldownNotifier = ref.read(passwordResetCooldownNotifierProvider.notifier);
+      await cooldownNotifier.recordEmailSent();
 
       // Feedback and cooldown
       setState(() {

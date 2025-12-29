@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/password_reset_cooldown_provider.dart';
 
 part 'forgot_password_controller.dart';
 
@@ -16,6 +17,10 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 class _ForgotPasswordScreenState extends ForgotPasswordController {
   @override
   Widget build(BuildContext context) {
+    // Watch the cooldown state
+    final cooldownRemaining = ref.watch(passwordResetCooldownNotifierProvider);
+    final isOnCooldown = cooldownRemaining > 0;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recover Password'),
@@ -60,11 +65,29 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
                     successText!,
                     style: const TextStyle(color: Colors.green),
                   ),
+                if (isOnCooldown)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.timer, size: 16, color: Colors.orange),
+                        const SizedBox(width: 8),
+                        Text(
+                          'You can request another reset in $cooldownRemaining seconds',
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: (isSubmitting)
+                    onPressed: (isSubmitting || isOnCooldown)
                         ? null
                         : () async {
                             await onSubmit(context, ref.read(authProvider.notifier));
@@ -75,7 +98,9 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Send recovery email'),
+                        : Text(isOnCooldown 
+                            ? 'Please wait ($cooldownRemaining s)' 
+                            : 'Send recovery email'),
                   ),
                 ),
               ],

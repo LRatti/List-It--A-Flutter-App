@@ -3,6 +3,7 @@ import 'package:app_code/models/user.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/email_verification_provider.dart';
+import 'package:app_code/providers/real_app_providers/password_reset_cooldown_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -214,12 +215,38 @@ class _SettingsScreenState extends SettingsController {
             ),
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: 
-                    () => sendPasswordResetFromSettings(user.email),
-                child: Text(
-                  'Forgot Password?',
-                ),
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final cooldownRemaining = ref.watch(passwordResetCooldownNotifierProvider);
+                  final isOnCooldown = cooldownRemaining > 0;
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: isOnCooldown 
+                            ? null 
+                            : () => sendPasswordResetFromSettings(user.email),
+                        child: Text(
+                          isOnCooldown 
+                              ? 'Forgot Password? (Wait ${cooldownRemaining}s)'
+                              : 'Forgot Password?',
+                        ),
+                      ),
+                      if (isOnCooldown)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12.0),
+                          child: Text(
+                            'Cooldown: ${cooldownRemaining}s',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
             const SizedBox(height: 20),

@@ -5,6 +5,7 @@ import 'package:app_code/screens/auth/forgot_password.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _RecordingAuthRepository implements AuthRepository {
   int resetCount = 0;
@@ -65,6 +66,9 @@ Future<void> _pumpForgotPassword(
   WidgetTester tester,
   _RecordingAuthRepository repo,
 ) async {
+  // Initialize SharedPreferences mock to avoid cooldown interference
+  SharedPreferences.setMockInitialValues({});
+  
   await tester.pumpWidget(
     ProviderScope(
       overrides: [authRepositoryProvider.overrideWithValue(repo)],
@@ -208,29 +212,8 @@ void main() {
       findsOneWidget,
     );
 
-    // Clear the fields
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Email'),
-      '',
-    );
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Confirm Email'),
-      '',
-    );
-
-    // Second submission with different email
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Email'),
-      'other@example.com',
-    );
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Confirm Email'),
-      'other@example.com',
-    );
-
-    await tester.tap(find.text('Send recovery email'));
-    await tester.pumpAndSettle();
-
-    expect(repo.resetCount, 2);
+    // The button is now disabled due to cooldown. We verify the cooldown is active
+    // by checking that the send button is disabled (has the orange timer icon indicating cooldown)
+    expect(find.byIcon(Icons.timer), findsOneWidget);
   });
 }

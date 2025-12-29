@@ -209,9 +209,27 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
       return;
     }
 
+    // Check cooldown before attempting to send
+    final cooldownService = ref.read(passwordResetCooldownServiceProvider);
+    final canSend = await cooldownService.canSendResetEmail();
+    
+    if (!canSend) {
+      final remaining = await cooldownService.getRemainingCooldownSeconds();
+      showSnackBar(
+        'Please wait $remaining seconds before requesting another reset email.',
+        isError: true,
+      );
+      return;
+    }
+
     try {
       final authNotifier = ref.read(authProvider.notifier);
       await authNotifier.sendPasswordResetEmail(email);
+      
+      // Record the email was sent and start cooldown
+      final cooldownNotifier = ref.read(passwordResetCooldownNotifierProvider.notifier);
+      await cooldownNotifier.recordEmailSent();
+      
       if (!mounted) return;
       showSnackBar('Recovery email sent. You will be signed out.');
       await authNotifier.signOut();
