@@ -1,3 +1,4 @@
+import 'package:app_code/screens/auth/auth_gate.dart';
 import 'package:app_code/screens/auth/welcome.dart';
 import 'package:app_code/screens/home/profile.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
@@ -13,15 +14,9 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -38,12 +33,13 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       routes: {
+        '/': (context) => const AuthGate(),
+        '/home': (context) => const MobileHomePage(),
         '/settings': (context) => const SettingsScreen(),
         '/signin': (context) => const WelcomeScreen(),
         '/verification': (context) => const VerificationScreen(),
       },
-      //home: const ProfileScreen(),
-      home: const MobileHomePage(),
+      initialRoute: '/',
     );
   }
 }
