@@ -1,9 +1,7 @@
 import 'package:app_code/screens/auth/auth_gate.dart';
 import 'package:app_code/screens/auth/welcome.dart';
-import 'package:app_code/screens/home/profile.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/screens/settings/verification_screen.dart';
-import 'package:app_code/repositories/real_app_repo/firebase_auth_repository.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
 import 'package:flutter/material.dart';
 // firebase

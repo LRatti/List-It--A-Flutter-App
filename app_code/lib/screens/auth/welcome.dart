@@ -1,6 +1,6 @@
 import 'package:app_code/screens/auth/sign_in.dart';
 import 'package:app_code/screens/auth/sign_up.dart';
-import 'package:app_code/providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

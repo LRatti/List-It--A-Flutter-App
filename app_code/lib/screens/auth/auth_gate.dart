@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/screens/auth/initial_screen.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/screens/auth/sign_in.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
 
 void main() {
@@ -19,13 +19,12 @@ void main() {
   Future<void> pumpSignInForm(WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(repository),
-        ],
-        child: const MaterialApp(
-          home: Scaffold(
-            body: SignInForm(),
-          ),
+        overrides: [authRepositoryProvider.overrideWithValue(repository)],
+        child: MaterialApp(
+          home: const Scaffold(body: SignInForm()),
+          routes: {
+            '/home': (context) => const Scaffold(body: Text('Home Screen')),
+          },
         ),
       ),
     );
@@ -52,12 +51,20 @@ void main() {
     expect(find.text('Please enter your password'), findsOneWidget);
   });
 
-  testWidgets('shows error message when credentials are incorrect', (tester) async {
+  testWidgets('shows error message when credentials are incorrect', (
+    tester,
+  ) async {
     await pumpSignInForm(tester);
 
     // Enter invalid credentials
-    await tester.enterText(find.byKey(const Key('email_field')), 'invalid@example.com');
-    await tester.enterText(find.byKey(const Key('password_field')), 'wrongpassword');
+    await tester.enterText(
+      find.byKey(const Key('email_field')),
+      'invalid@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('password_field')),
+      'wrongpassword',
+    );
     await tester.pumpAndSettle();
 
     // Tap sign in button
@@ -75,8 +82,14 @@ void main() {
     await pumpSignInForm(tester);
 
     // Enter valid credentials
-    await tester.enterText(find.byKey(const Key('email_field')), 'test@example.com');
-    await tester.enterText(find.byKey(const Key('password_field')), 'password123');
+    await tester.enterText(
+      find.byKey(const Key('email_field')),
+      'test@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('password_field')),
+      'password123',
+    );
     await tester.pumpAndSettle();
 
     // Tap sign in button
@@ -94,8 +107,14 @@ void main() {
     await pumpSignInForm(tester);
 
     // First attempt with invalid credentials
-    await tester.enterText(find.byKey(const Key('email_field')), 'invalid@example.com');
-    await tester.enterText(find.byKey(const Key('password_field')), 'wrongpassword');
+    await tester.enterText(
+      find.byKey(const Key('email_field')),
+      'invalid@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('password_field')),
+      'wrongpassword',
+    );
     await tester.tap(find.byKey(const Key('sign_in_button')));
     await tester.pumpAndSettle();
 
@@ -120,7 +139,9 @@ void main() {
     expect(find.text('test@example.com'), findsOneWidget);
   });
 
-  testWidgets('password field is configured for password input', (tester) async {
+  testWidgets('password field is configured for password input', (
+    tester,
+  ) async {
     await pumpSignInForm(tester);
 
     // Verify password field exists

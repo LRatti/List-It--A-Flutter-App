@@ -1,5 +1,5 @@
-import 'package:app_code/providers/auth_provider.dart';
-import 'package:app_code/providers/user_details_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/user_details_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;

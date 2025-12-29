@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/screens/auth/welcome.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
 
 void main() {
@@ -21,18 +21,23 @@ void main() {
   Future<void> pumpWelcomeScreen(WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(repository),
-        ],
-        child: const MaterialApp(
-          home: WelcomeScreen(),
+        overrides: [authRepositoryProvider.overrideWithValue(repository)],
+        child: MaterialApp(
+          home: const WelcomeScreen(),
+          routes: {
+            '/home': (context) => const Scaffold(body: Text('Home Screen')),
+            '/signin': (context) =>
+                const Scaffold(body: Text('Welcome Screen')),
+          },
         ),
       ),
     );
     await tester.pumpAndSettle();
   }
 
-  testWidgets('renders welcome screen with initial sign up form', (tester) async {
+  testWidgets('renders welcome screen with initial sign up form', (
+    tester,
+  ) async {
     await pumpWelcomeScreen(tester);
 
     expect(find.text('Flutter Auth'), findsOneWidget);
@@ -123,7 +128,10 @@ void main() {
     // Verify user is signed in with Google account (new UID)
     final linkedUser = repository.getCurrentUser();
     expect(linkedUser, isNotNull);
-    expect(linkedUser!.uid, isNot(equals(initialUser.uid))); // Different user ID
+    expect(
+      linkedUser!.uid,
+      isNot(equals(initialUser.uid)),
+    ); // Different user ID
     expect(linkedUser.isAnonymous, false);
     expect(linkedUser.email, 'testuser@gmail.com');
   });
@@ -147,13 +155,24 @@ void main() {
     expect(user.email, 'testuser@gmail.com');
   });
 
-  testWidgets('sign up form submission works through welcome screen', (tester) async {
+  testWidgets('sign up form submission works through welcome screen', (
+    tester,
+  ) async {
     await pumpWelcomeScreen(tester);
 
     // Fill in sign up form
-    await tester.enterText(find.byKey(const Key('username_field')), 'welcomeuser');
-    await tester.enterText(find.byKey(const Key('email_field')), 'welcome@example.com');
-    await tester.enterText(find.byKey(const Key('password_field')), 'password123');
+    await tester.enterText(
+      find.byKey(const Key('username_field')),
+      'welcomeuser',
+    );
+    await tester.enterText(
+      find.byKey(const Key('email_field')),
+      'welcome@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('password_field')),
+      'password123',
+    );
     await tester.pumpAndSettle();
 
     // Submit form
@@ -167,7 +186,9 @@ void main() {
     expect(user.getUserName(), 'welcomeuser');
   });
 
-  testWidgets('sign in form submission works through welcome screen', (tester) async {
+  testWidgets('sign in form submission works through welcome screen', (
+    tester,
+  ) async {
     // Register a test user
     repository.registerTestUser('signedin@example.com', 'password123');
 
@@ -178,8 +199,14 @@ void main() {
     await tester.pumpAndSettle();
 
     // Fill in sign in form
-    await tester.enterText(find.byKey(const Key('email_field')), 'signedin@example.com');
-    await tester.enterText(find.byKey(const Key('password_field')), 'password123');
+    await tester.enterText(
+      find.byKey(const Key('email_field')),
+      'signedin@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('password_field')),
+      'password123',
+    );
     await tester.pumpAndSettle();
 
     // Submit form
@@ -197,6 +224,27 @@ void main() {
 
     expect(find.byType(AppBar), findsOneWidget);
     expect(find.text('Flutter Auth'), findsOneWidget);
+  });
+
+  testWidgets('app bar has back button', (tester) async {
+    await pumpWelcomeScreen(tester);
+
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+  });
+
+  testWidgets('back button allows aborting authentication', (tester) async {
+    await pumpWelcomeScreen(tester);
+
+    // Verify we're on the welcome screen
+    expect(find.text('Welcome.'), findsOneWidget);
+
+    // Tap back button
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+
+    // Should navigate back (in real app, would go back to InitialScreen)
+    // Test verifies the back button is present and tappable
+    expect(find.byIcon(Icons.arrow_back), findsNothing);
   });
 
   testWidgets('screen is scrollable', (tester) async {

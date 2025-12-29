@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 
 class SignInForm extends ConsumerStatefulWidget {
   final dynamic authNotifier; // Keep for backward compatibility with tests

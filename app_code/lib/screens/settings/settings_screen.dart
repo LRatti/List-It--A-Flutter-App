@@ -1,7 +1,7 @@
 import 'package:app_code/models/user.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
-import 'package:app_code/providers/auth_provider.dart';
-import 'package:app_code/providers/email_verification_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/email_verification_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

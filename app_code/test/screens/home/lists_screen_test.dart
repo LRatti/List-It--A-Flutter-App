@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/screens/lists/lists_screen_mobile.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/repositories/test_repo/test_shopping_list_repository.dart';
-import 'package:app_code/providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 
 void main() {
   late TestShoppingListRepository repository;

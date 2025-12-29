@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/providers/auth_provider.dart';
-import 'package:app_code/providers/email_verification_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/email_verification_provider.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {
   final dynamic authNotifier; // Keep for backward compatibility with tests
