@@ -6,6 +6,7 @@ import 'package:app_code/providers/real_app_providers/email_verification_provide
 import 'package:app_code/providers/real_app_providers/password_reset_cooldown_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/widgets/password_text_field.dart';
 
 part 'settings_controller.dart';
 
@@ -178,40 +179,37 @@ class _SettingsScreenState extends SettingsController {
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(height: 12),
-            TextFormField(
+            PasswordTextField(
               controller: newPasswordController,
+              labelText: 'New Password',
               decoration: InputDecoration(
-                labelText: 'New Password',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              obscureText: true,
             ),
             const SizedBox(height: 12),
-            TextFormField(
+            PasswordTextField(
               controller: confirmPasswordController,
+              labelText: 'Confirm New Password',
               decoration: InputDecoration(
-                labelText: 'Confirm New Password',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              obscureText: true,
             ),
             const SizedBox(height: 24),
             // Current Password Verification
             Text('Verification', style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 12),
-            TextFormField(
+            PasswordTextField(
               controller: currentPasswordController,
+              labelText: 'Enter Current Password to Confirm Changes',
               decoration: InputDecoration(
-                labelText: 'Enter Current Password to Confirm Changes',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              obscureText: true,
             ),
             Align(
               alignment: Alignment.centerRight,

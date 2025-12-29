@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/email_verification_provider.dart';
+import 'package:app_code/widgets/password_text_field.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {
   final dynamic authNotifier; // Keep for backward compatibility with tests
@@ -67,11 +68,10 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             const SizedBox(height: 16.0),
 
             // password
-            TextFormField(
+            PasswordTextField(
               controller: _passwordController,
-              key: const Key('password_field'),
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
+              fieldKey: const Key('password_field'),
+              labelText: 'Password',
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please make a password';
