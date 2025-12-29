@@ -8,7 +8,7 @@ import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/providers/auth_provider.dart';
 import 'package:app_code/providers/email_verification_provider.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
-import 'package:app_code/services/database_manager/manage_user.dart';
+import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
 
 class _MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
