@@ -7,18 +7,22 @@ import 'package:app_code/models/user.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/email_verification_provider.dart';
+import 'package:app_code/providers/real_app_providers/user_details_provider.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
 
 class _FakeUserManager extends UserManager {
   _FakeUserManager(this.user);
   final User user;
+  User? _currentUser;
 
   @override
-  Future<User?> getUserData() async => user;
+  Future<User?> getUserData() async => _currentUser ?? user;
 
   @override
-  Future<void> setUserData(User user) async {}
+  Future<void> setUserData(User user) async {
+    _currentUser = user;
+  }
 }
 
 class _RecordingAuthRepository implements AuthRepository {
@@ -74,6 +78,40 @@ class _RecordingAuthRepository implements AuthRepository {
   Future<void> abortEmailVerification({required bool isNewSignup}) async {}
 }
 
+class _FakeAuthNotifier extends AuthNotifier {
+  _FakeAuthNotifier(this.user, this.repository);
+  final User user;
+  final AuthRepository repository;
+
+  @override
+  Future<User?> build() async {
+    // Don't call super.build() as it tries to access Firebase
+    // Just return our test user
+    return user;
+  }
+
+  @override
+  bool canUpdateCredentials() => repository.canUpdateCredentials();
+
+  @override
+  Future<void> updateEmail({
+    required String newEmail,
+    required String currentPassword,
+  }) => repository.updateEmail(
+    newEmail: newEmail,
+    currentPassword: currentPassword,
+  );
+
+  @override
+  Future<void> updatePassword({
+    required String newPassword,
+    required String currentPassword,
+  }) => repository.updatePassword(
+    newPassword: newPassword,
+    currentPassword: currentPassword,
+  );
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -87,14 +125,19 @@ void main() {
   });
 
   Widget _buildApp({
-    required Widget child,
+    required User user,
     NavigatorObserver? observer,
     AuthRepository? authRepository,
+    UserManager? userManager,
   }) {
+    final repo = authRepository ?? _RecordingAuthRepository();
     return ProviderScope(
       overrides: [
-        if (authRepository != null)
-          authRepositoryProvider.overrideWithValue(authRepository),
+        authRepositoryProvider.overrideWithValue(repo),
+        if (userManager != null)
+          userManagerProvider.overrideWithValue(userManager),
+        // Provide auth state so userDetailsProvider can work
+        authProvider.overrideWith(() => _FakeAuthNotifier(user, repo)),
       ],
       child: MaterialApp(
         routes: {
@@ -102,7 +145,7 @@ void main() {
               const Scaffold(body: Text('Verification')),
           '/signin': (context) => const Scaffold(body: Text('Sign In Screen')),
         },
-        home: child,
+        home: const SettingsScreen(),
         navigatorObservers: [if (observer != null) observer],
       ),
     );
@@ -113,11 +156,13 @@ void main() {
   ) async {
     final user = User(uid: 'u1', email: 'old@example.com', userName: 'User');
     final repo = _RecordingAuthRepository();
+    final userManager = _FakeUserManager(user);
 
     await tester.pumpWidget(
       _buildApp(
+        user: user,
         authRepository: repo,
-        child: SettingsScreen(userManager: _FakeUserManager(user)),
+        userManager: userManager,
       ),
     );
 
@@ -171,11 +216,13 @@ void main() {
   testWidgets('updates password and shows sign-in message', (tester) async {
     final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
     final repo = _RecordingAuthRepository();
+    final userManager = _FakeUserManager(user);
 
     await tester.pumpWidget(
       _buildApp(
+        user: user,
         authRepository: repo,
-        child: SettingsScreen(userManager: _FakeUserManager(user)),
+        userManager: userManager,
       ),
     );
 
@@ -220,11 +267,13 @@ void main() {
   ) async {
     final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
     final repo = _RecordingAuthRepository();
+    final userManager = _FakeUserManager(user);
 
     await tester.pumpWidget(
       _buildApp(
+        user: user,
         authRepository: repo,
-        child: SettingsScreen(userManager: _FakeUserManager(user)),
+        userManager: userManager,
       ),
     );
 
@@ -272,11 +321,13 @@ void main() {
   testWidgets('shows error when email fields do not match', (tester) async {
     final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
     final repo = _RecordingAuthRepository();
+    final userManager = _FakeUserManager(user);
 
     await tester.pumpWidget(
       _buildApp(
+        user: user,
         authRepository: repo,
-        child: SettingsScreen(userManager: _FakeUserManager(user)),
+        userManager: userManager,
       ),
     );
 
@@ -312,11 +363,13 @@ void main() {
   testWidgets('shows error when password is too short', (tester) async {
     final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
     final repo = _RecordingAuthRepository();
+    final userManager = _FakeUserManager(user);
 
     await tester.pumpWidget(
       _buildApp(
+        user: user,
         authRepository: repo,
-        child: SettingsScreen(userManager: _FakeUserManager(user)),
+        userManager: userManager,
       ),
     );
 
@@ -355,11 +408,13 @@ void main() {
   testWidgets('shows error when current password is missing', (tester) async {
     final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
     final repo = _RecordingAuthRepository();
+    final userManager = _FakeUserManager(user);
 
     await tester.pumpWidget(
       _buildApp(
+        user: user,
         authRepository: repo,
-        child: SettingsScreen(userManager: _FakeUserManager(user)),
+        userManager: userManager,
       ),
     );
 
@@ -392,11 +447,13 @@ void main() {
     final user = User(uid: 'u1', email: 'me@example.com', userName: 'User');
     final repo = _RecordingAuthRepository();
     repo.canEdit = false;
+    final userManager = _FakeUserManager(user);
 
     await tester.pumpWidget(
       _buildApp(
+        user: user,
         authRepository: repo,
-        child: SettingsScreen(userManager: _FakeUserManager(user)),
+        userManager: userManager,
       ),
     );
 

@@ -6,7 +6,7 @@ class UserManager {
   static final firebase_auth.FirebaseAuth _firebaseAuth =
       firebase_auth.FirebaseAuth.instance;
 
-  Future<dynamic> getUserData() async {
+  Future<User?> getUserData() async {
     //Firebase
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid != null) {

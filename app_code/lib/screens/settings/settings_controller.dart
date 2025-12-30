@@ -7,9 +7,9 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
   late TextEditingController _currentPasswordController;
   late TextEditingController _newPasswordController;
   late TextEditingController _confirmPasswordController;
-  late final UserManager _userManager;
   bool _isSaving = false;
   bool _canEditCredentials = false;
+  String? _lastUserId;
 
   // Public getters for UI access
   TextEditingController get usernameController => _usernameController;
@@ -20,7 +20,6 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
   TextEditingController get newPasswordController => _newPasswordController;
   TextEditingController get confirmPasswordController =>
       _confirmPasswordController;
-  UserManager get userManager => _userManager;
   bool get isSaving => _isSaving;
   bool get canEditCredentials => _canEditCredentials;
 
@@ -33,7 +32,6 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
     _currentPasswordController = TextEditingController();
     _newPasswordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
-    _userManager = widget.userManager ?? UserManager();
     // canEditCredentials will be set after first build when ref is available
   }
 
@@ -74,7 +72,7 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
     try {
       // Only update username here. Email changes must be done via the dedicated button.
       final modifiedUser = _createModifiedUser(user);
-      await _userManager.setUserData(modifiedUser);
+      await ref.read(userDetailsProvider.notifier).updateUser(modifiedUser);
 
       if (mounted) {
         showSnackBar('Changes saved successfully!');
@@ -232,12 +230,16 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
       
       if (!mounted) return;
       showSnackBar('Recovery email sent. You will be signed out.');
-      await authNotifier.signOut();
+      
+      // Navigate BEFORE signing out to avoid showing "No user data found" message
       if (mounted) {
         Navigator.of(
           context,
         ).pushNamedAndRemoveUntil('/signin', (route) => false);
       }
+      
+      // Sign out after navigation is initiated
+      await authNotifier.signOut();
     } catch (e) {
       if (mounted) {
         showSnackBar(

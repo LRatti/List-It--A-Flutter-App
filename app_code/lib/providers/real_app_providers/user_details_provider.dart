@@ -1,20 +1,56 @@
 import 'package:app_code/models/user.dart';
-import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';  
+import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
+import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Since UserManager is typically a singleton that doesn't change, 
-/// the watch is mostly for explicit dependency declaration rather than reactive updates.
-final userManagerProvider = Provider((ref) {
+/// Repository provider to keep the data layer injectable/testable.
+final userManagerProvider = Provider<UserManager>((ref) {
   return UserManager();
 });
 
-/// Provides real-time user details from the UserManager
+/// Riverpod notifier that exposes the current user details and handles updates.
+final userDetailsProvider =
+    AsyncNotifierProvider<UserDetailsNotifier, User?>(UserDetailsNotifier.new);
 
-/// This provider watches for changes in user details (email, username, etc.)
-/// and notifies all watchers of any updates. It's useful for updating UI
-/// components like the profile page whenever the user edits their information.
-final userDetailsProvider = FutureProvider.autoDispose<User?>((ref) async {
-  final userManager = ref.watch(userManagerProvider);
-  final user = await userManager.getUserData();
-  return user;
-});
+class UserDetailsNotifier extends AsyncNotifier<User?> {
+  UserManager get _userManager => ref.read(userManagerProvider);
+
+  @override
+  Future<User?> build() async {
+    // Watch auth state so this provider rebuilds when user signs in/out
+    // This ensures user details refresh after email updates or re-authentication
+    final authUser = ref.watch(authProvider);
+    
+    // If no auth user or user is loading, return null
+    if (!authUser.hasValue || authUser.value == null) {
+      return null;
+    }
+    
+    return _userManager.getUserData();
+  }
+
+  /// Reloads user details from the repository.
+  Future<User?> refreshUser() async {
+    try {
+      final user = await _userManager.getUserData();
+      state = AsyncData(user);
+      return user;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
+    }
+  }
+
+  /// Persists the updated user and refreshes Riverpod state.
+  Future<User?> updateUser(User updatedUser) async {
+    try {
+      await _userManager.setUserData(updatedUser);
+      final refreshedUser = await _userManager.getUserData();
+      state = AsyncData(refreshedUser);
+      return refreshedUser;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
+    }
+  }
+}
