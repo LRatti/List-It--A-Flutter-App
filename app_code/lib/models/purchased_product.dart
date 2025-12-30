@@ -12,6 +12,8 @@ class PurchasedProduct {
   Category category;
   double price;
   int quantity;
+  late DateTime lastModified;
+  bool isDeleted;
   
   PurchasedProduct({
     String? id,
@@ -20,7 +22,11 @@ class PurchasedProduct {
     required this.category,
     this.price = 0.0,
     this.quantity = 0,
-  }) : this.id = id ?? Helper.generateId();
+    DateTime? lastModified,
+    bool isDeleted = false,
+  }) : this.id = id ?? Helper.generateId(),
+        lastModified = lastModified ?? DateTime.now(),
+        isDeleted = isDeleted;
 
   factory PurchasedProduct.fromDatabase(Map<String, dynamic> json, Category category, Product product) {
     return PurchasedProduct(
@@ -30,6 +36,8 @@ class PurchasedProduct {
       product: product,
       price: json['price'],
       quantity: json['quantity'],
+      lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
+      isDeleted: (json['is_deleted'] ?? 0) == 1,
     );
   }
 
@@ -41,6 +49,8 @@ class PurchasedProduct {
       'category_id': category.id,
       'price': price,
       'quantity': quantity,
+      'last_modified': lastModified.toIso8601String(),
+      'is_deleted': isDeleted ? 1 : 0,
     };
   }
 
@@ -52,6 +62,8 @@ class PurchasedProduct {
       category: json['category'] != null ? Category.fromJson(json['category']) : Category(id: '', name: 'Uncategorized'),
       quantity: json['quantity'],
       product: json['product'] != null ? Product.fromJson(json['product']) : Product(id: '', name: 'Unknown'),
+      lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
+      isDeleted: json['isDeleted'] ?? false,
     );
   }
 
@@ -63,6 +75,8 @@ class PurchasedProduct {
       'category': category.toJson(),
       'price': price,
       'quantity': quantity,
+      'lastModified': lastModified.toIso8601String(),
+      'isDeleted': isDeleted,
     };
   }
 

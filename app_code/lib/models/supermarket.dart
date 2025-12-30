@@ -9,15 +9,19 @@ class Supermarket {
   String _name;
   List<Category> _categories;
   bool isVisible;
+  late DateTime lastModified;
   
   Supermarket({
     String? id,
     name = 'Default Supermarket', 
     List<Category>? categories,
     this.isVisible = true,
+    DateTime? lastModified,
+    bool isDeleted = false,
   }) :  this.id = id ?? Helper.generateId(),
         _categories = categories ?? [],
-        _name = name;
+        _name = name,
+        lastModified = lastModified ?? DateTime.now();
 
   String getName() {
     return _name;
@@ -48,6 +52,7 @@ class Supermarket {
       id: json['id'],
       name: json['name'] ?? 'Supermarket',
       isVisible: json['is_visible'],
+      lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -57,6 +62,7 @@ class Supermarket {
       'name': _name,
       'categoryIds': _categories.map((cat) => cat.id).toList(),
       'is_visible': isVisible,
+      'last_modified': lastModified.toIso8601String(),
     };
   }
   
@@ -68,6 +74,7 @@ class Supermarket {
           ?.map((item) => Category.fromJson(item))
           .toList() ?? [],
       isVisible: json['is_visible'],
+      lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -77,6 +84,7 @@ class Supermarket {
       'name': _name,
       'categories': _categories.map((cat) => cat.toJson()).toList(),
       'is_visible': isVisible,
+      'lastModified': lastModified.toIso8601String(),
     };
   }
 }

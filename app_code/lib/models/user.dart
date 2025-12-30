@@ -7,15 +7,21 @@ class User {
   final bool isAnonymous;
   String? email;
   String? _userName;
+  late DateTime lastModified;
+  bool isDeleted;
 
   User({
     String? uid,
     this.isAnonymous = false,
     this.email, 
-    String? userName, 
+    String? userName,
+    DateTime? lastModified,
+    bool isDeleted = false,
   }): 
       _userName = userName,
-      uid = uid ?? Helper.generateId() {
+      uid = uid ?? Helper.generateId(),
+      lastModified = lastModified ?? DateTime.now(),
+      isDeleted = isDeleted {
     this.uid = uid;
   }
       
@@ -33,6 +39,8 @@ class User {
       uid: json.id,
       email: json['email'],
       userName: json['user_name'],
+      lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
+      isDeleted: json['is_deleted'] ?? false,
     );
   }
 
@@ -41,6 +49,8 @@ class User {
       'id': uid,
       'email': email,
       'user_name': _userName,
+      'last_modified': lastModified.toIso8601String(),
+      'is_deleted': isDeleted,
     };
   }
 
@@ -50,6 +60,8 @@ class User {
       isAnonymous: json['is_anonymous'] ?? false,
       email: json['email'],
       userName: json['user_name'],
+      lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
+      isDeleted: json['isDeleted'] ?? false,
     );
   }
 
@@ -59,6 +71,8 @@ class User {
       'is_anonymous': isAnonymous,
       'email': email,
       'user_name': _userName,
+      'lastModified': lastModified.toIso8601String(),
+      'isDeleted': isDeleted,
     };
   }
 }

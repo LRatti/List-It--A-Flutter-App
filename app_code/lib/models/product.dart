@@ -5,16 +5,20 @@ class Product {
   String _name;
   Map<String, String> associations;
   bool isVisible;
+  late DateTime lastModified;
 
   Product({
     String? id,
     required String name,
     Map<String, String>? associations,
     bool isVisible = true,
+    DateTime? lastModified,
+    bool isDeleted = false,
   })  : id = id ?? Helper.generateId(),
         _name = name,
         associations = associations ?? {},
-        isVisible = isVisible;
+        isVisible = isVisible,
+        lastModified = lastModified ?? DateTime.now();
 
   String getName() {
     return _name;
@@ -45,6 +49,7 @@ class Product {
       name: json['name'],
       isVisible: (json['is_visible'] ?? 1) == 1,
       associations: associations,
+      lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -53,6 +58,7 @@ class Product {
       'id': id,
       'name': _name,
       'is_visible': isVisible ? 1 : 0,
+      'last_modified': lastModified.toIso8601String(),
     };
   }
 
@@ -62,6 +68,7 @@ class Product {
       name: json['name'],
       associations: Map<String, String>.from(json['associations'] ?? {}),
       isVisible: json['isVisible'] ?? true,
+      lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -70,6 +77,7 @@ class Product {
       'id': id,
       'name': _name,
       'isVisible': isVisible,
+      'lastModified': lastModified.toIso8601String(),
     };
   }
 }

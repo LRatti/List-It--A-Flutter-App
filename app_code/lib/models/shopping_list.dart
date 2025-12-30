@@ -14,6 +14,8 @@ class ShoppingList {
   String? image;
   List<PurchasedProduct>? products;
   bool _isRegistered = false;
+  late DateTime lastModified;
+  bool isDeleted;
 
   ShoppingList(
       {String? id,
@@ -24,10 +26,14 @@ class ShoppingList {
       this.image,
       this.products,
       isRegistered = false,
+      DateTime? lastModified,
+      bool isDeleted = false,
   }) :  _name = name,
         _totalPrice = totalPrice,
         _supermarket = supermarket ?? _getDefaultSupermarket(),
         _isRegistered = isRegistered,
+        lastModified = lastModified ?? DateTime.now(),
+        isDeleted = isDeleted,
         this.id = id ?? Helper.generateId();
 
   String getName() {
@@ -62,6 +68,8 @@ class ShoppingList {
       totalPrice: json['total_price'],
       image: json['image'],
       isRegistered: json['is_registered'] == 1,
+      lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
+      isDeleted: (json['is_deleted'] ?? 0) == 1,
     );
   }
 
@@ -74,6 +82,8 @@ class ShoppingList {
       'total_price': _totalPrice,
       'image': image,
       'is_registered': _isRegistered ? 1 : 0,
+      'last_modified': lastModified.toIso8601String(),
+      'is_deleted': isDeleted ? 1 : 0,
     };
   }
 
@@ -88,6 +98,8 @@ class ShoppingList {
           ?.map((item) => PurchasedProduct.fromJson(item))
           .toList(),
       isRegistered: json['is_registered'] == 1,
+      lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
+      isDeleted: json['isDeleted'] ?? false,
     );
   }
 
@@ -101,6 +113,8 @@ class ShoppingList {
       'image': image,
       'products': products?.map((product) => product.toDatabase()).toList(),
       'is_registered': _isRegistered ? 1 : 0,
+      'lastModified': lastModified.toIso8601String(),
+      'isDeleted': isDeleted,
     };
   }
 
