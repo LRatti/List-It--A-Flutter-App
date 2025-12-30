@@ -104,7 +104,7 @@ class ManageProduct {
     );
     final categoryIds = categoryRows.map((e) => e['category_id'] as String).toList();
 
-    return Product.fromDatabase(productRows.first, categoryIds: categoryIds);
+    return Product.fromDatabase(productRows.first, associations: {});
   }
 
   static Future<List<Product>> getAllProducts() async {
@@ -121,7 +121,7 @@ class ManageProduct {
       );
       final categoryIds = categoryRows.map((e) => e['category_id'] as String).toList();
 
-      final product = Product.fromDatabase(row, categoryIds: categoryIds);
+      final product = Product.fromDatabase(row, associations: {});
       result.add(product);
     }
 
@@ -142,6 +142,6 @@ class ManageProduct {
     );
     final categoryIds = categoryRows.map((e) => e['category_id'] as String).toList();
 
-    return Product.fromDatabase(rows.first, categoryIds: categoryIds);
+    return Product.fromDatabase(rows.first, associations: {});
   }
 }
