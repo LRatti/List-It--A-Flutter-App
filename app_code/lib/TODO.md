@@ -8,7 +8,12 @@ DONE: Aggiungere i nuovi attributi a product.
 
 DONE: fix ER.
 
-TODO: Apply some of the suggestions in the documentation to the nearest app feature
-TODO: Make the nearest app feature work also for the web implementation
+DONE: Apply some of the suggestions in the documentation to the nearest app feature
+    NOTE: implemented different message according to error state.
+
+DONE: Make the nearest app feature work also for the web implementation.
+    NOTE: cannot work on web becuase of limitations in the used extension.
+
 TODO: Generate unit and widget tests for the nearest supermarket 
-TODO: make the nearest app feature so that it updates immediatly after all the possible issues are solved
+
+DONE: make the nearest app feature so that it updates immediatly after all the possible issues are solved

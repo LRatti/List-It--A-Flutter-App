@@ -6,6 +6,7 @@ import 'package:app_code/providers/real_app_providers/supermarket_location_repos
 import 'package:geolocator/geolocator.dart';
 
 /// State for nearest supermarket feature
+
 class NearestSupermarketState {
   final NearbySupermarket? supermarket;
   final bool isLoading;
@@ -40,11 +41,11 @@ class NearestSupermarketState {
     if (isLoading) {
       return 'Locating nearby supermarkets...';
     }
-    if (errorMessage != null) {
-      return errorMessage!;
-    }
     if (supermarket != null) {
       return '${supermarket!.name} - ${supermarket!.formattedDistance}';
+    }
+    if (errorMessage != null) {
+      return errorMessage!;
     }
     return 'Unable to detect nearby supermarkets';
   }
@@ -55,9 +56,11 @@ class NearestSupermarketState {
 /// Notifier for managing nearest supermarket state
 class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
   Timer? _refreshTimer;
+  Timer? _errorRetryTimer;
   StreamSubscription<Position>? _positionSubscription;
   Position? _lastPosition;
   static const double _significantDistanceChange = 100; // meters
+  static const Duration _errorRetryInterval = Duration(seconds: 20);
 
   @override
   NearestSupermarketState build() {
@@ -81,24 +84,49 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
       final locationRepo = ref.read(locationRepositoryProvider);
       final supermarketRepo = ref.read(supermarketLocationRepositoryProvider);
 
+      // 1. Check location service availability
+      final serviceEnabled = await locationRepo.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _setError(
+          message: 'Please enable location services to find supermarkets',
+        );
+        return;
+      }
+
+      // 2. Check and request permissions
+      LocationPermission permission = await locationRepo.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await locationRepo.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied) {
+        _setError(
+          message: 'Location permission is required to find supermarkets',
+        );
+        return;
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        _setError(
+          message: 'Enable location permission in settings to continue',
+        );
+        return;
+      }
+
       // Get current position
       final position = await locationRepo.getCurrentPosition();
 
       if (position == null) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: 'Unable to detect nearby supermarkets',
-          clearSupermarket: true,
+        _setError(
+          message: 'Unable to get your location right now',
         );
         return;
       }
 
       // Check GPS accuracy
       if (position.accuracy > 100) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: 'Unable to detect nearby supermarkets',
-          clearSupermarket: true,
+        _setError(
+          message: 'Low GPS accuracy. Try moving outdoors.',
         );
         return;
       }
@@ -114,10 +142,8 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
       );
 
       if (supermarkets.isEmpty) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: 'Unable to detect nearby supermarkets',
-          clearSupermarket: true,
+        _setError(
+          message: 'No supermarkets found within 5km',
           currentPosition: position,
         );
         return;
@@ -133,11 +159,14 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
         currentPosition: position,
         clearError: true,
       );
+
+      _stopErrorRetry();
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Unable to detect nearby supermarkets',
-        clearSupermarket: true,
+      final isTimeout = e is TimeoutException;
+      _setError(
+        message: isTimeout
+            ? 'Network timeout while finding supermarkets'
+            : 'Network issue while finding supermarkets',
       );
     }
   }
@@ -176,6 +205,30 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
     );
   }
 
+  /// Start a faster retry loop when in error state so recovery is reactive
+  void _startErrorRetry() {
+    _errorRetryTimer ??=
+        Timer.periodic(_errorRetryInterval, (_) => fetchNearestSupermarket());
+  }
+
+  void _stopErrorRetry() {
+    _errorRetryTimer?.cancel();
+    _errorRetryTimer = null;
+  }
+
+  void _setError({
+    required String message,
+    Position? currentPosition,
+  }) {
+    state = state.copyWith(
+      isLoading: false,
+      errorMessage: message,
+      clearSupermarket: true,
+      currentPosition: currentPosition ?? state.currentPosition,
+    );
+    _startErrorRetry();
+  }
+
   /// Manually refresh
   Future<void> refresh() async {
     await fetchNearestSupermarket();
@@ -184,6 +237,7 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
   /// Clean up resources
   void cleanup() {
     _refreshTimer?.cancel();
+    _stopErrorRetry();
     _positionSubscription?.cancel();
   }
 }
