@@ -3,8 +3,41 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/widgets/top_bar_with_navbar.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
+import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
 import 'package:app_code/providers/test_providers/test_auth_provider.dart';
 import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
+import 'package:app_code/services/map_launcher_service.dart';
+
+class TestNearestSupermarketNotifier extends NearestSupermarketNotifier {
+  @override
+  NearestSupermarketState build() {
+    return const NearestSupermarketState(
+      isLoading: false,
+      errorMessage: 'internet not available',
+    );
+  }
+}
+
+class MockMapLauncherService extends MapLauncherService {
+  @override
+  Future<bool> openMap({
+    required double latitude,
+    required double longitude,
+    String? label,
+  }) async {
+    return true;
+  }
+
+  @override
+  Future<bool> openDirections({
+    required double destinationLat,
+    required double destinationLon,
+    String? destinationLabel,
+  }) async {
+    return true;
+  }
+}
 
 void main() {
   late InMemoryAuthRepository authRepository;
@@ -31,6 +64,9 @@ void main() {
       overrides: [
         authRepositoryProvider.overrideWithValue(authRepository),
         authProvider.overrideWith(() => TestAuthNotifier(authRepository)),
+        nearestSupermarketProvider
+            .overrideWith(() => TestNearestSupermarketNotifier()),
+        mapLauncherServiceProvider.overrideWithValue(MockMapLauncherService()),
       ],
     );
 
@@ -65,7 +101,7 @@ void main() {
     await pumpTopBar(tester, isAnonymous: true);
 
     expect(
-      find.text('Nearest supermarket: internet not available'),
+      find.text('internet not available'),
       findsOneWidget,
     );
   });
