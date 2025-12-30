@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
+import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
 
 class TopBarWithNavBar extends ConsumerWidget implements PreferredSizeWidget {
   const TopBarWithNavBar({super.key});
@@ -9,6 +11,8 @@ class TopBarWithNavBar extends ConsumerWidget implements PreferredSizeWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final authNotifier = ref.read(authProvider.notifier);
+    final nearestSupermarketState = ref.watch(nearestSupermarketProvider);
+    final mapLauncherService = ref.read(mapLauncherServiceProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -58,13 +62,80 @@ class TopBarWithNavBar extends ConsumerWidget implements PreferredSizeWidget {
             ),
           ],
         ),
-        Container(
-          width: double.infinity,
-          color: Colors.grey[200],
-          padding: const EdgeInsets.all(12),
-          child: const Text(
-            "Nearest supermarket: internet not available",
-            style: TextStyle(fontSize: 16),
+        // Nearest supermarket bar
+        Material(
+          color: nearestSupermarketState.hasValidSupermarket
+              ? Colors.green[50]
+              : Colors.grey[200],
+          child: InkWell(
+            onTap: nearestSupermarketState.hasValidSupermarket
+                ? () async {
+                    final supermarket = nearestSupermarketState.supermarket!;
+                    final success = await mapLauncherService.openMap(
+                      latitude: supermarket.latitude,
+                      longitude: supermarket.longitude,
+                      label: supermarket.name,
+                    );
+                    
+                    if (!success && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Unable to open map'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
+                : null,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  Icon(
+                    nearestSupermarketState.hasValidSupermarket
+                        ? Icons.place
+                        : Icons.location_off,
+                    size: 20,
+                    color: nearestSupermarketState.hasValidSupermarket
+                        ? Colors.green[700]
+                        : Colors.grey[600],
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      nearestSupermarketState.displayText,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: nearestSupermarketState.hasValidSupermarket
+                            ? FontWeight.w500
+                            : FontWeight.normal,
+                        color: nearestSupermarketState.hasValidSupermarket
+                            ? Colors.green[900]
+                            : Colors.grey[700],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (nearestSupermarketState.isLoading)
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(Colors.grey[600]),
+                      ),
+                    ),
+                  if (nearestSupermarketState.hasValidSupermarket)
+                    Icon(
+                      Icons.open_in_new,
+                      size: 16,
+                      color: Colors.green[700],
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ],
