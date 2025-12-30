@@ -1,5 +1,6 @@
 import 'package:app_code/models/user.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/user_details_provider.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
@@ -7,18 +8,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _FakeAuthNotifier extends AuthNotifier {
+	_FakeAuthNotifier(this.user, this.repository);
+	final User user;
+	final AuthRepository repository;
+
+	@override
+	Future<User?> build() async {
+		// Don't call super.build() as it tries to access Firebase
+		// Just return our test user
+		return user;
+	}
+
+	@override
+	bool canUpdateCredentials() => repository.canUpdateCredentials();
+}
+
 void main() {
 	TestWidgetsFlutterBinding.ensureInitialized();
 
 	Widget buildScreen({required User? user}) {
+		final repo = _FakeAuthRepository();
 		return ProviderScope(
 			overrides: [
-				authRepositoryProvider.overrideWithValue(_FakeAuthRepository()),
+				authRepositoryProvider.overrideWithValue(repo),
+				userManagerProvider.overrideWithValue(_FakeUserManager(user)),
+				// Provide auth state so userDetailsProvider can work
+				if (user != null)
+					authProvider.overrideWith(() => _FakeAuthNotifier(user, repo)),
 			],
-			child: MaterialApp(
-				home: SettingsScreen(
-					userManager: _FakeUserManager(user),
-				),
+			child: const MaterialApp(
+				home: SettingsScreen(),
 			),
 		);
 	}

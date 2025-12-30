@@ -110,7 +110,10 @@ This lets your colleague see your work anytime.
 ```bash
 git fetch origin
 git checkout feature/login-screen
+# merge and commit
 git merge origin/main
+# merge, do not commit and do not fast foward
+git merge --no-ff --no-commit origin/main
 # resolve conflicts if any, then:
 git add .
 git commit   # finish merge commit if needed
@@ -307,11 +310,36 @@ git checkout my-branch
 
 # Restore your work
 git stash pop
+
+# Show stash log
+git reflog show stash
 ```
 
 This is the cleanest workflow used by most teams.
 
 ---
 
+You want to **reset your local branch so it exactly matches the remote branch**, discarding the extra local commits.
+
+### ⚠️ Warning
+
+This will **lose local commits** that are not on the remote branch. If you might need them later, stash or back them up first.
+
+---
+
+## ✅ Recommended (safe & clean)
+
+```bash
+git fetch origin
+git reset --hard origin/<branch-name>
+```
+
+Example:
+
+```bash
+git fetch origin
+git reset --hard origin/main
+```
+---
 
 

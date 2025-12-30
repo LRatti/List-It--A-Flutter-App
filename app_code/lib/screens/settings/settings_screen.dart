@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:app_code/models/user.dart';
-import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/email_verification_provider.dart';
 import 'package:app_code/providers/real_app_providers/password_reset_cooldown_provider.dart';
+import 'package:app_code/providers/real_app_providers/user_details_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/widgets/password_text_field.dart';
@@ -11,9 +11,7 @@ import 'package:app_code/widgets/password_text_field.dart';
 part 'settings_controller.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key, this.userManager});
-
-  final UserManager? userManager;
+  const SettingsScreen({super.key});
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -24,6 +22,8 @@ class _SettingsScreenState extends SettingsController {
 
   @override
   Widget build(BuildContext context) {
+    final userDetailsAsync = ref.watch(userDetailsProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -33,31 +33,23 @@ class _SettingsScreenState extends SettingsController {
       body: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
-        child: FutureBuilder<dynamic>(
-          future: userManager.getUserData(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (snapshot.connectionState == ConnectionState.done) {
-              final User? user = snapshot.data;
-              if (user != null) {
-                // Initialize controllers only once with user data
-                if (!_isInitialized) {
-                  usernameController.text = user.getUserName();
-                  emailController.clear(); // start with empty email field
-                  _isInitialized = true;
-                }
-
-                return _buildEditForm(user);
-              } else {
-                return const Center(child: Text('No user data found.'));
-              }
-            } else {
-              return const Center(child: Text('Something went wrong.'));
+        child: userDetailsAsync.when(
+          data: (user) {
+            if (user == null) {
+              return const Center(child: Text('No user data found.'));
             }
+
+            if (!_isInitialized || _lastUserId != user.uid) {
+              usernameController.text = user.getUserName();
+              emailController.clear();
+              _lastUserId = user.uid;
+              _isInitialized = true;
+            }
+
+            return _buildEditForm(user);
           },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text('Error: $error')),
         ),
       ),
     );
