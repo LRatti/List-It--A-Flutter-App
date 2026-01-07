@@ -84,51 +84,60 @@ class ListsScreenMobile extends ConsumerWidget {
       loading: () => const SizedBox.shrink(),
       error: (error, _) => Center(child: Text(error.toString())),
       data: (lists) {
-        if (lists.isEmpty) {
-          return const Center(
-            child: Text(
-              "No lists yet.\nTap + to create one.",
-              textAlign: TextAlign.center,
-            ),
-          );
-        }
-
         return Scaffold(
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              const crossAxisCount = 3;
-              const spacing = 12.0;
-              final totalWidth = constraints.maxWidth;
-              final itemWidth =
-                  (totalWidth - (crossAxisCount + 1) * spacing) / crossAxisCount;
-              const nameRowHeight = 48.0;
-              const verticalGap = 8.0;
-              const safeBuffer = 2.0;
-              final itemHeight = itemWidth + nameRowHeight + verticalGap + safeBuffer;
+          body: lists.isEmpty
+              ? const Center(
+                  child: Text(
+                    "No lists yet.\nTap + to create one.",
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Adaptive grid: compute columns and tile size from available width
+                    const spacing = 12.0;
+                    const minTileWidth = 120.0; // Minimum desired tile width
+                    const nameRowHeight = 48.0;
+                    const verticalGap = 8.0;
+                    const safeBuffer = 2.0;
 
-              return GridView.builder(
-                padding: const EdgeInsets.all(spacing),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: spacing,
-                  mainAxisSpacing: spacing,
-                  childAspectRatio: itemWidth / itemHeight,
+                    final totalWidth = constraints.maxWidth;
+
+                    // Choose how many columns fit given a minimum tile width + spacing
+                    int crossAxisCount =
+                        (totalWidth / (minTileWidth + spacing)).floor();
+                    if (crossAxisCount < 1) crossAxisCount = 1;
+
+                    // Compute the actual tile width that fills the row evenly
+                    final tileWidth = (totalWidth - (crossAxisCount + 1) * spacing) / crossAxisCount;
+
+                    // Height is square thumbnail + name row + small gaps
+                    final itemHeight = tileWidth + nameRowHeight + verticalGap + safeBuffer;
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(spacing),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: spacing,
+                        mainAxisSpacing: spacing,
+                        // Keep aspect ratio consistent with the computed height
+                        childAspectRatio: tileWidth / itemHeight,
+                      ),
+                      itemCount: lists.length,
+                      itemBuilder: (context, index) {
+                        final shoppingList = lists[index];
+                        return ShoppingListCard(
+                          shoppingList: shoppingList,
+                          onTap: () {},
+                          onNameChanged: (newName) =>
+                              _updateListName(ref, shoppingList, newName),
+                          onDelete: () =>
+                              _deleteShoppingList(context, ref, shoppingList),
+                        );
+                      },
+                    );
+                  },
                 ),
-                itemCount: lists.length,
-                itemBuilder: (context, index) {
-                  final shoppingList = lists[index];
-                  return ShoppingListCard(
-                    shoppingList: shoppingList,
-                    onTap: () {},
-                    onNameChanged: (newName) =>
-                        _updateListName(ref, shoppingList, newName),
-                    onDelete: () =>
-                        _deleteShoppingList(context, ref, shoppingList),
-                  );
-                },
-              );
-            },
-          ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showAddShoppingListDialog(context, ref),
             child: const Icon(Icons.add),
