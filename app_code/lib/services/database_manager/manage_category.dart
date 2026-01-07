@@ -2,16 +2,16 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/services/database/sqlite/manage_category.dart' as sqlite_manage_category;
 
 class ManageCategory {
-  static void addCategory(Category category) {
-    sqlite_manage_category.ManageCategory.addCategory(category) ;
+  static Future<void> addCategory(Category category) {
+    return sqlite_manage_category.ManageCategory.addCategory(category) ;
   }
 
-  static void deleteCategory(Category category) {
-    sqlite_manage_category.ManageCategory.deleteCategory(category.id);
+  static Future<void> deleteCategory(Category category) {
+    return sqlite_manage_category.ManageCategory.deleteCategory(category.id);
   }
 
-  static void updateCategory(Category category) {
-    sqlite_manage_category.ManageCategory.updateCategory(category);
+  static Future<void> updateCategory(Category category) {
+    return sqlite_manage_category.ManageCategory.updateCategory(category);
   }
 
   static Future<Category?> getCategoryById(String id) {
