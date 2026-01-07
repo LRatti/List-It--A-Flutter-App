@@ -84,8 +84,11 @@ class ListsScreenMobile extends ConsumerWidget {
       loading: () => const SizedBox.shrink(),
       error: (error, _) => Center(child: Text(error.toString())),
       data: (lists) {
+        // Filter to show only non-registered lists
+        final activeLists = lists.where((list) => !list.getIsRegistered()).toList();
+
         return Scaffold(
-          body: lists.isEmpty
+          body: activeLists.isEmpty
               ? const Center(
                   child: Text(
                     "No lists yet.\nTap + to create one.",
@@ -123,9 +126,9 @@ class ListsScreenMobile extends ConsumerWidget {
                         // Keep aspect ratio consistent with the computed height
                         childAspectRatio: tileWidth / itemHeight,
                       ),
-                      itemCount: lists.length,
+                      itemCount: activeLists.length,
                       itemBuilder: (context, index) {
-                        final shoppingList = lists[index];
+                        final shoppingList = activeLists[index];
                         return ShoppingListCard(
                           shoppingList: shoppingList,
                           onTap: () {},
