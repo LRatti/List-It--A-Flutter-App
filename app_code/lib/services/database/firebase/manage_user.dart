@@ -3,7 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirebaseUserManager {
 
-  final _db = FirebaseFirestore.instance.collection("Users");
+  FirebaseUserManager({
+    FirebaseFirestore? firestore,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore;
+
+  CollectionReference<Map<String, dynamic>> get _db => _firestore.collection("Users");
 
   Future<void> setUser(User user) async { //to be awaited when called
     await _db.doc(user.uid).set(user.toDatabase())

@@ -39,26 +39,39 @@ void main() {
   expect(all.first.getName(), 'Apple');
 });
 
-test('updates an existing product', () async {
-  final product = Product(name: 'Milk');
-  await ManageProduct.addProduct(product);
+  test('updates an existing product', () async {
+    final product = Product(name: 'Milk');
+    await ManageProduct.addProduct(product);
 
-  final updated = Product(id: product.id, name: 'Skim Milk');
-  await ManageProduct.updateProduct(updated);
+    final updated = Product(id: product.id, name: 'Skim Milk');
+    await ManageProduct.updateProduct(updated);
 
-  final retrieved = await ManageProduct.getProductById(product.id);
-  expect(retrieved, isNotNull);
-  expect(retrieved!.getName(), 'Skim Milk');
-});
+    final retrieved = await ManageProduct.getProductById(product.id);
+    expect(retrieved, isNotNull);
+    expect(retrieved!.getName(), 'Skim Milk');
+  });
 
-test('deletes a product', () async {
-  final product = Product(name: 'Chips');
-  await ManageProduct.addProduct(product);
+  test('deletes a product', () async {
+    final product = Product(name: 'Chips');
+    await ManageProduct.addProduct(product);
 
-  await ManageProduct.deleteProduct(product.id);
+    await ManageProduct.deleteProduct(product.id);
 
-  final remaining = await ManageProduct.getAllProducts();
-  expect(remaining, isEmpty);
-});
+    final remaining = await ManageProduct.getAllProducts();
+    expect(remaining, isEmpty);
+  });
+
+  test('handles associations correctly', () async {
+    final product = Product(
+      name: 'Orange Juice',
+      associations: {'supermarket1': 'category1'},
+    );
+    await ManageProduct.addProduct(product);
+
+    final retrieved = await ManageProduct.getProductById(product.id);
+    expect(retrieved, isNotNull);
+    expect(retrieved!.associations.length, 1);
+    expect(retrieved.associations['supermarket1'], 'category1');
+  });
 
 }

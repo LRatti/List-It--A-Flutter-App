@@ -97,14 +97,19 @@ class ManageProduct {
     final productRows = await db.query('product', where: 'id = ?', whereArgs: [id]);
     if (productRows.isEmpty) return null;
 
-    final categoryRows = await db.query(
+    final associationRows = await db.query(
       'associations',
       where: 'product_id = ?',
       whereArgs: [id],
     );
-    final categoryIds = categoryRows.map((e) => e['category_id'] as String).toList();
+    final associations = <String, String>{};
+    for (final row in associationRows) {
+      final supermarketId = row['supermarket_id'] as String;
+      final categoryId = row['category_id'] as String;
+      associations[supermarketId] = categoryId;
+    }
 
-    return Product.fromDatabase(productRows.first, categoryIds: categoryIds);
+    return Product.fromDatabase(productRows.first, associations: associations);
   }
 
   static Future<List<Product>> getAllProducts() async {
@@ -114,14 +119,20 @@ class ManageProduct {
     List<Product> result = [];
 
     for (final row in productRows) {
-      final categoryRows = await db.query(
+      final associationRows = await db.query(
         'associations',
         where: 'product_id = ?',
         whereArgs: [row['id']],
       );
-      final categoryIds = categoryRows.map((e) => e['category_id'] as String).toList();
 
-      final product = Product.fromDatabase(row, categoryIds: categoryIds);
+      final associations = <String, String>{};
+      for (final row in associationRows) {
+        final supermarketId = row['supermarket_id'] as String;
+        final categoryId = row['category_id'] as String;
+        associations[supermarketId] = categoryId;
+      }
+
+      final product = Product.fromDatabase(row, associations: associations);
       result.add(product);
     }
 
@@ -135,13 +146,19 @@ class ManageProduct {
     if (rows.isEmpty) return null;
 
     final productId = rows.first['id'] as String;
-    final categoryRows = await db.query(
+    final associationRows = await db.query(
       'associations',
       where: 'product_id = ?',
       whereArgs: [productId],
     );
-    final categoryIds = categoryRows.map((e) => e['category_id'] as String).toList();
 
-    return Product.fromDatabase(rows.first, categoryIds: categoryIds);
+    final associations = <String, String>{};
+    for (final row in associationRows) {
+      final supermarketId = row['supermarket_id'] as String;
+      final categoryId = row['category_id'] as String;
+      associations[supermarketId] = categoryId;
+    }
+
+    return Product.fromDatabase(rows.first, associations: associations);
   }
 }

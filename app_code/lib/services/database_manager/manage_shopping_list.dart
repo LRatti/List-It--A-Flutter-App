@@ -1,20 +1,20 @@
 import 'package:app_code/models/shopping_list.dart';
+import 'package:app_code/services/database/sqlite/manage_shopping_list.dart' as sqlite_manage_shopping_list;
 
 class ManageShoppingList {
-  void addShoppingList(ShoppingList category) {
-    // Code to add a category to the database
+  void addShoppingList(ShoppingList shoppingList) {
+    sqlite_manage_shopping_list.ManageShoppingList.addShoppingList(shoppingList);
   }
 
-  void deleteShoppingList(ShoppingList category) {
-    // Code to delete a category from the database
+  void deleteShoppingList(ShoppingList shoppingList) {
+    sqlite_manage_shopping_list.ManageShoppingList.deleteShoppingList(shoppingList);
   }
 
-  void updateShoppingList(ShoppingList category) {
-    // Code to update a category in the database
+  void updateShoppingList(ShoppingList shoppingList) {
+    sqlite_manage_shopping_list.ManageShoppingList.updateShoppingList(shoppingList);
   }
 
   List<ShoppingList> getAllShoppingLists() {
-    // Code to retrieve all categories from the database
-    return [];
+    return sqlite_manage_shopping_list.ManageShoppingList.getAllShoppingLists() as List<ShoppingList>;
   }
 }
