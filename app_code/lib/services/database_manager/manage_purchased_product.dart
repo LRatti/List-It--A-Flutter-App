@@ -2,16 +2,16 @@ import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/services/database/sqlite/manage_purchased_product.dart' as sqlite_manage_purchased_product;
 
 class ManagePurchasedProduct {
-  static void addPurchasedProduct(PurchasedProduct purchasedProduct) {
-    sqlite_manage_purchased_product.ManagePurchasedProduct.addPurchasedProduct(purchasedProduct) ;
+  static Future<void> addPurchasedProduct(PurchasedProduct purchasedProduct) {
+    return sqlite_manage_purchased_product.ManagePurchasedProduct.addPurchasedProduct(purchasedProduct) ;
   }
 
-  static void deletePurchasedProduct(PurchasedProduct purchasedProduct) {
-    sqlite_manage_purchased_product.ManagePurchasedProduct.deletePurchasedProduct(purchasedProduct.id);
+  static Future<void> deletePurchasedProduct(PurchasedProduct purchasedProduct) {
+    return sqlite_manage_purchased_product.ManagePurchasedProduct.deletePurchasedProduct(purchasedProduct.id);
   }
 
-  static void updatePurchasedProduct(PurchasedProduct purchasedProduct) {
-    sqlite_manage_purchased_product.ManagePurchasedProduct.updatePurchasedProduct(purchasedProduct);
+  static Future<void> updatePurchasedProduct(PurchasedProduct purchasedProduct) {
+    return sqlite_manage_purchased_product.ManagePurchasedProduct.updatePurchasedProduct(purchasedProduct);
   }
 
   static Future<List<PurchasedProduct>> getPurchasedProductsByList(String listId) {

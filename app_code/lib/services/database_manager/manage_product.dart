@@ -2,16 +2,16 @@ import 'package:app_code/models/product.dart';
 import 'package:app_code/services/database/sqlite/manage_product.dart' as sqlite_manage_product;
 
 class ManageProduct {
-  static void addProduct(Product product) {
-    sqlite_manage_product.ManageProduct.addProduct(product) ;
+  static Future<void> addProduct(Product product) {
+    return sqlite_manage_product.ManageProduct.addProduct(product) ;
   }
 
-  static void deleteProduct(Product product) {
-    sqlite_manage_product.ManageProduct.deleteProduct(product.id);
+  static Future<void> deleteProduct(Product product) {
+    return sqlite_manage_product.ManageProduct.deleteProduct(product.id);
   }
 
-  static void updateProduct(Product product) {
-    sqlite_manage_product.ManageProduct.updateProduct(product);
+  static Future<void> updateProduct(Product product) {
+    return sqlite_manage_product.ManageProduct.updateProduct(product);
   }
 
   static Future<Product?> getProductById(String id) {
