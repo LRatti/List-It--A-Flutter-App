@@ -1,4 +1,5 @@
 import 'package:app_code/providers/shopping_lists_notifier.dart';
+import 'package:app_code/utils/statistics_calculator.dart';
 import 'package:app_code/widgets/period_selector.dart';
 import 'package:app_code/widgets/statistics_pie_chart.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +56,67 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
   /// Checks if date a is after date b (comparing only dates, not time)
   bool _isAfter(DateTime a, DateTime b) => a.isAfter(DateTime(b.year, b.month, b.day, 23, 59, 59));
 
+  /// Shows a bottom sheet with products for the selected category
+  void _showCategoryDetails(BuildContext context, String categoryName, List<dynamic> allLists) {
+    final products = StatisticsCalculator.aggregateCategoryProducts(categoryName, allLists);
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    categoryName,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            // Product list
+            Expanded(
+              child: ListView.separated(
+                controller: scrollController,
+                itemCount: products.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  
+                  return ListTile(
+                    title: Text(product.name),
+                    subtitle: Text('Quantity: ${product.quantity}'),
+                    trailing: Text(
+                      _formatCurrency(product.price),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final listsAsync = ref.watch(shoppingListsProvider);
@@ -67,34 +129,10 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),
         data: (lists) {
-          // Filter to only show completed (registered) shopping lists
-          final registered = lists.where((l) => l.getIsRegistered()).toList();
-          
-          // Further filter by selected time period
-          final filtered = registered
-              .where((l) => l.getCreatedAt() != null && _isWithinPeriod(l.getCreatedAt()!))
-              .toList();
-
-          // Aggregate spending by category
-          final categoryTotals = <String, double>{};
-          for (final list in filtered) {
-            for (final product in list.getProducts()) {
-              final key = product.category.getName();
-              final value = product.price;
-              categoryTotals.update(key, (old) => old + value, ifAbsent: () => value);
-            }
-          }
-
-          // Calculate total spending and sort categories by amount (descending)
-          final total = categoryTotals.values.fold(0.0, (a, b) => a + b);
-          final entries = categoryTotals.entries
-              .where((e) => e.value > 0)
-              .toList()
-            ..sort((a, b) => b.value.compareTo(a.value));
-
-          if (total == 0) {
-            return const Center(child: Text('No data for the selected period.'));
-          }
+          final computation = StatisticsCalculator.compute(lists, _isWithinPeriod);
+          final filtered = computation.filteredLists;
+          final entries = computation.categoryEntries;
+          final total = computation.total;
 
           return SingleChildScrollView(
             child: Padding(
@@ -113,39 +151,47 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                       });
                     },
                   ),
-                  const SizedBox(height: 12),
-                  // Pie chart - fixed height
-                  SizedBox(
-                    height: 200,
-                    child: StatisticsPieChart(entries: entries, total: total),
-                  ),
-                  const SizedBox(height: 12),
-                  // "By category" title
-                  const Text(
-                    'By category',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                  ),
-                  const SizedBox(height: 8),
-                  // Category list - not expanded, just normal height
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: entries.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final e = entries[index];
-                      final percent = total == 0 ? 0 : (e.value / total) * 100;
-                      final color = _colorForIndex(index);
-                      return ListTile(
-                        dense: true,
-                        leading: CircleAvatar(backgroundColor: color, radius: 8),
-                        title: Text(e.key, style: const TextStyle(fontSize: 15)),
-                        subtitle: Text('${percent.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 12)),
-                        trailing: Text(_formatCurrency(e.value), style: const TextStyle(fontSize: 12)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
-                      );
-                    },
-                  ),
+                  if (total == 0)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 20),
+                      child: Center(child: Text('No data for the selected period.')),
+                    )
+                  else ...[
+                    const SizedBox(height: 12),
+                    // Pie chart - fixed height
+                    SizedBox(
+                      height: 200,
+                      child: StatisticsPieChart(entries: entries, total: total),
+                    ),
+                    const SizedBox(height: 12),
+                    // "By category" title
+                    const Text(
+                      'By category',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                    const SizedBox(height: 8),
+                    // Category list - not expanded, just normal height
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: entries.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final e = entries[index];
+                        final percent = total == 0 ? 0 : (e.value / total) * 100;
+                        final color = _colorForIndex(index);
+                        return ListTile(
+                          dense: true,
+                          leading: CircleAvatar(backgroundColor: color, radius: 8),
+                          title: Text(e.key, style: const TextStyle(fontSize: 15)),
+                          subtitle: Text('${percent.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 12)),
+                          trailing: Text(_formatCurrency(e.value), style: const TextStyle(fontSize: 12)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
+                          onTap: () => _showCategoryDetails(context, e.key, filtered),
+                        );
+                      },
+                    ),
+                  ],
                 ],
               ),
             ),
