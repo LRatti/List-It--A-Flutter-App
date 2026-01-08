@@ -5,15 +5,16 @@ import 'package:app_code/screens/lists/lists_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarkets_screen_mobile.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
 import 'package:app_code/screens/stats/statistics_screen_mobile.dart';
+import 'package:app_code/providers/text_scale_provider.dart';
 
-class MobileHomePage extends StatefulWidget {
+class MobileHomePage extends ConsumerStatefulWidget {
   const MobileHomePage({super.key});
 
   @override
-  State<MobileHomePage> createState() => _MobileHomePageState();
+  ConsumerState<MobileHomePage> createState() => _MobileHomePageState();
 }
 
-class _MobileHomePageState extends State<MobileHomePage> {
+class _MobileHomePageState extends ConsumerState<MobileHomePage> {
   int _selectedIndex = 0;
 
   Widget _getSelectedTabContent() {
@@ -51,6 +52,9 @@ class _MobileHomePageState extends State<MobileHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final textScale = ref.watch(textScaleProvider);
+    final iconSize = (24.0 * textScale).clamp(20.0, 32.0);
+    
     return Scaffold(
       appBar: const TopBarWithNavBar(),
       body: _getSelectedTabContent(),
@@ -62,6 +66,9 @@ class _MobileHomePageState extends State<MobileHomePage> {
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
+        iconSize: iconSize,
+        selectedFontSize: (14.0 * textScale).clamp(12.0, 18.0),
+        unselectedFontSize: (12.0 * textScale).clamp(10.0, 16.0),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.list), label: "Lists"),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: "History"),

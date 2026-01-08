@@ -27,11 +27,14 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
   static const double _fontSize = 12.0;
   static const double _lineHeightMultiplier = 1.2;
 
-  final TextStyle _productTextStyle = const TextStyle(
-    fontSize: _fontSize,
-    height: _lineHeightMultiplier,
-    color: Colors.black87,
-  );
+  TextStyle _productTextStyle(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context).scale(_fontSize);
+    return TextStyle(
+      fontSize: scale,
+      height: _lineHeightMultiplier,
+      color: Colors.black87,
+    );
+  }
 
   @override
   void initState() {
@@ -111,7 +114,8 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
 
     // Show only the items that fit without scrolling.
     // Estimate line height using font size and height multiplier.
-    final lineHeightPx = _fontSize * _lineHeightMultiplier;
+    final scale = MediaQuery.textScalerOf(context).scale(_fontSize);
+    final lineHeightPx = scale * _lineHeightMultiplier;
     final maxLinesFit = (constraints.maxHeight / lineHeightPx).floor();
 
     // If there are more products than lines available, reserve one line
@@ -129,14 +133,14 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
         for (var p in products.take(visibleCount))
           Text(
             "• ${p.product.getName()}",
-            style: _productTextStyle,
+            style: _productTextStyle(context),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         if (hasOverflow && remainingCount > 0)
           Text(
             "+$remainingCount more",
-            style: _productTextStyle.copyWith(color: Colors.black45),
+            style: _productTextStyle(context).copyWith(color: Colors.black45),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -149,23 +153,25 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
     return Center(
       child: Text(
         "Empty",
-        style: _productTextStyle.copyWith(color: Colors.black38),
+        style: _productTextStyle(context).copyWith(color: Colors.black38),
         textAlign: TextAlign.center,
       ),
     );
   }
 
   Widget _buildFooterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const SizedBox(width: 8.0),
-        Expanded(
-          child: _editingName ? _buildEditingField() : _buildNameAndDate(),
-        ),
-        _buildDeleteButton(),
-      ],
-    );
+    return LayoutBuilder(builder: (context, constraints) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: _editingName ? _buildEditingField() : _buildNameAndDate(),
+          ),
+          _buildDeleteButton(),
+        ],
+      );
+    });
   }
 
   Widget _buildNameAndDate() {
@@ -184,7 +190,7 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
       controller: _nameController,
       autofocus: true,
       textAlign: TextAlign.center,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
       onSubmitted: (_) => _saveName(),
       onTapOutside: (_) {
         FocusManager.instance.primaryFocus?.unfocus();
@@ -202,7 +208,7 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
     return Text(
       widget.shoppingList.getName(),
       textAlign: TextAlign.center,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -216,23 +222,22 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
     return Text(
       formattedDate,
       textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w400,
-        color: Colors.black54,
-      ),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.black54),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
   }
 
   Widget _buildDeleteButton() {
+    final scale = MediaQuery.textScaleFactorOf(context);
+    final size = (_sideElementSize * scale).clamp(36.0, 56.0);
+    final iconSize = (20.0 * scale).clamp(18.0, 28.0);
     return SizedBox(
-      width: _sideElementSize,
-      height: _sideElementSize,
+      width: size,
+      height: size,
       child: IconButton(
         icon: const Icon(Icons.delete_outline, color: Colors.red),
-        iconSize: 20,
+        iconSize: iconSize,
         onPressed: widget.onDelete,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints(),

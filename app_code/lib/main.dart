@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
+import 'package:app_code/providers/text_scale_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,13 +21,14 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
-  
+
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-  
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textScale = ref.watch(textScaleProvider);
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -34,6 +36,13 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        return MediaQuery(
+          data: mq.copyWith(textScaleFactor: textScale),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: const MobileHomePage(),
     );
   }
