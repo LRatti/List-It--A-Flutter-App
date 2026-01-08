@@ -122,12 +122,9 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
     final listsAsync = ref.watch(shoppingListsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Statistics'),
-      ),
       body: listsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(error.toString())),
+        error: (error, _) => Center(child: Text("Error occurring: please reload the app.\n")),
         data: (lists) {
           final computation = StatisticsCalculator.compute(lists, _isWithinPeriod);
           final filtered = computation.filteredLists;
