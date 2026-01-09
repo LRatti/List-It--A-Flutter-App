@@ -6,6 +6,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 
 class GeminiService {
   // Read the API key from a compile-time define. Do NOT hardcode secrets.
+  //TODO: don't use default value in production
   static const String _apiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: 'AIzaSyALVy8BB5S7jkszDZdGlLgWc6QXIj4Cg4s');
 
   late final GenerativeModel _model;
@@ -137,7 +138,7 @@ Ensure the JSON is valid and can be parsed. Return ONLY the JSON object, no addi
       final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(content);
       
       if (jsonMatch == null) {
-        return RecipeData.error('Invalid response format from Gemini');
+        return RecipeData.error('Invalid response from Gemini');
       }
 
       final jsonString = jsonMatch.group(0)!;
