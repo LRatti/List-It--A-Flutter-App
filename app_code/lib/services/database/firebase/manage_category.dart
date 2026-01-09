@@ -6,12 +6,19 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 class FirebaseCategoryManager {
 
-  static final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  FirebaseCategoryManager({
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+  })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
   
   CollectionReference<Map<String, dynamic>> get _categories {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Categories");
+    return _firestore.collection("Users").doc(uid).collection("Categories");
   }
 
   Future<void> setCategory(Category category) async {
@@ -25,7 +32,7 @@ class FirebaseCategoryManager {
     // Code to add multiple categories to the database using batch writes
     if (categories.isEmpty) return;
     
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
     for (var category in categories) {
       batch.set(_categories.doc(category.id), category.toJson());
     }
