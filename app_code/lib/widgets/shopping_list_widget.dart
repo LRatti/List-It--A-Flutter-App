@@ -4,15 +4,19 @@ import 'package:app_code/models/shopping_list.dart';
 class ShoppingListCard extends StatefulWidget {
   final ShoppingList shoppingList;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
   final ValueChanged<String> onNameChanged;
   final VoidCallback onDelete;
+  final bool isSelected;
 
   const ShoppingListCard({
     super.key,
     required this.shoppingList,
     required this.onTap,
+    this.onLongPress,
     required this.onNameChanged,
     required this.onDelete,
+    this.isSelected = false,
   });
 
   @override
@@ -21,222 +25,148 @@ class ShoppingListCard extends StatefulWidget {
 
 class _ShoppingListCardState extends State<ShoppingListCard> {
   bool _editingName = false;
-  late TextEditingController _nameController;
-
-  static const double _sideElementSize = 40.0;
-  static const double _fontSize = 12.0;
-  static const double _lineHeightMultiplier = 1.2;
-
-  final TextStyle _productTextStyle = const TextStyle(
-    fontSize: _fontSize,
-    height: _lineHeightMultiplier,
-    color: Colors.black87,
-  );
+  late final TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.shoppingList.getName(),
-    );
+    _controller = TextEditingController(text: widget.shoppingList.getName());
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
+  Color _getAccentColor() {
+    final colors = [Colors.redAccent, Colors.orangeAccent, Colors.greenAccent, Colors.teal];
+    return colors[widget.shoppingList.getName().length % colors.length];
+  }
+
   void _saveName() {
-    final newName = _nameController.text.trim();
-    if (newName.isNotEmpty) {
-      widget.onNameChanged(newName);
-    } else {
-      _nameController.text = widget.shoppingList.getName();
-    }
-    setState(() {
-      _editingName = false;
-    });
+    final text = _controller.text.trim();
+    if (text.isNotEmpty) widget.onNameChanged(text);
+    setState(() => _editingName = false);
   }
 
   @override
   Widget build(BuildContext context) {
+    final products = widget.shoppingList.getProducts();
+    final String previewText = products.isEmpty 
+        ? 'No items' 
+        : products.map((p) => p.product.getName()).join('\n');
+
+    return GestureDetector(
+      onLongPress: widget.onLongPress,
+      child: Column(
+      mainAxisSize: MainAxisSize.min, // Allows the column to grow vertically
+      children: [
+        // Note Box: Fixed height ensures horizontal alignment of the "boxes"
+        Stack(
+          children: [
+            Material(
+              elevation: 2,
+              borderRadius: BorderRadius.circular(12),
+              color: widget.isSelected ? Colors.blue[50] : Colors.white,
+              child: InkWell(
+                onTap: widget.onTap,
+                onLongPress: widget.onLongPress,
+                borderRadius: BorderRadius.circular(12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    children: [
+                      Container(height: 6, width: double.infinity, color: _getAccentColor()),
+                      Container(
+                        height: 100,
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(8),
+                        child: Text(
+                          previewText,
+                          style: const TextStyle(fontSize: 12, color: Colors.black87, height: 1.2),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            if (widget.isSelected)
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: const Icon(Icons.check, size: 14, color: Colors.white),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Footer: No fixed height here = No overflow
+        _editingName ? _buildEditor() : _buildFooter(),
+      ],
+    ));
+  }
+
+  Widget _buildEditor() {
+    return TextField(
+      controller: _controller,
+      autofocus: true,
+      textAlign: TextAlign.center,
+      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+      onSubmitted: (_) => _saveName(),
+      onTapOutside: (_) => _saveName(),
+      decoration: const InputDecoration(isDense: true, border: InputBorder.none),
+    );
+  }
+
+  Widget _buildFooter() {
+    final date = widget.shoppingList.createdAt;
+    final formatted = date != null
+        ? '${date.day} ${monthAbbreviation(date.month)} ${date.year}'
+        : '--/--/----';
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildProductPreviewCard(),
-        const SizedBox(height: 8),
-        _buildFooterRow(),
-      ],
-    );
-  }
-
-  Widget _buildProductPreviewCard() {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.yellow[100],
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 4,
-                offset: Offset(2, 2),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start, // Align icon to top of text
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: () => setState(() => _editingName = true),
+                child: Text(
+                  widget.shoppingList.getName(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  maxLines: 1, // Truncate to one line as requested
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ],
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return _buildProductListContent(context, constraints);
-            },
-          ),
+            ),
+            const SizedBox(width: 2),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildProductListContent(
-    BuildContext context,
-    BoxConstraints constraints,
-  ) {
-    final products = widget.shoppingList.getProducts();
-
-    if (products.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    // Show only the items that fit without scrolling.
-    // Estimate line height using font size and height multiplier.
-    final lineHeightPx = _fontSize * _lineHeightMultiplier;
-    final maxLinesFit = (constraints.maxHeight / lineHeightPx).floor();
-
-    // If there are more products than lines available, reserve one line
-    // for a "+N more" indicator.
-    final hasOverflow = products.length > maxLinesFit && maxLinesFit > 0;
-    final visibleCount = hasOverflow
-        ? (maxLinesFit - 1).clamp(0, products.length)
-        : products.length.clamp(0, products.length);
-    final remainingCount = products.length - visibleCount;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        for (var p in products.take(visibleCount))
-          Text(
-            "• ${p.product.getName()}",
-            style: _productTextStyle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        if (hasOverflow && remainingCount > 0)
-          Text(
-            "+$remainingCount more",
-            style: _productTextStyle.copyWith(color: Colors.black45),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+        const SizedBox(height: 2),
+        Text(
+          formatted,
+          style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+        ),
       ],
     );
   }
 
-  Widget _buildEmptyState() {
-    // Avoid using Expanded outside of Flex parents
-    return Center(
-      child: Text(
-        "Empty",
-        style: _productTextStyle.copyWith(color: Colors.black38),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildFooterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const SizedBox(width: 8.0),
-        Expanded(
-          child: _editingName ? _buildEditingField() : _buildNameAndDate(),
-        ),
-        _buildDeleteButton(),
-      ],
-    );
-  }
-
-  Widget _buildNameAndDate() {
-    return GestureDetector(
-      onTap: () => setState(() => _editingName = true),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [_buildDisplayTitle(), _buildCreationDate()],
-      ),
-    );
-  }
-
-  Widget _buildEditingField() {
-    return TextField(
-      controller: _nameController,
-      autofocus: true,
-      textAlign: TextAlign.center,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      onSubmitted: (_) => _saveName(),
-      onTapOutside: (_) {
-        FocusManager.instance.primaryFocus?.unfocus();
-        _saveName();
-      },
-      decoration: const InputDecoration(
-        isDense: true,
-        contentPadding: EdgeInsets.symmetric(vertical: 4),
-        border: UnderlineInputBorder(),
-      ),
-    );
-  }
-
-  Widget _buildDisplayTitle() {
-    return Text(
-      widget.shoppingList.getName(),
-      textAlign: TextAlign.center,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildCreationDate() {
-    final date = widget.shoppingList.createdAt;
-    final formattedDate =
-        "${date?.day.toString().padLeft(2, '0')}/${date?.month.toString().padLeft(2, '0')}/${date?.year}";
-
-    return Text(
-      formattedDate,
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w400,
-        color: Colors.black54,
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildDeleteButton() {
-    return SizedBox(
-      width: _sideElementSize,
-      height: _sideElementSize,
-      child: IconButton(
-        icon: const Icon(Icons.delete_outline, color: Colors.red),
-        iconSize: 20,
-        onPressed: widget.onDelete,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
-      ),
-    );
+  String monthAbbreviation(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
   }
 }
