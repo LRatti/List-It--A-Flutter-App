@@ -110,7 +110,16 @@ class ListsScreenMobile extends ConsumerWidget {
                       width: itemWidth,
                       child: ShoppingListCard(
                         shoppingList: list,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ListDetailScreenMobile(
+                                shoppingList: list,
+                              ),
+                            ),
+                          );
+                        },
                         onNameChanged: (name) => ref.read(shoppingListsProvider.notifier).updateList(
                           list..setName(name),
                         ),
