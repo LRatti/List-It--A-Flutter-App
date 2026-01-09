@@ -17,10 +17,7 @@ class _HistoryScreenMobileState extends ConsumerState<HistoryScreenMobile> {
 
   bool get _selectionActive => _selectedIds.isNotEmpty;
 
-  Future<void> _deleteShoppingList(
-    BuildContext context,
-    ShoppingList list,
-  ) async {
+  Future<void> _deleteShoppingList(BuildContext context, ShoppingList list) async {
     final ref = this.ref;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -56,6 +53,40 @@ class _HistoryScreenMobileState extends ConsumerState<HistoryScreenMobile> {
     });
   }
 
+  Future<void> _deleteSelected(BuildContext context) async {
+    final ref = this.ref;
+    if (_selectedIds.isEmpty) return;
+    final count = _selectedIds.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete selected lists'),
+        content: Text('Are you sure you want to delete $count selected list(s)?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final notifier = ref.read(shoppingListsProvider.notifier);
+      final lists = ref.read(shoppingListsProvider).value ?? [];
+      final toDelete = lists.where((l) => _selectedIds.contains(l.id)).toList();
+      for (final l in toDelete) {
+        await notifier.deleteList(l);
+      }
+      setState(() => _selectedIds.clear());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
@@ -66,18 +97,14 @@ class _HistoryScreenMobileState extends ConsumerState<HistoryScreenMobile> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),
         data: (lists) {
-          final registeredLists = lists
-              .where((l) => l.getIsRegistered())
-              .toList();
-          if (registeredLists.isEmpty)
-            return const Center(child: Text('No registered lists yet.'));
+          final registeredLists = lists.where((l) => l.getIsRegistered()).toList();
+          if (registeredLists.isEmpty) return const Center(child: Text('No registered lists yet.'));
 
           return LayoutBuilder(
             builder: (context, constraints) {
               final double spacing = 12.0;
               final double padding = 16.0;
-              final double itemWidth =
-                  (constraints.maxWidth - (padding * 2) - (spacing * 2)) / 3;
+              final double itemWidth = (constraints.maxWidth - (padding * 2) - (spacing * 2)) / 3;
 
               return SingleChildScrollView(
                 padding: EdgeInsets.all(padding),
@@ -98,9 +125,9 @@ class _HistoryScreenMobileState extends ConsumerState<HistoryScreenMobile> {
                           }
                         },
                         onLongPress: () => _toggleSelection(list),
-                        onNameChanged: (name) => ref
-                            .read(shoppingListsProvider.notifier)
-                            .updateList(list..setName(name)),
+                        onNameChanged: (name) => ref.read(shoppingListsProvider.notifier).updateList(
+                          list..setName(name),
+                        ),
                         onDelete: () => _deleteShoppingList(context, list),
                         isSelected: isSelected,
                       ),
@@ -112,6 +139,13 @@ class _HistoryScreenMobileState extends ConsumerState<HistoryScreenMobile> {
           );
         },
       ),
+      floatingActionButton: _selectionActive
+          ? FloatingActionButton(
+              onPressed: () => _deleteSelected(context),
+              backgroundColor: Colors.red,
+              child: const Icon(Icons.delete),
+            )
+          : null,
     );
   }
 }
