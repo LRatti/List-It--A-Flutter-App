@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/widgets/shopping_list_widget.dart';
 import 'package:app_code/providers/shopping_lists_notifier.dart';
 
-class ListsScreenMobile extends ConsumerWidget {
+class ListsScreenMobile extends ConsumerStatefulWidget {
   const ListsScreenMobile({super.key});
 
-  /// Opens a dialog to create a new shopping list
-  Future<void> _showAddShoppingListDialog(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final controller = TextEditingController();
+  @override
+  ConsumerState<ListsScreenMobile> createState() => _ListsScreenMobileState();
+}
 
+class _ListsScreenMobileState extends ConsumerState<ListsScreenMobile> {
+  final Set<String> _selectedIds = {};
+
+  bool get _selectionActive => _selectedIds.isNotEmpty;
+
+  Future<void> _showAddShoppingListDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    final ref = this.ref;
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -49,12 +53,8 @@ class ListsScreenMobile extends ConsumerWidget {
     );
   }
 
-  /// Opens a confirmation dialog to delete a list
-  Future<void> _deleteShoppingList(
-    BuildContext context,
-    WidgetRef ref,
-    ShoppingList list,
-  ) async {
+  Future<void> _deleteShoppingList(BuildContext context, ShoppingList list) async {
+    final ref = this.ref;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -79,8 +79,52 @@ class ListsScreenMobile extends ConsumerWidget {
     }
   }
 
+  void _toggleSelection(ShoppingList list) {
+    setState(() {
+      if (_selectedIds.contains(list.id)) {
+        _selectedIds.remove(list.id);
+      } else {
+        _selectedIds.add(list.id);
+      }
+    });
+  }
+
+  Future<void> _deleteSelected(BuildContext context) async {
+    final ref = this.ref;
+    if (_selectedIds.isEmpty) return;
+    final count = _selectedIds.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete selected lists'),
+        content: Text('Are you sure you want to delete $count selected list(s)?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final notifier = ref.read(shoppingListsProvider.notifier);
+      final lists = ref.read(shoppingListsProvider).value ?? [];
+      final toDelete = lists.where((l) => _selectedIds.contains(l.id)).toList();
+      for (final l in toDelete) {
+        await notifier.deleteList(l);
+      }
+      setState(() => _selectedIds.clear());
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
 
     return Scaffold(
@@ -94,7 +138,6 @@ class ListsScreenMobile extends ConsumerWidget {
 
           return LayoutBuilder(
             builder: (context, constraints) {
-              // Calculate width for 3 columns minus padding and spacing
               final double spacing = 12.0;
               final double padding = 16.0;
               final double itemWidth = (constraints.maxWidth - (padding * 2) - (spacing * 2)) / 3;
@@ -102,18 +145,27 @@ class ListsScreenMobile extends ConsumerWidget {
               return SingleChildScrollView(
                 padding: EdgeInsets.all(padding),
                 child: Wrap(
-                  spacing: spacing, // Horizontal space between cards
-                  runSpacing: 24,   // Vertical space between rows
+                  spacing: spacing,
+                  runSpacing: 24,
                   children: activeLists.map((list) {
+                    final isSelected = _selectedIds.contains(list.id);
                     return SizedBox(
                       width: itemWidth,
                       child: ShoppingListCard(
                         shoppingList: list,
-                        onTap: () {},
+                        onTap: () {
+                          if (_selectionActive) {
+                            _toggleSelection(list);
+                          } else {
+                            // Could navigate to details here
+                          }
+                        },
+                        onLongPress: () => _toggleSelection(list),
                         onNameChanged: (name) => ref.read(shoppingListsProvider.notifier).updateList(
                           list..setName(name),
                         ),
-                        onDelete: () => _deleteShoppingList(context, ref, list),
+                        onDelete: () => _deleteShoppingList(context, list),
+                        isSelected: isSelected,
                       ),
                     );
                   }).toList(),
@@ -123,10 +175,16 @@ class ListsScreenMobile extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddShoppingListDialog(context, ref),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _selectionActive
+          ? FloatingActionButton(
+              onPressed: () => _deleteSelected(context),
+              backgroundColor: Colors.red,
+              child: const Icon(Icons.delete),
+            )
+          : FloatingActionButton(
+              onPressed: () => _showAddShoppingListDialog(context),
+              child: const Icon(Icons.add),
+            ),
     );
   }
 }

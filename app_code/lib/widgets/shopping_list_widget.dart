@@ -4,15 +4,19 @@ import 'package:app_code/models/shopping_list.dart';
 class ShoppingListCard extends StatefulWidget {
   final ShoppingList shoppingList;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
   final ValueChanged<String> onNameChanged;
   final VoidCallback onDelete;
+  final bool isSelected;
 
   const ShoppingListCard({
     super.key,
     required this.shoppingList,
     required this.onTap,
+    this.onLongPress,
     required this.onNameChanged,
     required this.onDelete,
+    this.isSelected = false,
   });
 
   @override
@@ -53,43 +57,63 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
         ? 'No items' 
         : products.map((p) => p.product.getName()).join('\n');
 
-    return Column(
+    return GestureDetector(
+      onLongPress: widget.onLongPress,
+      child: Column(
       mainAxisSize: MainAxisSize.min, // Allows the column to grow vertically
       children: [
         // Note Box: Fixed height ensures horizontal alignment of the "boxes"
-        Material(
-          elevation: 2,
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.white,
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: ClipRRect(
+        Stack(
+          children: [
+            Material(
+              elevation: 2,
               borderRadius: BorderRadius.circular(12),
-              child: Column(
-                children: [
-                  Container(height: 6, width: double.infinity, color: _getAccentColor()),
-                  Container(
-                    height: 100, // Fixed height keeps boxes in line
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(8),
-                    child: Text(
-                      previewText,
-                      style: const TextStyle(fontSize: 12, color: Colors.black87, height: 1.2),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 5,
-                    ),
+              color: widget.isSelected ? Colors.blue[50] : Colors.white,
+              child: InkWell(
+                onTap: widget.onTap,
+                onLongPress: widget.onLongPress,
+                borderRadius: BorderRadius.circular(12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    children: [
+                      Container(height: 6, width: double.infinity, color: _getAccentColor()),
+                      Container(
+                        height: 100,
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(8),
+                        child: Text(
+                          previewText,
+                          style: const TextStyle(fontSize: 12, color: Colors.black87, height: 1.2),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 5,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
+            if (widget.isSelected)
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: const Icon(Icons.check, size: 14, color: Colors.white),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 8),
         // Footer: No fixed height here = No overflow
         _editingName ? _buildEditor() : _buildFooter(),
       ],
-    );
+    ));
   }
 
   Widget _buildEditor() {
@@ -130,10 +154,6 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
               ),
             ),
             const SizedBox(width: 2),
-            GestureDetector(
-              onTap: widget.onDelete,
-              child: Icon(Icons.delete_outline, size: 16, color: Colors.red[300]),
-            ),
           ],
         ),
         const SizedBox(height: 2),
