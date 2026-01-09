@@ -158,7 +158,14 @@ class _ListsScreenMobileState extends ConsumerState<ListsScreenMobile> {
                           if (_selectionActive) {
                             _toggleSelection(list);
                           } else {
-                            // Could navigate to details here
+                            Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ListDetailScreenMobile(
+                                shoppingList: list,
+                              ),
+                            ),
+                          );
                           }
                         },
                         onLongPress: () => _toggleSelection(list),
