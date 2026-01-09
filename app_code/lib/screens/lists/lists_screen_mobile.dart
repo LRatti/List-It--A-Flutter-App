@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/widgets/shopping_list_widget.dart';
 import 'package:app_code/providers/shopping_lists_notifier.dart';
+import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 
 class ListsScreenMobile extends ConsumerWidget {
   const ListsScreenMobile({super.key});
@@ -131,7 +132,16 @@ class ListsScreenMobile extends ConsumerWidget {
                         final shoppingList = activeLists[index];
                         return ShoppingListCard(
                           shoppingList: shoppingList,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ListDetailScreenMobile(
+                                  shoppingList: shoppingList,
+                                ),
+                              ),
+                            );
+                          },
                           onNameChanged: (newName) =>
                               _updateListName(ref, shoppingList, newName),
                           onDelete: () =>
