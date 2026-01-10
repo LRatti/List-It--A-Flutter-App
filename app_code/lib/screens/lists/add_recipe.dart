@@ -71,15 +71,17 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Edit Ingredient'),
-        content: TextField(
-          controller: editController,
-          decoration: InputDecoration(
-            hintText: 'Enter ingredient name',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+        content: SingleChildScrollView(
+          child: TextField(
+            controller: editController,
+            decoration: InputDecoration(
+              hintText: 'Enter ingredient name',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
+            autofocus: true,
           ),
-          autofocus: true,
         ),
         actions: [
           TextButton(
@@ -129,6 +131,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
               (cat) => cat.getName().toLowerCase() == categoryName.toLowerCase(),
             );
           } catch (_) {
+            //TODO: handle no matching category
             // If category not found, use the first available category
             if (widget.availableCategories.isNotEmpty) {
               matchingCategory = widget.availableCategories.first;

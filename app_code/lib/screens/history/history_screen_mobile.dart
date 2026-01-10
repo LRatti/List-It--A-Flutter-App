@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/shopping_lists_notifier.dart';
-import 'package:app_code/widgets/shopping_lists_grid_view.dart';
+import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
 
 class HistoryScreenMobile extends ConsumerWidget {
   const HistoryScreenMobile({super.key});
@@ -21,9 +21,10 @@ class HistoryScreenMobile extends ConsumerWidget {
       ),
       data: (lists) {
         final registeredLists = lists.where((l) => l.getIsRegistered()).toList();
-        return ShoppingListsGridView(
+        return SearchableShoppingListsView(
           lists: registeredLists,
           emptyMessage: 'No registered lists yet.',
+          showRegistered: true,
         );
       },
     );

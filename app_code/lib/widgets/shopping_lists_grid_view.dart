@@ -9,6 +9,7 @@ class ShoppingListsGridView extends ConsumerStatefulWidget {
   final String emptyMessage;
   final void Function(BuildContext, ShoppingList)? onListTap;
   final Widget? floatingActionButton;
+  final void Function(bool)? onDeletionModeChanged;
 
   const ShoppingListsGridView({
     super.key,
@@ -16,6 +17,7 @@ class ShoppingListsGridView extends ConsumerStatefulWidget {
     required this.emptyMessage,
     this.onListTap,
     this.floatingActionButton,
+    this.onDeletionModeChanged,
   });
 
   @override
@@ -53,7 +55,10 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
     );
 
     if (confirmed == true) {
-      await ref.read(shoppingListsProvider.notifier).deleteList(list);
+      // Move to trash instead of permanent deletion
+      await ref.read(shoppingListsProvider.notifier).updateList(
+            list..setIsRegistered(true),
+          );
     }
   }
 
@@ -65,6 +70,14 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
         _selectedIds.add(list.id);
       }
     });
+    widget.onDeletionModeChanged?.call(_selectionActive);
+  }
+
+  void _cancelSelection() {
+    setState(() {
+      _selectedIds.clear();
+    });
+    widget.onDeletionModeChanged?.call(false);
   }
 
   Future<void> _deleteSelected(BuildContext context) async {
@@ -95,10 +108,16 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
       final lists = ref.read(shoppingListsProvider).value ?? [];
       final toDelete = lists.where((l) => _selectedIds.contains(l.id)).toList();
       for (final l in toDelete) {
-        await notifier.deleteList(l);
+        // Move to trash instead of permanent deletion
+        await notifier.updateList(l..setIsRegistered(true));
       }
       setState(() => _selectedIds.clear());
     }
+  }
+
+  void _deleteSelectedWithCallback(BuildContext context) async {
+    await _deleteSelected(context);
+    widget.onDeletionModeChanged?.call(false);
   }
 
   @override
@@ -111,53 +130,88 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final double spacing = 12.0;
-          final double padding = 16.0;
-          final double itemWidth =
-              (constraints.maxWidth - (padding * 2) - (spacing * 2)) / 3;
+    return PopScope(
+      canPop: !_selectionActive,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _selectionActive) {
+          _cancelSelection();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: _selectionActive
+            ? AppBar(
+                backgroundColor: Colors.white,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _cancelSelection,
+                ),
+                title: Text(
+                  '${_selectedIds.length} selected',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              )
+            : null,
+        body: Stack(
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final double spacing = 12.0;
+              final double padding = 16.0;
+              final double itemWidth =
+                  (constraints.maxWidth - (padding * 2) - (spacing * 2)) / 3;
 
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(padding),
-            child: Wrap(
-              spacing: spacing,
-              runSpacing: 24,
-              children: widget.lists.map((list) {
-                final isSelected = _selectedIds.contains(list.id);
-                return SizedBox(
-                  width: itemWidth,
-                  child: ShoppingListCard(
-                    shoppingList: list,
-                    onTap: () {
-                      if (_selectionActive) {
-                        _toggleSelection(list);
-                      } else {
-                        widget.onListTap?.call(context, list);
-                      }
-                    },
-                    onLongPress: () => _toggleSelection(list),
-                    onNameChanged: (name) => ref
-                        .read(shoppingListsProvider.notifier)
-                        .updateList(list..setName(name)),
-                    onDelete: () => _deleteShoppingList(context, list),
-                    isSelected: isSelected,
-                  ),
-                );
-              }).toList(),
-            ),
-          );
-        },
+              return SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  left: padding,
+                  right: padding,
+                  top: padding,
+                  bottom: _selectionActive ? 80 : padding,
+                ),
+                child: Wrap(
+                  spacing: spacing,
+                  runSpacing: 24,
+                  children: widget.lists.map((list) {
+                    final isSelected = _selectedIds.contains(list.id);
+                    return SizedBox(
+                      width: itemWidth,
+                      child: Stack(
+                        children: [
+                          ShoppingListCard(
+                            shoppingList: list,
+                            onTap: () {
+                              if (_selectionActive) {
+                                _toggleSelection(list);
+                              } else {
+                                widget.onListTap?.call(context, list);
+                              }
+                            },
+                            onLongPress: () => _toggleSelection(list),
+                            onNameChanged: (name) => ref
+                                .read(shoppingListsProvider.notifier)
+                                .updateList(list..setName(name)),
+                            onDelete: () => _deleteShoppingList(context, list),
+                            isSelected: isSelected,
+                          ),
+                          // Rely on ShoppingListCard's own selected UI; avoid duplicate checkmark overlay
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       floatingActionButton: _selectionActive
           ? FloatingActionButton(
-              onPressed: () => _deleteSelected(context),
+              onPressed: () => _deleteSelectedWithCallback(context),
               backgroundColor: Colors.red,
               child: const Icon(Icons.delete),
             )
           : widget.floatingActionButton,
+      ),
     );
   }
 }

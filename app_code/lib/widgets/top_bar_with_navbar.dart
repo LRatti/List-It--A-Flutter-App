@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
-class TopBarWithNavBar extends StatelessWidget implements PreferredSizeWidget {
-  const TopBarWithNavBar({super.key});
+class TopBarWithNavBar extends StatelessWidget {
+  final bool isMenuOpen;
+  final VoidCallback onMenuToggle;
+
+  const TopBarWithNavBar({
+    super.key,
+    required this.isMenuOpen,
+    required this.onMenuToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -10,16 +17,11 @@ class TopBarWithNavBar extends StatelessWidget implements PreferredSizeWidget {
       children: [
         AppBar(
           title: const Text('My Shopping App'),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.settings),
-            ),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.person),
-            ),
-          ],
+          leading: IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: onMenuToggle,
+          ),
+          actions: const [],
         ),
         Container(
           width: double.infinity,
@@ -35,12 +37,5 @@ class TopBarWithNavBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ],
     );
-  }
-
-  @override
-  Size get preferredSize {
-    // Minimum guaranteed height.
-    // If text scale increases, Flutter will expand the layout automatically.
-    return const Size.fromHeight(kToolbarHeight + 56);
   }
 }
