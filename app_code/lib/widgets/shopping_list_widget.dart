@@ -53,9 +53,6 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
   @override
   Widget build(BuildContext context) {
     final products = widget.shoppingList.getProducts();
-    final String previewText = products.isEmpty 
-        ? 'No items' 
-        : products.map((p) => p.product.getName()).join('\n');
 
     return GestureDetector(
       onLongPress: widget.onLongPress,
@@ -82,12 +79,18 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
                         height: 100,
                         width: double.infinity,
                         padding: const EdgeInsets.all(8),
-                        child: Text(
-                          previewText,
-                          style: const TextStyle(fontSize: 12, color: Colors.black87, height: 1.2),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 5,
-                        ),
+                        child: products.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  'No items',
+                                  style: TextStyle(fontSize: 12, color: Colors.black87),
+                                ),
+                              )
+                            : ListView(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                children: products.map((p) => _buildBulletItem(p.product.getName())).toList(),
+                              ),
                       ),
                     ],
                   ),
@@ -114,6 +117,23 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
         _editingName ? _buildEditor() : _buildFooter(),
       ],
     ));
+  }
+
+  Widget _buildBulletItem(String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('• ', style: TextStyle(fontSize: 12, color: Colors.black87)),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 12, color: Colors.black87),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildEditor() {

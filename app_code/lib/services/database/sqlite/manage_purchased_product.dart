@@ -36,7 +36,7 @@ class ManagePurchasedProduct {
     return rows.map((row) {
       final product = Product.fromDatabase(
         {'id': row['p_id'], 'name': row['p_name'], 'is_visible': row['p_visible']},
-        categoryIds: [], // o passare categorie se vuoi caricarle
+        associations: {},
       );
       final category = Category.fromDatabase({'id': row['c_id'], 'name': row['c_name']});
       return PurchasedProduct.fromDatabase(row, category, product);
@@ -60,7 +60,7 @@ class ManagePurchasedProduct {
     final row = rows.first;
     final product = Product.fromDatabase(
       {'id': row['p_id'], 'name': row['p_name'], 'is_visible': row['p_visible']},
-      categoryIds: [],
+      associations: {},
     );
     final category = Category.fromDatabase({'id': row['c_id'], 'name': row['c_name']});
     return PurchasedProduct.fromDatabase(row, category, product);
@@ -103,7 +103,7 @@ class ManagePurchasedProduct {
     final row = rows.first;
     final product = Product.fromDatabase(
       {'id': row['p_id'], 'name': row['p_name'], 'is_visible': row['p_visible']},
-      categoryIds: [],
+      associations: {},
     );
     final category = Category.fromDatabase({'id': row['c_id'], 'name': row['c_name']});
     return PurchasedProduct.fromDatabase(row, category, product);

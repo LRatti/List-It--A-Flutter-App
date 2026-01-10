@@ -4,8 +4,15 @@ import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
 import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
 
-class TopBarWithNavBar extends ConsumerWidget implements PreferredSizeWidget {
-  const TopBarWithNavBar({super.key});
+class TopBarWithNavBar extends StatelessWidget {
+  final bool isMenuOpen;
+  final VoidCallback onMenuToggle;
+
+  const TopBarWithNavBar({
+    super.key,
+    required this.isMenuOpen,
+    required this.onMenuToggle,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -61,6 +68,11 @@ class TopBarWithNavBar extends ConsumerWidget implements PreferredSizeWidget {
               error: (_, __) => const SizedBox(width: 48, height: 48),
             ),
           ],
+          leading: IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: onMenuToggle,
+          ),
+          actions: const [],
         ),
         // Nearest supermarket bar
         Material(
@@ -140,12 +152,5 @@ class TopBarWithNavBar extends ConsumerWidget implements PreferredSizeWidget {
         ),
       ],
     );
-  }
-
-  @override
-  Size get preferredSize {
-    // Minimum guaranteed height.
-    // If text scale increases, Flutter will expand the layout automatically.
-    return const Size.fromHeight(kToolbarHeight + 56);
   }
 }

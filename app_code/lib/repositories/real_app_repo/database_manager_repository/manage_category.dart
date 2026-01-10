@@ -1,23 +1,29 @@
-
-
 import 'package:app_code/models/category.dart';
+import 'package:app_code/services/database/sqlite/manage_category.dart' as sqlite_manage_category;
 
 class ManageCategory {
-  void addCategory(Category category) {
-    // Code to add a category to the database
+  static Future<void> addCategory(Category category) {
+    return sqlite_manage_category.ManageCategory.addCategory(category) ;
   }
 
-  void deleteCategory(Category category) {
-    // Code to delete a category from the database
+  static Future<void> deleteCategory(Category category) {
+    return sqlite_manage_category.ManageCategory.deleteCategory(category.id);
   }
 
-  void updateCategory(Category category) {
-    // Code to update a category in the database
+  static Future<void> updateCategory(Category category) {
+    return sqlite_manage_category.ManageCategory.updateCategory(category);
   }
 
-  List<Category> getAllCategories() {
-    // Code to retrieve all categories from the database
-    return [];
+  static Future<Category?> getCategoryById(String id) {
+    return sqlite_manage_category.ManageCategory.getCategoryById(id);
+  }
+
+  static Future<Category?> getCategoryByName(String name) {
+    return sqlite_manage_category.ManageCategory.getCategoryByName(name);
+  }
+
+  static Future<List<Category>> getAllCategories() {
+    return sqlite_manage_category.ManageCategory.getAllCategories();
   }
 
 }

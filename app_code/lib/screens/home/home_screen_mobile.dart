@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app_code/widgets/top_bar_with_navbar.dart';
+import 'package:app_code/widgets/side_menu.dart';
 import 'package:app_code/screens/lists/lists_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarkets_screen_mobile.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
@@ -14,6 +15,7 @@ class MobileHomePage extends StatefulWidget {
 
 class _MobileHomePageState extends State<MobileHomePage> {
   int _selectedIndex = 0;
+  bool _isMenuOpen = false;
 
   final List<Widget> _tabs = const [
     ListsScreenMobile(key: ValueKey('lists_tab')),
@@ -22,6 +24,18 @@ class _MobileHomePageState extends State<MobileHomePage> {
     StatisticsScreenMobile(key: ValueKey('statistics_tab')),
   ];
 
+  void _toggleMenu() {
+    setState(() {
+      _isMenuOpen = !_isMenuOpen;
+    });
+  }
+
+  void _closeMenu() {
+    setState(() {
+      _isMenuOpen = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isLandscape =
@@ -29,84 +43,112 @@ class _MobileHomePageState extends State<MobileHomePage> {
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            // ✅ Fully dynamic top bar
-            const TopBarWithNavBar(),
+            Column(
+              children: [
+                TopBarWithNavBar(
+                  isMenuOpen: _isMenuOpen,
+                  onMenuToggle: _toggleMenu,
+                ),
 
-            // Main content
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (isLandscape)
-                    Container(
-                      width: 80,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF7F9FC),
-                        border: Border(
-                          right: BorderSide(
-                            color: Colors.grey.shade300,
-                            width: 1,
+                // Main content
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (isLandscape)
+                        Container(
+                          width: 80,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF7F9FC),
+                            border: Border(
+                              right: BorderSide(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          child: NavigationRail(
+                            backgroundColor: const Color(0xFFF7F9FC),
+                            minWidth: 72,
+                            labelType: NavigationRailLabelType.all,
+                            selectedIndex: _selectedIndex,
+                            scrollable: true ,
+                            onDestinationSelected: (int index) {
+                              setState(() {
+                                _selectedIndex = index;
+                              });
+                            },
+                            selectedIconTheme:
+                                const IconThemeData(color: Colors.blue),
+                            unselectedIconTheme:
+                                const IconThemeData(color: Colors.grey),
+                            selectedLabelTextStyle:
+                                const TextStyle(color: Colors.blue),
+                            unselectedLabelTextStyle:
+                                const TextStyle(color: Colors.grey),
+                            useIndicator: true,
+                            indicatorColor:
+                                Colors.blueAccent.withOpacity(0.1),
+                            destinations: const [
+                              NavigationRailDestination(
+                                icon: Icon(Icons.list_outlined),
+                                selectedIcon: Icon(Icons.list),
+                                label: Text('Lists'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.history_outlined),
+                                selectedIcon: Icon(Icons.history),
+                                label: Text('History'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.store_outlined),
+                                selectedIcon: Icon(Icons.store),
+                                label: Text('Supermarkets'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.bar_chart_outlined),
+                                selectedIcon: Icon(Icons.bar_chart),
+                                label: Text('Statistics'),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      child: NavigationRail(
-                        backgroundColor: const Color(0xFFF7F9FC),
-                        minWidth: 72,
-                        labelType: NavigationRailLabelType.all,
-                        selectedIndex: _selectedIndex,
-                        scrollable: true ,
-                        onDestinationSelected: (int index) {
-                          setState(() {
-                            _selectedIndex = index;
-                          });
-                        },
-                        selectedIconTheme:
-                            const IconThemeData(color: Colors.blue),
-                        unselectedIconTheme:
-                            const IconThemeData(color: Colors.grey),
-                        selectedLabelTextStyle:
-                            const TextStyle(color: Colors.blue),
-                        unselectedLabelTextStyle:
-                            const TextStyle(color: Colors.grey),
-                        useIndicator: true,
-                        indicatorColor:
-                            Colors.blueAccent.withOpacity(0.1),
-                        destinations: const [
-                          NavigationRailDestination(
-                            icon: Icon(Icons.list_outlined),
-                            selectedIcon: Icon(Icons.list),
-                            label: Text('Lists'),
-                          ),
-                          NavigationRailDestination(
-                            icon: Icon(Icons.history_outlined),
-                            selectedIcon: Icon(Icons.history),
-                            label: Text('History'),
-                          ),
-                          NavigationRailDestination(
-                            icon: Icon(Icons.store_outlined),
-                            selectedIcon: Icon(Icons.store),
-                            label: Text('Supermarkets'),
-                          ),
-                          NavigationRailDestination(
-                            icon: Icon(Icons.bar_chart_outlined),
-                            selectedIcon: Icon(Icons.bar_chart),
-                            label: Text('Statistics'),
-                          ),
-                        ],
-                      ),
-                    ),
 
-                  Expanded(
-                    child: IndexedStack(
-                      index: _selectedIndex,
-                      children: _tabs,
-                    ),
+                      Expanded(
+                        child: IndexedStack(
+                          index: _selectedIndex,
+                          children: _tabs,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+            if (_isMenuOpen)
+              Positioned(
+                top: kToolbarHeight + 56,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Row(
+                  children: [
+                    SideMenu(
+                      onClose: _closeMenu,
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: _closeMenu,
+                        child: Container(
+                          color: Colors.black.withOpacity(0.3),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
