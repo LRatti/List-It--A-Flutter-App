@@ -90,7 +90,7 @@ class _MobileHomePageState extends State<MobileHomePage> {
                                 const TextStyle(color: Colors.grey),
                             useIndicator: true,
                             indicatorColor:
-                                Colors.blueAccent.withOpacity(0.1),
+                                Colors.blueAccent,
                             destinations: const [
                               NavigationRailDestination(
                                 icon: Icon(Icons.list_outlined),

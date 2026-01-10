@@ -104,57 +104,89 @@ class TrashScreenMobile extends ConsumerWidget {
                   itemCount: trashedLists.length,
                   itemBuilder: (context, index) {
                     final list = trashedLists[index];
-                    return ListTile(
-                      title: Text(list.getName()),
-                      subtitle: Text(
-                        'Delete in 30 days',
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                      trailing: SizedBox(
-                        width: 150,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () async {
-                                await ref
-                                    .read(shoppingListsProvider.notifier)
-                                    .updateList(list..setIsInTheTrash(false));
-                              },
-                              child: const Text('Restore'),
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  list.getName(),
+                                  softWrap: true,
+                                  maxLines: 4,
+                                  overflow: TextOverflow.visible,
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Delete in 30 days',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(color: Colors.grey.shade600),
+                                ),
+                              ],
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (_) => AlertDialog(
-                                    title: const Text('Delete permanently'),
-                                    content: Text(
-                                      "Are you sure you want to permanently delete '${list.getName()}'?",
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          await ref
-                                              .read(shoppingListsProvider.notifier)
-                                              .deleteList(list);
-                                          if (context.mounted) Navigator.pop(context);
-                                        },
-                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                        child: const Text('Delete'),
-                                      ),
-                                    ],
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            fit: FlexFit.loose,
+                            child: Align(
+                              alignment: Alignment.topRight,
+                              child: Wrap(
+                                alignment: WrapAlignment.end,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 4,
+                                runSpacing: 4,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.restore),
+                                    tooltip: 'Restore',
+                                    onPressed: () async {
+                                      await ref
+                                          .read(shoppingListsProvider.notifier)
+                                          .updateList(list..setIsInTheTrash(false));
+                                    },
                                   ),
-                                );
-                              },
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (_) => AlertDialog(
+                                          title: const Text('Delete permanently'),
+                                          content: Text(
+                                            "Are you sure you want to permanently delete '${list.getName()}'?",
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context),
+                                              child: const Text('Cancel'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () async {
+                                                await ref
+                                                    .read(shoppingListsProvider.notifier)
+                                                    .deleteList(list);
+                                                if (context.mounted) Navigator.pop(context);
+                                              },
+                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                              child: const Text('Delete'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     );
                   },
