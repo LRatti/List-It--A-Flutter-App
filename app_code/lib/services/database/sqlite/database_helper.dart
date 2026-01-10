@@ -32,7 +32,8 @@ class DatabaseHelper {
         image TEXT,
         is_registered INTEGER NOT NULL,
         last_modified TEXT NOT NULL,
-        is_deleted INTEGER NOT NULL DEFAULT 0
+        is_in_the_trash INTEGER NOT NULL DEFAULT 0,
+        deletion_timestamp TEXT
       )
     ''');
 

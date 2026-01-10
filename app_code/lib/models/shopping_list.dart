@@ -14,8 +14,9 @@ class ShoppingList {
   String? image;
   List<PurchasedProduct>? products;
   bool _isRegistered = false;
+  bool _isInTheTrash = false;
+  DateTime? _deletionTimestamp;
   late DateTime lastModified;
-  bool isDeleted;
 
   ShoppingList(
       {String? id,
@@ -26,14 +27,16 @@ class ShoppingList {
       this.image,
       this.products,
       isRegistered = false,
+      isInTheTrash = false,
+      deletionTimestamp,
       DateTime? lastModified,
-      bool isDeleted = false,
   }) :  _name = name,
         _totalPrice = totalPrice,
         _supermarket = supermarket ?? _getDefaultSupermarket(),
         _isRegistered = isRegistered,
+        _isInTheTrash = isInTheTrash,
+        _deletionTimestamp = deletionTimestamp,
         lastModified = lastModified ?? DateTime.now(),
-        isDeleted = isDeleted,
         this.id = id ?? Helper.generateId();
 
   String getName() {
@@ -60,6 +63,14 @@ class ShoppingList {
     return _isRegistered;
   }
 
+  bool getIsInTheTrash() {
+    return _isInTheTrash;
+  }
+
+  DateTime? getDeletionTimestamp() {
+    return _deletionTimestamp;
+  }
+
   factory ShoppingList.fromDatabase(Map<String, dynamic> json) {
     return ShoppingList(
       id: json['id'],
@@ -68,8 +79,9 @@ class ShoppingList {
       totalPrice: json['total_price'],
       image: json['image'],
       isRegistered: json['is_registered'] == 1,
+      isInTheTrash: json['is_in_the_trash'] == 1,
+      deletionTimestamp: json['deletion_timestamp'] != null ? DateTime.tryParse(json['deletion_timestamp']) : null,
       lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
-      isDeleted: (json['is_deleted'] ?? 0) == 1,
     );
   }
 
@@ -82,8 +94,9 @@ class ShoppingList {
       'total_price': _totalPrice,
       'image': image,
       'is_registered': _isRegistered ? 1 : 0,
+      'is_in_the_trash': _isInTheTrash ? 1 : 0,
+      'deletion_timestamp': _deletionTimestamp?.toIso8601String(),
       'last_modified': lastModified.toIso8601String(),
-      'is_deleted': isDeleted ? 1 : 0,
     };
   }
 
@@ -99,7 +112,6 @@ class ShoppingList {
           .toList(),
       isRegistered: json['is_registered'] == 1,
       lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
-      isDeleted: json['isDeleted'] ?? false,
     );
   }
 
@@ -114,7 +126,6 @@ class ShoppingList {
       'products': products?.map((product) => product.toDatabase()).toList(),
       'is_registered': _isRegistered ? 1 : 0,
       'lastModified': lastModified.toIso8601String(),
-      'isDeleted': isDeleted,
     };
   }
 
@@ -171,6 +182,19 @@ class ShoppingList {
 
   void setIsRegistered(bool isRegistered) {
     _isRegistered = isRegistered;
+  }
+
+  void setIsInTheTrash(bool isInTheTrash) {
+    _isInTheTrash = isInTheTrash;
+    if (isInTheTrash && _deletionTimestamp == null) {
+      _deletionTimestamp = DateTime.now();
+    } else if (!isInTheTrash) {
+      _deletionTimestamp = null;
+    }
+  }
+
+  void setDeletionTimestamp(DateTime? timestamp) {
+    _deletionTimestamp = timestamp;
   }
 
   //TODO: take the supermarket from the json file containing the default one
