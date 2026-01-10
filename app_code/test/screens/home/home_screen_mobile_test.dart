@@ -4,20 +4,47 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
 import 'package:app_code/repositories/test_repo/test_shopping_list_repository.dart';
 import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
+import 'package:app_code/repositories/test_repo/mock_location_repository.dart';
+import 'package:app_code/repositories/test_repo/mock_supermarket_location_repository.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/location_repository_provider.dart';
+import 'package:app_code/providers/real_app_providers/supermarket_location_repository_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
+import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
 import 'package:app_code/providers/test_providers/test_auth_provider.dart';
+import 'package:app_code/services/map_launcher_service.dart';
+
+/// Test notifier for nearest supermarket that doesn't create timers
+class TestNearestSupermarketNotifier extends NearestSupermarketNotifier {
+  @override
+  NearestSupermarketState build() {
+    // Return a simple state without initializing timers or location services
+    return const NearestSupermarketState(
+      isLoading: false,
+      errorMessage: 'Location services disabled in test',
+    );
+  }
+}
 
 void main() {
   late InMemoryAuthRepository authRepository;
+  late MockLocationRepository mockLocationRepository;
+  late MockSupermarketLocationRepository mockSupermarketRepository;
 
   setUp(() async {
     authRepository = InMemoryAuthRepository();
     await authRepository.signInAnonymously();
+    
+    // Initialize mock repositories
+    mockLocationRepository = MockLocationRepository();
+    mockSupermarketRepository = MockSupermarketLocationRepository();
   });
 
   tearDown(() {
     authRepository.reset();
+    mockLocationRepository.reset();
+    mockSupermarketRepository.reset();
   });
 
   Future<ProviderContainer> pumpHomeScreen(WidgetTester tester) async {
@@ -28,8 +55,20 @@ void main() {
         ),
         authRepositoryProvider.overrideWithValue(authRepository),
         authProvider.overrideWith(() => TestAuthNotifier(authRepository)),
+        // Override location-related providers to prevent real location service calls
+        locationRepositoryProvider.overrideWithValue(mockLocationRepository),
+        supermarketLocationRepositoryProvider.overrideWithValue(mockSupermarketRepository),
+        // Override nearest supermarket provider with a simple state that doesn't create timers
+        nearestSupermarketProvider.overrideWith(() => TestNearestSupermarketNotifier()),
+        // Override map launcher service with a no-op implementation
+        mapLauncherServiceProvider.overrideWithValue(
+          MapLauncherService(),
+        ),
       ],
     );
+    
+    // Dispose container after test
+    addTearDown(container.dispose);
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
