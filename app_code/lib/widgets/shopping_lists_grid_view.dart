@@ -70,20 +70,33 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
         _selectedIds.add(list.id);
       }
     });
-    widget.onDeletionModeChanged?.call(_selectionActive);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onDeletionModeChanged?.call(_selectionActive);
+    });
   }
 
   void _cancelSelection() {
     setState(() {
       _selectedIds.clear();
     });
-    widget.onDeletionModeChanged?.call(false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onDeletionModeChanged?.call(false);
+    });
   }
 
   @override
   void deactivate() {
     // Clear selection when widget is deactivated (e.g., when switching screens/tabs)
-    _cancelSelection();
+    if (_selectionActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _selectedIds.clear();
+          });
+          widget.onDeletionModeChanged?.call(false);
+        }
+      });
+    }
     super.deactivate();
   }
 
@@ -124,7 +137,9 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
 
   void _deleteSelectedWithCallback(BuildContext context) async {
     await _deleteSelected(context);
-    widget.onDeletionModeChanged?.call(false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onDeletionModeChanged?.call(false);
+    });
   }
 
   @override
