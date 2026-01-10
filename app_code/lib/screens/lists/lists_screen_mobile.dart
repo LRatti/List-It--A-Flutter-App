@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
-import 'package:app_code/providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
 

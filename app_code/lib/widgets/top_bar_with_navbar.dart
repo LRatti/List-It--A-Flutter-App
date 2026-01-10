@@ -4,7 +4,7 @@ import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
 import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
 
-class TopBarWithNavBar extends StatelessWidget {
+class TopBarWithNavBar extends ConsumerWidget {
   final bool isMenuOpen;
   final VoidCallback onMenuToggle;
 
@@ -72,7 +72,6 @@ class TopBarWithNavBar extends StatelessWidget {
             icon: const Icon(Icons.menu),
             onPressed: onMenuToggle,
           ),
-          actions: const [],
         ),
         // Nearest supermarket bar
         Material(
