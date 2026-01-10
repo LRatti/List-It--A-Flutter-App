@@ -21,7 +21,7 @@ class HistoryScreenMobile extends ConsumerWidget {
       ),
       data: (lists) {
         final registeredLists = lists
-            .where((l) => l.getIsRegistered())
+            .where((l) => l.getIsRegistered() && !l.getIsInTheTrash())
             .toList()
           ..sort((a, b) {
             final ad = a.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);

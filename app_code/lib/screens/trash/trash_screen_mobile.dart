@@ -22,7 +22,7 @@ class TrashScreenMobile extends ConsumerWidget {
     if (confirmed == true) {
       final notifier = ref.read(shoppingListsProvider.notifier);
       for (final l in trashedLists) {
-        await notifier.updateList(l..setIsRegistered(false));
+        await notifier.updateList(l..setIsInTheTrash(false));
       }
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('All lists restored')));
     }
@@ -67,7 +67,7 @@ class TrashScreenMobile extends ConsumerWidget {
       ),
       data: (lists) {
         final trashedLists = lists
-            .where((l) => l.getIsRegistered())
+            .where((l) => l.getIsInTheTrash())
             .toList()
           ..sort((a, b) {
             final ad = a.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -119,7 +119,7 @@ class TrashScreenMobile extends ConsumerWidget {
                               onPressed: () async {
                                 await ref
                                     .read(shoppingListsProvider.notifier)
-                                    .updateList(list..setIsRegistered(false));
+                                    .updateList(list..setIsInTheTrash(false));
                               },
                               child: const Text('Restore'),
                             ),

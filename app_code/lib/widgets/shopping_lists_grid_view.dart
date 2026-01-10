@@ -57,7 +57,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
     if (confirmed == true) {
       // Move to trash instead of permanent deletion
       await ref.read(shoppingListsProvider.notifier).updateList(
-            list..setIsRegistered(true),
+            list..setIsInTheTrash(true),
           );
     }
   }
@@ -116,7 +116,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
       final toDelete = lists.where((l) => _selectedIds.contains(l.id)).toList();
       for (final l in toDelete) {
         // Move to trash instead of permanent deletion
-        await notifier.updateList(l..setIsRegistered(true));
+        await notifier.updateList(l..setIsInTheTrash(true));
       }
       setState(() => _selectedIds.clear());
     }

@@ -35,7 +35,7 @@ class TrashDialog extends ConsumerWidget {
         ],
       ),
       data: (lists) {
-        final trashedLists = lists.where((l) => l.getIsRegistered()).toList();
+        final trashedLists = lists.where((l) => l.getIsInTheTrash()).toList();
 
         return AlertDialog(
           title: const Text('Trash'),
@@ -68,7 +68,7 @@ class TrashDialog extends ConsumerWidget {
                                   // Restore the list
                                   await ref
                                       .read(shoppingListsProvider.notifier)
-                                      .updateList(list..setIsRegistered(false));
+                                      .updateList(list..setIsInTheTrash(false));
                                 },
                                 child: const Text('Restore'),
                               ),

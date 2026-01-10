@@ -86,7 +86,7 @@ class ListsScreenMobile extends ConsumerWidget {
       ),
       data: (lists) {
         final activeLists = lists
-            .where((l) => !l.getIsRegistered())
+            .where((l) => !l.getIsInTheTrash() && !l.getIsRegistered())
             .toList()
           ..sort((a, b) {
             final ad = a.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
