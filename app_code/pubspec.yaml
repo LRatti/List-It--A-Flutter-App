@@ -19,6 +19,12 @@ dependencies:
   sqflite: ^2.4.2
   path: ^1.9.1
   logger: ^2.4.0
+  shared_preferences: ^2.3.5
+  geolocator: ^13.0.2
+  http: ^1.2.2
+  url_launcher: ^6.3.1
+  permission_handler: ^11.3.1
+  flutter_staggered_grid_view: ^0.7.0
   flutter_staggered_grid_view: ^0.7.0
 
 dev_dependencies:
@@ -26,6 +32,9 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   sqflite_common_ffi: ^2.3.2
+  fake_cloud_firestore: ^4.0.0
+  firebase_auth_mocks: ^0.15.1
+  mocktail: ^1.0.3
   
 
 flutter:

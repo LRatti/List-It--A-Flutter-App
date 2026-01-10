@@ -8,18 +8,32 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 class FirebaseShoppingListManager {
   // Class implementation
 
-  static final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  FirebaseShoppingListManager({
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+    FirebasePurchasedProductManager? purchasedProductManager,
+  })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance,
+        _purchasedProductManager = purchasedProductManager ??
+            FirebasePurchasedProductManager(
+              firebaseAuth: firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+              firestore: firestore ?? FirebaseFirestore.instance,
+            );
+
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
+  final FirebasePurchasedProductManager _purchasedProductManager;
   
   CollectionReference<Map<String, dynamic>> get _shoppingLists {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Shopping Lists");
+    return _firestore.collection("Users").doc(uid).collection("Shopping Lists");
   }
   
   CollectionReference<Map<String, dynamic>> get _supermarkets {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Supermarkets");
+    return _firestore.collection("Users").doc(uid).collection("Supermarkets");
   }
 
   Future<void> setShoppingList(ShoppingList shoppingList) async {
@@ -33,7 +47,7 @@ class FirebaseShoppingListManager {
     // Code to add multiple shopping lists to the database using batch writes
     if (shoppingLists.isEmpty) return;
     
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
     for (var shoppingList in shoppingLists) {
       batch.set(_shoppingLists.doc(shoppingList.id), shoppingList.toDatabase());
       
@@ -57,12 +71,12 @@ class FirebaseShoppingListManager {
         Supermarket supermarket;
         ShoppingList shoppingList;
         List<PurchasedProduct> purchasedProducts = [];
-        if (doc.data() != null && doc.data()!['supermarket'] != null) {
-          supermarket = await _supermarkets.doc(doc.data()!['supermarket']).get().then((supermarketDoc) => Supermarket.fromDatabase(supermarketDoc.data()!));
+        if (doc.data() != null && doc.data()!['supermarket_id'] != null) {
+          supermarket = await _supermarkets.doc(doc.data()!['supermarket_id']).get().then((supermarketDoc) => Supermarket.fromDatabase(supermarketDoc.data()!));
           shoppingList = ShoppingList.fromDatabase(doc.data()!);
           shoppingList.setSupermarket(supermarket);
           // Fetch and set purchased products
-          purchasedProducts = await FirebasePurchasedProductManager().getPurchasedProductByList(listId);
+          purchasedProducts = await _purchasedProductManager.getPurchasedProductByList(listId);
           shoppingList.setPurchasedProducts(purchasedProducts);
           return shoppingList;
         } else {

@@ -6,18 +6,25 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 class FirebaseSupermarketManager {
 
-  static final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  FirebaseSupermarketManager({
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+  })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
   
   CollectionReference<Map<String, dynamic>> get _supermarkets {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Supermarkets");
+    return _firestore.collection("Users").doc(uid).collection("Supermarkets");
   }
   
   CollectionReference<Map<String, dynamic>> get _categories {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Categories");
+    return _firestore.collection("Users").doc(uid).collection("Categories");
   }
   
   // Methods to manage supermarket data in Firebase
@@ -39,7 +46,7 @@ class FirebaseSupermarketManager {
     // Code to add multiple supermarkets to the database using batch writes
     if (supermarkets.isEmpty) return;
     
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
     for (var supermarket in supermarkets) {
       batch.set(_supermarkets.doc(supermarket.id), supermarket.toDatabase());
     }

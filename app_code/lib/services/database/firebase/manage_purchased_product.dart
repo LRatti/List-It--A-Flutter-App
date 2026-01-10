@@ -7,18 +7,31 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 class FirebasePurchasedProductManager {
   // Implementation for managing purchased products in Firebase
 
-  static final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  FirebasePurchasedProductManager({
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+  })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
   
   CollectionReference<Map<String, dynamic>> get _shoppingLists {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Shopping Lists");
+    return _firestore.collection("Users").doc(uid).collection("Shopping Lists");
   }
   
   CollectionReference<Map<String, dynamic>> get _products {
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
-    return FirebaseFirestore.instance.collection("Users").doc(uid).collection("Products");
+    return _firestore.collection("Users").doc(uid).collection("Products");
+  }
+
+  CollectionReference<Map<String, dynamic>> get _categories {
+    final uid = _firebaseAuth.currentUser?.uid;
+    if (uid == null) throw Exception('User not authenticated');
+    return _firestore.collection("Users").doc(uid).collection("Categories");
   }
 
   Future<void> setPurchasedProduct(PurchasedProduct product) async {
@@ -32,7 +45,7 @@ class FirebasePurchasedProductManager {
     // Code to add multiple purchased products to the database using batch writes
     if (products.isEmpty) return;
     
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
     for (var product in products) {
       final docRef = _shoppingLists.doc(product.listId).collection("Purchased Products").doc(product.id);
       batch.set(docRef, product.toDatabase());
@@ -59,11 +72,11 @@ class FirebasePurchasedProductManager {
         final prodDoc = await _products.doc(productId).get();
         if (!prodDoc.exists) return null;
         
-        final catDoc = await _products.doc(catId).get();
+        final catDoc = await _categories.doc(catId).get();
         if (!catDoc.exists) return null;
 
         final Category category = Category.fromJson(catDoc.data()!);
-        final Product product = Product.fromJson(prodDoc.data()!);
+        final Product product = Product.fromDatabase(prodDoc.data()!);
         final PurchasedProduct purchased = PurchasedProduct.fromDatabase(data, category, product);
         return purchased;
       } else {

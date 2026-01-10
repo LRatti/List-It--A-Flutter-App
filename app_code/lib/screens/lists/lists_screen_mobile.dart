@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/widgets/shopping_list_widget.dart';
-import 'package:app_code/providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 
 class ListsScreenMobile extends ConsumerStatefulWidget {
   const ListsScreenMobile({super.key});
