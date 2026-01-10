@@ -20,7 +20,14 @@ class HistoryScreenMobile extends ConsumerWidget {
         body: Center(child: Text(error.toString())),
       ),
       data: (lists) {
-        final registeredLists = lists.where((l) => l.getIsRegistered()).toList();
+        final registeredLists = lists
+            .where((l) => l.getIsRegistered())
+            .toList()
+          ..sort((a, b) {
+            final ad = a.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final bd = b.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+            return bd.compareTo(ad); // newest first
+          });
         return SearchableShoppingListsView(
           lists: registeredLists,
           emptyMessage: 'No registered lists yet.',

@@ -85,7 +85,14 @@ class ListsScreenMobile extends ConsumerWidget {
         body: Center(child: Text(error.toString())),
       ),
       data: (lists) {
-        final activeLists = lists.where((l) => !l.getIsRegistered()).toList();
+        final activeLists = lists
+            .where((l) => !l.getIsRegistered())
+            .toList()
+          ..sort((a, b) {
+            final ad = a.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final bd = b.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+            return bd.compareTo(ad); // newest first
+          });
         return SearchableShoppingListsView(
           lists: activeLists,
           emptyMessage: 'No lists yet.',
