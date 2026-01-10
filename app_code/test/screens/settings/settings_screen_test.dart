@@ -75,7 +75,7 @@ void main() {
 	});
 }
 
-class _FakeUserManager extends UserManager {
+class _FakeUserManager extends UserDatabaseManager {
 	_FakeUserManager(this.user);
 
 	final User? user;

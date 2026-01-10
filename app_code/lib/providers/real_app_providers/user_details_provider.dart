@@ -4,8 +4,8 @@ import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Repository provider to keep the data layer injectable/testable.
-final userManagerProvider = Provider<UserManager>((ref) {
-  return UserManager();
+final userManagerProvider = Provider<UserDatabaseManager>((ref) {
+  return UserDatabaseManager();
 });
 
 /// Riverpod notifier that exposes the current user details and handles updates.
@@ -13,7 +13,7 @@ final userDetailsProvider =
     AsyncNotifierProvider<UserDetailsNotifier, User?>(UserDetailsNotifier.new);
 
 class UserDetailsNotifier extends AsyncNotifier<User?> {
-  UserManager get _userManager => ref.read(userManagerProvider);
+  UserDatabaseManager get _userManager => ref.read(userManagerProvider);
 
   @override
   Future<User?> build() async {

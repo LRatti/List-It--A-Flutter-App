@@ -11,7 +11,7 @@ import 'package:app_code/providers/real_app_providers/user_details_provider.dart
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
 
-class _FakeUserManager extends UserManager {
+class _FakeUserManager extends UserDatabaseManager {
   _FakeUserManager(this.user);
   final User user;
   User? _currentUser;
@@ -128,7 +128,7 @@ void main() {
     required User user,
     NavigatorObserver? observer,
     AuthRepository? authRepository,
-    UserManager? userManager,
+    UserDatabaseManager? userManager,
   }) {
     final repo = authRepository ?? _RecordingAuthRepository();
     return ProviderScope(
