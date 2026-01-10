@@ -155,7 +155,7 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                     )
                   else ...[
                     const SizedBox(height: 12),
-                    // Pie chart - fixed height
+                    // Pie chart
                     SizedBox(
                       height: 200,
                       child: StatisticsPieChart(entries: entries, total: total),
