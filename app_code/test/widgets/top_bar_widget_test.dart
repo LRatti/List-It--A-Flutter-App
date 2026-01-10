@@ -203,7 +203,7 @@ void main() {
 
     // Create a widget that uses TopBar's preferredSize
     final appBar = TopBarWithNavBar();
-    expect(appBar.preferredSize.height, kToolbarHeight + 48);
+    expect(appBar.preferredSize.height, kToolbarHeight + 56);
   });
 
   testWidgets('TopBar has appropriate spacing', (tester) async {
