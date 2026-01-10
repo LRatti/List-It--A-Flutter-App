@@ -4,62 +4,71 @@ import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/widgets/shopping_list_widget.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 
-class ListsScreenMobile extends ConsumerWidget {
+class ListsScreenMobile extends ConsumerStatefulWidget {
   const ListsScreenMobile({super.key});
 
-  Future<void> _showAddShoppingListDialog(BuildContext context, WidgetRef ref,) async {
+  @override
+  ConsumerState<ListsScreenMobile> createState() => _ListsScreenMobileState();
+}
+
+class _ListsScreenMobileState extends ConsumerState<ListsScreenMobile> {
+  final Set<String> _selectedIds = {};
+
+  bool get _selectionActive => _selectedIds.isNotEmpty;
+
+  Future<void> _showAddShoppingListDialog(BuildContext context) async {
     final controller = TextEditingController();
+    final ref = this.ref;
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Add new list"),
+        title: const Text('Add new list'),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: "List name"),
+          decoration: const InputDecoration(hintText: 'List name'),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
               final name = controller.text.trim();
               if (name.isNotEmpty) {
-                final newList = ShoppingList(
-                  name: name,
-                  createdAt: DateTime.now(),
-                );
-                await ref
-                    .read(shoppingListsProvider.notifier)
-                    .addList(newList);
+                await ref.read(shoppingListsProvider.notifier).addList(
+                      ShoppingList(
+                        name: name,
+                        createdAt: DateTime.now(),
+                      ),
+                    );
               }
-              Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context);
             },
-            child: const Text("Add"),
+            child: const Text('Add'),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _deleteShoppingList(BuildContext context, WidgetRef ref, ShoppingList list,
-  ) async {
+  Future<void> _deleteShoppingList(BuildContext context, ShoppingList list) async {
+    final ref = this.ref;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Delete list"),
+        title: const Text('Delete list'),
         content: Text("Are you sure you want to delete '${list.getName()}'?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text("Delete"),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -70,71 +79,112 @@ class ListsScreenMobile extends ConsumerWidget {
     }
   }
 
-  Future<void> _updateListName(WidgetRef ref, ShoppingList list, String newName,
-  ) async {
-    list.setName(newName);
-    await ref.read(shoppingListsProvider.notifier).updateList(list);
+  void _toggleSelection(ShoppingList list) {
+    setState(() {
+      if (_selectedIds.contains(list.id)) {
+        _selectedIds.remove(list.id);
+      } else {
+        _selectedIds.add(list.id);
+      }
+    });
+  }
+
+  Future<void> _deleteSelected(BuildContext context) async {
+    final ref = this.ref;
+    if (_selectedIds.isEmpty) return;
+    final count = _selectedIds.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete selected lists'),
+        content: Text('Are you sure you want to delete $count selected list(s)?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final notifier = ref.read(shoppingListsProvider.notifier);
+      final lists = ref.read(shoppingListsProvider).value ?? [];
+      final toDelete = lists.where((l) => _selectedIds.contains(l.id)).toList();
+      for (final l in toDelete) {
+        await notifier.deleteList(l);
+      }
+      setState(() => _selectedIds.clear());
+    }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
 
-    return shoppingListsAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (error, _) => Center(child: Text(error.toString())),
-      data: (lists) {
-        if (lists.isEmpty) {
-          return const Center(
-            child: Text(
-              "No lists yet.\nTap + to create one.",
-              textAlign: TextAlign.center,
-            ),
-          );
-        }
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: shoppingListsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: Text(error.toString())),
+        data: (lists) {
+          final activeLists = lists.where((l) => !l.getIsRegistered()).toList();
+          if (activeLists.isEmpty) return const Center(child: Text('No lists yet.'));
 
-        return Scaffold(
-          body: LayoutBuilder(
+          return LayoutBuilder(
             builder: (context, constraints) {
-              const crossAxisCount = 3;
-              const spacing = 12.0;
-              final totalWidth = constraints.maxWidth;
-              final itemWidth =
-                  (totalWidth - (crossAxisCount + 1) * spacing) / crossAxisCount;
-              const nameRowHeight = 48.0;
-              const verticalGap = 8.0;
-              const safeBuffer = 2.0;
-              final itemHeight = itemWidth + nameRowHeight + verticalGap + safeBuffer;
+              final double spacing = 12.0;
+              final double padding = 16.0;
+              final double itemWidth = (constraints.maxWidth - (padding * 2) - (spacing * 2)) / 3;
 
-              return GridView.builder(
-                padding: const EdgeInsets.all(spacing),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: spacing,
-                  mainAxisSpacing: spacing,
-                  childAspectRatio: itemWidth / itemHeight,
+              return SingleChildScrollView(
+                padding: EdgeInsets.all(padding),
+                child: Wrap(
+                  spacing: spacing,
+                  runSpacing: 24,
+                  children: activeLists.map((list) {
+                    final isSelected = _selectedIds.contains(list.id);
+                    return SizedBox(
+                      width: itemWidth,
+                      child: ShoppingListCard(
+                        shoppingList: list,
+                        onTap: () {
+                          if (_selectionActive) {
+                            _toggleSelection(list);
+                          } else {
+                            // Could navigate to details here
+                          }
+                        },
+                        onLongPress: () => _toggleSelection(list),
+                        onNameChanged: (name) => ref.read(shoppingListsProvider.notifier).updateList(
+                          list..setName(name),
+                        ),
+                        onDelete: () => _deleteShoppingList(context, list),
+                        isSelected: isSelected,
+                      ),
+                    );
+                  }).toList(),
                 ),
-                itemCount: lists.length,
-                itemBuilder: (context, index) {
-                  final shoppingList = lists[index];
-                  return ShoppingListCard(
-                    shoppingList: shoppingList,
-                    onTap: () {},
-                    onNameChanged: (newName) =>
-                        _updateListName(ref, shoppingList, newName),
-                    onDelete: () =>
-                        _deleteShoppingList(context, ref, shoppingList),
-                  );
-                },
               );
             },
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAddShoppingListDialog(context, ref),
-            child: const Icon(Icons.add),
-          ),
-        );
-      },
+          );
+        },
+      ),
+      floatingActionButton: _selectionActive
+          ? FloatingActionButton(
+              onPressed: () => _deleteSelected(context),
+              backgroundColor: Colors.red,
+              child: const Icon(Icons.delete),
+            )
+          : FloatingActionButton(
+              onPressed: () => _showAddShoppingListDialog(context),
+              child: const Icon(Icons.add),
+            ),
     );
   }
 }

@@ -14,7 +14,7 @@ class TopBarWithNavBar extends ConsumerWidget implements PreferredSizeWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         AppBar(
-          title: const Text("My Shopping App"),
+          title: const Text('My Shopping App'),
           actions: [
             authState.when(
               data: (user) {
@@ -60,11 +60,14 @@ class TopBarWithNavBar extends ConsumerWidget implements PreferredSizeWidget {
         ),
         Container(
           width: double.infinity,
-          color: Colors.grey[200],
+          color: Colors.grey.shade200,
           padding: const EdgeInsets.all(12),
           child: const Text(
-            "Nearest supermarket: internet not available",
+            'Nearest supermarket: internet not available',
             style: TextStyle(fontSize: 16),
+            softWrap: true,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -72,5 +75,9 @@ class TopBarWithNavBar extends ConsumerWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 48);
+  Size get preferredSize {
+    // Minimum guaranteed height.
+    // If text scale increases, Flutter will expand the layout automatically.
+    return const Size.fromHeight(kToolbarHeight + 56);
+  }
 }
