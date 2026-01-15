@@ -20,7 +20,7 @@ class GeminiRepositoryReal implements GeminiRepository {
         categories: categories,
       );
     } catch (e) {
-      return RecipeData.error('Error querying Gemini: $e');
+      return RecipeData.error('Something went wrong while searching for the recipe. Please try again.');
     }
   }
 }

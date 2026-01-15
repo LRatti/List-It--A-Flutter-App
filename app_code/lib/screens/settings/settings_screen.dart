@@ -7,6 +7,7 @@ import 'package:app_code/providers/real_app_providers/user_details_provider.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/widgets/password_text_field.dart';
+import 'package:app_code/widgets/safe_bottom_padding_wrapper.dart';
 
 part 'settings_controller.dart';
 
@@ -240,17 +241,19 @@ class _SettingsScreenState extends SettingsController {
               ),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isSaving ? null : () => updateAuthCredentials(user),
-                child: isSaving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Update Security Settings'),
+            SafeBottomPaddingWrapper(
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isSaving ? null : () => updateAuthCredentials(user),
+                  child: isSaving
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Update Security Settings'),
+                ),
               ),
             ),
           ],

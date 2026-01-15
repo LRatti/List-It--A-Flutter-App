@@ -54,7 +54,7 @@ class TrashDialog extends ConsumerWidget {
                       return ListTile(
                         title: Text(list.getName()),
                         subtitle: Text(
-                          'Delete in 30 days',
+                          list.getDeletionMessage(),
                           style: TextStyle(color: Colors.grey.shade600),
                         ),
                         trailing: SizedBox(

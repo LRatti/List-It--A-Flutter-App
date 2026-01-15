@@ -123,7 +123,7 @@ class TrashScreenMobile extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Delete in 30 days',
+                                  list.getDeletionMessage(),
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium

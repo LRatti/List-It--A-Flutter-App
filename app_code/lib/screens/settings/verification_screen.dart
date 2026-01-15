@@ -4,6 +4,7 @@ import 'package:app_code/providers/real_app_providers/email_verification_provide
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:app_code/widgets/safe_bottom_padding_wrapper.dart';
 
 part 'verification_controller.dart';
 
@@ -77,83 +78,89 @@ class _VerificationScreenState extends VerificationController {
             ),
             const SizedBox(height: 40),
 
-            // Resend verification email button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: isResending ? null : resendVerificationEmail,
-                icon: isResending
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                    : const Icon(Icons.email),
-                label: Text(
-                  isResending ? 'Sending...' : 'Resend Verification Email',
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
+            // Buttons section with safe padding for navigation bar
+            SafeBottomPaddingWrapper(
+              child: Column(
+                spacing: 16.0,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Resend verification email button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: isResending ? null : resendVerificationEmail,
+                      icon: isResending
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Icon(Icons.email),
+                      label: Text(
+                        isResending ? 'Sending...' : 'Resend Verification Email',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
 
-            // Manual continue button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: isCheckingVerification ? null : checkAndContinue,
-                icon: isCheckingVerification
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                    : const Icon(Icons.check_circle),
-                label: Text(
-                  isCheckingVerification
-                      ? 'Checking...'
-                      : 'I\'ve Verified, Continue',
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
+                  // Manual continue button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: isCheckingVerification ? null : checkAndContinue,
+                      icon: isCheckingVerification
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Icon(Icons.check_circle),
+                      label: Text(
+                        isCheckingVerification
+                            ? 'Checking...'
+                            : 'I\'ve Verified, Continue',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
 
-            // Abort operation button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: isCheckingVerification ? null : abortOperation,
-                icon: const Icon(Icons.close),
-                label: Text(
-                  isCheckingVerification ? 'Aborting...' : 'Abort Operation',
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: BorderSide(color: Colors.red[400]!),
-                  foregroundColor: Colors.red[400],
-                ),
+                  // Abort operation button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: isCheckingVerification ? null : abortOperation,
+                      icon: const Icon(Icons.close),
+                      label: Text(
+                        isCheckingVerification ? 'Aborting...' : 'Abort Operation',
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: Colors.red[400]!),
+                        foregroundColor: Colors.red[400],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 24),
 
             // Helper text
             Text(

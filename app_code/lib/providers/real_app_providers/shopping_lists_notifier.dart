@@ -22,10 +22,32 @@ class ShoppingListsNotifier extends AsyncNotifier<List<ShoppingList>> {
   late final ShoppingListRepository  _repository;
 
   /// Initializes the repository and loads all shopping lists.
+  /// Automatically deletes any lists in trash that have exceeded 30 days.
   @override
   Future<List<ShoppingList>> build() async {
     _repository = ref.read(shoppingListRepositoryProvider);
-    return _repository.getAll();
+    final allLists = await _repository.getAll();
+    
+    // Check for lists that should be auto-deleted (in trash for 30+ days)
+    final now = DateTime.now();
+    final listsToDelete = <ShoppingList>[];
+    
+    for (final list in allLists) {
+      if (list.getIsInTheTrash() && list.getDeletionTimestamp() != null) {
+        final daysSinceDeletion = now.difference(list.getDeletionTimestamp()!).inDays;
+        if (daysSinceDeletion >= 30) {
+          listsToDelete.add(list);
+        }
+      }
+    }
+    
+    // Delete any expired lists
+    for (final list in listsToDelete) {
+      await _repository.delete(list);
+    }
+    
+    // Return the filtered list (without the deleted ones)
+    return allLists.where((l) => !listsToDelete.contains(l)).toList();
   }
 
   /// Persists a new list, then appends it to the in-memory state.

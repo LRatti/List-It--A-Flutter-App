@@ -86,6 +86,6 @@ class GeminiRepositoryTest implements GeminiRepository {
     }
 
     // Recipe not found
-    return RecipeData.error('Recipe "$recipeName" not found in our database.');
+    return RecipeData.error('The recipe you searched for does not exist. Please check the spelling and try again.');
   }
 }

@@ -190,6 +190,37 @@ class ShoppingList {
     _deletionTimestamp = timestamp;
   }
 
+  /// Calculates the number of days remaining before auto-deletion
+  /// Returns null if the list is not in trash or no deletion timestamp is set
+  int? getDaysUntilDeletion() {
+    if (!_isInTheTrash || _deletionTimestamp == null) {
+      return null;
+    }
+    
+    final now = DateTime.now();
+    final daysElapsed = now.difference(_deletionTimestamp!).inDays;
+    final daysRemaining = 30 - daysElapsed;
+    
+    // Return at least 0 days (when it's time to delete)
+    return daysRemaining > 0 ? daysRemaining : 0;
+  }
+
+  /// Get a user-friendly message about when the list will be deleted
+  String getDeletionMessage() {
+    final daysRemaining = getDaysUntilDeletion();
+    if (daysRemaining == null) {
+      return '';
+    }
+    
+    if (daysRemaining == 0) {
+      return 'Deleting now...';
+    } else if (daysRemaining == 1) {
+      return 'Delete in 1 day';
+    } else {
+      return 'Delete in $daysRemaining days';
+    }
+  }
+
   //TODO: take the supermarket from the json file containing the default one
   static Supermarket _getDefaultSupermarket() {
     Category defaultCategory = Category(

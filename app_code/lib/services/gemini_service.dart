@@ -31,7 +31,7 @@ class GeminiService {
   }) async {
     try {
       if (_apiKey.isEmpty) {
-        return RecipeData.error('GEMINI_API_KEY is not set.');
+        return RecipeData.error('Service is not available at the moment. Please try again later.');
       }
 
       final categoryNames = categories.map((c) => c.getName()).join(', ');
@@ -44,7 +44,7 @@ class GeminiService {
       final responseText = response.text ?? '';
       
       if (responseText.isEmpty) {
-        return RecipeData.error('Unable to process your request. Try again please');
+        return RecipeData.error('Recipe service did not return a response. Please try again.');
       }
       
       return _parseGeminiResponse(responseText);
@@ -57,9 +57,9 @@ class GeminiService {
           errorStr.contains('connection') || 
           errorStr.contains('timeout') ||
           errorStr.contains('network')) {
-        return RecipeData.error('Connection error: try later, please');
+        return RecipeData.error('Connection error. Please check your internet connection and try again.');
       }
-      return RecipeData.error('Unable to process your request. Try again please');
+      return RecipeData.error('Something went wrong. Please try again.');
     }
   }
 
@@ -72,14 +72,14 @@ class GeminiService {
     if (lowerMsg.contains('not found') || 
         lowerMsg.contains('does not exist') ||
         lowerMsg.contains('unknown recipe')) {
-      return RecipeData.error('You inserted an invalid recipe, try again please');
+      return RecipeData.error('The recipe you searched for does not exist. Please check the spelling and try again.');
     }
 
     // Check for quota/rate limit errors
     if (lowerMsg.contains('quota') || 
         lowerMsg.contains('rate limit') ||
         lowerMsg.contains('exceeded')) {
-      return RecipeData.error('Service temporarily unavailable. Try again later, please');
+      return RecipeData.error('Recipe service is temporarily unavailable. Please try again in a few moments.');
     }
 
     // Check for connection errors
@@ -87,11 +87,11 @@ class GeminiService {
         lowerMsg.contains('connection') || 
         lowerMsg.contains('timeout') ||
         lowerMsg.contains('network')) {
-      return RecipeData.error('Connection error: try later, please');
+      return RecipeData.error('Connection error. Please check your internet connection and try again.');
     }
 
     // Default error
-    return RecipeData.error('Unable to process your request. Try again please');
+    return RecipeData.error('Something went wrong while searching for the recipe. Please try again.');
   }
 
   /// Builds the prompt to send to Gemini
@@ -138,7 +138,7 @@ Ensure the JSON is valid and can be parsed. Return ONLY the JSON object, no addi
       final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(content);
       
       if (jsonMatch == null) {
-        return RecipeData.error('Invalid response from Gemini');
+        return RecipeData.error('Recipe service returned an unexpected response. Please try again.');
       }
 
       final jsonString = jsonMatch.group(0)!;
@@ -170,7 +170,7 @@ Ensure the JSON is valid and can be parsed. Return ONLY the JSON object, no addi
         error: error.isEmpty ? 'noError' : error,
       );
     } catch (e) {
-      return RecipeData.error('Failed to parse Gemini response: $e');
+      return RecipeData.error('Could not process the recipe. Please try again.');
     }
   }
 }
