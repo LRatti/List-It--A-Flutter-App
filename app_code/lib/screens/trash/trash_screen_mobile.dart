@@ -93,16 +93,17 @@ class TrashScreenMobile extends ConsumerWidget {
               ),
             ],
           ),
-          body: trashedLists.isEmpty
-              ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text('Trash is empty'),
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: trashedLists.length,
-                  itemBuilder: (context, index) {
+          body: SafeArea(
+            child: trashedLists.isEmpty
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text('Trash is empty'),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: trashedLists.length,
+                    itemBuilder: (context, index) {
                     final list = trashedLists[index];
 
                     return Padding(
@@ -191,6 +192,7 @@ class TrashScreenMobile extends ConsumerWidget {
                     );
                   },
                 ),
+          ),
         );
       },
     );

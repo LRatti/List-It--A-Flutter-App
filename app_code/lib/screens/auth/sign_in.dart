@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/widgets/password_text_field.dart';
+import 'package:app_code/widgets/safe_bottom_padding_wrapper.dart';
 
 class SignInForm extends ConsumerStatefulWidget {
   final dynamic authNotifier; // Keep for backward compatibility with tests
@@ -73,33 +74,35 @@ class _SignInFormState extends ConsumerState<SignInForm> {
             const SizedBox(height: 16.0),
 
             // submit button
-            ElevatedButton(
-              key: const Key('sign_in_button'),
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  setState(() {
-                    _errorFeedback = null;
-                  });
-
-                  final email = _emailController.text.trim();
-                  final password = _passwordController.text.trim();
-
-                  try {
-                    await authNotifier.signIn(email, password);
-                    if (context.mounted) {
-                      // Navigate to home screen after successful login
-                      Navigator.of(
-                        context,
-                      ).pushNamedAndRemoveUntil('/home', (route) => false);
-                    }
-                  } catch (e) {
+            SafeBottomPaddingWrapper(
+              child: ElevatedButton(
+                key: const Key('sign_in_button'),
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
                     setState(() {
-                      _errorFeedback = 'Incorrect login credentials.';
+                      _errorFeedback = null;
                     });
+
+                    final email = _emailController.text.trim();
+                    final password = _passwordController.text.trim();
+
+                    try {
+                      await authNotifier.signIn(email, password);
+                      if (context.mounted) {
+                        // Navigate to home screen after successful login
+                        Navigator.of(
+                          context,
+                        ).pushNamedAndRemoveUntil('/home', (route) => false);
+                      }
+                    } catch (e) {
+                      setState(() {
+                        _errorFeedback = 'Incorrect login credentials.';
+                      });
+                    }
                   }
-                }
-              },
-              child: const Text('Sign In'),
+                },
+                child: const Text('Sign In'),
+              ),
             ),
             const SizedBox(height: 8.0),
             Align(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/screens/lists/add_recipe.dart';
+import 'package:app_code/widgets/safe_bottom_padding_wrapper.dart';
 
 class ListDetailScreenMobile extends ConsumerWidget {
   final ShoppingList shoppingList;
@@ -33,25 +34,27 @@ class ListDetailScreenMobile extends ConsumerWidget {
         ),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => AddRecipeScreen(
-                  shoppingList: shoppingList,
-                  availableCategories: mockCategories,
+        child: SafeBottomPaddingWrapper(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AddRecipeScreen(
+                    shoppingList: shoppingList,
+                    availableCategories: mockCategories,
+                  ),
                 ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 32,
+                vertical: 16,
               ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 32,
-              vertical: 16,
             ),
+            child: const Text('Add a Recipe'),
           ),
-          child: const Text('Add a Recipe'),
         ),
       ),
     );

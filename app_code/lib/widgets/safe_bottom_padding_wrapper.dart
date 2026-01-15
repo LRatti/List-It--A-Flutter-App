@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// A wrapper widget that adds safe bottom padding to avoid being covered by
+/// A wrapper widget that adds safe padding to avoid being covered by
 /// Android's navigation bar or other system UI elements.
 ///
+/// In portrait orientation, adds bottom padding.
+/// In landscape orientation, adds left/right padding depending on navigation bar position.
 /// This is useful for buttons and other UI elements that are positioned at
-/// the bottom of the screen and need to be accessible.
+/// the bottom or sides of the screen and need to be accessible.
 ///
 /// Example usage:
 /// ```dart
@@ -27,14 +29,19 @@ class SafeBottomPaddingWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final mediaQuery = MediaQuery.of(context);
+    final viewPadding = mediaQuery.viewPadding;
     
+    // Use viewPadding which represents system UI insets regardless of SafeArea
+    // This ensures proper padding in both portrait and landscape
     return Padding(
-      padding: EdgeInsets.only(bottom: bottomPadding + defaultPadding),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(defaultPadding, defaultPadding, defaultPadding, 0),
-        child: child,
+      padding: EdgeInsets.fromLTRB(
+        defaultPadding + viewPadding.left,
+        defaultPadding,
+        defaultPadding + viewPadding.right,
+        defaultPadding + viewPadding.bottom,
       ),
+      child: child,
     );
   }
 }
