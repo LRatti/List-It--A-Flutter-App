@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/email_verification_provider.dart';
 import 'package:app_code/widgets/password_text_field.dart';
-import 'package:app_code/widgets/safe_bottom_padding_wrapper.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {
   final dynamic authNotifier; // Keep for backward compatibility with tests
@@ -95,49 +94,47 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             const SizedBox(height: 16.0),
 
             // submit button
-            SafeBottomPaddingWrapper(
-              child: ElevatedButton(
-                key: const Key('sign_up_button'),
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    setState(() {
-                      _errorFeedback = null;
-                    });
+            ElevatedButton(
+              key: const Key('sign_up_button'),
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  setState(() {
+                    _errorFeedback = null;
+                  });
 
-                    final email = _emailController.text.trim();
-                    final password = _passwordController.text.trim();
-                    final username = _usernameController.text.trim();
+                  final email = _emailController.text.trim();
+                  final password = _passwordController.text.trim();
+                  final username = _usernameController.text.trim();
 
-                    try {
-                      await authNotifier.linkAnonymousWithEmailPassword(
-                        email,
-                        password,
-                        username,
+                  try {
+                    await authNotifier.linkAnonymousWithEmailPassword(
+                      email,
+                      password,
+                      username,
+                    );
+
+                    if (context.mounted) {
+                      // Set email verification session to indicate new signup
+                      ref
+                          .read(emailVerificationSessionProvider.notifier)
+                          .state = EmailVerificationSession(
+                        isNewSignup: true,
+                        email: email,
                       );
 
-                      if (context.mounted) {
-                        // Set email verification session to indicate new signup
-                        ref
-                            .read(emailVerificationSessionProvider.notifier)
-                            .state = EmailVerificationSession(
-                          isNewSignup: true,
-                          email: email,
-                        );
-
-                        // Navigate to verification screen
-                        Navigator.of(
-                          context,
-                        ).pushReplacementNamed('/verification');
-                      }
-                    } catch (e) {
-                      setState(() {
-                        _errorFeedback = 'Could not sign up with those details.';
-                      });
+                      // Navigate to verification screen
+                      Navigator.of(
+                        context,
+                      ).pushReplacementNamed('/verification');
                     }
+                  } catch (e) {
+                    setState(() {
+                      _errorFeedback = 'Could not sign up with those details.';
+                    });
                   }
-                },
-                child: const Text('Sign Up'),
-              ),
+                }
+              },
+              child: const Text('Sign Up'),
             ),
           ],
         ),

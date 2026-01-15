@@ -6,7 +6,6 @@ import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/providers/recipe_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 import 'package:app_code/models/product.dart';
-import 'package:app_code/widgets/safe_bottom_padding_wrapper.dart';
 
 class AddRecipeScreen extends ConsumerStatefulWidget {
   final ShoppingList shoppingList;
@@ -497,7 +496,8 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
             currentSearch.result.maybeWhen(
               data: (recipe) {
                 if (!recipe.hasError && recipe.recipeName.isNotEmpty) {
-                  return SafeBottomPaddingWrapper(
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(

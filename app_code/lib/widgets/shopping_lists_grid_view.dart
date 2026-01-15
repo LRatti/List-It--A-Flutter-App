@@ -147,6 +147,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
     if (widget.lists.isEmpty) {
       return Scaffold(
         backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: false,
         body: Center(child: Text(widget.emptyMessage)),
         floatingActionButton: widget.floatingActionButton,
       );
@@ -161,6 +162,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: false,
         appBar: _selectionActive
             ? AppBar(
                 backgroundColor: Colors.white,

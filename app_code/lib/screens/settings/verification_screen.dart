@@ -4,7 +4,6 @@ import 'package:app_code/providers/real_app_providers/email_verification_provide
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:app_code/widgets/safe_bottom_padding_wrapper.dart';
 
 part 'verification_controller.dart';
 
@@ -31,13 +30,14 @@ class _VerificationScreenState extends VerificationController {
         centerTitle: true,
         automaticallyImplyLeading: false, // Remove back button
       ),
-      body: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+      body: SafeArea(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
             // Email verification icon
             Icon(
               Icons.mark_email_unread_outlined,
@@ -79,15 +79,14 @@ class _VerificationScreenState extends VerificationController {
             const SizedBox(height: 40),
 
             // Buttons section with safe padding for navigation bar
-            SafeBottomPaddingWrapper(
-              child: Column(
-                spacing: 16.0,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Resend verification email button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
+            Column(
+              spacing: 16.0,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Resend verification email button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
                       onPressed: isResending ? null : resendVerificationEmail,
                       icon: isResending
                           ? const SizedBox(
@@ -160,19 +159,19 @@ class _VerificationScreenState extends VerificationController {
                   ),
                 ],
               ),
-            ),
 
-            // Helper text
-            Text(
-              'The app will automatically redirect once your email is verified.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[500],
-                fontStyle: FontStyle.italic,
+              // Helper text
+              Text(
+                'The app will automatically redirect once your email is verified.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

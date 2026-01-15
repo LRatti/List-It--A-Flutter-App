@@ -1,7 +1,6 @@
 import 'package:app_code/screens/auth/sign_in.dart';
 import 'package:app_code/screens/auth/sign_up.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
-import 'package:app_code/widgets/safe_bottom_padding_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -80,23 +79,21 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     ),
                   ],
                 ),
-              SafeBottomPaddingWrapper(
-                child: ElevatedButton(
-                  key: const Key('google_sign_in_button'),
-                  onPressed: () async {
-                    // Always defer to repository logic for Google sign-in.
-                    // It will upgrade anonymous accounts or sign in existing ones.
-                    await authNotifier.signInWithGoogle();
+              ElevatedButton(
+                key: const Key('google_sign_in_button'),
+                onPressed: () async {
+                  // Always defer to repository logic for Google sign-in.
+                  // It will upgrade anonymous accounts or sign in existing ones.
+                  await authNotifier.signInWithGoogle();
 
-                    if (context.mounted) {
-                      // Navigate back to home screen after successful sign-in
-                      Navigator.of(
-                        context,
-                      ).pushNamedAndRemoveUntil('/home', (route) => false);
-                    }
-                  },
-                  child: const Text("Sign in with Google"),
-                ),
+                  if (context.mounted) {
+                    // Navigate back to home screen after successful sign-in
+                    Navigator.of(
+                      context,
+                    ).pushNamedAndRemoveUntil('/home', (route) => false);
+                  }
+                },
+                child: const Text("Sign in with Google"),
               ),
             ],
           ),

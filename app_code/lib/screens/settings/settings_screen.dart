@@ -7,7 +7,6 @@ import 'package:app_code/providers/real_app_providers/user_details_provider.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/widgets/password_text_field.dart';
-import 'package:app_code/widgets/safe_bottom_padding_wrapper.dart';
 
 part 'settings_controller.dart';
 
@@ -31,11 +30,12 @@ class _SettingsScreenState extends SettingsController {
         backgroundColor: Colors.blue[500],
         centerTitle: true,
       ),
-      body: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        child: userDetailsAsync.when(
-          data: (user) {
+      body: SafeArea(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          child: userDetailsAsync.when(
+            data: (user) {
             if (user == null) {
               return const Center(child: Text('No user data found.'));
             }
@@ -52,6 +52,7 @@ class _SettingsScreenState extends SettingsController {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text('Error: $error')),
         ),
+      ),
       ),
     );
   }
@@ -241,7 +242,8 @@ class _SettingsScreenState extends SettingsController {
               ),
             ),
             const SizedBox(height: 20),
-            SafeBottomPaddingWrapper(
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
