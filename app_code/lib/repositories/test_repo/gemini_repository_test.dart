@@ -2,22 +2,31 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/recipe_response.dart';
 import 'package:app_code/repositories/abstract/gemini_repository.dart';
+import 'dart:math';
 
 /// Test implementation of GeminiRepository for testing purposes
 /// Returns mock recipe data without making actual API calls
 class GeminiRepositoryTest implements GeminiRepository {
-  
+  final Random _random = Random();
+
   @override
   Future<RecipeData> queryRecipe({
     required String recipeName,
     required List<Category> categories,
   }) async {
     // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(seconds: 5));
+
+    final normalizedInput = recipeName.toLowerCase().trim();
+
+    // Check if user is requesting an error
+    if (normalizedInput == 'error') {
+      return RecipeData.error('"$recipeName" not found. Try again.');
+    }
 
     // Map of test recipes
-    final testRecipes = {
-      'chocolate cake': {
+    final testRecipes = [
+      {
         'products': [
           Product(name: 'Flour'),
           Product(name: 'Cocoa powder'),
@@ -27,10 +36,10 @@ class GeminiRepositoryTest implements GeminiRepository {
           Product(name: 'Milk'),
         ],
         'quantities': ['2 cups', '1 cup', '1.5 cups', '3', '100g', '1 cup'],
-        'categories': ['grains', 'pantry', 'pantry', 'dairy', 'dairy', 'dairy'],
+        'categories': ['Bakery', 'Bakery', 'Bakery', 'Dairy', 'Dairy', 'Dairy'],
         'name': 'Chocolate Cake',
       },
-      'pasta carbonara': {
+      {
         'products': [
           Product(name: 'Pasta'),
           Product(name: 'Bacon'),
@@ -39,10 +48,10 @@ class GeminiRepositoryTest implements GeminiRepository {
           Product(name: 'Black pepper'),
         ],
         'quantities': ['400g', '200g', '4', '100g', 'to taste'],
-        'categories': ['grains', 'meat', 'dairy', 'dairy', 'pantry'],
+        'categories': ['Bakery', 'Meat', 'Dairy', 'Dairy', 'Bakery'],
         'name': 'Pasta Carbonara',
       },
-      'tomato soup': {
+      {
         'products': [
           Product(name: 'Tomatoes'),
           Product(name: 'Onion'),
@@ -52,40 +61,27 @@ class GeminiRepositoryTest implements GeminiRepository {
           Product(name: 'Olive oil'),
         ],
         'quantities': ['1kg', '1', '3 cloves', '1 liter', '200ml', '2 tbsp'],
-        'categories': ['vegetables', 'vegetables', 'vegetables', 'pantry', 'dairy', 'pantry'],
+        'categories': [
+          'Vegetables',
+          'Vegetables',
+          'Vegetables',
+          'Bakery',
+          'Dairy',
+          'Bakery',
+        ],
         'name': 'Tomato Soup',
       },
-    };
+    ];
 
-    final normalizedInput = recipeName.toLowerCase().trim();
-    
-    // Check if recipe exists
-    if (testRecipes.containsKey(normalizedInput)) {
-      final recipe = testRecipes[normalizedInput]!;
-      return RecipeData(
-        products: List.from(recipe['products'] as List<Product>),
-        quantities: List.from(recipe['quantities'] as List<String>),
-        productCategories: List.from(recipe['categories'] as List<String>),
-        recipeName: recipe['name'] as String,
-        error: 'noError',
-      );
-    }
+    // Return a random recipe from the list
+    final randomRecipe = testRecipes[_random.nextInt(testRecipes.length)];
 
-    // Check for partial matches (case-insensitive)
-    for (final key in testRecipes.keys) {
-      if (key.contains(normalizedInput) || normalizedInput.contains(key)) {
-        final recipe = testRecipes[key]!;
-        return RecipeData(
-          products: List.from(recipe['products'] as List<Product>),
-          quantities: List.from(recipe['quantities'] as List<String>),
-          productCategories: List.from(recipe['categories'] as List<String>),
-          recipeName: recipe['name'] as String,
-          error: 'noError',
-        );
-      }
-    }
-
-    // Recipe not found
-    return RecipeData.error('The recipe you searched for does not exist. Please check the spelling and try again.');
+    return RecipeData(
+      products: List.from(randomRecipe['products'] as List<Product>),
+      quantities: List.from(randomRecipe['quantities'] as List<String>),
+      productCategories: List.from(randomRecipe['categories'] as List<String>),
+      recipeName: randomRecipe['name'] as String,
+      error: 'noError',
+    );
   }
 }

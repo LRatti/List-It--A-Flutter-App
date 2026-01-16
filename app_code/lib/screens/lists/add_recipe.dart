@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/purchased_product.dart';
-import 'package:app_code/providers/recipe_provider.dart';
+import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 import 'package:app_code/models/product.dart';
 
@@ -32,6 +32,13 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
     super.initState();
     _deletedIndices = {};
     _editedNames = {};
+
+    // Load cached recipe search if available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(backgroundRecipeProvider.notifier)
+          .loadCachedSearch(widget.shoppingList.id);
+    });
   }
 
   @override
@@ -42,7 +49,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
 
   void _queryRecipe() async {
     final recipeName = _recipeNameController.text.trim();
-    
+
     if (recipeName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a recipe name')),
@@ -50,30 +57,27 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
       return;
     }
 
+    if (!mounted) return;
+
     setState(() {
       _isSearching = true;
     });
 
     // Start background search
-    await ref.read(backgroundRecipeProvider.notifier).startBackgroundSearch(
-      listId: widget.shoppingList.id,
-      recipeName: recipeName,
-      categories: widget.availableCategories,
-    );
+    await ref
+        .read(backgroundRecipeProvider.notifier)
+        .startBackgroundSearch(
+          listId: widget.shoppingList.id,
+          recipeName: recipeName,
+          categories: widget.availableCategories,
+          shoppingList: widget.shoppingList,
+        );
+
+    if (!mounted) return;
 
     setState(() {
       _isSearching = false;
     });
-
-    // Show a snackbar indicating the search is in progress
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Recipe search started in background'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
   }
 
   void _showEditIngredientDialog(int index, String currentName) {
@@ -120,7 +124,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
   void _addProductsToList() async {
     final backgroundSearches = ref.read(backgroundRecipeProvider);
     final currentSearch = backgroundSearches[widget.shoppingList.id];
-    
+
     if (currentSearch == null) return;
 
     currentSearch.result.whenData((recipe) {
@@ -133,16 +137,17 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
 
           final product = recipe.products[i];
           final categoryName = recipe.productCategories[i];
-          
+
           // Use edited name if available, otherwise use original name
           final productName = _editedNames[i] ?? product.getName();
           final editedProduct = Product(name: productName);
-          
+
           // Find matching category
           Category? matchingCategory;
           try {
             matchingCategory = widget.availableCategories.firstWhere(
-              (cat) => cat.getName().toLowerCase() == categoryName.toLowerCase(),
+              (cat) =>
+                  cat.getName().toLowerCase() == categoryName.toLowerCase(),
             );
           } catch (_) {
             //TODO: handle no matching category
@@ -167,7 +172,14 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
         }
 
         // Update the shopping list
-        ref.read(shoppingListsProvider.notifier).updateList(widget.shoppingList);
+        ref
+            .read(shoppingListsProvider.notifier)
+            .updateList(widget.shoppingList);
+
+        // Delete the cached recipe search
+        ref
+            .read(backgroundRecipeProvider.notifier)
+            .clearSearchForList(widget.shoppingList.id);
 
         final addedCount = recipe.products.length - _deletedIndices.length;
         // Show success message
@@ -206,319 +218,361 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
-                children: [
-                  // Input section
-                  Container(
-                    padding: const EdgeInsets.all(16.0),
-                    color: Colors.grey[100],
-                    child: Column(
-                      spacing: 12.0,
-                      children: [
-                        TextField(
-                          controller: _recipeNameController,
-                          decoration: InputDecoration(
-                            hintText: 'Enter recipe name...',
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                          enabled: !_isSearching,
-                        ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _isSearching ? null : _queryRecipe,
-                            child: _isSearching
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text('Search Recipe'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Results section
-                  currentSearch == null
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(32.0),
-                            child: Text(
-                              'Enter a recipe name and press "Search Recipe"',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
-                          ),
-                        )
-                      : currentSearch.result.when(
-                          loading: () => const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(32.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(height: 16),
-                                  Text('Searching for recipe...'),
-                                ],
+                  children: [
+                    // Input section
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      color: Colors.grey[100],
+                      child: Column(
+                        spacing: 12.0,
+                        children: [
+                          TextField(
+                            controller: _recipeNameController,
+                            decoration: InputDecoration(
+                              hintText: 'Enter recipe name...',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                             ),
+                            enabled: !_isSearching,
                           ),
-                          error: (error, stack) => Center(
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isSearching ? null : _queryRecipe,
+                              child: _isSearching
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text('Search Recipe'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Results section
+                    currentSearch == null
+                        ? Center(
                             child: Padding(
                               padding: const EdgeInsets.all(32.0),
                               child: Text(
-                                'Error: $error',
+                                'Enter a recipe name and press "Search Recipe"',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(color: Colors.red),
+                                style: TextStyle(color: Colors.grey[600]),
                               ),
                             ),
-                          ),
-                          data: (recipe) {
-                            // Error from Gemini
-                            if (recipe.hasError) {
-                              return Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(32.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.error_outline,
-                                        color: Colors.red,
-                                        size: 48,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        recipe.error,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                          )
+                        : currentSearch.result.when(
+                            loading: () => const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(32.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(height: 16),
+                                    Text('Searching for recipe...'),
+                                  ],
                                 ),
-                              );
-                            }
-
-                            // Success - show recipe details
-                            return Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 16.0,
-                                children: [
-                                  // Recipe name
-                                  Container(
-                                    padding: const EdgeInsets.all(12.0),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue[50],
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      border: Border.all(color: Colors.blue[200]!),
-                                    ),
+                              ),
+                            ),
+                            error: (error, stack) => Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(32.0),
+                                child: Text(
+                                  'Error: $error',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ),
+                            data: (recipe) {
+                              // Error from Gemini
+                              if (recipe.hasError) {
+                                return Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(32.0),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        const Text(
-                                          'Recipe',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                        const Icon(
+                                          Icons.error_outline,
+                                          color: Colors.red,
+                                          size: 48,
                                         ),
-                                        const SizedBox(height: 4),
+                                        const SizedBox(height: 16),
                                         Text(
-                                          recipe.recipeName,
+                                          recipe.error,
+                                          textAlign: TextAlign.center,
                                           style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Colors.red,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  // Products
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Ingredients (${recipe.products.length - _deletedIndices.length}/${recipe.products.length})',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
+                                );
+                              }
+
+                              // Success - show recipe details
+                              return Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 16.0,
+                                  children: [
+                                    // Recipe name
+                                    Container(
+                                      padding: const EdgeInsets.all(12.0),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue[50],
+                                        borderRadius: BorderRadius.circular(
+                                          8.0,
+                                        ),
+                                        border: Border.all(
+                                          color: Colors.blue[200]!,
                                         ),
                                       ),
-                                      const SizedBox(height: 12),
-                                      ListView.separated(
-                                        shrinkWrap: true,
-                                        physics: const NeverScrollableScrollPhysics(),
-                                        itemCount: recipe.products.length,
-                                        separatorBuilder: (_, __) => const Divider(),
-                                        itemBuilder: (context, index) {
-                                          final product = recipe.products[index];
-                                          final quantity = recipe.quantities[index];
-                                          final categoryName = recipe.productCategories[index];
-                                          final isDeleted = _deletedIndices.contains(index);
-                                          final displayName = _editedNames[index] ?? product.getName();
-                                          
-                                          return Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 12.0,
-                                              horizontal: 8.0,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Recipe',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w500,
                                             ),
-                                            decoration: isDeleted
-                                                ? BoxDecoration(
-                                                    color: Colors.grey[100],
-                                                  )
-                                                : null,
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
-                                                    spacing: 4.0,
-                                                    children: [
-                                                      GestureDetector(
-                                                        onTap: isDeleted
-                                                            ? null
-                                                            : () => _showEditIngredientDialog(
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            recipe.recipeName,
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // Products
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Ingredients (${recipe.products.length - _deletedIndices.length}/${recipe.products.length})',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        ListView.separated(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: recipe.products.length,
+                                          separatorBuilder: (_, __) =>
+                                              const Divider(),
+                                          itemBuilder: (context, index) {
+                                            final product =
+                                                recipe.products[index];
+                                            final quantity =
+                                                recipe.quantities[index];
+                                            final categoryName =
+                                                recipe.productCategories[index];
+                                            final isDeleted = _deletedIndices
+                                                .contains(index);
+                                            final displayName =
+                                                _editedNames[index] ??
+                                                product.getName();
+
+                                            return Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 12.0,
+                                                    horizontal: 8.0,
+                                                  ),
+                                              decoration: isDeleted
+                                                  ? BoxDecoration(
+                                                      color: Colors.grey[100],
+                                                    )
+                                                  : null,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      spacing: 4.0,
+                                                      children: [
+                                                        GestureDetector(
+                                                          onTap: isDeleted
+                                                              ? null
+                                                              : () => _showEditIngredientDialog(
                                                                   index,
                                                                   displayName,
                                                                 ),
-                                                        child: Text(
-                                                          displayName,
+                                                          child: Text(
+                                                            displayName,
+                                                            style: TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              decoration:
+                                                                  isDeleted
+                                                                  ? TextDecoration
+                                                                        .lineThrough
+                                                                  : null,
+                                                              color: isDeleted
+                                                                  ? Colors
+                                                                        .grey[500]
+                                                                  : Colors.blue,
+                                                              fontStyle:
+                                                                  !isDeleted
+                                                                  ? FontStyle
+                                                                        .italic
+                                                                  : null,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          quantity,
                                                           style: TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight: FontWeight.w600,
-                                                            decoration: isDeleted
-                                                                ? TextDecoration.lineThrough
-                                                                : null,
+                                                            fontSize: 12,
                                                             color: isDeleted
-                                                                ? Colors.grey[500]
-                                                                : Colors.blue,
-                                                            fontStyle: !isDeleted
-                                                                ? FontStyle.italic
+                                                                ? Colors
+                                                                      .grey[400]
+                                                                : Colors
+                                                                      .grey[600],
+                                                            decoration:
+                                                                isDeleted
+                                                                ? TextDecoration
+                                                                      .lineThrough
                                                                 : null,
                                                           ),
                                                         ),
-                                                      ),
-                                                      Text(
-                                                        quantity,
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: isDeleted
-                                                              ? Colors.grey[400]
-                                                              : Colors.grey[600],
-                                                          decoration: isDeleted
-                                                              ? TextDecoration.lineThrough
-                                                              : null,
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Row(
+                                                    spacing: 8.0,
+                                                    children: [
+                                                      Container(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 12.0,
+                                                              vertical: 6.0,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color:
+                                                              Colors.grey[200],
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                16.0,
+                                                              ),
                                                         ),
+                                                        child: Text(
+                                                          categoryName,
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Colors
+                                                                .grey[700],
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      IconButton(
+                                                        icon: Icon(
+                                                          isDeleted
+                                                              ? Icons.restore
+                                                              : Icons
+                                                                    .delete_outline,
+                                                          color: isDeleted
+                                                              ? Colors.blue
+                                                              : Colors.red,
+                                                          size: 20,
+                                                        ),
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        constraints:
+                                                            const BoxConstraints(),
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            if (isDeleted) {
+                                                              _deletedIndices
+                                                                  .remove(
+                                                                    index,
+                                                                  );
+                                                            } else {
+                                                              _deletedIndices
+                                                                  .add(index);
+                                                            }
+                                                          });
+                                                        },
                                                       ),
                                                     ],
                                                   ),
-                                                ),
-                                                Row(
-                                                  spacing: 8.0,
-                                                  children: [
-                                                    Container(
-                                                      padding: const EdgeInsets.symmetric(
-                                                        horizontal: 12.0,
-                                                        vertical: 6.0,
-                                                      ),
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.grey[200],
-                                                        borderRadius:
-                                                            BorderRadius.circular(16.0),
-                                                      ),
-                                                      child: Text(
-                                                        categoryName,
-                                                        style: TextStyle(
-                                                          fontSize: 11,
-                                                          color: Colors.grey[700],
-                                                          fontWeight: FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    IconButton(
-                                                      icon: Icon(
-                                                        isDeleted
-                                                            ? Icons.restore
-                                                            : Icons.delete_outline,
-                                                        color: isDeleted
-                                                            ? Colors.blue
-                                                            : Colors.red,
-                                                        size: 20,
-                                                      ),
-                                                      padding: EdgeInsets.zero,
-                                                      constraints: const BoxConstraints(),
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          if (isDeleted) {
-                                                            _deletedIndices.remove(index);
-                                                          } else {
-                                                            _deletedIndices.add(index);
-                                                          }
-                                                        });
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                ],
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                  ],
+                ),
               ),
             ),
-          ),
-          // Fixed Add to list button at bottom
-          if (currentSearch != null && !_isSearching)
-            currentSearch.result.maybeWhen(
-              data: (recipe) {
-                if (!recipe.hasError && recipe.recipeName.isNotEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _addProductsToList,
-                        icon: const Icon(Icons.add_shopping_cart),
-                        label: const Text('Add to List'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
+            // Fixed Add to list button at bottom
+            if (currentSearch != null && !_isSearching)
+              currentSearch.result.maybeWhen(
+                data: (recipe) {
+                  if (!recipe.hasError && recipe.recipeName.isNotEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _addProductsToList,
+                          icon: const Icon(Icons.add_shopping_cart),
+                          label: const Text('Add to List'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-              orElse: () => const SizedBox.shrink(),
-            ),
-        ],
-      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+                orElse: () => const SizedBox.shrink(),
+              ),
+          ],
+        ),
       ),
     );
   }

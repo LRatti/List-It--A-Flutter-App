@@ -17,10 +17,7 @@ class ListDetailScreenMobile extends ConsumerWidget {
     Category(name: 'Beverages'),
   ];
 
-  const ListDetailScreenMobile({
-    super.key,
-    required this.shoppingList,
-  });
+  const ListDetailScreenMobile({super.key, required this.shoppingList});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,7 +40,8 @@ class ListDetailScreenMobile extends ConsumerWidget {
                   MaterialPageRoute(
                     builder: (_) => AddRecipeScreen(
                       shoppingList: shoppingList,
-                      availableCategories: mockCategories,
+                      availableCategories:
+                          ListDetailScreenMobile.mockCategories,
                     ),
                   ),
                 );

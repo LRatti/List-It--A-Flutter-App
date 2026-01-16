@@ -98,5 +98,16 @@ class DatabaseHelper {
         FOREIGN KEY(category_id) REFERENCES category(id)
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE recipe_cache(
+        list_id TEXT PRIMARY KEY,
+        recipe_name TEXT NOT NULL,
+        recipe_data TEXT NOT NULL,
+        error_message TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY(list_id) REFERENCES shopping_list(id)
+      )
+    ''');
   }
 }
