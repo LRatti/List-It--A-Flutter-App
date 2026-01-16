@@ -23,7 +23,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Flutter Auth'),
-        backgroundColor: Colors.blue[500],
         centerTitle: true,
         // Show back button to allow users to abort signup/signin
         leading: IconButton(

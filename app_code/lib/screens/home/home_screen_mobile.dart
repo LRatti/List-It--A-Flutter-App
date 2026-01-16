@@ -61,16 +61,16 @@ class _MobileHomePageState extends State<MobileHomePage> {
                         Container(
                           width: 80,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF7F9FC),
+                            color: Theme.of(context).scaffoldBackgroundColor,
                             border: Border(
                               right: BorderSide(
-                                color: Colors.grey.shade300,
+                                color: Theme.of(context).dividerColor,
                                 width: 1,
                               ),
                             ),
                           ),
                           child: NavigationRail(
-                            backgroundColor: const Color(0xFFF7F9FC),
+                            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                             minWidth: 72,
                             labelType: NavigationRailLabelType.all,
                             selectedIndex: _selectedIndex,
@@ -81,16 +81,16 @@ class _MobileHomePageState extends State<MobileHomePage> {
                               });
                             },
                             selectedIconTheme:
-                                const IconThemeData(color: Colors.blue),
+                                IconThemeData(color: Colors.blue),
                             unselectedIconTheme:
-                                const IconThemeData(color: Colors.grey),
+                                IconThemeData(color: Colors.grey[400]),
                             selectedLabelTextStyle:
-                                const TextStyle(color: Colors.blue),
+                                TextStyle(color: Colors.blue),
                             unselectedLabelTextStyle:
-                                const TextStyle(color: Colors.grey),
+                                TextStyle(color: Colors.grey[400]),
                             useIndicator: true,
                             indicatorColor:
-                                Colors.blueAccent.withOpacity(0.1),
+                                Theme.of(context).primaryColor.withOpacity(0.1),
                             destinations: const [
                               NavigationRailDestination(
                                 icon: Icon(Icons.list_outlined),

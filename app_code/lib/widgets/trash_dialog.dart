@@ -55,7 +55,7 @@ class TrashDialog extends ConsumerWidget {
                         title: Text(list.getName()),
                         subtitle: Text(
                           list.getDeletionMessage(),
-                          style: TextStyle(color: Colors.grey.shade600),
+                          style: TextStyle(color: Theme.of(context).hintColor),
                         ),
                         trailing: SizedBox(
                           width: 150,
@@ -72,9 +72,9 @@ class TrashDialog extends ConsumerWidget {
                                 child: const Text('Restore'),
                               ),
                               IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.delete,
-                                  color: Colors.red,
+                                  color: Theme.of(context).colorScheme.error,
                                 ),
                                 onPressed: () {
                                   showDialog(
@@ -101,7 +101,7 @@ class TrashDialog extends ConsumerWidget {
                                             }
                                           },
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red,
+                                            backgroundColor: Theme.of(context).colorScheme.error,
                                           ),
                                           child: const Text('Delete'),
                                         ),

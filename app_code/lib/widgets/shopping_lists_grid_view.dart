@@ -47,7 +47,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Delete'),
           ),
         ],
@@ -116,7 +116,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Delete'),
           ),
         ],
@@ -146,7 +146,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
   Widget build(BuildContext context) {
     if (widget.lists.isEmpty) {
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         resizeToAvoidBottomInset: false,
         body: Center(child: Text(widget.emptyMessage)),
         floatingActionButton: widget.floatingActionButton,
@@ -161,11 +161,11 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         resizeToAvoidBottomInset: false,
         appBar: _selectionActive
             ? AppBar(
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: _cancelSelection,
@@ -230,7 +230,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
         floatingActionButton: _selectionActive
             ? FloatingActionButton(
                 onPressed: () => _deleteSelectedWithCallback(context),
-                backgroundColor: Colors.red,
+                backgroundColor: Theme.of(context).colorScheme.error,
                 child: const Icon(Icons.delete),
               )
             : widget.floatingActionButton,

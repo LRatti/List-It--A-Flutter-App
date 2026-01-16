@@ -25,7 +25,6 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
       appBar: AppBar(
         title: const Text('Recover Password'),
         centerTitle: true,
-        backgroundColor: Colors.blue[500],
       ),
       body: SafeArea(
         child: SingleChildScrollView(

@@ -6,6 +6,8 @@ import 'package:app_code/screens/profile/verification_screen.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
 import 'package:app_code/providers/real_app_providers/global_keys_provider.dart';
 import 'package:app_code/providers/real_app_providers/recipe_notification_service_provider.dart';
+import 'package:app_code/providers/real_app_providers/theme_provider.dart';
+import 'package:app_code/services/mock/mock_data_seed.dart';
 import 'package:flutter/material.dart';
 // firebase
 import 'package:firebase_core/firebase_core.dart';
@@ -16,6 +18,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Seed mock data to the local database if it's empty
+  await seedMockDataIfEmpty();
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -32,14 +37,18 @@ class MyApp extends ConsumerWidget {
     // Initialize side effects using ref.read() to avoid widget rebuilds
     ref.read(recipeNotificationServiceProvider);
 
-    // MaterialApp is the root widget
+    // MaterialApp is the root widget - always use dark theme with black background
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
+        scaffoldBackgroundColor: Colors.white,
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -47,7 +56,9 @@ class MyApp extends ConsumerWidget {
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
+        scaffoldBackgroundColor: Colors.black,
       ),
+      themeMode: ref.watch(themeProvider),
       debugShowCheckedModeBanner: false,
       routes: {
         '/': (context) => const AuthGate(),

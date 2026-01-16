@@ -26,7 +26,10 @@ class InitialScreen extends ConsumerWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.blue[400]!, Colors.blue[700]!],
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.7),
+                Theme.of(context).primaryColor,
+              ],
             ),
           ),
           child: Column(
@@ -34,7 +37,7 @@ class InitialScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // App Icon/Logo
-              Icon(Icons.shopping_cart, size: 120, color: Colors.white),
+              const Icon(Icons.shopping_cart, size: 120, color: Colors.white),
               const SizedBox(height: 24),
 
               // App Title

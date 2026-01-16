@@ -65,7 +65,9 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
             Material(
               elevation: 2,
               borderRadius: BorderRadius.circular(12),
-              color: widget.isSelected ? Colors.blue[50] : Colors.white,
+              color: widget.isSelected 
+                  ? Theme.of(context).primaryColor.withOpacity(0.1)
+                  : Theme.of(context).cardColor,
               child: InkWell(
                 onTap: widget.onTap,
                 onLongPress: widget.onLongPress,
@@ -80,10 +82,13 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(8),
                         child: products.isEmpty
-                            ? const Center(
+                            ? Center(
                                 child: Text(
                                   'No items',
-                                  style: TextStyle(fontSize: 12, color: Colors.black87),
+                                  style: TextStyle(
+                                    fontSize: 12, 
+                                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                                  ),
                                 ),
                               )
                             : ListView(
@@ -106,7 +111,7 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
                 top: 6,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: Theme.of(context).primaryColor,
                     shape: BoxShape.circle,
                   ),
                   padding: const EdgeInsets.all(4),
@@ -126,11 +131,11 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('• ', style: TextStyle(fontSize: 12, color: Colors.black87)),
+        Text('• ', style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey)),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(fontSize: 12, color: Colors.black87),
+            style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),
@@ -182,7 +187,7 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
         const SizedBox(height: 2),
         Text(
           formatted,
-          style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+          style: TextStyle(fontSize: 10, color: Theme.of(context).hintColor),
         ),
       ],
     );

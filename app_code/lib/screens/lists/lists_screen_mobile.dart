@@ -76,12 +76,12 @@ class ListsScreenMobile extends ConsumerWidget {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
 
     return shoppingListsAsync.when(
-      loading: () => const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+      loading: () => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(child: CircularProgressIndicator()),
       ),
       error: (error, _) => Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Center(child: Text(error.toString())),
       ),
       data: (lists) {

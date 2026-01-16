@@ -223,7 +223,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                     // Input section
                     Container(
                       padding: const EdgeInsets.all(16.0),
-                      color: Colors.grey[100],
+                      color: Theme.of(context).primaryColor.withOpacity(0.12),
                       child: Column(
                         spacing: 12.0,
                         children: [
@@ -232,7 +232,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                             decoration: InputDecoration(
                               hintText: 'Enter recipe name...',
                               filled: true,
-                              fillColor: Colors.white,
+                              fillColor: Theme.of(context).cardColor,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
@@ -265,7 +265,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                               child: Text(
                                 'Enter a recipe name and press "Search Recipe"',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.grey[600]),
+                                style: TextStyle(color: Theme.of(context).hintColor),
                               ),
                             ),
                           )
@@ -334,12 +334,12 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                     Container(
                                       padding: const EdgeInsets.all(12.0),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue[50],
+                                        color: Theme.of(context).primaryColor.withOpacity(0.15),
                                         borderRadius: BorderRadius.circular(
                                           8.0,
                                         ),
                                         border: Border.all(
-                                          color: Colors.blue[200]!,
+                                          color: Theme.of(context).primaryColor.withOpacity(0.4),
                                         ),
                                       ),
                                       child: Column(
@@ -441,9 +441,8 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                                         .lineThrough
                                                                   : null,
                                                               color: isDeleted
-                                                                  ? Colors
-                                                                        .grey[500]
-                                                                  : Colors.blue,
+                                                                  ? Theme.of(context).disabledColor
+                                                                  : Theme.of(context).primaryColor,
                                                               fontStyle:
                                                                   !isDeleted
                                                                   ? FontStyle
@@ -481,8 +480,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                               vertical: 6.0,
                                                             ),
                                                         decoration: BoxDecoration(
-                                                          color:
-                                                              Colors.grey[200],
+                                                          color: Theme.of(context).primaryColor.withOpacity(0.2),
                                                           borderRadius:
                                                               BorderRadius.circular(
                                                                 16.0,
@@ -492,8 +490,9 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                           categoryName,
                                                           style: TextStyle(
                                                             fontSize: 11,
-                                                            color: Colors
-                                                                .grey[700],
+                                                            color: Theme.of(context).brightness == Brightness.dark 
+                                                                ? Colors.white 
+                                                                : Theme.of(context).primaryColor,
                                                             fontWeight:
                                                                 FontWeight.w500,
                                                           ),
@@ -506,8 +505,8 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                               : Icons
                                                                     .delete_outline,
                                                           color: isDeleted
-                                                              ? Colors.blue
-                                                              : Colors.red,
+                                                              ? Theme.of(context).primaryColor
+                                                              : Theme.of(context).colorScheme.error,
                                                           size: 20,
                                                         ),
                                                         padding:

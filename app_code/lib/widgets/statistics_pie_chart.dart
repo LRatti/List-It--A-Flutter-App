@@ -15,7 +15,11 @@ class StatisticsPieChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: PieChartPainter(entries: entries, total: total),
+      painter: PieChartPainter(
+        entries: entries, 
+        total: total,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      ),
       child: Center(
         child: Text(
           'Total\nEUR ${total.toStringAsFixed(2)}',
@@ -30,13 +34,20 @@ class StatisticsPieChart extends StatelessWidget {
 /// Custom painter that draws a donut-style pie chart
 /// Each category is represented by a colored arc segment
 class PieChartPainter extends CustomPainter {
-  PieChartPainter({required this.entries, required this.total});
+  PieChartPainter({
+    required this.entries, 
+    required this.total,
+    required this.backgroundColor,
+  });
 
   /// List of category names and their spending amounts
   final List<MapEntry<String, double>> entries;
   
   /// Total spending across all categories
   final double total;
+  
+  /// Background color for the donut hole
+  final Color backgroundColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -71,7 +82,7 @@ class PieChartPainter extends CustomPainter {
 
     // Draw white circle in center to create donut effect
     final holePaint = Paint()
-      ..color = Colors.white
+      ..color = backgroundColor
       ..blendMode = BlendMode.srcOver;
     canvas.drawCircle(center, radius * 0.45, holePaint);
   }

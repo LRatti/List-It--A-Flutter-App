@@ -28,7 +28,6 @@ class _VerificationScreenState extends VerificationController {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Verify Your Email'),
-        backgroundColor: Colors.blue[500],
         centerTitle: true,
         automaticallyImplyLeading: false, // Remove back button
       ),
@@ -44,7 +43,7 @@ class _VerificationScreenState extends VerificationController {
               Icon(
                 Icons.mark_email_unread_outlined,
                 size: 100,
-                color: Colors.blue[500],
+                color: Theme.of(context).primaryColor,
               ),
               const SizedBox(height: 32),
 
@@ -59,23 +58,23 @@ class _VerificationScreenState extends VerificationController {
               // Message
               Text(
                 'We have sent a verification link to:',
-                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                style: TextStyle(fontSize: 16, color: Theme.of(context).hintColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 email,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.blue,
+                  color: Theme.of(context).primaryColor,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 'Please check your inbox and click the verification link to activate your account.',
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 14, color: Theme.of(context).hintColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
@@ -109,7 +108,7 @@ class _VerificationScreenState extends VerificationController {
                       ),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Colors.blue,
+                        backgroundColor: Theme.of(context).primaryColor,
                         foregroundColor: Colors.white,
                       ),
                     ),
@@ -141,7 +140,7 @@ class _VerificationScreenState extends VerificationController {
                       ),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Colors.green,
+                        backgroundColor: Theme.of(context).colorScheme.secondary,
                         foregroundColor: Colors.white,
                       ),
                     ),
@@ -160,8 +159,8 @@ class _VerificationScreenState extends VerificationController {
                       ),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: Colors.red[400]!),
-                        foregroundColor: Colors.red[400],
+                        side: BorderSide(color: Theme.of(context).colorScheme.error),
+                        foregroundColor: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ),
@@ -173,7 +172,7 @@ class _VerificationScreenState extends VerificationController {
                 'The app will automatically redirect once your email is verified.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[500],
+                  color: Theme.of(context).hintColor,
                   fontStyle: FontStyle.italic,
                 ),
                 textAlign: TextAlign.center,

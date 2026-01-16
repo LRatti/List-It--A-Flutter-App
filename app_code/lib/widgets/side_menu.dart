@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app_code/screens/settings/settings_screen_mobile.dart';
 import 'package:app_code/screens/trash/trash_screen_mobile.dart';
+import 'package:app_code/screens/profile/settings_screen.dart';
 
 class SideMenu extends StatelessWidget {
   final VoidCallback onClose;
@@ -14,11 +15,11 @@ class SideMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 280,
-      color: Colors.white,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Column(
         children: [
           Container(
-            color: Colors.blue,
+            color: Theme.of(context).primaryColor,
             padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -47,7 +48,12 @@ class SideMenu extends StatelessWidget {
                   title: const Text('Profile'),
                   onTap: () {
                     onClose();
-                    // TODO: Navigate to profile screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SettingsScreen(),
+                      ),
+                    );
                   },
                 ),
                 ListTile(

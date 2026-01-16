@@ -77,8 +77,8 @@ class TopBarWithNavBar extends ConsumerWidget {
         // Nearest supermarket bar
         Material(
           color: nearestSupermarketState.hasValidSupermarket
-              ? Colors.green[50]
-              : Colors.grey[200],
+              ? Colors.green[400]?.withOpacity(0.2)
+              : Theme.of(context).dividerColor,
           child: InkWell(
             onTap: nearestSupermarketState.hasValidSupermarket
                 ? () async {
@@ -107,8 +107,8 @@ class TopBarWithNavBar extends ConsumerWidget {
                         : Icons.location_off,
                     size: 20,
                     color: nearestSupermarketState.hasValidSupermarket
-                        ? Colors.green[700]
-                        : Colors.grey[600],
+                        ? Colors.green[400]
+                        : Theme.of(context).hintColor,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -120,8 +120,8 @@ class TopBarWithNavBar extends ConsumerWidget {
                             ? FontWeight.w500
                             : FontWeight.normal,
                         color: nearestSupermarketState.hasValidSupermarket
-                            ? Colors.green[900]
-                            : Colors.grey[700],
+                            ? Colors.green[300]
+                            : Theme.of(context).hintColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -133,11 +133,11 @@ class TopBarWithNavBar extends ConsumerWidget {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(Colors.grey[600]),
+                        valueColor: AlwaysStoppedAnimation(Theme.of(context).hintColor),
                       ),
                     ),
                   if (nearestSupermarketState.hasValidSupermarket)
-                    Icon(Icons.open_in_new, size: 16, color: Colors.green[700]),
+                    Icon(Icons.open_in_new, size: 16, color: Colors.green[400]),
                 ],
               ),
             ),

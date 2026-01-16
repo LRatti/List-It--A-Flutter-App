@@ -95,7 +95,7 @@ class _SearchableShoppingListsViewState
 
   PreferredSizeWidget _buildSearchAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: _stopSearch,
@@ -123,7 +123,7 @@ class _SearchableShoppingListsViewState
 
   PreferredSizeWidget _buildNormalAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
       title: Text(widget.showRegistered ? 'History' : 'Lists'),
       actions: [
         IconButton(
@@ -137,7 +137,7 @@ class _SearchableShoppingListsViewState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _isDeletionMode ? null : (_isSearching ? _buildSearchAppBar() : _buildNormalAppBar()),
       body: GestureDetector(
         onTap: _isSearching ? _stopSearch : null,

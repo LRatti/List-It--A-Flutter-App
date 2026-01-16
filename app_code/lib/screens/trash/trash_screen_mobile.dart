@@ -63,7 +63,7 @@ class TrashScreenMobile extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Delete all'),
           ),
         ],
@@ -109,9 +109,9 @@ class TrashScreenMobile extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () => _confirmEmptyTrash(context, ref, trashedLists),
-                child: const Text(
+                child: Text(
                   'Empty trash',
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
             ],
@@ -156,7 +156,7 @@ class TrashScreenMobile extends ConsumerWidget {
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium
-                                        ?.copyWith(color: Colors.grey.shade600),
+                                        ?.copyWith(color: Theme.of(context).hintColor),
                                   ),
                                 ],
                               ),
@@ -186,9 +186,9 @@ class TrashScreenMobile extends ConsumerWidget {
                                       },
                                     ),
                                     IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.delete,
-                                        color: Colors.red,
+                                        color: Theme.of(context).colorScheme.error,
                                       ),
                                       onPressed: () {
                                         showDialog(
@@ -218,7 +218,7 @@ class TrashScreenMobile extends ConsumerWidget {
                                                     Navigator.pop(context);
                                                 },
                                                 style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.red,
+                                                  backgroundColor: Theme.of(context).colorScheme.error,
                                                 ),
                                                 child: const Text('Delete'),
                                               ),

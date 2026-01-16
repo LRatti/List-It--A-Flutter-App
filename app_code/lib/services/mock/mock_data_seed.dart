@@ -18,164 +18,164 @@ Future<void> seedMockDataIfEmpty() async {
 
     print('📦 Starting mock data seed...');
 
-  final fish = Category(name: 'Fish');
-  final drinks = Category(name: 'Drinks');
-  final meat = Category(name: 'Meat');
-  final veggies = Category(name: 'Vegetables');
-  final bakery = Category(name: 'Bakery');
+    final fish = Category(name: 'Fish');
+    final drinks = Category(name: 'Drinks');
+    final meat = Category(name: 'Meat');
+    final veggies = Category(name: 'Vegetables');
+    final bakery = Category(name: 'Bakery');
 
-  ShoppingList listForPeriod({required String name, required DateTime date}) {
-    return ShoppingList(
-      name: name,
-      createdAt: date,
-      isRegistered: true,
-      products: [],
-    );
-  }
+    ShoppingList listForPeriod({required String name, required DateTime date}) {
+      return ShoppingList(
+        name: name,
+        createdAt: date,
+        isRegistered: true,
+        products: [],
+      );
+    }
 
-  ShoppingList buildListA() {
-    final list = listForPeriod(
-      name: 'Weekly Groceries',
-      date: DateTime.now().subtract(const Duration(days: 2)),
-    );
-    final items = [
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Salmon'),
-        category: fish,
-        price: 25.0,
-        quantity: 1,
-      ),
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Steak'),
-        category: meat,
-        price: 22.0,
-        quantity: 1,
-      ),
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Soda Pack'),
-        category: drinks,
-        price: 12.0,
-        quantity: 1,
-      ),
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Lettuce'),
-        category: veggies,
-        price: 4.0,
-        quantity: 1,
-      ),
+    ShoppingList buildListA() {
+      final list = listForPeriod(
+        name: 'Weekly Groceries',
+        date: DateTime.now().subtract(const Duration(days: 2)),
+      );
+      final items = [
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Salmon'),
+          category: fish,
+          price: 25.0,
+          quantity: 1,
+        ),
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Steak'),
+          category: meat,
+          price: 22.0,
+          quantity: 1,
+        ),
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Soda Pack'),
+          category: drinks,
+          price: 12.0,
+          quantity: 1,
+        ),
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Lettuce'),
+          category: veggies,
+          price: 4.0,
+          quantity: 1,
+        ),
+      ];
+      list.setPurchasedProducts(items);
+      list.computeTotalPrice();
+      return list;
+    }
+
+    ShoppingList buildListB() {
+      final list = listForPeriod(
+        name: 'Friends Dinner',
+        date: DateTime.now().subtract(const Duration(days: 18)),
+      );
+      final items = [
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Wine'),
+          category: drinks,
+          price: 30.0,
+          quantity: 2,
+        ),
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Sea Bass'),
+          category: fish,
+          price: 28.0,
+          quantity: 2,
+        ),
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Baguette'),
+          category: bakery,
+          price: 6.0,
+          quantity: 3,
+        ),
+      ];
+      list.setPurchasedProducts(items);
+      list.computeTotalPrice();
+      return list;
+    }
+
+    ShoppingList buildListC() {
+      final list = listForPeriod(
+        name: 'Summer Barbecue',
+        date: DateTime.now().subtract(const Duration(days: 80)),
+      );
+      final items = [
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Ribs'),
+          category: meat,
+          price: 34.0,
+          quantity: 2,
+        ),
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Beer Crate'),
+          category: drinks,
+          price: 24.0,
+          quantity: 1,
+        ),
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Corn'),
+          category: veggies,
+          price: 8.0,
+          quantity: 8,
+        ),
+      ];
+      list.setPurchasedProducts(items);
+      list.computeTotalPrice();
+      return list;
+    }
+
+    ShoppingList buildDraftList() {
+      final list = ShoppingList(
+        name: 'Quick Shop',
+        createdAt: DateTime.now().subtract(const Duration(days: 5)),
+        isRegistered: true,
+        products: [],
+      );
+      final items = [
+        PurchasedProduct(
+          listId: list.id,
+          product: Product(name: 'Test Item'),
+          category: veggies,
+          price: 5.0,
+          quantity: 1,
+        ),
+      ];
+      list.setPurchasedProducts(items);
+      list.computeTotalPrice();
+      return list;
+    }
+
+    final mockLists = [
+      buildListA(),
+      buildListB(),
+      buildListC(),
+      buildDraftList(),
     ];
-    list.setPurchasedProducts(items);
-    list.computeTotalPrice();
-    return list;
-  }
 
-  ShoppingList buildListB() {
-    final list = listForPeriod(
-      name: 'Friends Dinner',
-      date: DateTime.now().subtract(const Duration(days: 18)),
-    );
-    final items = [
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Wine'),
-        category: drinks,
-        price: 30.0,
-        quantity: 2,
-      ),
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Sea Bass'),
-        category: fish,
-        price: 28.0,
-        quantity: 2,
-      ),
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Baguette'),
-        category: bakery,
-        price: 6.0,
-        quantity: 3,
-      ),
-    ];
-    list.setPurchasedProducts(items);
-    list.computeTotalPrice();
-    return list;
-  }
-
-  ShoppingList buildListC() {
-    final list = listForPeriod(
-      name: 'Summer Barbecue',
-      date: DateTime.now().subtract(const Duration(days: 80)),
-    );
-    final items = [
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Ribs'),
-        category: meat,
-        price: 34.0,
-        quantity: 2,
-      ),
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Beer Crate'),
-        category: drinks,
-        price: 24.0,
-        quantity: 1,
-      ),
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Corn'),
-        category: veggies,
-        price: 8.0,
-        quantity: 8,
-      ),
-    ];
-    list.setPurchasedProducts(items);
-    list.computeTotalPrice();
-    return list;
-  }
-
-  // Additional registered list.
-  ShoppingList buildDraftList() {
-    final list = ShoppingList(
-      name: 'Quick Shop',
-      createdAt: DateTime.now().subtract(const Duration(days: 5)),
-      isRegistered: true,
-      products: [],
-    );
-    final items = [
-      PurchasedProduct(
-        listId: list.id,
-        product: Product(name: 'Test Item'),
-        category: veggies,
-        price: 5.0,
-        quantity: 1,
-      ),
-    ];
-    list.setPurchasedProducts(items);
-    list.computeTotalPrice();
-    return list;
-  }
-
-  final mockLists = [
-    buildListA(),
-    buildListB(),
-    buildListC(),
-    buildDraftList(),
-  ];
-
-  print('📦 Adding ${mockLists.length} mock lists to database...');
-  for (final list in mockLists) {
-    print('  - Adding: ${list.getName()} with ${list.getProducts().length} products');
-    await ManageShoppingList.addShoppingList(list);
-  }
-  print('📦 Mock data seed completed successfully!');
+    print('📦 Adding ${mockLists.length} mock lists to database...');
+    for (final list in mockLists) {
+      print('  - Adding: ${list.getName()} with ${list.getProducts().length} products');
+      await ManageShoppingList.addShoppingList(list);
+    }
+    print('📦 Mock data seed completed successfully!');
   } catch (e, stackTrace) {
     print('❌ Error seeding mock data: $e');
     print('Stack trace: $stackTrace');
   }
 }
+

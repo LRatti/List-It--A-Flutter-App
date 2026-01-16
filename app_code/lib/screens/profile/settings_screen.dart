@@ -27,7 +27,6 @@ class _SettingsScreenState extends SettingsController {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: Colors.blue[500],
         centerTitle: true,
       ),
       body: SafeArea(
@@ -81,9 +80,9 @@ class _SettingsScreenState extends SettingsController {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
+              border: Border.all(color: Theme.of(context).dividerColor),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +91,7 @@ class _SettingsScreenState extends SettingsController {
                   'Current Email',
                   style: Theme.of(
                     context,
-                  ).textTheme.labelMedium?.copyWith(color: Colors.grey[700]),
+                  ).textTheme.labelMedium?.copyWith(color: Theme.of(context).hintColor),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -129,16 +128,16 @@ class _SettingsScreenState extends SettingsController {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue[200]!),
+                border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
               ),
               child: Text(
                 'Email and password are managed via your Google account. Changes are disabled.',
                 textAlign: TextAlign.center,
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.blue[900]),
+                ).textTheme.bodySmall?.copyWith(color: Theme.of(context).primaryColor),
               ),
             )
           else ...[
@@ -232,7 +231,7 @@ class _SettingsScreenState extends SettingsController {
                             'Cooldown: ${cooldownRemaining}s',
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.grey[600],
+                              color: Theme.of(context).hintColor,
                             ),
                           ),
                         ),
@@ -276,7 +275,7 @@ class _SettingsScreenState extends SettingsController {
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Container(height: 2, width: 60, color: Colors.blue[500]),
+        Container(height: 2, width: 60, color: Theme.of(context).primaryColor),
       ],
     );
   }
