@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
 import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
+import 'package:app_code/widgets/app_snackbar.dart';
 
 class TopBarWithNavBar extends ConsumerWidget {
   final bool isMenuOpen;
@@ -87,13 +88,10 @@ class TopBarWithNavBar extends ConsumerWidget {
                       longitude: supermarket.longitude,
                       label: supermarket.name,
                     );
-                    
+
                     if (!success && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Unable to open map'),
-                          duration: Duration(seconds: 2),
-                        ),
+                        buildAppSnackBar(message: 'Unable to open map'),
                       );
                     }
                   }
@@ -139,11 +137,7 @@ class TopBarWithNavBar extends ConsumerWidget {
                       ),
                     ),
                   if (nearestSupermarketState.hasValidSupermarket)
-                    Icon(
-                      Icons.open_in_new,
-                      size: 16,
-                      color: Colors.green[700],
-                    ),
+                    Icon(Icons.open_in_new, size: 16, color: Colors.green[700]),
                 ],
               ),
             ),

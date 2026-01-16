@@ -5,6 +5,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/models/product.dart';
 
 class AddRecipeScreen extends ConsumerStatefulWidget {
@@ -182,12 +183,12 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
             .clearSearchForList(widget.shoppingList.id);
 
         final addedCount = recipe.products.length - _deletedIndices.length;
-        // Show success message
+        // Show success message (uniform style)
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '$addedCount products added to "${widget.shoppingList.getName()}"',
-            ),
+          buildAppSnackBar(
+            message:
+                '$addedCount products added to "${widget.shoppingList.getName()}"',
+            isError: false,
           ),
         );
 

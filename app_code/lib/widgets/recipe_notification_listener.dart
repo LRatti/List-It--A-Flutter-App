@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
 import 'package:app_code/screens/lists/add_recipe.dart';
+import 'package:app_code/widgets/app_snackbar.dart';
 
 /// Global widget that listens for recipe search completions and shows notifications
 class RecipeNotificationListener extends ConsumerStatefulWidget {
@@ -90,25 +91,13 @@ class _RecipeNotificationListenerState
 
         print('Showing SnackBar: $message');
         scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: GestureDetector(
-              onTap: () {
-                scaffoldMessenger.hideCurrentSnackBar();
-                _navigateToRecipeScreen(search);
-              },
-              child: Row(
-                children: [
-                  Icon(icon, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Expanded(child: Text(message)),
-                  const Icon(Icons.touch_app, size: 18, color: Colors.white70),
-                ],
-              ),
-            ),
-            backgroundColor: backgroundColor,
-            duration: const Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(16),
+          buildAppSnackBar(
+            message: message,
+            isError: recipe.hasError,
+            onTap: () {
+              scaffoldMessenger.hideCurrentSnackBar();
+              _navigateToRecipeScreen(search);
+            },
           ),
         );
       });
