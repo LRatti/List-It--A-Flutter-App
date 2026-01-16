@@ -339,18 +339,22 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                           8.0,
                                         ),
                                         border: Border.all(
-                                          color: Theme.of(context).primaryColor.withOpacity(0.4),
+                                          color: Theme.of(context).brightness == Brightness.dark
+                                              ? Colors.grey[400]!
+                                              : Theme.of(context).primaryColor.withOpacity(0.4),
                                         ),
                                       ),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          const Text(
+                                          Text(
                                             'Recipe',
                                             style: TextStyle(
                                               fontSize: 12,
-                                              color: Colors.grey,
+                                              color: Theme.of(context).brightness == Brightness.dark
+                                                  ? Colors.grey[400]
+                                                  : Colors.grey[600],
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
@@ -406,7 +410,9 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                   ),
                                               decoration: isDeleted
                                                   ? BoxDecoration(
-                                                      color: Colors.grey[100],
+                                                      color: Theme.of(context).brightness == Brightness.dark
+                                                          ? Colors.grey[800]
+                                                          : Colors.grey[100],
                                                     )
                                                   : null,
                                               child: Row(
@@ -442,7 +448,9 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                                   : null,
                                                               color: isDeleted
                                                                   ? Theme.of(context).disabledColor
-                                                                  : Theme.of(context).primaryColor,
+                                                                  : (Theme.of(context).brightness == Brightness.dark
+                                                                      ? Colors.white
+                                                                      : Theme.of(context).primaryColor),
                                                               fontStyle:
                                                                   !isDeleted
                                                                   ? FontStyle
@@ -456,10 +464,12 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                           style: TextStyle(
                                                             fontSize: 12,
                                                             color: isDeleted
-                                                                ? Colors
-                                                                      .grey[400]
-                                                                : Colors
-                                                                      .grey[600],
+                                                                ? (Theme.of(context).brightness == Brightness.dark
+                                                                    ? Colors.grey[600]
+                                                                    : Colors.grey[400])
+                                                                : (Theme.of(context).brightness == Brightness.dark
+                                                                    ? Colors.grey[400]
+                                                                    : Colors.grey[600]),
                                                             decoration:
                                                                 isDeleted
                                                                 ? TextDecoration
@@ -560,8 +570,8 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                           label: const Text('Add to List'),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12.0),
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       ),
