@@ -89,7 +89,10 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
                             : ListView(
                                 padding: EdgeInsets.zero,
                                 shrinkWrap: true,
-                                children: products.map((p) => _buildBulletItem(p.product.getName())).toList(),
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: products
+                                    .map((p) => _buildBulletItem(p.product.getName()))
+                                    .toList(),
                               ),
                       ),
                     ],
