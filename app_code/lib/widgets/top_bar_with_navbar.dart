@@ -43,17 +43,10 @@ class TopBarWithNavBar extends ConsumerWidget {
                     ),
                   );
                 } else {
-                  // Show settings and logout for authenticated users
+                  // Show logout for authenticated users
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        key: const Key('settings_button'),
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/settings');
-                        },
-                        icon: const Icon(Icons.settings),
-                      ),
                       IconButton(
                         key: const Key('logout_button'),
                         onPressed: () async {
