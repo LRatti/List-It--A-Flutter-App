@@ -1,8 +1,8 @@
 import 'package:app_code/screens/auth/auth_gate.dart';
 import 'package:app_code/screens/auth/welcome.dart';
-import 'package:app_code/screens/settings/settings_screen.dart';
+import 'package:app_code/screens/settings/settings_screen_mobile.dart';
 import 'package:app_code/screens/auth/forgot_password.dart';
-import 'package:app_code/screens/settings/verification_screen.dart';
+import 'package:app_code/screens/profile/verification_screen.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
 import 'package:app_code/widgets/recipe_notification_listener.dart';
 import 'package:flutter/material.dart';
@@ -39,11 +39,18 @@ class MyApp extends ConsumerWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
         debugShowCheckedModeBanner: false,
         routes: {
           '/': (context) => const AuthGate(),
           '/home': (context) => const MobileHomePage(),
-          '/settings': (context) => const SettingsScreen(),
+          '/settings': (context) => const SettingsScreenMobile(),
           '/signin': (context) => const WelcomeScreen(),
           '/verification': (context) => const VerificationScreen(),
           '/forgot-password': (context) => const ForgotPasswordScreen(),
