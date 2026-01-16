@@ -4,7 +4,8 @@ import 'package:app_code/screens/settings/settings_screen_mobile.dart';
 import 'package:app_code/screens/auth/forgot_password.dart';
 import 'package:app_code/screens/profile/verification_screen.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
-import 'package:app_code/widgets/recipe_notification_listener.dart';
+import 'package:app_code/providers/real_app_providers/global_keys_provider.dart';
+import 'package:app_code/providers/real_app_providers/recipe_notification_service_provider.dart';
 import 'package:flutter/material.dart';
 // firebase
 import 'package:firebase_core/firebase_core.dart';
@@ -22,41 +23,41 @@ void main() async {
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-    final navigatorKey = GlobalKey<NavigatorState>();
+    // Get global keys from providers
+    final scaffoldMessengerKey = ref.watch(scaffoldMessengerKeyProvider);
+    final navigatorKey = ref.watch(navigatorKeyProvider);
 
-    return RecipeNotificationListener(
+    // Initialize side effects using ref.read() to avoid widget rebuilds
+    ref.read(recipeNotificationServiceProvider);
+
+    // MaterialApp is the root widget
+    return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,
-      child: MaterialApp(
-        scaffoldMessengerKey: scaffoldMessengerKey,
-        navigatorKey: navigatorKey,
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue,
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
-        debugShowCheckedModeBanner: false,
-        routes: {
-          '/': (context) => const AuthGate(),
-          '/home': (context) => const MobileHomePage(),
-          '/settings': (context) => const SettingsScreenMobile(),
-          '/signin': (context) => const WelcomeScreen(),
-          '/verification': (context) => const VerificationScreen(),
-          '/forgot-password': (context) => const ForgotPasswordScreen(),
-        },
-        initialRoute: '/',
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      debugShowCheckedModeBanner: false,
+      routes: {
+        '/': (context) => const AuthGate(),
+        '/home': (context) => const MobileHomePage(),
+        '/settings': (context) => const SettingsScreenMobile(),
+        '/signin': (context) => const WelcomeScreen(),
+        '/verification': (context) => const VerificationScreen(),
+        '/forgot-password': (context) => const ForgotPasswordScreen(),
+      },
+      initialRoute: '/',
     );
   }
 }
