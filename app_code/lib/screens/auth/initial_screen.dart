@@ -44,8 +44,7 @@ class InitialScreen extends ConsumerWidget {
               // App Title
               Text(
                 'My Shopping App',
-                style: TextStyle(
-                  fontSize: 32,
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: colorScheme.onPrimary,
                 ),
@@ -56,7 +55,9 @@ class InitialScreen extends ConsumerWidget {
               Text(
                 'Organize your shopping lists efficiently',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, color: colorScheme.onPrimary.withAlpha(180)),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onPrimary.withAlpha(180),
+                ),
               ),
               const SizedBox(height: 60),
 
@@ -83,9 +84,12 @@ class InitialScreen extends ConsumerWidget {
                     ),
                     elevation: 4,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Sign Up',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.primary,
+                    ),
                   ),
                 ),
               ),
@@ -111,9 +115,12 @@ class InitialScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Continue without signing up',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onPrimary,
+                    ),
                   ),
                 ),
               ),
@@ -123,7 +130,9 @@ class InitialScreen extends ConsumerWidget {
               Text(
                 'You can sign up later to sync your lists across devices',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: colorScheme.onPrimary.withAlpha(160)),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onPrimary.withAlpha(160),
+                ),
               ),
             ],
           ),

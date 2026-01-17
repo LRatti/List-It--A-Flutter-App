@@ -105,7 +105,9 @@ class _SearchableShoppingListsViewState
           hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           border: InputBorder.none,
         ),
-        style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: colorScheme.onSurface,
+        ),
       ),
       actions: [
         if (_searchController.text.isNotEmpty)

@@ -172,7 +172,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
                 ),
                 title: Text(
                   '${_selectedIds.length} selected',
-                  style: const TextStyle(fontSize: 16),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               )
             : null,

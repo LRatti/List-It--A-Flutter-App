@@ -323,7 +323,7 @@ class _PeriodSelectorState extends State<PeriodSelector> {
                 ),
                 child: Text(
                   _formatRange(_weekRange),
-                  style: const TextStyle(fontSize: 14),
+                  style: Theme.of(context).textTheme.labelLarge,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                 ),

@@ -28,9 +28,8 @@ class SideMenu extends StatelessWidget {
               children: [
                 Text(
                   'Menu',
-                  style: TextStyle(
-                    color: colorScheme.onPrimary, // ensures contrast
-                    fontSize: 20,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

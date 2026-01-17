@@ -219,8 +219,7 @@ class _SettingsScreenState extends SettingsController {
                           padding: const EdgeInsets.only(right: 12.0),
                           child: Text(
                             'Cooldown: ${cooldownRemaining}s',
-                            style: TextStyle(
-                              fontSize: 11,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                             ),
                           ),

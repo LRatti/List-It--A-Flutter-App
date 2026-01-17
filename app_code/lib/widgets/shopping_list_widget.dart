@@ -96,8 +96,7 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
                               ? Center(
                                   child: Text(
                                     'No items',
-                                    style: TextStyle(
-                                      fontSize: 12,
+                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                       color: colorScheme.onSurfaceVariant,
                                     ),
                                   ),
@@ -143,11 +142,13 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('• ', style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant)),
+        Text('• ', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),
@@ -161,8 +162,7 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
       controller: _controller,
       autofocus: true,
       textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 13,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
         fontWeight: FontWeight.bold,
         color: colorScheme.onSurface,
       ),
@@ -194,9 +194,8 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
                 child: Text(
                   widget.shoppingList.getName(),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
                     color: colorScheme.onSurface,
                   ),
                   maxLines: 1,
@@ -210,7 +209,9 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
         const SizedBox(height: 2),
         Text(
           formatted,
-          style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );

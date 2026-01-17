@@ -128,6 +128,7 @@ class _ListDetailScreenMobileState
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final categorizations =
         ref.watch(backgroundProductCategorizationProvider);
 
@@ -279,9 +280,7 @@ class _ListDetailScreenMobileState
                                 Expanded(
                                   child: Text(
                                     categorization.productName,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
+                                    style: textTheme.labelLarge?.copyWith(
                                       color: colorScheme.onErrorContainer,
                                     ),
                                   ),
@@ -302,8 +301,7 @@ class _ListDetailScreenMobileState
                             const SizedBox(height: 8),
                             Text(
                               'Error categorizing product',
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: textTheme.labelSmall?.copyWith(
                                 color: colorScheme.onErrorContainer,
                               ),
                             ),
@@ -328,9 +326,7 @@ class _ListDetailScreenMobileState
                                 Expanded(
                                   child: Text(
                                     categorization.productName,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
+                                    style: textTheme.labelLarge?.copyWith(
                                       color: colorScheme.onPrimaryContainer,
                                     ),
                                   ),
@@ -351,8 +347,7 @@ class _ListDetailScreenMobileState
                             const SizedBox(height: 8),
                             Text(
                               'Category: $category',
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: textTheme.labelSmall?.copyWith(
                                 color: colorScheme.onPrimaryContainer,
                               ),
                             ),

@@ -88,9 +88,8 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
                         const SizedBox(width: 8),
                         Text(
                           'You can request another reset in $cooldownRemaining seconds',
-                          style: TextStyle(
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: colorScheme.tertiary,
-                            fontSize: 12,
                           ),
                         ),
                       ],

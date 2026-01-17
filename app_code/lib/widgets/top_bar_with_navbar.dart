@@ -109,8 +109,7 @@ class TopBarWithNavBar extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       nearestSupermarketState.displayText,
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         fontWeight: nearestSupermarketState.hasValidSupermarket
                             ? FontWeight.w500
                             : FontWeight.normal,

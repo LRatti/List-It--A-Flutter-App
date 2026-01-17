@@ -15,7 +15,11 @@ import 'package:app_code/screens/settings/settings_screen_mobile.dart';
 // Providers
 import 'package:app_code/providers/real_app_providers/global_keys_provider.dart';
 import 'package:app_code/providers/real_app_providers/theme_provider.dart';
+import 'package:app_code/providers/real_app_providers/font_size_provider.dart';
 import 'package:app_code/providers/real_app_providers/recipe_notification_service_provider.dart';
+
+// Styles
+import 'package:app_code/styles/scaled_typography.dart';
 
 // Services
 import 'package:app_code/services/mock/mock_data_seed.dart';
@@ -58,6 +62,9 @@ class MyApp extends ConsumerWidget {
       brightness: Brightness.dark,
     );
 
+    // Watch font size for reactive updates
+    final fontSizeMultiplier = ref.watch(fontSizeValueProvider);
+
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
@@ -70,6 +77,10 @@ class MyApp extends ConsumerWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: lightColorScheme,
+        textTheme: ScaledTypography.generateScaledTextTheme(
+          fontSizeMultiplier: fontSizeMultiplier,
+          colorScheme: lightColorScheme,
+        ),
         appBarTheme: AppBarTheme(
           backgroundColor: lightColorScheme.surface,
           foregroundColor: lightColorScheme.onSurface,
@@ -80,6 +91,10 @@ class MyApp extends ConsumerWidget {
       darkTheme: ThemeData(
         useMaterial3: true,
         colorScheme: darkColorScheme,
+        textTheme: ScaledTypography.generateScaledTextTheme(
+          fontSizeMultiplier: fontSizeMultiplier,
+          colorScheme: darkColorScheme,
+        ),
         appBarTheme: AppBarTheme(
           backgroundColor: darkColorScheme.surface,
           foregroundColor: darkColorScheme.onSurface,

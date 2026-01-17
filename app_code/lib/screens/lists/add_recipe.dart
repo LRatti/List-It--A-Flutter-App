@@ -255,7 +255,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                     const SizedBox(height: 16),
                                     Text(
                                       recipe.error,
-                                      style: const TextStyle(color: Colors.red, fontSize: 16),
+                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.red),
                                       textAlign: TextAlign.center,
                                     ),
                                   ],
@@ -282,14 +282,13 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                     children: [
                                       Text(
                                         'Recipe',
-                                        style: TextStyle(
-                                          fontSize: 12,
+                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                           fontWeight: FontWeight.w500,
                                           color: colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(recipe.recipeName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                      Text(recipe.recipeName, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                                     ],
                                   ),
                                 ),
@@ -297,7 +296,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                 // Ingredients
                                 Text(
                                   'Ingredients (${recipe.products.length - _deletedIndices.length}/${recipe.products.length})',
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 12),
                                 ListView.separated(
@@ -326,8 +325,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                   onTap: isDeleted ? null : () => _showEditIngredientDialog(index, displayName),
                                                   child: Text(
                                                     displayName,
-                                                    style: TextStyle(
-                                                      fontSize: 14,
+                                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                                       fontWeight: FontWeight.w600,
                                                       decoration: isDeleted ? TextDecoration.lineThrough : null,
                                                       color: isDeleted ? colorScheme.onSurfaceVariant : colorScheme.onSurface,
@@ -337,8 +335,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                 ),
                                                 Text(
                                                   quantity,
-                                                  style: TextStyle(
-                                                    fontSize: 12,
+                                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                                     color: colorScheme.onSurfaceVariant,
                                                     decoration: isDeleted ? TextDecoration.lineThrough : null,
                                                   ),
@@ -356,8 +353,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                 ),
                                                 child: Text(
                                                   categoryName,
-                                                  style: TextStyle(
-                                                    fontSize: 11,
+                                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                                     fontWeight: FontWeight.w500,
                                                     color: colorScheme.onSurfaceVariant, // matches light/dark
                                                   ),

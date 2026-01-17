@@ -24,6 +24,7 @@ class _VerificationScreenState extends VerificationController {
         verificationSession?.email ?? authState.value?.email ?? 'your email';
 
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -45,31 +46,34 @@ class _VerificationScreenState extends VerificationController {
                 color: colorScheme.primary,
               ),
               const SizedBox(height: 32),
-              const Text(
+              Text(
                 'Verify Your Email Address',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 'We have sent a verification link to:',
-                style: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant),
+                style: textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 email,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                style: textTheme.bodyLarge?.copyWith(
                   color: colorScheme.primary,
+                  fontWeight: FontWeight.w600,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 'Please check your inbox and click the verification link to activate your account.',
-                style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
+                style: textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
@@ -150,8 +154,7 @@ class _VerificationScreenState extends VerificationController {
               const SizedBox(height: 24),
               Text(
                 'The app will automatically redirect once your email is verified.',
-                style: TextStyle(
-                  fontSize: 12,
+                style: textTheme.labelSmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,
                 ),
