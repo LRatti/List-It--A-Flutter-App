@@ -9,7 +9,7 @@ class ThemeNotifier extends Notifier<ThemeMode> {
   @override
   ThemeMode build() {
     _loadThemeMode();
-    return ThemeMode.dark; // Default to dark mode
+    return ThemeMode.light; // Default to light mode on first launch
   }
 
   /// Load theme mode from SharedPreferences
@@ -23,8 +23,8 @@ class ThemeNotifier extends Notifier<ThemeMode> {
         state = newMode;
       }
     } catch (e) {
-      // If loading fails, keep default
-      state = ThemeMode.dark;
+      // If loading fails, keep default light
+      state = ThemeMode.light;
     }
   }
 
