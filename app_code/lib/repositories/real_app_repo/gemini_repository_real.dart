@@ -23,4 +23,19 @@ class GeminiRepositoryReal implements GeminiRepository {
       return RecipeData.error('Something went wrong while searching for the recipe. Please try again.');
     }
   }
+
+  @override
+  Future<String> categorizeProduct({
+    required String productName,
+    required List<Category> categories,
+  }) async {
+    try {
+      return await _geminiService.categorizeProduct(
+        productName: productName,
+        categories: categories,
+      );
+    } catch (e) {
+      return 'uncategorized';
+    }
+  }
 }

@@ -197,4 +197,54 @@ Ensure the JSON is valid and can be parsed. Return ONLY the JSON object, no addi
       );
     }
   }
+
+  /// Categorizes a product using Gemini AI
+  Future<String> categorizeProduct({
+    required String productName,
+    required List<Category> categories,
+  }) async {
+    try {
+      if (_apiKey.isEmpty) {
+        return 'uncategorized';
+      }
+
+      final categoryNames = categories.map((c) => c.getName()).join(', ');
+
+      final prompt = '''
+You are a product categorization expert.
+
+The user wants to categorize the product: "$productName"
+
+Available categories: $categoryNames
+
+Your task:
+1. Choose the most appropriate category for this product from the available categories.
+2. If the product doesn't fit any category well, choose "uncategorized".
+3. Return ONLY the category name, nothing else.
+
+IMPORTANT: Return ONLY the category name as plain text, no JSON, no quotes, no additional text.
+''';
+
+      final content = [Content.text(prompt)];
+
+      final response = await _model.generateContent(content);
+
+      final responseText = (response.text ?? '').trim();
+
+      if (responseText.isEmpty) {
+        return 'uncategorized';
+      }
+
+      // Validate the response is one of the available categories
+      final normalizedResponse = responseText.toLowerCase();
+      final matchingCategory = categories.firstWhere(
+        (cat) => cat.getName().toLowerCase() == normalizedResponse,
+        orElse: () => Category(name: 'uncategorized'),
+      );
+
+      return matchingCategory.getName();
+    } catch (e) {
+      return 'uncategorized';
+    }
+  }
 }

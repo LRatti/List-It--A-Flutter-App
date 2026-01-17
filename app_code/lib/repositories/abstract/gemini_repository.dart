@@ -6,4 +6,9 @@ abstract class GeminiRepository {
     required String recipeName,
     required List<Category> categories,
   });
+
+  Future<String> categorizeProduct({
+    required String productName,
+    required List<Category> categories,
+  });
 }

@@ -1,3 +1,4 @@
+import 'package:app_code/repositories/test_repo/recipe_cache_repository_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:app_code/models/recipe_response.dart';
@@ -54,14 +55,15 @@ class BackgroundRecipeSearch {
 /// Using Provider is correct for dependency injection.
 final geminiRepositoryProvider = Provider<GeminiRepository>((ref) {
   // Use test repository for mock data
-  return GeminiRepositoryTest();
+  // return GeminiRepositoryTest();
   // Use real repository for actual API calls
-  // return GeminiRepositoryReal();
+  return GeminiRepositoryTest();
 });
 
 /// Provider for recipe cache repository
+// TODO: switch to real repository when needed
 final recipeCacheRepositoryProvider = Provider<RecipeCacheRepository>((ref) {
-  return RecipeCacheRepositoryReal();
+  return RecipeCacheRepositoryTest();
 });
 
 /// State notifier for recipe queries.

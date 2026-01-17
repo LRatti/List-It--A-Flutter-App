@@ -84,4 +84,52 @@ class GeminiRepositoryTest implements GeminiRepository {
       error: 'noError',
     );
   }
+
+  @override
+  Future<String> categorizeProduct({
+    required String productName,
+    required List<Category> categories,
+  }) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 5));
+
+    final normalizedProduct = productName.toLowerCase().trim();
+
+    // Simple mock categorization based on product name
+    if (normalizedProduct.contains('milk') || normalizedProduct.contains('cheese') ||
+        normalizedProduct.contains('yogurt') || normalizedProduct.contains('butter') ||
+        normalizedProduct.contains('egg')) {
+      return _findCategory(categories, 'Dairy');
+    } else if (normalizedProduct.contains('apple') || normalizedProduct.contains('banana') ||
+        normalizedProduct.contains('orange') || normalizedProduct.contains('grape')) {
+      return _findCategory(categories, 'Fruits');
+    } else if (normalizedProduct.contains('tomato') || normalizedProduct.contains('carrot') ||
+        normalizedProduct.contains('lettuce') || normalizedProduct.contains('onion') ||
+        normalizedProduct.contains('garlic')) {
+      return _findCategory(categories, 'Vegetables');
+    } else if (normalizedProduct.contains('beef') || normalizedProduct.contains('chicken') ||
+        normalizedProduct.contains('pork') || normalizedProduct.contains('bacon') ||
+        normalizedProduct.contains('meat')) {
+      return _findCategory(categories, 'Meat');
+    } else if (normalizedProduct.contains('bread') || normalizedProduct.contains('flour') ||
+        normalizedProduct.contains('pasta') || normalizedProduct.contains('cake')) {
+      return _findCategory(categories, 'Bakery');
+    } else if (normalizedProduct.contains('water') || normalizedProduct.contains('juice') ||
+        normalizedProduct.contains('soda') || normalizedProduct.contains('coffee') ||
+        normalizedProduct.contains('tea')) {
+      return _findCategory(categories, 'Beverages');
+    }
+
+    return _findCategory(categories, 'uncategorized');
+  }
+
+  String _findCategory(List<Category> categories, String targetName) {
+    try {
+      return categories
+          .firstWhere((cat) => cat.getName().toLowerCase() == targetName.toLowerCase())
+          .getName();
+    } catch (e) {
+      return 'uncategorized';
+    }
+  }
 }
