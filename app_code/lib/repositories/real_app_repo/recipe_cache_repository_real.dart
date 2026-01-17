@@ -11,6 +11,7 @@ class RecipeCacheRepositoryReal implements RecipeCacheRepository {
     required String listId,
     required String recipeName,
     required RecipeData recipeData,
+    bool hasSeenNotification = false,
   }) async {
     final db = await DatabaseHelper.database;
 
@@ -23,12 +24,13 @@ class RecipeCacheRepositoryReal implements RecipeCacheRepository {
       'recipe_name': recipeName,
       'recipe_data': recipeData.toJsonString(),
       'error_message': recipeData.hasError ? recipeData.error : null,
+      'has_seen_notification': hasSeenNotification ? 1 : 0,
       'created_at': DateTime.now().toIso8601String(),
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
-  Future<({String recipeName, RecipeData recipeData})?> loadRecipeCache(
+  Future<({String recipeName, RecipeData recipeData, bool hasSeenNotification})?> loadRecipeCache(
     String listId,
   ) async {
     final db = await DatabaseHelper.database;
@@ -47,6 +49,7 @@ class RecipeCacheRepositoryReal implements RecipeCacheRepository {
     return (
       recipeName: row['recipe_name'] as String,
       recipeData: RecipeData.fromJsonString(row['recipe_data'] as String),
+      hasSeenNotification: (row['has_seen_notification'] as int? ?? 0) == 1,
     );
   }
 
@@ -69,6 +72,17 @@ class RecipeCacheRepositoryReal implements RecipeCacheRepository {
     );
 
     return results.isNotEmpty;
+  }
+
+  @override
+  Future<void> markNotificationSeen(String listId) async {
+    final db = await DatabaseHelper.database;
+    await db.update(
+      'recipe_cache',
+      {'has_seen_notification': 1},
+      where: 'list_id = ?',
+      whereArgs: [listId],
+    );
   }
 
   @override

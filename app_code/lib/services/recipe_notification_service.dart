@@ -9,13 +9,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class RecipeNotificationService {
   final GlobalKey<NavigatorState> _navigatorKey;
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey;
+  final BackgroundRecipeNotifier _backgroundNotifier;
   final Set<String> _notifiedListIds = {};
 
   RecipeNotificationService({
     required GlobalKey<NavigatorState> navigatorKey,
     required GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey,
+    required BackgroundRecipeNotifier backgroundNotifier,
   })  : _navigatorKey = navigatorKey,
-        _scaffoldMessengerKey = scaffoldMessengerKey;
+        _scaffoldMessengerKey = scaffoldMessengerKey,
+        _backgroundNotifier = backgroundNotifier;
 
   /// Process background recipe searches and show notifications
   void processBackgroundSearches(
@@ -31,8 +34,10 @@ class RecipeNotificationService {
         continue;
       }
 
-      // Show notification only once per completed search
-      if (search.isCompleted && !_notifiedListIds.contains(listId)) {
+      // Show notification only once per completed search and only if not previously seen
+      if (search.isCompleted &&
+          !_notifiedListIds.contains(listId) &&
+          !search.hasSeenNotification) {
         _notifiedListIds.add(listId);
         _handleRecipeSearchCompletion(search);
       }
@@ -52,6 +57,10 @@ class RecipeNotificationService {
       final message = isError
           ? 'Recipe search completed with issues'
           : 'Recipe "${recipe.recipeName}" found!';
+
+      // Persist that the notification was shown so it does not reappear
+      // Mark as seen BEFORE showing to handle app closure during display
+      _backgroundNotifier.markNotificationSeen(search.listId);
 
       scaffoldMessenger.showSnackBar(
         buildAppSnackBar(

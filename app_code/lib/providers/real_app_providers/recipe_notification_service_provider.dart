@@ -9,11 +9,13 @@ import 'package:app_code/services/recipe_notification_service.dart';
 final recipeNotificationServiceProvider = Provider<void>((ref) {
   final navigatorKey = ref.read(navigatorKeyProvider);
   final scaffoldMessengerKey = ref.read(scaffoldMessengerKeyProvider);
+  final backgroundNotifier = ref.read(backgroundRecipeProvider.notifier);
 
   // Create the notification service
   final service = RecipeNotificationService(
     navigatorKey: navigatorKey,
     scaffoldMessengerKey: scaffoldMessengerKey,
+    backgroundNotifier: backgroundNotifier,
   );
 
   // Set up listener for background recipe searches

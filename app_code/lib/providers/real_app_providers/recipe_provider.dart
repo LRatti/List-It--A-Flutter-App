@@ -15,6 +15,7 @@ class BackgroundRecipeSearch {
   final String recipeName;
   final AsyncValue<RecipeData> result;
   final bool isCompleted;
+  final bool hasSeenNotification;
   final ShoppingList? shoppingList;
   final List<Category>? availableCategories;
 
@@ -23,6 +24,7 @@ class BackgroundRecipeSearch {
     required this.recipeName,
     required this.result,
     required this.isCompleted,
+    this.hasSeenNotification = false,
     this.shoppingList,
     this.availableCategories,
   });
@@ -32,6 +34,7 @@ class BackgroundRecipeSearch {
     String? recipeName,
     AsyncValue<RecipeData>? result,
     bool? isCompleted,
+    bool? hasSeenNotification,
     ShoppingList? shoppingList,
     List<Category>? availableCategories,
   }) {
@@ -40,6 +43,7 @@ class BackgroundRecipeSearch {
       recipeName: recipeName ?? this.recipeName,
       result: result ?? this.result,
       isCompleted: isCompleted ?? this.isCompleted,
+      hasSeenNotification: hasSeenNotification ?? this.hasSeenNotification,
       shoppingList: shoppingList ?? this.shoppingList,
       availableCategories: availableCategories ?? this.availableCategories,
     );
@@ -123,6 +127,7 @@ class BackgroundRecipeNotifier
           recipeName: cachedData.recipeName,
           result: AsyncValue.data(cachedData.recipeData),
           isCompleted: true,
+          hasSeenNotification: cachedData.hasSeenNotification,
         ),
       };
     }
@@ -143,6 +148,7 @@ class BackgroundRecipeNotifier
         recipeName: recipeName,
         result: const AsyncValue.loading(),
         isCompleted: false,
+        hasSeenNotification: false,
         shoppingList: shoppingList,
         availableCategories: categories,
       ),
@@ -182,6 +188,7 @@ class BackgroundRecipeNotifier
         listId: listId,
         recipeName: recipeName,
         recipeData: recipeData,
+        hasSeenNotification: true,
       );
     });
   }
@@ -189,6 +196,17 @@ class BackgroundRecipeNotifier
   /// Get the search result for a specific list
   BackgroundRecipeSearch? getSearchForList(String listId) {
     return state[listId];
+  }
+
+  /// Mark notification as seen for a list and persist it
+  Future<void> markNotificationSeen(String listId) async {
+    final existing = state[listId];
+    if (existing == null || existing.hasSeenNotification) return;
+
+    state = {
+      ...state,
+      listId: existing.copyWith(hasSeenNotification: true),
+    };
   }
 
   /// Clear the search result for a specific list (also deletes from cache)

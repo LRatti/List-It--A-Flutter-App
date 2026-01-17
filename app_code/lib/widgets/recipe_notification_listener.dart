@@ -44,7 +44,9 @@ class _RecipeNotificationListenerState
         }
 
         // Only show notification if completed and not already notified
-        if (search.isCompleted && !_notifiedListIds.contains(listId)) {
+        if (search.isCompleted &&
+            !_notifiedListIds.contains(listId) &&
+            !search.hasSeenNotification) {
           _showRecipeNotification(search);
         }
       }
@@ -73,6 +75,10 @@ class _RecipeNotificationListenerState
         final message = recipe.hasError
             ? 'Recipe search completed with issues'
             : 'Recipe "${recipe.recipeName}" found!';
+
+        // Persist that we have shown the notification
+        // Mark as seen BEFORE showing to handle app closure during display
+        ref.read(backgroundRecipeProvider.notifier).markNotificationSeen(search.listId);
 
         scaffoldMessenger.showSnackBar(
           buildAppSnackBar(

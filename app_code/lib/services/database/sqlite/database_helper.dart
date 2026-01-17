@@ -105,6 +105,7 @@ class DatabaseHelper {
         recipe_name TEXT NOT NULL,
         recipe_data TEXT NOT NULL,
         error_message TEXT,
+        has_seen_notification INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL,
         FOREIGN KEY(list_id) REFERENCES shopping_list(id)
       )

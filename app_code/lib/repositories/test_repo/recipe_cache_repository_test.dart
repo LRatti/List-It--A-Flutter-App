@@ -4,22 +4,23 @@ import 'package:app_code/repositories/abstract/recipe_cache_repository.dart';
 /// Test implementation of RecipeCacheRepository for testing purposes
 /// Stores recipe caches in memory without actual database persistence
 class RecipeCacheRepositoryTest implements RecipeCacheRepository {
-  final Map<String, ({String recipeName, RecipeData recipeData})> _cache = {};
+  final Map<String, ({String recipeName, RecipeData recipeData, bool hasSeenNotification})> _cache = {};
 
   @override
   Future<void> saveRecipeCache({
     required String listId,
     required String recipeName,
     required RecipeData recipeData,
+    bool hasSeenNotification = false,
   }) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 50));
 
-    _cache[listId] = (recipeName: recipeName, recipeData: recipeData);
+    _cache[listId] = (recipeName: recipeName, recipeData: recipeData, hasSeenNotification: hasSeenNotification);
   }
 
   @override
-  Future<({String recipeName, RecipeData recipeData})?> loadRecipeCache(
+  Future<({String recipeName, RecipeData recipeData, bool hasSeenNotification})?> loadRecipeCache(
     String listId,
   ) async {
     // Simulate network delay
@@ -42,6 +43,21 @@ class RecipeCacheRepositoryTest implements RecipeCacheRepository {
     await Future.delayed(const Duration(milliseconds: 50));
 
     return _cache.containsKey(listId);
+  }
+
+  @override
+  Future<void> markNotificationSeen(String listId) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    final existing = _cache[listId];
+    if (existing != null) {
+      _cache[listId] = (
+        recipeName: existing.recipeName,
+        recipeData: existing.recipeData,
+        hasSeenNotification: true,
+      );
+    }
   }
 
   @override
