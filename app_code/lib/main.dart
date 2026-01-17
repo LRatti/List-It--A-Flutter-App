@@ -62,8 +62,9 @@ class MyApp extends ConsumerWidget {
       brightness: Brightness.dark,
     );
 
-    // Watch font size for reactive updates
+    // Watch font size and theme mode for reactive updates
     final fontSizeMultiplier = ref.watch(fontSizeValueProvider);
+    final themeMode = ref.watch(themeModeValueProvider);
 
     return MaterialApp(
       title: 'Flutter Demo',
@@ -72,7 +73,7 @@ class MyApp extends ConsumerWidget {
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,
 
-      themeMode: ref.watch(themeProvider),
+      themeMode: themeMode,
 
       theme: ThemeData(
         useMaterial3: true,

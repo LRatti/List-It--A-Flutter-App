@@ -39,8 +39,8 @@ class _SettingsScreenMobileState extends ConsumerState<SettingsScreenMobile> {
 
   @override
   Widget build(BuildContext context) {
-    // Only watch themeProvider, NOT fontSizeProvider (avoid rebuild lag during slider drag)
-    final themeMode = ref.watch(themeProvider);
+    // Only watch theme mode via value provider (avoid async + lag during slider drag)
+    final themeMode = ref.watch(themeModeValueProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
