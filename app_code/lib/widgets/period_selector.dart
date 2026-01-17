@@ -318,7 +318,7 @@ class _PeriodSelectorState extends State<PeriodSelector> {
                 constraints: const BoxConstraints(minWidth: 120, maxWidth: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Theme.of(context).hintColor),
+                  border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

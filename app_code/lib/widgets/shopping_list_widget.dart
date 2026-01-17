@@ -40,7 +40,12 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
   }
 
   Color _getAccentColor() {
-    final colors = [Colors.redAccent, Colors.orangeAccent, Colors.greenAccent, Colors.teal];
+    final colors = [
+      Colors.redAccent,
+      Colors.orangeAccent,
+      Colors.greenAccent,
+      Colors.teal
+    ];
     return colors[widget.shoppingList.getName().length % colors.length];
   }
 
@@ -53,89 +58,96 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
   @override
   Widget build(BuildContext context) {
     final products = widget.shoppingList.getProducts();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onLongPress: widget.onLongPress,
       child: Column(
-      mainAxisSize: MainAxisSize.min, // Allows the column to grow vertically
-      children: [
-        // Note Box: Fixed height ensures horizontal alignment of the "boxes"
-        Stack(
-          children: [
-            Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(12),
-              color: widget.isSelected 
-                  ? Theme.of(context).primaryColor.withOpacity(0.1)
-                  : Theme.of(context).cardColor,
-              child: InkWell(
-                onTap: widget.onTap,
-                onLongPress: widget.onLongPress,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            children: [
+              Material(
+                elevation: 2,
                 borderRadius: BorderRadius.circular(12),
-                child: ClipRRect(
+                color: widget.isSelected
+                ? colorScheme.primaryContainer
+                : (Theme.of(context).brightness == Brightness.dark
+                    ? colorScheme.surfaceContainerHigh
+                    : colorScheme.surface),
+                child: InkWell(
+                  onTap: widget.onTap,
+                  onLongPress: widget.onLongPress,
                   borderRadius: BorderRadius.circular(12),
-                  child: Column(
-                    children: [
-                      Container(height: 6, width: double.infinity, color: _getAccentColor()),
-                      Container(
-                        height: 100,
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(8),
-                        child: products.isEmpty
-                            ? Center(
-                                child: Text(
-                                  'No items',
-                                  style: TextStyle(
-                                    fontSize: 12, 
-                                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 6,
+                          width: double.infinity,
+                          color: _getAccentColor(),
+                        ),
+                        Container(
+                          height: 100,
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(8),
+                          child: products.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    'No items',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
+                                )
+                              : ListView(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  children: products
+                                      .map((p) =>
+                                          _buildBulletItem(p.product.getName(), colorScheme))
+                                      .toList(),
                                 ),
-                              )
-                            : ListView(
-                                padding: EdgeInsets.zero,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                children: products
-                                    .map((p) => _buildBulletItem(p.product.getName()))
-                                    .toList(),
-                              ),
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            if (widget.isSelected)
-              Positioned(
-                right: 6,
-                top: 6,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    shape: BoxShape.circle,
+              if (widget.isSelected)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: const Icon(Icons.check, size: 14, color: Colors.white),
                   ),
-                  padding: const EdgeInsets.all(4),
-                  child: const Icon(Icons.check, size: 14, color: Colors.white),
                 ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        // Footer: No fixed height here = No overflow
-        _editingName ? _buildEditor() : _buildFooter(),
-      ],
-    ));
+            ],
+          ),
+          const SizedBox(height: 8),
+          _editingName ? _buildEditor(colorScheme) : _buildFooter(colorScheme),
+        ],
+      ),
+    );
   }
 
-  Widget _buildBulletItem(String text) {
+  Widget _buildBulletItem(String text, ColorScheme colorScheme) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('• ', style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey)),
+        Text('• ', style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant)),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey),
+            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),
@@ -144,19 +156,26 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
     );
   }
 
-  Widget _buildEditor() {
+  Widget _buildEditor(ColorScheme colorScheme) {
     return TextField(
       controller: _controller,
       autofocus: true,
       textAlign: TextAlign.center,
-      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.bold,
+        color: colorScheme.onSurface,
+      ),
       onSubmitted: (_) => _saveName(),
       onTapOutside: (_) => _saveName(),
-      decoration: const InputDecoration(isDense: true, border: InputBorder.none),
+      decoration: const InputDecoration(
+        isDense: true,
+        border: InputBorder.none,
+      ),
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(ColorScheme colorScheme) {
     final date = widget.shoppingList.createdAt;
     final formatted = date != null
         ? '${date.day} ${monthAbbreviation(date.month)} ${date.year}'
@@ -167,7 +186,7 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start, // Align icon to top of text
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: InkWell(
@@ -175,8 +194,12 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
                 child: Text(
                   widget.shoppingList.getName(),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                  maxLines: 1, // Truncate to one line as requested
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: colorScheme.onSurface,
+                  ),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -187,14 +210,17 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
         const SizedBox(height: 2),
         Text(
           formatted,
-          style: TextStyle(fontSize: 10, color: Theme.of(context).hintColor),
+          style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
         ),
       ],
     );
   }
 
   String monthAbbreviation(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
     return months[month - 1];
   }
 }

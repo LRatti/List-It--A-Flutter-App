@@ -33,16 +33,10 @@ class _RecipeNotificationListenerState
       _,
       searches,
     ) {
-      print('RecipeNotificationListener: State changed');
-      print('Current searches: ${searches.keys}');
 
       for (final entry in searches.entries) {
         final listId = entry.key;
         final search = entry.value;
-
-        print(
-          'Checking search for list $listId: isCompleted=${search.isCompleted}, recipeName=${search.recipeName}',
-        );
 
         // Reset notification flag when a new search starts (not completed)
         if (!search.isCompleted) {
@@ -51,8 +45,6 @@ class _RecipeNotificationListenerState
 
         // Only show notification if completed and not already notified
         if (search.isCompleted && !_notifiedListIds.contains(listId)) {
-          print('Search completed. Showing notification.');
-          _notifiedListIds.add(listId);
           _showRecipeNotification(search);
         }
       }
@@ -65,13 +57,8 @@ class _RecipeNotificationListenerState
   }
 
   void _showRecipeNotification(BackgroundRecipeSearch search) {
-    print('_showRecipeNotification called');
     search.result.whenData((recipe) {
-      print(
-        'Recipe data available: ${recipe.recipeName}, hasError: ${recipe.hasError}',
-      );
       if (!mounted) {
-        print('Widget not mounted, skipping notification');
         return;
       }
 
@@ -83,13 +70,10 @@ class _RecipeNotificationListenerState
         final scaffoldMessenger = widget.scaffoldMessengerKey.currentState;
         if (scaffoldMessenger == null) return;
 
-        final backgroundColor = recipe.hasError ? Colors.orange : Colors.green;
-        final icon = recipe.hasError ? Icons.warning_amber : Icons.check_circle;
         final message = recipe.hasError
             ? 'Recipe search completed with issues'
             : 'Recipe "${recipe.recipeName}" found!';
 
-        print('Showing SnackBar: $message');
         scaffoldMessenger.showSnackBar(
           buildAppSnackBar(
             message: message,

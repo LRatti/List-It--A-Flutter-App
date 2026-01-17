@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 /// A donut-style pie chart widget that displays category spending data
 /// Shows total amount in the center with colored segments for each category
 class StatisticsPieChart extends StatelessWidget {
-  const StatisticsPieChart({super.key, required this.entries, required this.total});
+  const StatisticsPieChart({
+    super.key,
+    required this.entries,
+    required this.total,
+  });
 
   /// List of category names and their spending amounts
   final List<MapEntry<String, double>> entries;
@@ -14,17 +18,23 @@ class StatisticsPieChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return CustomPaint(
       painter: PieChartPainter(
-        entries: entries, 
+        entries: entries,
         total: total,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: colorScheme.surface, // donut hole background matches theme
+        colorScheme: colorScheme,
       ),
       child: Center(
         child: Text(
           'Total\nEUR ${total.toStringAsFixed(2)}',
           textAlign: TextAlign.center,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface, // text color adapts to light/dark mode
+          ),
         ),
       ),
     );
@@ -35,19 +45,16 @@ class StatisticsPieChart extends StatelessWidget {
 /// Each category is represented by a colored arc segment
 class PieChartPainter extends CustomPainter {
   PieChartPainter({
-    required this.entries, 
+    required this.entries,
     required this.total,
     required this.backgroundColor,
+    required this.colorScheme,
   });
 
-  /// List of category names and their spending amounts
   final List<MapEntry<String, double>> entries;
-  
-  /// Total spending across all categories
   final double total;
-  
-  /// Background color for the donut hole
   final Color backgroundColor;
+  final ColorScheme colorScheme;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -55,19 +62,15 @@ class PieChartPainter extends CustomPainter {
     final radius = math.min(size.width, size.height) / 2;
     final center = rect.center;
 
-    // Start drawing from top (12 o'clock position)
     double startAngle = -math.pi / 2;
-    
-    // Draw each category as an arc segment
+
     for (int i = 0; i < entries.length; i++) {
-      // Calculate the sweep angle based on category's percentage of total
       final sweep = (entries[i].value / total) * 2 * math.pi;
-      
+
       final paint = Paint()
         ..style = PaintingStyle.fill
         ..color = _colorForIndex(i);
-      
-      // Draw the arc for this category
+
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle,
@@ -75,23 +78,30 @@ class PieChartPainter extends CustomPainter {
         true,
         paint,
       );
-      
-      // Move to next starting position
+
       startAngle += sweep;
     }
 
-    // Draw white circle in center to create donut effect
+    // Draw donut hole using theme surface color
     final holePaint = Paint()
       ..color = backgroundColor
       ..blendMode = BlendMode.srcOver;
     canvas.drawCircle(center, radius * 0.45, holePaint);
   }
 
-  /// Returns a consistent color for each category index
-  /// Uses Material primary colors in a repeating cycle
+  /// Returns a color for each index using theme-aware colors
   Color _colorForIndex(int index) {
-    final colors = Colors.primaries;
-    return colors[index % colors.length].shade400;
+    // Use a set of semantic colors for light/dark mode instead of fixed primaries
+    final themeColors = [
+      colorScheme.primary,
+      colorScheme.secondary,
+      colorScheme.tertiary ?? colorScheme.primaryContainer,
+      colorScheme.error,
+      colorScheme.primaryContainer,
+      colorScheme.secondaryContainer,
+      colorScheme.tertiaryContainer ?? colorScheme.secondaryContainer,
+    ];
+    return themeColors[index % themeColors.length];
   }
 
   @override

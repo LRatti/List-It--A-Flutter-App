@@ -361,6 +361,7 @@ abstract class VerificationController
         message: message,
         isError: isError,
         duration: const Duration(seconds: 4),
+        context: context,
       ),
     );
   }

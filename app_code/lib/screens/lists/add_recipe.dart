@@ -34,11 +34,8 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
     _deletedIndices = {};
     _editedNames = {};
 
-    // Load cached recipe search if available
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(backgroundRecipeProvider.notifier)
-          .loadCachedSearch(widget.shoppingList.id);
+      ref.read(backgroundRecipeProvider.notifier).loadCachedSearch(widget.shoppingList.id);
     });
   }
 
@@ -50,7 +47,6 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
 
   void _queryRecipe() async {
     final recipeName = _recipeNameController.text.trim();
-
     if (recipeName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a recipe name')),
@@ -59,26 +55,17 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
     }
 
     if (!mounted) return;
+    setState(() => _isSearching = true);
 
-    setState(() {
-      _isSearching = true;
-    });
-
-    // Start background search
-    await ref
-        .read(backgroundRecipeProvider.notifier)
-        .startBackgroundSearch(
-          listId: widget.shoppingList.id,
-          recipeName: recipeName,
-          categories: widget.availableCategories,
-          shoppingList: widget.shoppingList,
-        );
+    await ref.read(backgroundRecipeProvider.notifier).startBackgroundSearch(
+      listId: widget.shoppingList.id,
+      recipeName: recipeName,
+      categories: widget.availableCategories,
+      shoppingList: widget.shoppingList,
+    );
 
     if (!mounted) return;
-
-    setState(() {
-      _isSearching = false;
-    });
+    setState(() => _isSearching = false);
   }
 
   void _showEditIngredientDialog(int index, String currentName) {
@@ -100,17 +87,12 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               final newName = editController.text.trim();
               if (newName.isNotEmpty && newName != currentName) {
-                setState(() {
-                  _editedNames[index] = newName;
-                });
+                setState(() => _editedNames[index] = newName);
               }
               editController.dispose();
               Navigator.pop(context);
@@ -125,42 +107,29 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
   void _addProductsToList() async {
     final backgroundSearches = ref.read(backgroundRecipeProvider);
     final currentSearch = backgroundSearches[widget.shoppingList.id];
-
     if (currentSearch == null) return;
 
     currentSearch.result.whenData((recipe) {
       if (!recipe.hasError) {
-        // Add only non-deleted products to the shopping list
         for (int i = 0; i < recipe.products.length; i++) {
-          if (_deletedIndices.contains(i)) {
-            continue; // Skip deleted ingredients
-          }
+          if (_deletedIndices.contains(i)) continue;
 
           final product = recipe.products[i];
           final categoryName = recipe.productCategories[i];
-
-          // Use edited name if available, otherwise use original name
           final productName = _editedNames[i] ?? product.getName();
           final editedProduct = Product(name: productName);
 
-          // Find matching category
           Category? matchingCategory;
           try {
             matchingCategory = widget.availableCategories.firstWhere(
-              (cat) =>
-                  cat.getName().toLowerCase() == categoryName.toLowerCase(),
+              (cat) => cat.getName().toLowerCase() == categoryName.toLowerCase(),
             );
           } catch (_) {
-            //TODO: handle no matching category
-            // If category not found, use the first available category
-            if (widget.availableCategories.isNotEmpty) {
-              matchingCategory = widget.availableCategories.first;
-            } else {
-              matchingCategory = Category(name: categoryName);
-            }
+            matchingCategory = widget.availableCategories.isNotEmpty
+                ? widget.availableCategories.first
+                : Category(name: categoryName);
           }
 
-          // Create purchased product with the product from recipe
           final purchasedProduct = PurchasedProduct(
             listId: widget.shoppingList.id,
             product: editedProduct,
@@ -172,27 +141,17 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
           widget.shoppingList.products!.add(purchasedProduct);
         }
 
-        // Update the shopping list
-        ref
-            .read(shoppingListsProvider.notifier)
-            .updateList(widget.shoppingList);
-
-        // Delete the cached recipe search
-        ref
-            .read(backgroundRecipeProvider.notifier)
-            .clearSearchForList(widget.shoppingList.id);
+        ref.read(shoppingListsProvider.notifier).updateList(widget.shoppingList);
+        ref.read(backgroundRecipeProvider.notifier).clearSearchForList(widget.shoppingList.id);
 
         final addedCount = recipe.products.length - _deletedIndices.length;
-        // Show success message (uniform style)
         ScaffoldMessenger.of(context).showSnackBar(
           buildAppSnackBar(
-            message:
-                '$addedCount products added to "${widget.shoppingList.getName()}"',
+            message: '$addedCount products added to "${widget.shoppingList.getName()}"',
             isError: false,
+            context: context,
           ),
         );
-
-        // Pop the screen
         Navigator.pop(context);
       }
     });
@@ -200,56 +159,55 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final backgroundSearches = ref.watch(backgroundRecipeProvider);
     final currentSearch = backgroundSearches[widget.shoppingList.id];
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
         title: const Text('Add Recipe'),
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // Scrollable section with input and results
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // Input section
+                    // Input Section
                     Container(
-                      padding: const EdgeInsets.all(16.0),
-                      color: Theme.of(context).primaryColor.withOpacity(0.12),
+                      padding: const EdgeInsets.all(16),
+                      color: colorScheme.primary.withAlpha(31),
                       child: Column(
-                        spacing: 12.0,
                         children: [
                           TextField(
                             controller: _recipeNameController,
                             decoration: InputDecoration(
                               hintText: 'Enter recipe name...',
                               filled: true,
-                              fillColor: Theme.of(context).cardColor,
+                              fillColor: colorScheme.surface,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                             ),
                             enabled: !_isSearching,
                           ),
+                          const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: _isSearching ? null : _queryRecipe,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colorScheme.primary,
+                                foregroundColor: colorScheme.onPrimary,
+                              ),
                               child: _isSearching
                                   ? const SizedBox(
                                       height: 20,
                                       width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                     )
                                   : const Text('Search Recipe'),
                             ),
@@ -257,311 +215,196 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                         ],
                       ),
                     ),
-                    // Results section
-                    currentSearch == null
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(32.0),
-                              child: Text(
-                                'Enter a recipe name and press "Search Recipe"',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Theme.of(context).hintColor),
-                              ),
+                    // Results Section
+                    if (currentSearch == null)
+                      Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Center(
+                          child: Text(
+                            'Enter a recipe name and press "Search Recipe"',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: colorScheme.onSurfaceVariant),
+                          ),
+                        ),
+                      )
+                    else
+                      currentSearch.result.when(
+                        loading: () => const Padding(
+                          padding: EdgeInsets.all(32),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (error, _) => Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Center(
+                            child: Text(
+                              'Error: $error',
+                              style: const TextStyle(color: Colors.red),
+                              textAlign: TextAlign.center,
                             ),
-                          )
-                        : currentSearch.result.when(
-                            loading: () => const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(32.0),
+                          ),
+                        ),
+                        data: (recipe) {
+                          if (recipe.hasError) {
+                            return Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    CircularProgressIndicator(),
-                                    SizedBox(height: 16),
-                                    Text('Searching for recipe...'),
+                                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      recipe.error,
+                                      style: const TextStyle(color: Colors.red, fontSize: 16),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ],
                                 ),
                               ),
-                            ),
-                            error: (error, stack) => Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(32.0),
-                                child: Text(
-                                  'Error: $error',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(color: Colors.red),
-                                ),
-                              ),
-                            ),
-                            data: (recipe) {
-                              // Error from Gemini
-                              if (recipe.hasError) {
-                                return Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(32.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.error_outline,
-                                          color: Colors.red,
-                                          size: 48,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          recipe.error,
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }
+                            );
+                          }
 
-                              // Success - show recipe details
-                              return Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 16.0,
-                                  children: [
-                                    // Recipe name
-                                    Container(
-                                      padding: const EdgeInsets.all(12.0),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor.withOpacity(0.15),
-                                        borderRadius: BorderRadius.circular(
-                                          8.0,
-                                        ),
-                                        border: Border.all(
-                                          color: Theme.of(context).brightness == Brightness.dark
-                                              ? Colors.grey[400]!
-                                              : Theme.of(context).primaryColor.withOpacity(0.4),
+                          return Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Recipe name
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary.withAlpha(38),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: colorScheme.outline),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Recipe',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: colorScheme.onSurfaceVariant,
                                         ),
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                      const SizedBox(height: 4),
+                                      Text(recipe.recipeName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                // Ingredients
+                                Text(
+                                  'Ingredients (${recipe.products.length - _deletedIndices.length}/${recipe.products.length})',
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 12),
+                                ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: recipe.products.length,
+                                  separatorBuilder: (_, __) => const Divider(),
+                                  itemBuilder: (context, index) {
+                                    final product = recipe.products[index];
+                                    final quantity = recipe.quantities[index];
+                                    final categoryName = recipe.productCategories[index];
+                                    final isDeleted = _deletedIndices.contains(index);
+                                    final displayName = _editedNames[index] ?? product.getName();
+
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                                      color: isDeleted ? colorScheme.surfaceContainerHighest : null,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(
-                                            'Recipe',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Theme.of(context).brightness == Brightness.dark
-                                                  ? Colors.grey[400]
-                                                  : Colors.grey[600],
-                                              fontWeight: FontWeight.w500,
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: isDeleted ? null : () => _showEditIngredientDialog(index, displayName),
+                                                  child: Text(
+                                                    displayName,
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                      decoration: isDeleted ? TextDecoration.lineThrough : null,
+                                                      color: isDeleted ? colorScheme.onSurfaceVariant : colorScheme.onSurface,
+                                                      fontStyle: !isDeleted ? FontStyle.italic : null,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  quantity,
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: colorScheme.onSurfaceVariant,
+                                                    decoration: isDeleted ? TextDecoration.lineThrough : null,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            recipe.recipeName,
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                decoration: BoxDecoration(
+                                                  color: colorScheme.surfaceVariant, // automatic contrast
+                                                  borderRadius: BorderRadius.circular(16),
+                                                ),
+                                                child: Text(
+                                                  categoryName,
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: colorScheme.onSurfaceVariant, // matches light/dark
+                                                  ),
+                                                ),
+                                              ),
+
+                                              IconButton(
+                                                icon: Icon(
+                                                  isDeleted ? Icons.restore : Icons.delete_outline,
+                                                  size: 20,
+                                                  color: isDeleted ? colorScheme.primary : colorScheme.error,
+                                                ),
+                                                padding: EdgeInsets.zero,
+                                                constraints: const BoxConstraints(),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    if (isDeleted) {
+                                                      _deletedIndices.remove(index);
+                                                    } else {
+                                                      _deletedIndices.add(index);
+                                                    }
+                                                  });
+                                                },
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    // Products
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Ingredients (${recipe.products.length - _deletedIndices.length}/${recipe.products.length})',
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        ListView.separated(
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: recipe.products.length,
-                                          separatorBuilder: (_, __) =>
-                                              const Divider(),
-                                          itemBuilder: (context, index) {
-                                            final product =
-                                                recipe.products[index];
-                                            final quantity =
-                                                recipe.quantities[index];
-                                            final categoryName =
-                                                recipe.productCategories[index];
-                                            final isDeleted = _deletedIndices
-                                                .contains(index);
-                                            final displayName =
-                                                _editedNames[index] ??
-                                                product.getName();
-
-                                            return Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    vertical: 12.0,
-                                                    horizontal: 8.0,
-                                                  ),
-                                              decoration: isDeleted
-                                                  ? BoxDecoration(
-                                                      color: Theme.of(context).brightness == Brightness.dark
-                                                          ? Colors.grey[800]
-                                                          : Colors.grey[100],
-                                                    )
-                                                  : null,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      spacing: 4.0,
-                                                      children: [
-                                                        GestureDetector(
-                                                          onTap: isDeleted
-                                                              ? null
-                                                              : () => _showEditIngredientDialog(
-                                                                  index,
-                                                                  displayName,
-                                                                ),
-                                                          child: Text(
-                                                            displayName,
-                                                            style: TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              decoration:
-                                                                  isDeleted
-                                                                  ? TextDecoration
-                                                                        .lineThrough
-                                                                  : null,
-                                                              color: isDeleted
-                                                                  ? Theme.of(context).disabledColor
-                                                                  : (Theme.of(context).brightness == Brightness.dark
-                                                                      ? Colors.white
-                                                                      : Theme.of(context).primaryColor),
-                                                              fontStyle:
-                                                                  !isDeleted
-                                                                  ? FontStyle
-                                                                        .italic
-                                                                  : null,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          quantity,
-                                                          style: TextStyle(
-                                                            fontSize: 12,
-                                                            color: isDeleted
-                                                                ? (Theme.of(context).brightness == Brightness.dark
-                                                                    ? Colors.grey[600]
-                                                                    : Colors.grey[400])
-                                                                : (Theme.of(context).brightness == Brightness.dark
-                                                                    ? Colors.grey[400]
-                                                                    : Colors.grey[600]),
-                                                            decoration:
-                                                                isDeleted
-                                                                ? TextDecoration
-                                                                      .lineThrough
-                                                                : null,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    spacing: 8.0,
-                                                    children: [
-                                                      Container(
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              horizontal: 12.0,
-                                                              vertical: 6.0,
-                                                            ),
-                                                        decoration: BoxDecoration(
-                                                          color: Theme.of(context).primaryColor.withOpacity(0.2),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                16.0,
-                                                              ),
-                                                        ),
-                                                        child: Text(
-                                                          categoryName,
-                                                          style: TextStyle(
-                                                            fontSize: 11,
-                                                            color: Theme.of(context).brightness == Brightness.dark 
-                                                                ? Colors.white 
-                                                                : Theme.of(context).primaryColor,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      IconButton(
-                                                        icon: Icon(
-                                                          isDeleted
-                                                              ? Icons.restore
-                                                              : Icons
-                                                                    .delete_outline,
-                                                          color: isDeleted
-                                                              ? Theme.of(context).primaryColor
-                                                              : Theme.of(context).colorScheme.error,
-                                                          size: 20,
-                                                        ),
-                                                        padding:
-                                                            EdgeInsets.zero,
-                                                        constraints:
-                                                            const BoxConstraints(),
-                                                        onPressed: () {
-                                                          setState(() {
-                                                            if (isDeleted) {
-                                                              _deletedIndices
-                                                                  .remove(
-                                                                    index,
-                                                                  );
-                                                            } else {
-                                                              _deletedIndices
-                                                                  .add(index);
-                                                            }
-                                                          });
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                    );
+                                  },
                                 ),
-                              );
-                            },
-                          ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                   ],
                 ),
               ),
             ),
-            // Fixed Add to list button at bottom
+            // Add to List Button
             if (currentSearch != null && !_isSearching)
               currentSearch.result.maybeWhen(
                 data: (recipe) {
                   if (!recipe.hasError && recipe.recipeName.isNotEmpty) {
                     return Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       child: SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
@@ -569,9 +412,9 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                           icon: const Icon(Icons.add_shopping_cart),
                           label: const Text('Add to List'),
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
                           ),
                         ),
                       ),

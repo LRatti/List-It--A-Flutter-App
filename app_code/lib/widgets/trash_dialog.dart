@@ -8,6 +8,7 @@ class TrashDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return shoppingListsAsync.when(
       loading: () => AlertDialog(
@@ -55,7 +56,7 @@ class TrashDialog extends ConsumerWidget {
                         title: Text(list.getName()),
                         subtitle: Text(
                           list.getDeletionMessage(),
-                          style: TextStyle(color: Theme.of(context).hintColor),
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
                         ),
                         trailing: SizedBox(
                           width: 150,
@@ -74,7 +75,7 @@ class TrashDialog extends ConsumerWidget {
                               IconButton(
                                 icon: Icon(
                                   Icons.delete,
-                                  color: Theme.of(context).colorScheme.error,
+                                  color: colorScheme.error,
                                 ),
                                 onPressed: () {
                                   showDialog(
@@ -101,7 +102,7 @@ class TrashDialog extends ConsumerWidget {
                                             }
                                           },
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Theme.of(context).colorScheme.error,
+                                            backgroundColor: colorScheme.error,
                                           ),
                                           child: const Text('Delete'),
                                         ),

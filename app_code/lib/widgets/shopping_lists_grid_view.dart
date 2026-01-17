@@ -165,7 +165,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
         resizeToAvoidBottomInset: false,
         appBar: _selectionActive
             ? AppBar(
-                backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
+                backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).colorScheme.primary,
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: _cancelSelection,

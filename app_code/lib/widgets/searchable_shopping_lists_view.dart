@@ -53,9 +53,7 @@ class _SearchableShoppingListsViewState
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    _filterLists(_searchController.text);
-  }
+  void _onSearchChanged() => _filterLists(_searchController.text);
 
   void _filterLists(String query) {
     setState(() {
@@ -71,9 +69,7 @@ class _SearchableShoppingListsViewState
   }
 
   void _startSearch() {
-    setState(() {
-      _isSearching = true;
-    });
+    setState(() => _isSearching = true);
   }
 
   void _stopSearch() {
@@ -87,58 +83,67 @@ class _SearchableShoppingListsViewState
   void _setDeletionMode(bool isDeletionMode) {
     setState(() {
       _isDeletionMode = isDeletionMode;
-      if (isDeletionMode && _isSearching) {
-        _stopSearch();
-      }
+      if (isDeletionMode && _isSearching) _stopSearch();
     });
   }
 
-  PreferredSizeWidget _buildSearchAppBar() {
+  PreferredSizeWidget _buildSearchAppBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return AppBar(
-      backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
+      backgroundColor: colorScheme.surface,
+      elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(Icons.arrow_back, color: colorScheme.onSurfaceVariant),
         onPressed: _stopSearch,
       ),
       title: TextField(
         controller: _searchController,
         autofocus: true,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           hintText: 'Search lists...',
+          hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           border: InputBorder.none,
         ),
-        style: const TextStyle(fontSize: 16),
+        style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
       ),
       actions: [
         if (_searchController.text.isNotEmpty)
           IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              _searchController.clear();
-            },
+            icon: Icon(Icons.clear, color: colorScheme.onSurfaceVariant),
+            onPressed: () => _searchController.clear(),
           ),
       ],
     );
   }
 
-  PreferredSizeWidget _buildNormalAppBar() {
+  PreferredSizeWidget _buildNormalAppBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return AppBar(
-      backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
-      title: Text(widget.showRegistered ? 'History' : 'Lists'),
+      backgroundColor: colorScheme.surface, // match background
+      elevation: 0,
       actions: [
         IconButton(
-          icon: const Icon(Icons.search),
+          icon: Icon(Icons.search, color: colorScheme.onSurface),
           onPressed: _startSearch,
         ),
       ],
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: _isDeletionMode ? null : (_isSearching ? _buildSearchAppBar() : _buildNormalAppBar()),
+      backgroundColor: colorScheme.surface,
+      appBar: _isDeletionMode
+          ? null
+          : (_isSearching
+              ? _buildSearchAppBar(context)
+              : _buildNormalAppBar(context)),
       body: GestureDetector(
         onTap: _isSearching ? _stopSearch : null,
         child: ShoppingListsGridView(
@@ -147,18 +152,14 @@ class _SearchableShoppingListsViewState
               ? 'No lists found matching "${_searchController.text}"'
               : widget.emptyMessage,
           onListTap: (context, list) {
-            if (_isSearching) {
-              _stopSearch();
-            }
+            if (_isSearching) _stopSearch();
             widget.onListTap?.call(context, list);
           },
           onDeletionModeChanged: _setDeletionMode,
           floatingActionButton: widget.floatingActionButton != null
               ? GestureDetector(
                   onTap: () {
-                    if (_isSearching) {
-                      _stopSearch();
-                    }
+                    if (_isSearching) _stopSearch();
                   },
                   child: widget.floatingActionButton,
                 )

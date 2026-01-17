@@ -23,10 +23,17 @@ class TrashScreenMobile extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onSurface, // adapt to light/dark
+            ),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            ),
             child: const Text('Restore'),
           ),
         ],
@@ -37,9 +44,9 @@ class TrashScreenMobile extends ConsumerWidget {
       for (final l in trashedLists) {
         await notifier.updateList(l..setIsInTheTrash(false));
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(buildAppSnackBar(message: 'All lists restored'));
+      ScaffoldMessenger.of(context).showSnackBar(
+        buildAppSnackBar(message: 'All lists restored', context: context),
+      );
     }
   }
 
@@ -59,11 +66,17 @@ class TrashScreenMobile extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+            ),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Delete all'),
           ),
         ],
@@ -74,9 +87,9 @@ class TrashScreenMobile extends ConsumerWidget {
       for (final l in trashedLists) {
         await notifier.deleteList(l);
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(buildAppSnackBar(message: 'Trash emptied'));
+      ScaffoldMessenger.of(context).showSnackBar(
+        buildAppSnackBar(message: 'Trash emptied', context: context),
+      );
     }
   }
 
@@ -87,7 +100,8 @@ class TrashScreenMobile extends ConsumerWidget {
     return shoppingListsAsync.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (error, _) => Scaffold(body: Center(child: Text('Error: $error'))),
+      error: (error, _) =>
+          Scaffold(body: Center(child: Text('Error: $error'))),
       data: (lists) {
         final trashedLists = lists.where((l) => l.getIsInTheTrash()).toList()
           ..sort((a, b) {
@@ -105,14 +119,17 @@ class TrashScreenMobile extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => _confirmRestoreAll(context, ref, trashedLists),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
+                ),
                 child: const Text('Restore all'),
               ),
               TextButton(
                 onPressed: () => _confirmEmptyTrash(context, ref, trashedLists),
-                child: Text(
-                  'Empty trash',
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
                 ),
+                child: const Text('Empty trash'),
               ),
             ],
           ),
@@ -146,9 +163,8 @@ class TrashScreenMobile extends ConsumerWidget {
                                     softWrap: true,
                                     maxLines: 4,
                                     overflow: TextOverflow.visible,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleMedium,
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
@@ -156,7 +172,11 @@ class TrashScreenMobile extends ConsumerWidget {
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium
-                                        ?.copyWith(color: Theme.of(context).hintColor),
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -175,11 +195,12 @@ class TrashScreenMobile extends ConsumerWidget {
                                     IconButton(
                                       icon: const Icon(Icons.restore),
                                       tooltip: 'Restore',
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface, // adapt to light/dark
                                       onPressed: () async {
                                         await ref
-                                            .read(
-                                              shoppingListsProvider.notifier,
-                                            )
+                                            .read(shoppingListsProvider.notifier)
                                             .updateList(
                                               list..setIsInTheTrash(false),
                                             );
@@ -204,6 +225,11 @@ class TrashScreenMobile extends ConsumerWidget {
                                               TextButton(
                                                 onPressed: () =>
                                                     Navigator.pop(context),
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface,
+                                                ),
                                                 child: const Text('Cancel'),
                                               ),
                                               ElevatedButton(
@@ -218,7 +244,10 @@ class TrashScreenMobile extends ConsumerWidget {
                                                     Navigator.pop(context);
                                                 },
                                                 style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Theme.of(context).colorScheme.error,
+                                                  backgroundColor: Theme.of(context)
+                                                      .colorScheme
+                                                      .error,
+                                                  foregroundColor: Colors.white,
                                                 ),
                                                 child: const Text('Delete'),
                                               ),

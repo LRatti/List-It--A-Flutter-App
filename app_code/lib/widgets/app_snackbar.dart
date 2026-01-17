@@ -5,24 +5,37 @@ SnackBar buildAppSnackBar({
   bool isError = false,
   VoidCallback? onTap,
   Duration duration = const Duration(seconds: 5),
+  BuildContext? context,
 }) {
-  final backgroundColor = isError ? Colors.orange : Colors.green;
+  final colorScheme = context != null ? Theme.of(context).colorScheme : null;
+
+  final backgroundColor = isError
+      ? colorScheme?.errorContainer ?? Colors.red[600]
+      : colorScheme?.secondaryContainer ?? Colors.green[600];
+
+  final iconColor = isError
+      ? colorScheme?.onErrorContainer ?? Colors.white
+      : colorScheme?.onSecondaryContainer ?? Colors.white;
+
   final icon = isError ? Icons.warning_amber : Icons.check_circle;
+
+  // Create a slightly transparent version of iconColor without using withOpacity
+  final touchIconColor = iconColor.withAlpha(179); // ~70% opacity
 
   final content = Row(
     children: [
-      Icon(icon, color: Colors.white),
+      Icon(icon, color: iconColor),
       const SizedBox(width: 12),
       Expanded(
         child: Text(
           message,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: iconColor),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
       ),
       if (onTap != null)
-        const Icon(Icons.touch_app, size: 18, color: Colors.white70),
+        Icon(Icons.touch_app, size: 18, color: touchIconColor),
     ],
   );
 

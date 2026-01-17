@@ -18,18 +18,18 @@ class VerificationScreen extends ConsumerStatefulWidget {
 class _VerificationScreenState extends VerificationController {
   @override
   Widget build(BuildContext context) {
-    // Get the email being verified from the session provider
     final verificationSession = ref.watch(emailVerificationSessionProvider);
-    // Fall back to current user email if session is not set
     final authState = ref.watch(authProvider);
     final email =
         verificationSession?.email ?? authState.value?.email ?? 'your email';
+
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Verify Your Email'),
         centerTitle: true,
-        automaticallyImplyLeading: false, // Remove back button
+        automaticallyImplyLeading: false,
       ),
       body: SafeArea(
         child: Container(
@@ -39,26 +39,21 @@ class _VerificationScreenState extends VerificationController {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Email verification icon
               Icon(
                 Icons.mark_email_unread_outlined,
                 size: 100,
-                color: Theme.of(context).primaryColor,
+                color: colorScheme.primary,
               ),
               const SizedBox(height: 32),
-
-              // Title
               const Text(
                 'Verify Your Email Address',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-
-              // Message
               Text(
                 'We have sent a verification link to:',
-                style: TextStyle(fontSize: 16, color: Theme.of(context).hintColor),
+                style: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
@@ -67,112 +62,97 @@ class _VerificationScreenState extends VerificationController {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).primaryColor,
+                  color: colorScheme.primary,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 'Please check your inbox and click the verification link to activate your account.',
-                style: TextStyle(fontSize: 14, color: Theme.of(context).hintColor),
+                style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
 
-              // Buttons section with safe padding for navigation bar
+              // Buttons section
               Column(
-                spacing: 16.0,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Resend verification email button
+                  // Resend verification email
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: isResending ? null : resendVerificationEmail,
                       icon: isResending
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                  colorScheme.onPrimary,
                                 ),
                               ),
                             )
                           : const Icon(Icons.email),
-                      label: Text(
-                        isResending
-                            ? 'Sending...'
-                            : 'Resend Verification Email',
-                      ),
+                      label: Text(isResending ? 'Sending...' : 'Resend Verification Email'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor: Colors.white,
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
                       ),
                     ),
                   ),
-
-                  // Manual continue button
+                  const SizedBox(height: 16),
+                  // Manual continue
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: isCheckingVerification
-                          ? null
-                          : checkAndContinue,
+                      onPressed: isCheckingVerification ? null : checkAndContinue,
                       icon: isCheckingVerification
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                  colorScheme.onSecondary,
                                 ),
                               ),
                             )
                           : const Icon(Icons.check_circle),
-                      label: Text(
-                        isCheckingVerification
-                            ? 'Checking...'
-                            : 'I\'ve Verified, Continue',
-                      ),
+                      label: Text(isCheckingVerification ? 'Checking...' : 'I\'ve Verified, Continue'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Theme.of(context).colorScheme.secondary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: colorScheme.secondary,
+                        foregroundColor: colorScheme.onSecondary,
                       ),
                     ),
                   ),
-
-                  // Abort operation button
+                  const SizedBox(height: 16),
+                  // Abort operation
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: isCheckingVerification ? null : abortOperation,
                       icon: const Icon(Icons.close),
-                      label: Text(
-                        isCheckingVerification
-                            ? 'Aborting...'
-                            : 'Abort Operation',
-                      ),
+                      label: Text(isCheckingVerification ? 'Aborting...' : 'Abort Operation'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: Theme.of(context).colorScheme.error),
-                        foregroundColor: Theme.of(context).colorScheme.error,
+                        side: BorderSide(color: colorScheme.error),
+                        foregroundColor: colorScheme.error,
                       ),
                     ),
                   ),
                 ],
               ),
 
-              // Helper text
+              const SizedBox(height: 24),
               Text(
                 'The app will automatically redirect once your email is verified.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).hintColor,
+                  color: colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,
                 ),
                 textAlign: TextAlign.center,

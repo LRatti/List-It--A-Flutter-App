@@ -5,7 +5,7 @@ import 'package:app_code/providers/real_app_providers/email_verification_provide
 import 'package:app_code/widgets/password_text_field.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {
-  final dynamic authNotifier; // Keep for backward compatibility with tests
+  final dynamic authNotifier; // keep for backward compatibility
 
   const SignUpForm({super.key, this.authNotifier});
 
@@ -25,6 +25,8 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   @override
   Widget build(BuildContext context) {
     final authNotifier = ref.read(authProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Form(
@@ -32,75 +34,66 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // intro text
-            const Center(child: Text('Sign up for a new account.')),
+            // Intro text
+            Center(
+              child: Text(
+                'Sign up for a new account.',
+                style: TextStyle(color: colorScheme.onBackground),
+              ),
+            ),
             const SizedBox(height: 16.0),
 
-            // username
+            // Username field
             TextFormField(
               controller: _usernameController,
               key: const Key('username_field'),
               decoration: const InputDecoration(
                 labelText: 'How would you like to be called?',
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a username';
-                }
-                return null;
-              },
+              validator: (value) =>
+                  (value == null || value.isEmpty) ? 'Please enter a username' : null,
             ),
             const SizedBox(height: 16.0),
 
-            // email address
+            // Email field
             TextFormField(
               controller: _emailController,
               key: const Key('email_field'),
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(labelText: 'Email'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                return null;
-              },
+              validator: (value) =>
+                  (value == null || value.isEmpty) ? 'Please enter your email' : null,
             ),
             const SizedBox(height: 16.0),
 
-            // password
+            // Password field
             PasswordTextField(
               controller: _passwordController,
               fieldKey: const Key('password_field'),
               labelText: 'Password',
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please make a password';
-                }
-                if (value.length < 8) {
-                  return 'Password must be at least 8 chars long';
-                }
+                if (value == null || value.isEmpty) return 'Please make a password';
+                if (value.length < 8) return 'Password must be at least 8 chars long';
                 return null;
               },
             ),
             const SizedBox(height: 16.0),
 
-            // error feedback
+            // Error feedback
             if (_errorFeedback != null)
               Text(
                 _errorFeedback!,
                 key: const Key('error_text'),
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: colorScheme.error),
               ),
             const SizedBox(height: 16.0),
 
-            // submit button
+            // Submit button
             ElevatedButton(
               key: const Key('sign_up_button'),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  setState(() {
-                    _errorFeedback = null;
-                  });
+                  setState(() => _errorFeedback = null);
 
                   final email = _emailController.text.trim();
                   final password = _passwordController.text.trim();
@@ -114,18 +107,15 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                     );
 
                     if (context.mounted) {
-                      // Set email verification session to indicate new signup
-                      ref
-                          .read(emailVerificationSessionProvider.notifier)
-                          .state = EmailVerificationSession(
+                      // Set email verification session for new signup
+                      ref.read(emailVerificationSessionProvider.notifier).state =
+                          EmailVerificationSession(
                         isNewSignup: true,
                         email: email,
                       );
 
                       // Navigate to verification screen
-                      Navigator.of(
-                        context,
-                      ).pushReplacementNamed('/verification');
+                      Navigator.of(context).pushReplacementNamed('/verification');
                     }
                   } catch (e) {
                     setState(() {
@@ -134,6 +124,10 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   }
                 }
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+              ),
               child: const Text('Sign Up'),
             ),
           ],
