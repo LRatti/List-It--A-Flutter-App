@@ -2,6 +2,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
+import 'package:app_code/services/database/sqlite/manage_category.dart';
 import 'package:app_code/services/database/sqlite/manage_product.dart';
 import 'package:app_code/services/database/sqlite/manage_purchased_product.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,6 +23,7 @@ void main() {
     // Clear tables used in tests to avoid cross-test leakage.
     await db.delete('purchased_product');
     await db.delete('product');
+    await db.delete('category');
     await db.delete('shopping_list');
   });
 
@@ -170,6 +172,216 @@ void main() {
         await ManageProduct.getProductById(product.id);
     expect(stillThere, isNotNull);
     expect(stillThere!.getName(), 'Chips');
+  });
+
+  test('returns null when purchased product by id does not exist', () async {
+    final result = await ManagePurchasedProduct.getPurchasedProductById('nonexistent-id');
+    expect(result, isNull);
+  });
+
+  test('returns null when purchased product by name does not exist', () async {
+    final result = await ManagePurchasedProduct.getPurchasedProductByName(
+        'list-A', 'NonexistentProduct');
+    expect(result, isNull);
+  });
+
+  test('returns empty list when no purchased products for given list id', () async {
+    final items = await ManagePurchasedProduct.getPurchasedProductsByList('nonexistent-list');
+    expect(items, isEmpty);
+  });
+
+  test('handles adding purchased product with zero price', () async {
+    final product = Product(name: 'Free Sample');
+    await ManageProduct.addProduct(product);
+
+    final category = Category(name: 'Samples');
+
+    final purchased = PurchasedProduct(
+      listId: 'list-free',
+      product: product,
+      category: category,
+      price: 0.0,
+      quantity: 1,
+    );
+
+    await ManagePurchasedProduct.addPurchasedProduct(purchased);
+
+    final fetched = await ManagePurchasedProduct.getPurchasedProductById(purchased.id);
+    expect(fetched, isNotNull);
+    expect(fetched!.price, 0.0);
+  });
+
+  test('handles adding purchased product with large quantity', () async {
+    final product = Product(name: 'Bulk Rice');
+    await ManageProduct.addProduct(product);
+
+    final category = Category(name: 'Grains');
+
+    final purchased = PurchasedProduct(
+      listId: 'list-bulk',
+      product: product,
+      category: category,
+      price: 25.99,
+      quantity: 100,
+    );
+
+    await ManagePurchasedProduct.addPurchasedProduct(purchased);
+
+    final fetched = await ManagePurchasedProduct.getPurchasedProductById(purchased.id);
+    expect(fetched, isNotNull);
+    expect(fetched!.quantity, 100);
+  });
+
+  test('handles multiple purchased products with same product in different lists', () async {
+    final product = Product(name: 'Bread');
+    await ManageProduct.addProduct(product);
+
+    final category = Category(name: 'Bakery');
+
+    final purchased1 = PurchasedProduct(
+      listId: 'list-1',
+      product: product,
+      category: category,
+      price: 2.50,
+      quantity: 1,
+    );
+
+    final purchased2 = PurchasedProduct(
+      listId: 'list-2',
+      product: product,
+      category: category,
+      price: 2.50,
+      quantity: 2,
+    );
+
+    await ManagePurchasedProduct.addPurchasedProduct(purchased1);
+    await ManagePurchasedProduct.addPurchasedProduct(purchased2);
+
+    final list1Items = await ManagePurchasedProduct.getPurchasedProductsByList('list-1');
+    final list2Items = await ManagePurchasedProduct.getPurchasedProductsByList('list-2');
+
+    expect(list1Items.length, 1);
+    expect(list2Items.length, 1);
+    expect(list1Items.first.quantity, 1);
+    expect(list2Items.first.quantity, 2);
+  });
+
+  test('handles purchased product with decimal price', () async {
+    final product = Product(name: 'Gum');
+    await ManageProduct.addProduct(product);
+
+    final category = Category(name: 'Candy');
+
+    final purchased = PurchasedProduct(
+      listId: 'list-decimal',
+      product: product,
+      category: category,
+      price: 1.99,
+      quantity: 1,
+    );
+
+    await ManagePurchasedProduct.addPurchasedProduct(purchased);
+
+    final fetched = await ManagePurchasedProduct.getPurchasedProductById(purchased.id);
+    expect(fetched, isNotNull);
+    expect(fetched!.price, 1.99);
+  });
+
+  test('addPurchasedProduct adds product and category if not exist', () async {
+    final product = Product(name: 'New Product');
+    final category = Category(name: 'New Category');
+
+    final purchased = PurchasedProduct(
+      listId: 'list-new',
+      product: product,
+      category: category,
+      price: 5.00,
+      quantity: 1,
+    );
+
+    await ManagePurchasedProduct.addPurchasedProduct(purchased);
+
+    final retrievedProduct = await ManageProduct.getProductById(product.id);
+    expect(retrievedProduct, isNotNull);
+    expect(retrievedProduct!.getName(), 'New Product');
+
+    final retrievedCategory = await ManageCategory.getCategoryById(category.id);
+    expect(retrievedCategory, isNotNull);
+    expect(retrievedCategory!.getName(), 'New Category');
+
+    final retrievedPurchased = await ManagePurchasedProduct.getPurchasedProductById(purchased.id);
+    expect(retrievedPurchased, isNotNull);
+  });
+
+  test('updatePurchasedProduct updates product and category', () async {
+    final product = Product(name: 'Original Product');
+    final category = Category(name: 'Original Category');
+
+    final purchased = PurchasedProduct(
+      listId: 'list-update',
+      product: product,
+      category: category,
+      price: 5.00,
+      quantity: 1,
+    );
+    await ManagePurchasedProduct.addPurchasedProduct(purchased);
+
+    final updatedProduct = Product(id: product.id, name: 'Updated Product');
+    final updatedCategory = Category(id: category.id, name: 'Updated Category');
+
+    final updatedPurchased = PurchasedProduct(
+      id: purchased.id,
+      listId: purchased.listId,
+      product: updatedProduct,
+      category: updatedCategory,
+      price: 7.50,
+      quantity: 3,
+    );
+
+    await ManagePurchasedProduct.updatePurchasedProduct(updatedPurchased);
+
+    final retrievedProduct = await ManageProduct.getProductById(product.id);
+    expect(retrievedProduct!.getName(), 'Updated Product');
+
+    final retrievedCategory = await ManageCategory.getCategoryById(category.id);
+    expect(retrievedCategory!.getName(), 'Updated Category');
+
+    final retrievedPurchased = await ManagePurchasedProduct.getPurchasedProductById(purchased.id);
+    expect(retrievedPurchased!.price, 7.50);
+    expect(retrievedPurchased.quantity, 3);
+  });
+
+  test('replaces purchased product with same id using replace conflict algorithm', () async {
+    final product = Product(name: 'Product');
+    await ManageProduct.addProduct(product);
+
+    final category = Category(name: 'Category');
+
+    final p1 = PurchasedProduct(
+      id: 'same-id',
+      listId: 'list-replace',
+      product: product,
+      category: category,
+      price: 5.00,
+      quantity: 1,
+    );
+
+    final p2 = PurchasedProduct(
+      id: 'same-id',
+      listId: 'list-replace',
+      product: product,
+      category: category,
+      price: 10.00,
+      quantity: 2,
+    );
+
+    await ManagePurchasedProduct.addPurchasedProduct(p1);
+    await ManagePurchasedProduct.addPurchasedProduct(p2);
+
+    final items = await ManagePurchasedProduct.getPurchasedProductsByList('list-replace');
+    expect(items.length, 1);
+    expect(items.first.price, 10.00);
+    expect(items.first.quantity, 2);
   });
 
 }

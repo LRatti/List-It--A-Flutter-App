@@ -122,6 +122,7 @@ class ShoppingList {
     };
   }
 
+  // Adds a product to the shopping list
   void addProduct(Product product, Category category) {
     PurchasedProduct purchasedProduct = PurchasedProduct(
       id: product.id,
@@ -133,6 +134,26 @@ class ShoppingList {
     );
     products ??= [];
     products!.add(purchasedProduct);
+  }
+
+  // Updates price and quantity of an existing purchased product
+  void registerProduct(String productName, double price, int quantity) {
+    PurchasedProduct? purchasedProduct = getProductByName(productName);
+
+    if(purchasedProduct != null) {
+      purchasedProduct.price = price;
+      purchasedProduct.quantity = quantity;
+    }
+  }
+
+  // Adds a PurchasedProduct directly
+  void addPurchasedProduct(PurchasedProduct purchasedProduct) {
+    products ??= [];
+    products!.add(purchasedProduct);
+  }
+
+  PurchasedProduct? getProductByName(String productName) {
+    return products?.firstWhere((product) => product.product.getName() == productName);
   }
 
   void setPurchasedProducts(List<PurchasedProduct> products) {

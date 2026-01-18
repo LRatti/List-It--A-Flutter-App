@@ -79,6 +79,7 @@ class DatabaseHelper {
       CREATE TABLE supermarket_category(
         supermarket_id TEXT NOT NULL,
         category_id TEXT NOT NULL,
+        order_index INTEGER NOT NULL,
         PRIMARY KEY (supermarket_id, category_id),
         FOREIGN KEY(supermarket_id) REFERENCES supermarket(id),
         FOREIGN KEY(category_id) REFERENCES category(id)

@@ -63,7 +63,7 @@ final geminiRepositoryProvider = Provider<GeminiRepository>((ref) {
 /// Provider for recipe cache repository
 // TODO: switch to real repository when needed
 final recipeCacheRepositoryProvider = Provider<RecipeCacheRepository>((ref) {
-  return RecipeCacheRepositoryTest();
+  return RecipeCacheRepositoryReal();
 });
 
 /// State notifier for recipe queries.

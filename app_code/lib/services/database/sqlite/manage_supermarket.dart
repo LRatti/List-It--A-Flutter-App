@@ -13,14 +13,16 @@ class ManageSupermarket {
       'is_visible': market.isVisible ? 1 : 0,
     });
 
-    for (final cat in market.getCategories()) {
+    final categories = market.getCategories();
+    for (int i = 0; i < categories.length; i++) {
+      final cat = categories[i];
       await db.insert('category', cat.toDatabase(),
           conflictAlgorithm: ConflictAlgorithm.replace);
 
       await db.insert('supermarket_category', {
         'supermarket_id': market.id,
         'category_id': cat.id,
-        
+        'order_index': i,
       },
       conflictAlgorithm: ConflictAlgorithm.replace);
     }
@@ -38,6 +40,7 @@ class ManageSupermarket {
         FROM category c
         JOIN supermarket_category sc ON sc.category_id = c.id
         WHERE sc.supermarket_id = ?
+        ORDER BY sc.order_index ASC
       ''', [row['id']]);
 
       result.add(Supermarket(
@@ -80,13 +83,16 @@ class ManageSupermarket {
       whereArgs: [market.id],
     );
 
-    for (final cat in market.getCategories()) {
+    final categories = market.getCategories();
+    for (int i = 0; i < categories.length; i++) {
+      final cat = categories[i];
       await db.insert('category', cat.toDatabase(),
           conflictAlgorithm: ConflictAlgorithm.ignore);
 
       await db.insert('supermarket_category', {
         'supermarket_id': market.id,
         'category_id': cat.id,
+        'order_index': i,
       });
     }
   }
@@ -110,6 +116,7 @@ class ManageSupermarket {
       FROM category c
       JOIN supermarket_category sc ON sc.category_id = c.id
       WHERE sc.supermarket_id = ?
+      ORDER BY sc.order_index ASC
     ''', [id]);
 
     return Supermarket(
@@ -118,5 +125,97 @@ class ManageSupermarket {
       isVisible: rows.first['is_visible'] == 1,
       categories: categories.map(Category.fromDatabase).toList(),
     );
+  }
+
+  static Future<void> replaceCategoriesOrder(
+    String supermarketId,
+    List<Category> categories,
+  ) async {
+    final db = await DatabaseHelper.database;
+
+    await db.transaction((txn) async {
+      // Remove all existing category relations for the supermarket
+      await txn.delete(
+        'supermarket_category',
+        where: 'supermarket_id = ?',
+        whereArgs: [supermarketId],
+      );
+
+      // Reinsert categories with the new order
+      for (int i = 0; i < categories.length; i++) {
+        final category = categories[i];
+
+        // Ensure category exists
+        await txn.insert(
+          'category',
+          category.toDatabase(),
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+
+        await txn.insert(
+          'supermarket_category',
+          {
+            'supermarket_id': supermarketId,
+            'category_id': category.id,
+            'order_index': i,
+          },
+        );
+      }
+    });
+  }
+
+
+
+  /// Gets all categories of a supermarket ordered by position
+  static Future<List<Category>> getSupermarketCategories(String supermarketId) async {
+    final db = await DatabaseHelper.database;
+
+    final categories = await db.rawQuery('''
+      SELECT c.*
+      FROM category c
+      JOIN supermarket_category sc ON sc.category_id = c.id
+      WHERE sc.supermarket_id = ?
+      ORDER BY sc.order_index ASC
+    ''', [supermarketId]);
+
+    return categories.map(Category.fromDatabase).toList();
+  }
+
+  /// Adds a category to a supermarket at a specific position
+  static Future<void> addCategoryToSupermarket(
+    String supermarketId,
+    Category category,
+    int orderIndex,
+  ) async {
+    final db = await DatabaseHelper.database;
+
+    // Insert or replace the category
+    await db.insert('category', category.toDatabase(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+
+    // Insert the association with the order index
+    await db.insert('supermarket_category', {
+      'supermarket_id': supermarketId,
+      'category_id': category.id,
+      'order_index': orderIndex,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  /// Reorders categories of a supermarket
+  /// categoryOrderMap is a Map<categoryId, newOrderIndex>
+  static Future<void> reorderCategories(
+    String supermarketId,
+    Map<String, int> categoryOrderMap,
+  ) async {
+    final db = await DatabaseHelper.database;
+
+    for (final entry in categoryOrderMap.entries) {
+      await db.update(
+        'supermarket_category',
+        {'order_index': entry.value},
+        where: 'supermarket_id = ? AND category_id = ?',
+        whereArgs: [supermarketId, entry.key],
+      );
+    }
   }
 }
