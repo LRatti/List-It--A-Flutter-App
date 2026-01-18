@@ -15,9 +15,7 @@ class User {
     String? userName, 
   }): 
       _userName = userName,
-      uid = uid ?? Helper.generateId() {
-    this.uid = uid;
-  }
+      uid = uid ?? Helper.generateId();
       
   String getUserName() {
     return _userName ?? '';

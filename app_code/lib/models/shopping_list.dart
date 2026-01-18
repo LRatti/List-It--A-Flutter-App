@@ -49,6 +49,7 @@ class ShoppingList {
   }
 
   double getTotalPrice() {
+    computeTotalPrice();
     return this._totalPrice ?? 0.0;
   }
 
