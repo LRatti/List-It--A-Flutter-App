@@ -1,10 +1,12 @@
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/recipe_response.dart';
 import 'package:app_code/services/gemini/gemini_client.dart';
+import 'package:app_code/services/gemini/gemini_exception_handler.dart';
 import 'package:app_code/services/gemini/gemini_prompt_builder.dart';
 import 'package:app_code/services/gemini/gemini_response_parser.dart';
 import 'package:app_code/services/gemini/gemini_service.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 /// Fake Gemini client for testing without real API calls
 class FakeGeminiClient implements GeminiClient {
@@ -149,6 +151,66 @@ void main() {
       );
 
       expect(result, 'uncategorized');
+    });
+  });
+
+  group('GeminiExceptionHandler', () {
+    test('handleGenerativeAIException detects not found error', () {
+      final exception = GenerativeAIException('Recipe not found in database');
+
+      final result = GeminiExceptionHandler.handleGenerativeAIException(exception);
+
+      expect(result.error, isNotEmpty);
+      expect(result.error, contains('does not exist'));
+    });
+
+    test('handleGenerativeAIException detects quota exceeded error', () {
+      final exception = GenerativeAIException('Rate limit exceeded');
+
+      final result = GeminiExceptionHandler.handleGenerativeAIException(exception);
+
+      expect(result.error, contains('temporarily unavailable'));
+    });
+
+    test('handleGenerativeAIException detects connection error', () {
+      final exception = GenerativeAIException('Socket exception: Connection timeout');
+
+      final result = GeminiExceptionHandler.handleGenerativeAIException(exception);
+
+      expect(result.error, contains('Connection error'));
+      expect(result.error, contains('internet connection'));
+    });
+
+    test('handleGenerativeAIException provides default error message', () {
+      final exception = GenerativeAIException('Some random error');
+
+      final result = GeminiExceptionHandler.handleGenerativeAIException(exception);
+
+      expect(result.error, contains('Something went wrong'));
+    });
+
+    test('handleGenericException detects network errors', () {
+      final exception = Exception('SocketException: connection refused');
+
+      final result = GeminiExceptionHandler.handleGenericException(exception);
+
+      expect(result.error, contains('Connection error'));
+    });
+
+    test('handleGenericException handles timeout errors', () {
+      final exception = Exception('TimeoutException: operation timed out');
+
+      final result = GeminiExceptionHandler.handleGenericException(exception);
+
+      expect(result.error, contains('Connection error'));
+    });
+
+    test('handleGenericException provides generic fallback', () {
+      final exception = Exception('Unknown error occurred');
+
+      final result = GeminiExceptionHandler.handleGenericException(exception);
+
+      expect(result.error, 'Something went wrong. Please try again.');
     });
   });
 }
