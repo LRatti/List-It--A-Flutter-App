@@ -57,6 +57,7 @@ final geminiRepositoryProvider = Provider<GeminiRepository>((ref) {
   // Use test repository for mock data
   // return GeminiRepositoryTest();
   // Use real repository for actual API calls
+  //TODO: switch to real repository when needed
   return GeminiRepositoryTest();
 });
 
