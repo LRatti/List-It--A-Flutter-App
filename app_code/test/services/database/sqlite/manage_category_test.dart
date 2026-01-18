@@ -140,4 +140,75 @@ test('deletes a category', () async {
     final all = await ManageCategory.getAllCategories();
     expect(all, isEmpty);
   });
+
+  test('updates category name correctly', () async {
+    final category = Category(id: 'cat1', name: 'Original Name', isDefault: false);
+    await ManageCategory.addCategory(category);
+
+    final updated = Category(id: 'cat1', name: 'Updated Name', isDefault: false);
+    await ManageCategory.updateCategory(updated);
+
+    final retrieved = await ManageCategory.getCategoryById('cat1');
+    expect(retrieved, isNotNull);
+    expect(retrieved!.getName(), 'Updated Name');
+  });
+
+  test('multiple categories with similar names can coexist', () async {
+    final cat1 = Category(name: 'Fruit');
+    final cat2 = Category(name: 'Fruit Juice');
+    final cat3 = Category(name: 'Dried Fruit');
+
+    await ManageCategory.addCategory(cat1);
+    await ManageCategory.addCategory(cat2);
+    await ManageCategory.addCategory(cat3);
+
+    final all = await ManageCategory.getAllCategories();
+    expect(all.length, 3);
+
+    final fruitCat = await ManageCategory.getCategoryByName('Fruit');
+    expect(fruitCat, isNotNull);
+    expect(fruitCat!.getName(), 'Fruit');
+    expect(fruitCat.id, cat1.id);
+  });
+
+  test('handles category with empty name', () async {
+    final category = Category(name: '');
+    await ManageCategory.addCategory(category);
+
+    final retrieved = await ManageCategory.getCategoryById(category.id);
+    expect(retrieved, isNotNull);
+    expect(retrieved!.getName(), '');
+  });
+
+  test('handles updating to same values', () async {
+    final category = Category(name: 'Unchanged', isDefault: true);
+    await ManageCategory.addCategory(category);
+
+    final sameCategory = Category(id: category.id, name: 'Unchanged', isDefault: true);
+    await ManageCategory.updateCategory(sameCategory);
+
+    final retrieved = await ManageCategory.getCategoryById(category.id);
+    expect(retrieved, isNotNull);
+    expect(retrieved!.getName(), 'Unchanged');
+    expect(retrieved.isDefault, true);
+  });
+
+  test('getAllCategories returns all categories in database', () async {
+    final categories = List.generate(
+      5,
+      (i) => Category(name: 'Category $i'),
+    );
+
+    for (final cat in categories) {
+      await ManageCategory.addCategory(cat);
+    }
+
+    final all = await ManageCategory.getAllCategories();
+    expect(all.length, 5);
+
+    final names = all.map((c) => c.getName()).toSet();
+    for (int i = 0; i < 5; i++) {
+      expect(names.contains('Category $i'), true);
+    }
+  });
 }

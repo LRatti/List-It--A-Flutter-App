@@ -52,5 +52,55 @@ void main() {
       expect(fromJson.isAnonymous, true);
       expect(fromJson.getUserName(), 'Dave');
     });
+
+    test('handles null userName gracefully', () {
+      final user = User(uid: 'u1', email: 'test@test.com', userName: null);
+
+      expect(user.getUserName(), '');
+      expect(user.toDatabase()['user_name'], null);
+      expect(user.toJson()['user_name'], null);
+    });
+
+    test('handles empty userName', () {
+      final user = User(uid: 'u1', email: 'test@test.com', userName: '');
+
+      expect(user.getUserName(), '');
+      user.setUserName('NewName');
+      expect(user.getUserName(), 'NewName');
+    });
+
+    test('creates anonymous user correctly', () {
+      final user = User(isAnonymous: true, email: 'anon@test.com');
+
+      expect(user.isAnonymous, true);
+      expect(user.toJson()['is_anonymous'], true);
+    });
+
+    test('handles user with special characters in userName', () {
+      final user = User(
+        uid: 'u1',
+        email: 'special@test.com',
+        userName: 'Üser Ñamé 123',
+      );
+
+      expect(user.getUserName(), 'Üser Ñamé 123');
+      expect(user.toDatabase()['user_name'], 'Üser Ñamé 123');
+    });
+
+    test('multiple setUserName calls update correctly', () {
+      final user = User(userName: 'First');
+
+      expect(user.setUserName('Second'), 1);
+      expect(user.getUserName(), 'Second');
+      
+      expect(user.setUserName('Third'), 1);
+      expect(user.getUserName(), 'Third');
+    });
+
+    test('user with provided uid uses that uid', () {
+      final user = User(uid: 'custom-id', email: 'test@test.com');
+
+      expect(user.uid, 'custom-id');
+    });
   });
 }

@@ -29,7 +29,7 @@ class ShoppingList {
       isInTheTrash = false,
       deletionTimestamp,
   }) :  _name = name,
-        _totalPrice = totalPrice,
+        _totalPrice = totalPrice ?? 0.0,
         _supermarket = supermarket ?? _getDefaultSupermarket(),
         _isRegistered = isRegistered,
         _isInTheTrash = isInTheTrash,
@@ -154,8 +154,15 @@ class ShoppingList {
   }
 
   PurchasedProduct? getProductByName(String productName) {
-    return products?.firstWhere((product) => product.product.getName() == productName);
+    if (products == null) return null;
+    for (var product in products!) {
+      if (product.product.getName() == productName) {
+        return product;
+      }
+    }
+    return null;
   }
+
 
   void setPurchasedProducts(List<PurchasedProduct> products) {
     this.products = products;
@@ -179,10 +186,6 @@ class ShoppingList {
 
   void setSupermarket(Supermarket supermarket) {
     this._supermarket = supermarket;
-  }
-
-  void setTotalPrice(double totalPrice) {
-    this._totalPrice = totalPrice;
   }
 
   void computeTotalPrice() {

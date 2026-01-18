@@ -129,15 +129,5 @@ class ManageRecipeCache {
         .toList();
   }
 
-  /// Deletes recipe caches older than a specific number of days
-  static Future<int> deleteCachesOlderThan(int days) async {
-    final db = await DatabaseHelper.database;
-    final cutoffDate = DateTime.now().subtract(Duration(days: days)).toIso8601String();
-
-    return db.delete(
-      'recipe_cache',
-      where: 'created_at < ?',
-      whereArgs: [cutoffDate],
-    );
-  }
+  
 }

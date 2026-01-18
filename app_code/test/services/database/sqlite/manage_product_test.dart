@@ -267,4 +267,112 @@ void main() {
     expect(all.first.getName(), 'Replaced');
   });
 
+  test('handles getAllProducts with multiple products', () async {
+    final products = List.generate(
+      10,
+      (i) => Product(name: 'Product $i', associations: {'sup$i': 'cat$i'}),
+    );
+
+    for (final product in products) {
+      await ManageProduct.addProduct(product);
+    }
+
+    final all = await ManageProduct.getAllProducts();
+    expect(all.length, 10);
+
+    for (int i = 0; i < 10; i++) {
+      final product = all.firstWhere((p) => p.getName() == 'Product $i');
+      expect(product.associations['sup$i'], 'cat$i');
+    }
+  });
+
+  test('getProductByName handles products with no associations', () async {
+    final product = Product(name: 'No Association Product');
+    await ManageProduct.addProduct(product);
+
+    final found = await ManageProduct.getProductByName('No Association Product');
+    expect(found, isNotNull);
+    expect(found!.getName(), 'No Association Product');
+    expect(found.associations, isEmpty);
+  });
+
+  test('handles updating product name only', () async {
+    final product = Product(
+      name: 'Original Name',
+      associations: {'sup1': 'cat1'},
+      isVisible: true,
+    );
+    await ManageProduct.addProduct(product);
+
+    final updated = Product(
+      id: product.id,
+      name: 'New Name',
+      associations: {'sup1': 'cat1'},
+      isVisible: true,
+    );
+    await ManageProduct.updateProduct(updated);
+
+    final retrieved = await ManageProduct.getProductById(product.id);
+    expect(retrieved, isNotNull);
+    expect(retrieved!.getName(), 'New Name');
+    expect(retrieved.associations['sup1'], 'cat1');
+  });
+
+  test('handles product with special characters in name', () async {
+    final product = Product(name: 'Caffè & Tè (Special)');
+    await ManageProduct.addProduct(product);
+
+    final found = await ManageProduct.getProductByName('Caffè & Tè (Special)');
+    expect(found, isNotNull);
+    expect(found!.getName(), 'Caffè & Tè (Special)');
+  });
+
+  test('deleteProduct removes product but not shared categories/supermarkets', () async {
+    final db = await DatabaseHelper.database;
+    
+    // Add category and supermarket that might be shared
+    await db.insert('category', {
+      'id': 'shared-cat',
+      'name': 'Shared Category',
+      'is_default': 0,
+    });
+
+    final product1 = Product(
+      name: 'Product 1',
+      associations: {'sup1': 'shared-cat'},
+    );
+    final product2 = Product(
+      name: 'Product 2',
+      associations: {'sup1': 'shared-cat'},
+    );
+
+    await ManageProduct.addProduct(product1);
+    await ManageProduct.addProduct(product2);
+
+    // Delete first product
+    await ManageProduct.deleteProduct(product1.id);
+
+    // Category should still exist
+    final categoryRows = await db.query('category', where: 'id = ?', whereArgs: ['shared-cat']);
+    expect(categoryRows.length, 1);
+
+    // Second product should still have its association
+    final product2Retrieved = await ManageProduct.getProductById(product2.id);
+    expect(product2Retrieved, isNotNull);
+    expect(product2Retrieved!.associations['sup1'], 'shared-cat');
+  });
+
+  test('handles updating product with isVisible flag toggling', () async {
+    final product = Product(name: 'Toggle Product', isVisible: true);
+    await ManageProduct.addProduct(product);
+
+    var retrieved = await ManageProduct.getProductById(product.id);
+    expect(retrieved!.isVisible, true);
+
+    final updated = Product(id: product.id, name: 'Toggle Product', isVisible: false);
+    await ManageProduct.updateProduct(updated);
+
+    retrieved = await ManageProduct.getProductById(product.id);
+    expect(retrieved!.isVisible, false);
+  });
 }

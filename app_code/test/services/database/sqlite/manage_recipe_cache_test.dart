@@ -22,7 +22,6 @@ void main() {
 
   // --- Save and load a recipe cache ---
   test('saves and loads recipe cache correctly', () async {
-    final db = await DatabaseHelper.database;
 
     final recipeData = RecipeData(
       products: [Product(name: 'Tomato'), Product(name: 'Pasta')],
@@ -156,37 +155,6 @@ void main() {
     expect(createdAt.isBefore(afterSave.add(const Duration(seconds: 1))), true);
   });
 
-  // --- Delete old caches ---
-  test('deletes caches older than specified days', () async {
-    final recipeData = RecipeData.empty();
-
-    // Insert current cache
-    await ManageRecipeCache.saveRecipeCache(
-      listId: 'list1',
-      recipeName: 'Recent Recipe',
-      recipeData: recipeData,
-    );
-
-    // Insert old cache manually
-    final db = await DatabaseHelper.database;
-    final oldDate = DateTime.now().subtract(const Duration(days: 10)).toIso8601String();
-    await db.insert('recipe_cache', {
-      'list_id': 'list2',
-      'recipe_name': 'Old Recipe',
-      'recipe_data': recipeData.toJsonString(),
-      'error_message': null,
-      'has_seen_notification': 0,
-      'created_at': oldDate,
-    });
-
-    final deletedCount = await ManageRecipeCache.deleteCachesOlderThan(5);
-    expect(deletedCount, 1);
-
-    final allCached = await ManageRecipeCache.getAllCachedRecipes();
-    expect(allCached.length, 1);
-    expect(allCached.first.listId, 'list1');
-  });
-
   // --- Overwrite existing cache ---
   test('overwrites existing cache when saving with the same list id', () async {
     final recipeData1 = RecipeData(
@@ -224,4 +192,135 @@ void main() {
     expect(cached!.recipeName, 'Recipe 2');
     expect(cached.recipeData.products.first.getName(), 'Chicken');
   });
+
+  // --- Load non-existent cache returns null ---
+  test('returns null when loading non-existent recipe cache', () async {
+    final cached = await ManageRecipeCache.loadRecipeCache('non_existent_list');
+    expect(cached, isNull);
+  });
+
+  // --- Get creation date for non-existent cache ---
+  test('returns null when getting creation date for non-existent cache', () async {
+    final createdAt = await ManageRecipeCache.getCacheCreatedAt('non_existent_list');
+    expect(createdAt, isNull);
+  });
+
+  // --- Save and verify all cached recipes are retrieved ---
+  test('getAllCachedRecipes returns all saved recipes', () async {
+    final recipeData = RecipeData.empty();
+
+    await ManageRecipeCache.saveRecipeCache(
+      listId: 'list1',
+      recipeName: 'Recipe 1',
+      recipeData: recipeData,
+    );
+    await ManageRecipeCache.saveRecipeCache(
+      listId: 'list2',
+      recipeName: 'Recipe 2',
+      recipeData: recipeData,
+    );
+    await ManageRecipeCache.saveRecipeCache(
+      listId: 'list3',
+      recipeName: 'Recipe 3',
+      recipeData: recipeData,
+    );
+
+    final allRecipes = await ManageRecipeCache.getAllCachedRecipes();
+    expect(allRecipes.length, 3);
+    expect(allRecipes.map((r) => r.listId).toSet(), {'list1', 'list2', 'list3'});
+  });
+
+  // --- getAllCachedRecipes returns empty list when no caches ---
+  test('getAllCachedRecipes returns empty list when no caches exist', () async {
+    final allRecipes = await ManageRecipeCache.getAllCachedRecipes();
+    expect(allRecipes, isEmpty);
+  });
+
+  // --- markNotificationSeen on non-existent cache ---
+  test('markNotificationSeen on non-existent cache does not throw', () async {
+    expect(
+      () async => await ManageRecipeCache.markNotificationSeen('non_existent'),
+      returnsNormally,
+    );
+  });
+
+  // --- Delete cache that doesn't exist ---
+  test('deleteRecipeCache on non-existent cache does not throw', () async {
+    expect(
+      () async => await ManageRecipeCache.deleteRecipeCache('non_existent'),
+      returnsNormally,
+    );
+  });
+
+  // --- Save multiple caches and check hasCachedRecipe ---
+  test('hasCachedRecipe returns correct values for multiple caches', () async {
+    final recipeData = RecipeData.empty();
+
+    expect(await ManageRecipeCache.hasCachedRecipe('list1'), false);
+    
+    await ManageRecipeCache.saveRecipeCache(
+      listId: 'list1',
+      recipeName: 'Recipe 1',
+      recipeData: recipeData,
+    );
+    
+    expect(await ManageRecipeCache.hasCachedRecipe('list1'), true);
+    expect(await ManageRecipeCache.hasCachedRecipe('list2'), false);
+  });
+
+  // --- Save cache with hasSeenNotification = true ---
+  test('saves recipe cache with hasSeenNotification as true', () async {
+    final recipeData = RecipeData.empty();
+
+    await ManageRecipeCache.saveRecipeCache(
+      listId: 'list1',
+      recipeName: 'Test Recipe',
+      recipeData: recipeData,
+      hasSeenNotification: true,
+    );
+
+    final cached = await ManageRecipeCache.loadRecipeCache('list1');
+    expect(cached!.hasSeenNotification, true);
+  });
+
+  
+
+  // --- Save cache with complex recipe data ---
+  test('saves and loads complex recipe data correctly', () async {
+    final recipeData = RecipeData(
+      products: [
+        Product(name: 'Pasta'),
+        Product(name: 'Tomato'),
+        Product(name: 'Garlic'),
+        Product(name: 'Olive Oil'),
+      ],
+      quantities: ['400g', '800g', '3 cloves', '50ml'],
+      productCategories: ['Grains', 'Vegetables', 'Vegetables', 'Oils'],
+      recipeName: 'Pasta Pomodoro',
+      error: 'noError',
+    );
+
+    await ManageRecipeCache.saveRecipeCache(
+      listId: 'list1',
+      recipeName: 'Pasta Pomodoro',
+      recipeData: recipeData,
+    );
+
+    final cached = await ManageRecipeCache.loadRecipeCache('list1');
+    expect(cached!.recipeData.products.length, 4);
+    expect(cached.recipeData.quantities.length, 4);
+    expect(cached.recipeData.productCategories.length, 4);
+  });
+
+  // --- clearAllCaches when empty ---
+  test('clearAllCaches works correctly when database is empty', () async {
+    expect(
+      () async => await ManageRecipeCache.clearAllCaches(),
+      returnsNormally,
+    );
+
+    final allCached = await ManageRecipeCache.getAllCachedRecipes();
+    expect(allCached, isEmpty);
+  });
+
 }
