@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
-import 'package:app_code/screens/lists/add_recipe.dart';
+import 'package:app_code/screens/lists/add_recipe_screen_mobile.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 
 /// Global widget that listens for recipe search completions and shows notifications

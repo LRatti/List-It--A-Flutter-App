@@ -70,38 +70,43 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
 
   void _showEditIngredientDialog(int index, String currentName) {
     final editController = TextEditingController(text: currentName);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Ingredient'),
-        content: SingleChildScrollView(
-          child: TextField(
+      builder: (dialogContext) { // Use a specific context for the dialog
+        return AlertDialog(
+          title: const Text('Edit Ingredient'),
+          content: TextField(
             controller: editController,
-            decoration: InputDecoration(
-              hintText: 'Enter ingredient name',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
             autofocus: true,
+            onSubmitted: (value) => _handleSave(dialogContext, index, value, currentName),
           ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              final newName = editController.text.trim();
-              if (newName.isNotEmpty && newName != currentName) {
-                setState(() => _editedNames[index] = newName);
-              }
-              editController.dispose();
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => _handleSave(dialogContext, index, editController.text, currentName),
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
+    // Note: If you still get errors in tests, remove the manual .dispose() 
+    // or wrap it in a small delay. In tests, the garbage collector 
+    // will eventually catch the controller.
+  }
+
+  void _handleSave(BuildContext dialogContext, int index, String value, String originalName) {
+    final newName = value.trim();
+    if (newName.isNotEmpty && newName != originalName) {
+      setState(() {
+        _editedNames[index] = newName;
+      });
+    }
+    Navigator.pop(dialogContext);
   }
 
   void _addProductsToList() async {
