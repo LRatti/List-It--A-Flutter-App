@@ -17,6 +17,7 @@ import 'package:app_code/providers/real_app_providers/global_keys_provider.dart'
 import 'package:app_code/providers/real_app_providers/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/font_size_provider.dart';
 import 'package:app_code/providers/real_app_providers/recipe_notification_service_provider.dart';
+import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 
 // Styles
 import 'package:app_code/styles/scaled_typography.dart';
@@ -24,15 +25,31 @@ import 'package:app_code/styles/scaled_typography.dart';
 // Services
 import 'package:app_code/services/mock/mock_data_seed.dart';
 
-void main() async {
+/// Performs all initialization tasks required at app startup.
+/// This includes Firebase setup, mock data seeding, and cleanup operations.
+Future<void> _runStartupTasks() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
   // Seed mock data only if local database is empty
   await seedMockDataIfEmpty();
+
+  // Create a temporary ProviderContainer to run cleanup at startup
+  final container = ProviderContainer();
+  try {
+    // Clean up expired shopping lists (30+ days in trash)
+    await container.read(shoppingListsProvider.notifier).cleanupExpiredLists();
+  } finally {
+    container.dispose();
+  }
+}
+
+void main() async {
+  await _runStartupTasks();
 
   runApp(
     const ProviderScope(
