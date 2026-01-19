@@ -1,4 +1,4 @@
-import 'package:app_code/repositories/test_repo/recipe_cache_repository_test.dart';
+import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:app_code/models/recipe_response.dart';
@@ -6,7 +6,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/repositories/abstract/gemini_repository.dart';
 import 'package:app_code/repositories/real_app_repo/gemini_repository_real.dart';
-import 'package:app_code/repositories/test_repo/gemini_repository_test.dart';
+import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
 import 'package:app_code/repositories/abstract/recipe_cache_repository.dart';
 import 'package:app_code/repositories/real_app_repo/recipe_cache_repository_real.dart';
 
@@ -55,10 +55,10 @@ class BackgroundRecipeSearch {
 /// Using Provider is correct for dependency injection.
 final geminiRepositoryProvider = Provider<GeminiRepository>((ref) {
   // Use test repository for mock data
-  // return GeminiRepositoryTest();
+  // return MockGeminiRepository();
   // Use real repository for actual API calls
   //TODO: switch to real repository when needed
-  return GeminiRepositoryTest();
+  return MockGeminiRepository();
 });
 
 /// Provider for recipe cache repository

@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 
 void main() {
-  late InMemoryAuthRepository repo;
+  late MockAuthRepository repo;
 
   setUp(() {
-    repo = InMemoryAuthRepository();
+    repo = MockAuthRepository();
   });
 
   tearDown(() {

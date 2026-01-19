@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/screens/profile/verification_screen.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/email_verification_provider.dart';
-import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +13,7 @@ void main() {
   Future<void> pumpScreen(
     WidgetTester tester, {
     required EmailVerificationSession session,
-    required InMemoryAuthRepository repo,
+    required MockAuthRepository repo,
     String initialRoute = '/',
   }) async {
     // Set a larger test surface size to avoid overflow issues
@@ -41,7 +41,7 @@ void main() {
   }
 
   testWidgets('Abort on new signup deletes account and redirects to signin', (tester) async {
-    final repo = InMemoryAuthRepository();
+    final repo = MockAuthRepository();
     // Simulate new signup session
     final session = EmailVerificationSession(isNewSignup: true, email: 'new@example.com');
 
@@ -65,7 +65,7 @@ void main() {
   });
 
   testWidgets('Abort on email update cancels and pops', (tester) async {
-    final repo = InMemoryAuthRepository();
+    final repo = MockAuthRepository();
     // Simulate email update session
     final session = EmailVerificationSession(isNewSignup: false, email: 'update@example.com');
 

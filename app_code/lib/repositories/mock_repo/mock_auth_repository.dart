@@ -3,7 +3,7 @@ import 'package:app_code/repositories/abstract/auth_repository.dart';
 
 /// In-memory authentication repository used only for widget tests.
 /// Simulates authentication operations without Firebase.
-class InMemoryAuthRepository implements AuthRepository {
+class MockAuthRepository implements AuthRepository {
   User? _currentUser;
   final Map<String, String> _userCredentials = {}; // email -> password
   final Map<String, User> _registeredUsers = {}; // email -> User

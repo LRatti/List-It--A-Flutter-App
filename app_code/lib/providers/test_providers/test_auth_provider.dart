@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/user.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
-import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 
 /// Test-only AuthNotifier that uses the in-memory auth repository to avoid Firebase in widget tests.
 class TestAuthNotifier extends AuthNotifier {
   TestAuthNotifier(this.repository);
 
-  final InMemoryAuthRepository repository;
+  final MockAuthRepository repository;
 
   @override
   Future<User?> build() async {

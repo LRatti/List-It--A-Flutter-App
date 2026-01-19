@@ -3,7 +3,7 @@ import 'package:app_code/repositories/abstract/shopping_list_repository.dart';
 
 /// In-memory implementation used only for widget tests.
 /// It behaves like a real repository but without persistence.
-class TestShoppingListRepository implements ShoppingListRepository {
+class MockShoppingListRepository implements ShoppingListRepository {
   final List<ShoppingList> _lists = [];
 
   @override

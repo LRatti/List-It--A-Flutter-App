@@ -1,6 +1,6 @@
 import 'package:app_code/models/category.dart';
 import 'package:app_code/providers/real_app_providers/product_categorization_provider.dart';
-import 'package:app_code/repositories/test_repo/gemini_repository_test.dart';
+import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,7 +20,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           productCategorizationRepositoryProvider
-              .overrideWithValue(GeminiRepositoryTest()),
+              .overrideWithValue(MockGeminiRepository()),
         ],
       );
 
@@ -64,7 +64,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           productCategorizationRepositoryProvider
-              .overrideWithValue(GeminiRepositoryTest()),
+              .overrideWithValue(MockGeminiRepository()),
         ],
       );
 
@@ -106,7 +106,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           productCategorizationRepositoryProvider
-              .overrideWithValue(GeminiRepositoryTest()),
+              .overrideWithValue(MockGeminiRepository()),
         ],
       );
 
@@ -141,7 +141,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           productCategorizationRepositoryProvider
-              .overrideWithValue(GeminiRepositoryTest()),
+              .overrideWithValue(MockGeminiRepository()),
         ],
       );
 
@@ -175,12 +175,12 @@ void main() {
       expect(state, isEmpty);
     });
 
-    test('categorization result contains data from GeminiRepositoryTest',
+    test('categorization result contains data from MockGeminiRepository',
         () async {
       final container = ProviderContainer(
         overrides: [
           productCategorizationRepositoryProvider
-              .overrideWithValue(GeminiRepositoryTest()),
+              .overrideWithValue(MockGeminiRepository()),
         ],
       );
 
@@ -197,7 +197,7 @@ void main() {
 
       expect(result, isNotNull);
       expect(result!.isCompleted, isTrue);
-      // GeminiRepositoryTest categorizes yogurt as Dairy
+      // MockGeminiRepository categorizes yogurt as Dairy
       expect(
         result.result.maybeWhen(
           data: (category) => category == 'Dairy',
@@ -211,7 +211,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           productCategorizationRepositoryProvider
-              .overrideWithValue(GeminiRepositoryTest()),
+              .overrideWithValue(MockGeminiRepository()),
         ],
       );
 

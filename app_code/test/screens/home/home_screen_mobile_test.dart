@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
-import 'package:app_code/repositories/test_repo/test_shopping_list_repository.dart';
-import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
-import 'package:app_code/repositories/test_repo/mock_location_repository.dart';
-import 'package:app_code/repositories/test_repo/mock_supermarket_location_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_location_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_supermarket_location_repository.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/location_repository_provider.dart';
@@ -28,12 +28,12 @@ class TestNearestSupermarketNotifier extends NearestSupermarketNotifier {
 }
 
 void main() {
-  late InMemoryAuthRepository authRepository;
+  late MockAuthRepository authRepository;
   late MockLocationRepository mockLocationRepository;
   late MockSupermarketLocationRepository mockSupermarketRepository;
 
   setUp(() async {
-    authRepository = InMemoryAuthRepository();
+    authRepository = MockAuthRepository();
     await authRepository.signInAnonymously();
     
     // Initialize mock repositories
@@ -51,7 +51,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         shoppingListRepositoryProvider.overrideWithValue(
-          TestShoppingListRepository(),
+          MockShoppingListRepository(),
         ),
         authRepositoryProvider.overrideWithValue(authRepository),
         authProvider.overrideWith(() => TestAuthNotifier(authRepository)),

@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/repositories/abstract/location_repository.dart';
 import 'package:app_code/repositories/abstract/supermarket_location_repository.dart';
-import 'package:app_code/repositories/test_repo/mock_location_repository.dart';
-import 'package:app_code/repositories/test_repo/mock_supermarket_location_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_location_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_supermarket_location_repository.dart';
 
 /// Test-only providers that override the real implementations with mocks
 /// for creating a controlled testing environment

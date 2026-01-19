@@ -7,8 +7,8 @@ import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
 import 'package:app_code/models/recipe_response.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/category.dart';
-import 'package:app_code/repositories/test_repo/gemini_repository_test.dart';
-import 'package:app_code/repositories/test_repo/recipe_cache_repository_test.dart';
+import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
 
 /// Test spy implementation of [BackgroundRecipeNotifier].
 ///
@@ -28,8 +28,8 @@ class BackgroundNotifierSpy extends BackgroundRecipeNotifier {
   /// to avoid database access or external API calls during tests.
   BackgroundNotifierSpy()
       : super(
-          GeminiRepositoryTest(),
-          RecipeCacheRepositoryTest(),
+          MockGeminiRepository(),
+          MockRecipeCacheRepository(),
         );
 
   /// Overrides the real persistence behavior.
@@ -58,9 +58,9 @@ void main() {
       return ProviderScope(
         overrides: [
           recipeCacheRepositoryProvider
-              .overrideWithValue(RecipeCacheRepositoryTest()),
+              .overrideWithValue(MockRecipeCacheRepository()),
           geminiRepositoryProvider
-              .overrideWithValue(GeminiRepositoryTest()),
+              .overrideWithValue(MockGeminiRepository()),
         ],
         child: MaterialApp(
           navigatorKey: navigatorKey,

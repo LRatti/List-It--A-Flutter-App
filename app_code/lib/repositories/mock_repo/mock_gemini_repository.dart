@@ -6,7 +6,7 @@ import 'dart:math';
 
 /// Test implementation of GeminiRepository for testing purposes
 /// Returns mock recipe data without making actual API calls
-class GeminiRepositoryTest implements GeminiRepository {
+class MockGeminiRepository implements GeminiRepository {
   final Random _random = Random();
 
   @override

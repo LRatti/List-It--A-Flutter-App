@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
-import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 
 void main() {
   test('abortEmailVerification for new signup signs in anonymously', () async {
-    final repo = InMemoryAuthRepository();
+    final repo = MockAuthRepository();
     // Simulate user signed up (non-anonymous)
     await repo.signUp('user@example.com', 'password123');
 
@@ -25,7 +25,7 @@ void main() {
   });
 
   test('abortEmailVerification for email update keeps user signed in', () async {
-    final repo = InMemoryAuthRepository();
+    final repo = MockAuthRepository();
     // Simulate user signed in
     await repo.signUp('user2@example.com', 'password123');
 

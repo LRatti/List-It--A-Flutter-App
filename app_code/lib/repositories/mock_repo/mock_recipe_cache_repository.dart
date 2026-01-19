@@ -3,7 +3,7 @@ import 'package:app_code/repositories/abstract/recipe_cache_repository.dart';
 
 /// Test implementation of RecipeCacheRepository for testing purposes
 /// Stores recipe caches in memory without actual database persistence
-class RecipeCacheRepositoryTest implements RecipeCacheRepository {
+class MockRecipeCacheRepository implements RecipeCacheRepository {
   final Map<String, ({String recipeName, RecipeData recipeData, bool hasSeenNotification})> _cache = {};
 
   @override

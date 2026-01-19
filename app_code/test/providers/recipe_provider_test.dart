@@ -6,11 +6,11 @@ import 'package:app_code/models/recipe_response.dart';
 import 'package:app_code/models/shopping_list.dart';
 
 import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
-import 'package:app_code/repositories/test_repo/gemini_repository_test.dart';
-import 'package:app_code/repositories/test_repo/recipe_cache_repository_test.dart';
+import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
 
 /// Spy implementation to track cache side effects
-class RecipeCacheRepositorySpy extends RecipeCacheRepositoryTest {
+class RecipeCacheRepositorySpy extends MockRecipeCacheRepository {
   int saveCalls = 0;
   int deleteCalls = 0;
   int clearCalls = 0;
@@ -64,7 +64,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           geminiRepositoryProvider
-              .overrideWithValue(GeminiRepositoryTest()),
+              .overrideWithValue(MockGeminiRepository()),
         ],
       );
 
@@ -102,7 +102,7 @@ void main() {
     });
 
     test('loadCachedSearch loads cached data into state', () async {
-      final cacheRepo = RecipeCacheRepositoryTest();
+      final cacheRepo = MockRecipeCacheRepository();
 
       final container = ProviderContainer(
         overrides: [
@@ -137,7 +137,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           geminiRepositoryProvider
-              .overrideWithValue(GeminiRepositoryTest()),
+              .overrideWithValue(MockGeminiRepository()),
           recipeCacheRepositoryProvider.overrideWithValue(cacheRepo),
         ],
       );
