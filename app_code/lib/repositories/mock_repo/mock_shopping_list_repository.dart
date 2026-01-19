@@ -17,7 +17,12 @@ class MockShoppingListRepository implements ShoppingListRepository {
   }
 
   @override
-  Future<void> update(ShoppingList list) async {}
+  Future<void> update(ShoppingList list) async {
+    final index = _lists.indexWhere((l) => l.id == list.id);
+    if (index != -1) {
+      _lists[index] = list;
+    }
+  }
 
   @override
   Future<void> delete(ShoppingList list) async {

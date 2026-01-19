@@ -4,82 +4,123 @@ import 'package:app_code/repositories/real_app_repo/shopping_list_repository_db.
 import 'package:app_code/repositories/abstract/shopping_list_repository.dart';
 import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
 
+/// Provides the current time (injectable for testability).
+final currentDateTimeProvider = Provider<DateTime>((ref) => DateTime.now());
+
+/// Provides the concrete repository implementation.
+final shoppingListRepositoryProvider = Provider<ShoppingListRepository>((ref) {
+  return ShoppingListRepositoryDb();
+});
+
 /// Exposes a Riverpod AsyncNotifier that holds all shopping lists.
 final shoppingListsProvider =
     AsyncNotifierProvider<ShoppingListsNotifier, List<ShoppingList>>(
       ShoppingListsNotifier.new,
     );
 
-/// Provides the concrete repository implementation (SQLite here).
-// TODO: use manage_database instead of direct SQLite access
-final shoppingListRepositoryProvider = Provider<ShoppingListRepository>((ref) {
-  return ShoppingListRepositoryDb();
-});
-
 /// Manages shopping lists state and delegates persistence to the repository.
+/// 
+/// Design principles:
+/// - build() is pure: loads data without mutations
+/// - state updates are in-memory (no redundant repository.getAll() calls)
+/// - repository is watched (reactive to provider overrides)
+/// - time is injectable via currentDateTimeProvider for testability
+/// - cleanup is explicit via cleanupExpiredLists() method
 class ShoppingListsNotifier extends AsyncNotifier<List<ShoppingList>> {
-  late final ShoppingListRepository _repository;
-
-  /// Initializes the repository and loads all shopping lists.
-  /// Automatically deletes any lists in trash that have exceeded 30 days.
+  /// Loads all shopping lists from the repository.
+  /// Side-effect free: only loads data, doesn't delete anything.
+  /// Call cleanupExpiredLists() explicitly to remove expired trash items.
   @override
   Future<List<ShoppingList>> build() async {
-    _repository = ref.read(shoppingListRepositoryProvider);
-    final allLists = await _repository.getAll();
+    // Use ref.watch for repository (reactive to overrides)
+    final repository = ref.watch(shoppingListRepositoryProvider);
+    return repository.getAll();
+  }
 
-    // Check for lists that should be auto-deleted (in trash for 30+ days)
-    final now = DateTime.now();
-    final listsToDelete = <ShoppingList>[];
+  /// Persists a new list and updates state in-memory (efficient).
+  Future<void> addList(ShoppingList list) async {
+    final repository = ref.watch(shoppingListRepositoryProvider);
+    
+    state = await AsyncValue.guard(() async {
+      await repository.add(list);
+      // Update in-memory: append new list
+      final currentLists = state.value ?? [];
+      return [...currentLists, list];
+    });
+  }
 
-    for (final list in allLists) {
-      if (list.getIsInTheTrash() && list.getDeletionTimestamp() != null) {
-        final daysSinceDeletion = now
-            .difference(list.getDeletionTimestamp()!)
-            .inDays;
-        if (daysSinceDeletion >= 30) {
-          listsToDelete.add(list);
+  /// Deletes a list from persistence and updates state in-memory.
+  /// Automatically cancels related recipe searches.
+  Future<void> deleteList(ShoppingList list) async {
+    final repository = ref.watch(shoppingListRepositoryProvider);
+    final backgroundRecipeNotifier = 
+        ref.read(backgroundRecipeProvider.notifier);
+
+    state = await AsyncValue.guard(() async {
+      await repository.delete(list);
+      // Cancel ongoing recipe search for this list
+      await backgroundRecipeNotifier.cancelSearchForList(list.id);
+      
+      // Update in-memory: filter out deleted list by stable ID
+      final currentLists = state.value ?? [];
+      return currentLists.where((l) => l.id != list.id).toList();
+    });
+  }
+
+  /// Updates a list in persistence and updates state in-memory.
+  /// If list is moved to trash, automatically cancels recipe searches.
+  Future<void> updateList(ShoppingList list) async {
+    final repository = ref.watch(shoppingListRepositoryProvider);
+
+    state = await AsyncValue.guard(() async {
+      await repository.update(list);
+
+      // If moved to trash, cancel recipe searches
+      if (list.getIsInTheTrash()) {
+        final backgroundRecipeNotifier =
+            ref.read(backgroundRecipeProvider.notifier);
+        await backgroundRecipeNotifier.cancelSearchForList(list.id);
+      }
+
+      // Update in-memory: replace updated list by stable ID
+      final currentLists = state.value ?? [];
+      return [
+        for (final l in currentLists)
+          if (l.id == list.id) list else l,
+      ];
+    });
+  }
+
+  /// Explicitly clean up lists that have been in trash for more than 30 days.
+  /// This should be called explicitly (e.g., from UI initialization or a periodic timer).
+  /// 
+  /// Uses injectable time via [currentDateTimeProvider] for testability.
+  /// Cancels recipe searches for all deleted lists.
+  Future<void> cleanupExpiredLists() async {
+    final repository = ref.watch(shoppingListRepositoryProvider);
+    final now = ref.read(currentDateTimeProvider);
+    final backgroundRecipeNotifier = ref.read(backgroundRecipeProvider.notifier);
+    
+    state = await AsyncValue.guard(() async {
+      final currentLists = state.value ?? [];
+      final expiredIds = <String>{};
+
+      // Identify expired trash items by stable ID
+      for (final list in currentLists) {
+        if (list.getIsInTheTrash() && list.getDeletionTimestamp() != null) {
+          final daysSinceDeletion = now.difference(list.getDeletionTimestamp()!).inDays;
+          if (daysSinceDeletion >= 30) {
+            expiredIds.add(list.id);
+            // Delete from repository
+            await repository.delete(list);
+            // Cancel any ongoing recipe search
+            await backgroundRecipeNotifier.cancelSearchForList(list.id);
+          }
         }
       }
-    }
 
-    // Delete any expired lists
-    for (final list in listsToDelete) {
-      await _repository.delete(list);
-    }
-
-    // Return the filtered list (without the deleted ones)
-    return allLists.where((l) => !listsToDelete.contains(l)).toList();
-  }
-
-  /// Persists a new list, then appends it to the in-memory state.
-  Future<void> addList(ShoppingList list) async {
-    await _repository.add(list);
-    state = AsyncData([...state.value ?? [], list]);
-  }
-
-  /// Deletes a list from persistence and removes it from state.
-  Future<void> deleteList(ShoppingList list) async {
-    await _repository.delete(list);
-    await ref
-        .read(backgroundRecipeProvider.notifier)
-        .cancelSearchForList(list.id);
-    state = AsyncData(state.value!.where((l) => l.id != list.id).toList());
-  }
-
-  /// Updates a list in persistence and replaces it in state.
-  Future<void> updateList(ShoppingList list) async {
-    await _repository.update(list);
-
-    // If the list is moved to trash, cancel any ongoing recipe search
-    if (list.getIsInTheTrash()) {
-      await ref
-          .read(backgroundRecipeProvider.notifier)
-          .cancelSearchForList(list.id);
-    }
-
-    state = AsyncData([
-      for (final l in state.value!)
-        if (l.id == list.id) list else l,
-    ]);
+      // Update in-memory: filter out expired lists by stable ID
+      return currentLists.where((l) => !expiredIds.contains(l.id)).toList();
+    });
   }
 }
