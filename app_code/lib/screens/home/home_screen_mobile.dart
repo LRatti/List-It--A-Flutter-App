@@ -125,12 +125,16 @@ class _MobileHomePageState extends State<MobileHomePage> {
                 bottom: 0,
                 child: Row(
                   children: [
-                    SideMenu(onClose: _closeMenu),
+                    SideMenu(
+                      key: const Key('side_menu'),
+                      onClose: _closeMenu,
+                    ),
                     Expanded(
                       child: GestureDetector(
                         onTap: _closeMenu,
                         child: Container(
-                          color: Colors.black.withOpacity(0.3),
+                          key: const Key('side_menu_scrim'),
+                          color: Colors.black.withValues(alpha: 0.3),
                         ),
                       ),
                     ),

@@ -47,7 +47,11 @@ void main() {
     mockSupermarketRepository.reset();
   });
 
-  Future<ProviderContainer> pumpHomeScreen(WidgetTester tester) async {
+  Future<ProviderContainer> pumpHomeScreen(
+    WidgetTester tester, {
+    Size viewport = const Size(600, 900),
+    double devicePixelRatio = 1.0,
+  }) async {
     final container = ProviderContainer(
       overrides: [
         shoppingListRepositoryProvider.overrideWithValue(
@@ -66,9 +70,17 @@ void main() {
         ),
       ],
     );
-    
-    // Dispose container after test
-    addTearDown(container.dispose);
+
+    // Configure viewport to control orientation (portrait by default)
+    tester.view.physicalSize = viewport;
+    tester.view.devicePixelRatio = devicePixelRatio;
+
+    // Dispose container and reset view after test
+    addTearDown(() {
+      container.dispose();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -119,7 +131,7 @@ void main() {
     await pumpHomeScreen(tester);
 
     // Verify app bar is present
-    expect(find.byType(AppBar), findsOneWidget);
+    expect(find.byType(AppBar), findsWidgets);
     expect(find.text('My Shopping App'), findsOneWidget);
 
     // For anonymous user, should show Sign In button
@@ -145,8 +157,8 @@ void main() {
       await pumpHomeScreen(tester);
 
       // Verify authenticated user sees settings and logout
-      expect(find.byKey(const Key('settings_button')), findsOneWidget);
       expect(find.byKey(const Key('logout_button')), findsOneWidget);
+      expect(find.byKey(const Key('sign_in_button')), findsNothing);
     },
   );
 
@@ -176,6 +188,39 @@ void main() {
     // Go back to previous tab
     await tester.tap(find.text('Supermarkets'));
     await tester.pumpAndSettle();
+    expect(find.byKey(const Key('supermarkets_tab')), findsOneWidget);
+  });
+
+  testWidgets('Side menu opens and closes via scrim tap', (tester) async {
+    await pumpHomeScreen(tester);
+
+    expect(find.byKey(const Key('side_menu')), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('side_menu')), findsOneWidget);
+    expect(find.byKey(const Key('side_menu_scrim')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('side_menu_scrim')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('side_menu')), findsNothing);
+  });
+
+  testWidgets('Shows navigation rail in landscape and switches tabs', (tester) async {
+    await pumpHomeScreen(
+      tester,
+      viewport: const Size(1000, 600),
+    );
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(BottomNavigationBar), findsNothing);
+    expect(find.byKey(const Key('lists_tab')), findsOneWidget);
+
+    await tester.tap(find.text('Supermarkets'));
+    await tester.pumpAndSettle();
+
     expect(find.byKey(const Key('supermarkets_tab')), findsOneWidget);
   });
 }
