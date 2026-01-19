@@ -3,23 +3,32 @@ import 'package:flutter/material.dart';
 /// Generates a scaled TextTheme based on a multiplier
 /// Base sizes follow Material 3 guidelines
 class ScaledTypography {
-  /// Base font sizes (Material 3)
+/// --- Display Styles ---
+  /// Largest text on the screen, used for hero sections and branding.
   static const _displayLarge = 57.0;
   static const _displayMedium = 45.0;
   static const _displaySmall = 36.0;
   
+  /// --- Headline Styles ---
+  /// High-emphasis text for primary page headings and section markers.
   static const _headlineLarge = 32.0;
   static const _headlineMedium = 28.0;
   static const _headlineSmall = 24.0;
   
+  /// --- Title Styles ---
+  /// Medium-emphasis text used for card titles, list items, and subheaders.
   static const _titleLarge = 22.0;
   static const _titleMedium = 16.0;
   static const _titleSmall = 14.0;
   
+  /// --- Body Styles ---
+  /// Standard text for reading, used for descriptions and long paragraphs.
   static const _bodyLarge = 16.0;
   static const _bodyMedium = 14.0;
   static const _bodySmall = 12.0;
   
+  /// --- Label Styles ---
+  /// Functional text for components like buttons, chips, and small captions.
   static const _labelLarge = 14.0;
   static const _labelMedium = 12.0;
   static const _labelSmall = 11.0;
