@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/widgets/shopping_lists_grid_view.dart';
+import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 
 class SearchableShoppingListsView extends ConsumerStatefulWidget {
   final List<ShoppingList> lists;
@@ -87,6 +88,28 @@ class _SearchableShoppingListsViewState
     });
   }
 
+  void _resetState() {
+    final shouldResetDeletion = _isDeletionMode;
+    final shouldResetSearch = _isSearching || _searchController.text.isNotEmpty;
+
+    if (!shouldResetDeletion && !shouldResetSearch) return;
+
+    // Close deletion mode and search bar explicitly
+    if (shouldResetDeletion) {
+      _setDeletionMode(false);
+    }
+    if (shouldResetSearch) {
+      _stopSearch();
+    }
+
+    // Ensure lists are restored when neither search nor deletion is active
+    if (!_isDeletionMode && !_isSearching) {
+      setState(() {
+        _filteredLists = widget.lists;
+      });
+    }
+  }
+
   PreferredSizeWidget _buildSearchAppBar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -138,6 +161,13 @@ class _SearchableShoppingListsViewState
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    // Listen to global navigation signals to reset local UI state
+    ref.listen(appNavigationSignalProvider, (previous, next) {
+      if (previous != next) {
+        _resetState();
+      }
+    });
 
     return Scaffold(
       backgroundColor: colorScheme.surface,

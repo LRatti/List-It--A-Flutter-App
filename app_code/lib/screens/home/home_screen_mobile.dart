@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/widgets/top_bar_with_navbar.dart';
 import 'package:app_code/widgets/side_menu.dart';
 import 'package:app_code/screens/lists/lists_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarkets_screen_mobile.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
 import 'package:app_code/screens/stats/statistics_screen_mobile.dart';
+import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 
-class MobileHomePage extends StatefulWidget {
+class MobileHomePage extends ConsumerStatefulWidget {
   const MobileHomePage({super.key});
 
   @override
-  State<MobileHomePage> createState() => _MobileHomePageState();
+  ConsumerState<MobileHomePage> createState() => _MobileHomePageState();
 }
 
-class _MobileHomePageState extends State<MobileHomePage> {
-  int _selectedIndex = 0;
+class _MobileHomePageState extends ConsumerState<MobileHomePage> {
   bool _isMenuOpen = false;
 
   final List<Widget> _tabs = const [
@@ -24,11 +25,23 @@ class _MobileHomePageState extends State<MobileHomePage> {
     StatisticsScreenMobile(key: ValueKey('statistics_tab')),
   ];
 
-  void _toggleMenu() => setState(() => _isMenuOpen = !_isMenuOpen);
-  void _closeMenu() => setState(() => _isMenuOpen = false);
+  void _toggleMenu() {
+    ref.read(appNavigationSignalProvider.notifier).state++;
+    setState(() => _isMenuOpen = !_isMenuOpen);
+  }
+  void _closeMenu() {
+    ref.read(appNavigationSignalProvider.notifier).state++;
+    setState(() => _isMenuOpen = false);
+  }
+
+  void _onTabChanged(int index) {
+    ref.read(navigationIndexProvider.notifier).state = index;
+    ref.read(appNavigationSignalProvider.notifier).state++;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final selectedIndex = ref.watch(navigationIndexProvider);
     final bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     final colorScheme = Theme.of(context).colorScheme;
@@ -65,10 +78,10 @@ class _MobileHomePageState extends State<MobileHomePage> {
                             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                             minWidth: 72,
                             labelType: NavigationRailLabelType.all,
-                            selectedIndex: _selectedIndex,
+                            selectedIndex: selectedIndex,
                             scrollable: true,
                             onDestinationSelected: (int index) =>
-                                setState(() => _selectedIndex = index),
+                              _onTabChanged(index),
                             selectedIconTheme:
                                 IconThemeData(color: colorScheme.primary),
                             unselectedIconTheme:
@@ -106,7 +119,7 @@ class _MobileHomePageState extends State<MobileHomePage> {
 
                       Expanded(
                         child: IndexedStack(
-                          index: _selectedIndex,
+                          index: selectedIndex,
                           children: _tabs,
                         ),
                       ),
@@ -149,8 +162,8 @@ class _MobileHomePageState extends State<MobileHomePage> {
       bottomNavigationBar: isLandscape
     ? null
     : BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (int index) => setState(() => _selectedIndex = index),
+        currentIndex: selectedIndex,
+        onTap: (int index) => _onTabChanged(index),
         type: BottomNavigationBarType.fixed,
         backgroundColor: Theme.of(context).colorScheme.surface, // solid background
         selectedItemColor: Theme.of(context).colorScheme.primary, // bright/visible

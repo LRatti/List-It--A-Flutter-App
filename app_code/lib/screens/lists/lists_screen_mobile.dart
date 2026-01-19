@@ -115,6 +115,7 @@ class ListsScreenMobile extends ConsumerWidget {
             );
           },
           floatingActionButton: FloatingActionButton(
+            heroTag: 'addShoppingListFAB',
             onPressed: () => _showAddShoppingListDialog(context, ref),
             backgroundColor: Theme.of(context).colorScheme.primary,      // FAB background
             foregroundColor: Theme.of(context).colorScheme.onPrimary,    // Icon color

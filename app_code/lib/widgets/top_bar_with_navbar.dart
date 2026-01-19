@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
 import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
+import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 
 class TopBarWithNavBar extends ConsumerWidget {
@@ -39,6 +40,7 @@ class TopBarWithNavBar extends ConsumerWidget {
                     child: ElevatedButton(
                       key: const Key('sign_in_button'),
                       onPressed: () {
+                        ref.read(appNavigationSignalProvider.notifier).state++;
                         Navigator.of(context).pushNamed('/signin');
                       },
                       style: ElevatedButton.styleFrom(
@@ -74,6 +76,7 @@ class TopBarWithNavBar extends ConsumerWidget {
           child: InkWell(
             onTap: nearestSupermarketState.hasValidSupermarket
                 ? () async {
+                    ref.read(appNavigationSignalProvider.notifier).state++;
                     final supermarket = nearestSupermarketState.supermarket!;
                     final success = await mapLauncherService.openMap(
                       latitude: supermarket.latitude,

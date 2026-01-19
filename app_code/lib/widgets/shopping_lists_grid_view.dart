@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/widgets/shopping_list_widget.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 
 class ShoppingListsGridView extends ConsumerStatefulWidget {
   final List<ShoppingList> lists;
@@ -84,6 +85,16 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
     });
   }
 
+  void _resetSelection() {
+    if (!_selectionActive) return;
+    setState(() {
+      _selectedIds.clear();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onDeletionModeChanged?.call(false);
+    });
+  }
+
   @override
   void deactivate() {
     // Clear selection when widget is deactivated (e.g., when switching screens/tabs)
@@ -144,6 +155,13 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen for global navigation signals to clear selection and hide delete FAB
+    ref.listen(appNavigationSignalProvider, (prev, next) {
+      if (prev != next) {
+        _resetSelection();
+      }
+    });
+
     if (widget.lists.isEmpty) {
       return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
