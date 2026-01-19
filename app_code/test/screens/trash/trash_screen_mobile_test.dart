@@ -1,34 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/screens/trash/trash_screen_mobile.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
+import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
 
-class _FakeShoppingListsNotifier extends ShoppingListsNotifier {
-  _FakeShoppingListsNotifier(this.initialState);
-
-  final AsyncValue<List<ShoppingList>> initialState;
-  final List<ShoppingList> updateCalls = [];
-  final List<ShoppingList> deleteCalls = [];
-
+class _ThrowingShoppingListRepository extends MockShoppingListRepository {
   @override
-  Future<List<ShoppingList>> build() async {
-    state = initialState;
-    return initialState.value ?? <ShoppingList>[];
-  }
-
-  @override
-  Future<void> updateList(ShoppingList list) async {
-    updateCalls.add(list);
-    // keep state stable for UI; no repo interaction
-  }
-
-  @override
-  Future<void> deleteList(ShoppingList list) async {
-    deleteCalls.add(list);
-    // keep state stable for UI; no repo interaction
-  }
+  Future<List<ShoppingList>> getAll() async => throw Exception('boom');
 }
 
 ShoppingList _trashList(String name, {DateTime? createdAt}) {
@@ -41,19 +24,34 @@ ShoppingList _trashList(String name, {DateTime? createdAt}) {
   );
 }
 
-Future<(ProviderContainer, _FakeShoppingListsNotifier)> _pumpTrash(
+Future<(ProviderContainer, MockShoppingListRepository)> _pumpTrash(
   WidgetTester tester, {
-  AsyncValue<List<ShoppingList>>? state,
+  List<ShoppingList>? seed,
+  bool throwOnGetAll = false,
 }) async {
-  final notifier = _FakeShoppingListsNotifier(
-    state ?? const AsyncValue.loading(),
-  );
+  final repository = throwOnGetAll
+      ? _ThrowingShoppingListRepository()
+      : MockShoppingListRepository();
+
+  if (!throwOnGetAll) {
+    for (final l in seed ?? const <ShoppingList>[]) {
+      await repository.add(l);
+    }
+  }
 
   final container = ProviderContainer(
     overrides: [
-      shoppingListsProvider.overrideWith(() => notifier),
+      shoppingListRepositoryProvider.overrideWithValue(repository),
+      geminiRepositoryProvider.overrideWithValue(MockGeminiRepository()),
+      recipeCacheRepositoryProvider.overrideWithValue(MockRecipeCacheRepository()),
+      backgroundRecipeProvider.overrideWith((ref) {
+        final gemini = ref.read(geminiRepositoryProvider);
+        final cache = ref.read(recipeCacheRepositoryProvider);
+        return BackgroundRecipeNotifier(gemini, cache);
+      }),
     ],
   );
+
   addTearDown(container.dispose);
 
   await tester.pumpWidget(
@@ -62,41 +60,51 @@ Future<(ProviderContainer, _FakeShoppingListsNotifier)> _pumpTrash(
       child: const MaterialApp(home: TrashScreenMobile()),
     ),
   );
-  await tester.pumpAndSettle();
-  return (container, notifier);
+
+  return (container, repository);
 }
 
 void main() {
+  testWidgets('shows error message', (tester) async {
+    await _pumpTrash(
+      tester,
+      throwOnGetAll: true,
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.textContaining('boom'), findsOneWidget);
+  });
 
   testWidgets('shows empty message when trash is empty', (tester) async {
     await _pumpTrash(
       tester,
-      state: const AsyncValue.data(<ShoppingList>[]),
+      seed: const <ShoppingList>[],
     );
 
+    await tester.pumpAndSettle();
     expect(find.text('Trash is empty'), findsOneWidget);
   });
 
-  testWidgets('Restore all triggers update on each trashed list', (tester) async {
+  testWidgets('Restore all clears trash flags on all lists', (tester) async {
     final lists = [
       _trashList('A', createdAt: DateTime(2024, 5, 1)),
       _trashList('B', createdAt: DateTime(2024, 6, 1)),
     ];
 
-    final (_, notifier) = await _pumpTrash(
+    final (_, repo) = await _pumpTrash(
       tester,
-      state: AsyncValue.data(lists),
+      seed: lists,
     );
 
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Restore all'));
     await tester.pumpAndSettle();
-
-    // Confirm dialog
     await tester.tap(find.text('Restore'));
     await tester.pumpAndSettle();
 
-    expect(notifier.updateCalls.length, lists.length);
-    expect(notifier.updateCalls.map((l) => l.getIsInTheTrash()).every((v) => v == false), isTrue);
+    final stored = await repo.getAll();
+    expect(stored.length, lists.length);
+    expect(stored.every((l) => l.getIsInTheTrash() == false), isTrue);
   });
 
   testWidgets('Empty trash deletes all trashed lists after confirmation', (tester) async {
@@ -105,18 +113,19 @@ void main() {
       _trashList('D'),
     ];
 
-    final (_, notifier) = await _pumpTrash(
+    final (_, repo) = await _pumpTrash(
       tester,
-      state: AsyncValue.data(lists),
+      seed: lists,
     );
 
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Empty trash'));
     await tester.pumpAndSettle();
-
     await tester.tap(find.text('Delete all'));
     await tester.pumpAndSettle();
 
-    expect(notifier.deleteCalls.length, lists.length);
+    final remaining = await repo.getAll();
+    expect(remaining, isEmpty);
   });
 
   testWidgets('Single restore button updates the selected list', (tester) async {
@@ -124,15 +133,16 @@ void main() {
       _trashList('Solo'),
     ];
 
-    final (_, notifier) = await _pumpTrash(
+    final (_, repo) = await _pumpTrash(
       tester,
-      state: AsyncValue.data(lists),
+      seed: lists,
     );
 
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.restore));
     await tester.pumpAndSettle();
 
-    expect(notifier.updateCalls.length, 1);
-    expect(notifier.updateCalls.first.getIsInTheTrash(), isFalse);
+    final stored = await repo.getAll();
+    expect(stored.first.getIsInTheTrash(), isFalse);
   });
 }

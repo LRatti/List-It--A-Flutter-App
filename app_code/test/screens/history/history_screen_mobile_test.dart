@@ -4,16 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
 
-class _FakeShoppingListsNotifier extends ShoppingListsNotifier {
-  _FakeShoppingListsNotifier(this.initialState);
-
-  final AsyncValue<List<ShoppingList>> initialState;
-
+class _ThrowingShoppingListRepository extends MockShoppingListRepository {
   @override
-  Future<List<ShoppingList>> build() async {
-    state = initialState;
-    return initialState.value ?? <ShoppingList>[];
+  Future<List<ShoppingList>> getAll() async {
+    throw Exception('boom');
   }
 }
 
@@ -23,25 +19,31 @@ ShoppingList _list(
   bool inTrash = false,
   DateTime? createdAt,
 }) {
-  final list = ShoppingList(
+  return ShoppingList(
     name: name,
     createdAt: createdAt ?? DateTime.now(),
     isRegistered: registered,
     isInTheTrash: inTrash,
   );
-  return list;
 }
 
 Future<ProviderContainer> _pumpHistory(
   WidgetTester tester, {
-  AsyncValue<List<ShoppingList>>? state,
+  List<ShoppingList>? seedLists,
+  bool throwOnGetAll = false,
 }) async {
+  final repository =
+      throwOnGetAll ? _ThrowingShoppingListRepository() : MockShoppingListRepository();
+
+  if (!throwOnGetAll) {
+    for (final list in seedLists ?? <ShoppingList>[]) {
+      await repository.add(list);
+    }
+  }
+
   final container = ProviderContainer(
     overrides: [
-      if (state != null)
-        shoppingListsProvider.overrideWith(
-          () => _FakeShoppingListsNotifier(state),
-        ),
+      shoppingListRepositoryProvider.overrideWithValue(repository),
     ],
   );
 
@@ -55,11 +57,28 @@ Future<ProviderContainer> _pumpHistory(
       ),
     ),
   );
-  await tester.pumpAndSettle();
   return container;
 }
 
 void main() {
+  testWidgets('shows loading indicator while lists load', (tester) async {
+    await _pumpHistory(tester);
+
+    // first frame: loading
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('shows error message when repository fails', (tester) async {
+    await _pumpHistory(
+      tester,
+      throwOnGetAll: true,
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.textContaining('boom'), findsOneWidget);
+  });
 
   testWidgets('shows only registered non-trash lists', (tester) async {
     final lists = [
@@ -71,8 +90,10 @@ void main() {
 
     await _pumpHistory(
       tester,
-      state: AsyncValue.data(lists),
+      seedLists: lists,
     );
+
+    await tester.pumpAndSettle();
 
     expect(find.text('Registered A'), findsOneWidget);
     expect(find.text('Registered B'), findsOneWidget);
@@ -83,9 +104,10 @@ void main() {
   testWidgets('shows empty message when no registered lists', (tester) async {
     await _pumpHistory(
       tester,
-      state: const AsyncValue.data(<ShoppingList>[]),
+      seedLists: const <ShoppingList>[],
     );
 
+    await tester.pumpAndSettle();
     expect(find.text('No registered lists yet.'), findsOneWidget);
   });
 }
