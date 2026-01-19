@@ -20,7 +20,7 @@ class ShoppingList {
   ShoppingList(
       {String? id,
       required name,
-      required this.createdAt,
+      this.createdAt,
       supermarket,
       totalPrice,
       this.image,

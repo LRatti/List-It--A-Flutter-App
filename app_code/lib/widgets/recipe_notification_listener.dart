@@ -28,47 +28,41 @@ class _RecipeNotificationListenerState
 
   @override
   Widget build(BuildContext context) {
-    // Listen to recipe search changes
-    ref.listen<Map<String, BackgroundRecipeSearch>>(backgroundRecipeProvider, (
-      _,
-      searches,
-    ) {
+    ref.listen<Map<String, BackgroundRecipeSearch>>(
+      backgroundRecipeProvider,
+      (_, searches) {
+        // Remove IDs for lists that no longer exist
+        _notifiedListIds.removeWhere((id) => !searches.containsKey(id));
 
-      for (final entry in searches.entries) {
-        final listId = entry.key;
-        final search = entry.value;
+        for (final entry in searches.entries) {
+          final listId = entry.key;
+          final search = entry.value;
 
-        // Reset notification flag when a new search starts (not completed)
-        if (!search.isCompleted) {
-          _notifiedListIds.remove(listId);
+          // Reset notification flag if search is not completed
+          if (!search.isCompleted) {
+            _notifiedListIds.remove(listId);
+          }
+
+          // Show notification if search is completed, not yet notified, and not seen
+          if (search.isCompleted &&
+              !_notifiedListIds.contains(listId) &&
+              !search.hasSeenNotification) {
+            _showRecipeNotification(search);
+          }
         }
-
-        // Only show notification if completed and not already notified
-        if (search.isCompleted &&
-            !_notifiedListIds.contains(listId) &&
-            !search.hasSeenNotification) {
-          _showRecipeNotification(search);
-        }
-      }
-
-      // Clean up notified IDs for lists that no longer exist
-      _notifiedListIds.removeWhere((id) => !searches.containsKey(id));
-    });
+      },
+    );
 
     return widget.child;
   }
 
   void _showRecipeNotification(BackgroundRecipeSearch search) {
     search.result.whenData((recipe) {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
 
-      // Use WidgetsBinding to ensure we have a valid context
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
 
-        // Use the global ScaffoldMessenger key
         final scaffoldMessenger = widget.scaffoldMessengerKey.currentState;
         if (scaffoldMessenger == null) return;
 
@@ -76,8 +70,7 @@ class _RecipeNotificationListenerState
             ? 'Recipe search completed with issues'
             : 'Recipe "${recipe.recipeName}" found!';
 
-        // Persist that we have shown the notification
-        // Mark as seen BEFORE showing to handle app closure during display
+        // Mark as seen before showing to handle app closure during display
         ref.read(backgroundRecipeProvider.notifier).markNotificationSeen(search.listId);
 
         scaffoldMessenger.showSnackBar(
@@ -90,6 +83,9 @@ class _RecipeNotificationListenerState
             },
           ),
         );
+
+        // Track this list as notified
+        _notifiedListIds.add(search.listId);
       });
     });
   }
@@ -97,10 +93,7 @@ class _RecipeNotificationListenerState
   void _navigateToRecipeScreen(BackgroundRecipeSearch search) {
     if (!mounted) return;
 
-    // Check if we have the necessary data to navigate
-    if (search.shoppingList == null || search.availableCategories == null) {
-      return;
-    }
+    if (search.shoppingList == null || search.availableCategories == null) return;
 
     final navigator = widget.navigatorKey.currentState;
     if (navigator == null) return;
