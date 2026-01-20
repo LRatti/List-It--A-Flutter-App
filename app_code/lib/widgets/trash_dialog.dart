@@ -58,61 +58,57 @@ class TrashDialog extends ConsumerWidget {
                           list.getDeletionMessage(),
                           style: TextStyle(color: colorScheme.onSurfaceVariant),
                         ),
-                        trailing: SizedBox(
-                          width: 150,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton(
-                                onPressed: () async {
-                                  // Restore the list
-                                  await ref
-                                      .read(shoppingListsProvider.notifier)
-                                      .updateList(list..setIsInTheTrash(false));
-                                },
-                                child: const Text('Restore'),
+                        trailing: Wrap(
+                          spacing: 4,
+                          runSpacing: 4,
+                          children: [
+                            TextButton(
+                              onPressed: () async {
+                                await ref
+                                    .read(shoppingListsProvider.notifier)
+                                    .updateList(list..setIsInTheTrash(false));
+                              },
+                              child: const Text('Restore'),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                color: colorScheme.error,
                               ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.delete,
-                                  color: colorScheme.error,
-                                ),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (_) => AlertDialog(
-                                      title: const Text('Delete permanently'),
-                                      content: Text(
-                                        "Are you sure you want to permanently delete '${list.getName()}'?",
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: const Text('Cancel'),
-                                        ),
-                                        ElevatedButton(
-                                          onPressed: () async {
-                                            await ref
-                                                .read(shoppingListsProvider
-                                                    .notifier)
-                                                .deleteList(list);
-                                            if (context.mounted) {
-                                              Navigator.pop(context);
-                                            }
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: colorScheme.error,
-                                          ),
-                                          child: const Text('Delete'),
-                                        ),
-                                      ],
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    title: const Text('Delete permanently'),
+                                    content: Text(
+                                      "Are you sure you want to permanently delete '${list.getName()}'?",
                                     ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          await ref
+                                              .read(shoppingListsProvider
+                                                  .notifier)
+                                              .deleteList(list);
+                                          if (context.mounted) {
+                                            Navigator.pop(context);
+                                          }
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: colorScheme.error,
+                                        ),
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       );
                     },
