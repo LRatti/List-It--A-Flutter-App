@@ -12,7 +12,8 @@ class PurchasedProduct {
   Category category;
   double price;
   int quantity;
-  late DateTime lastModified;
+  late DateTime? lastModified;
+  late DateTime createdAt;
   bool isDeleted;
   
   PurchasedProduct({
@@ -23,9 +24,10 @@ class PurchasedProduct {
     this.price = 0.0,
     this.quantity = 0,
     DateTime? lastModified,
+    DateTime? createdAt,
     bool isDeleted = false,
   }) : this.id = id ?? Helper.generateId(),
-        lastModified = lastModified ?? DateTime.now(),
+        createdAt = createdAt ?? DateTime.now(),
         isDeleted = isDeleted;
 
   factory PurchasedProduct.fromDatabase(Map<String, dynamic> json, Category category, Product product) {
@@ -37,6 +39,7 @@ class PurchasedProduct {
       price: json['price'],
       quantity: json['quantity'],
       lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
       isDeleted: (json['is_deleted'] ?? 0) == 1,
     );
   }
@@ -49,7 +52,8 @@ class PurchasedProduct {
       'category_id': category.id,
       'price': price,
       'quantity': quantity,
-      'last_modified': lastModified.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'last_modified': lastModified?.toIso8601String(),
       'is_deleted': isDeleted ? 1 : 0,
     };
   }
@@ -63,6 +67,7 @@ class PurchasedProduct {
       quantity: json['quantity'],
       product: json['product'] != null ? Product.fromJson(json['product']) : Product(id: '', name: 'Unknown'),
       lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       isDeleted: json['isDeleted'] ?? false,
     );
   }
@@ -75,7 +80,8 @@ class PurchasedProduct {
       'category': category.toJson(),
       'price': price,
       'quantity': quantity,
-      'lastModified': lastModified.toIso8601String(),
+      'lastModified': lastModified?.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
       'isDeleted': isDeleted,
     };
   }

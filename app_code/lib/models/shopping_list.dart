@@ -8,7 +8,7 @@ class ShoppingList {
  
   final String id;
   String _name;
-  final DateTime? createdAt;
+  final DateTime createdAt;
   Supermarket _supermarket;
   double? _totalPrice;
   String? image;
@@ -16,7 +16,7 @@ class ShoppingList {
   bool _isRegistered = false;
   bool _isInTheTrash = false;
   DateTime? _deletionTimestamp;
-  late DateTime lastModified;
+  late DateTime? lastModified;
 
   ShoppingList(
       {String? id,
@@ -28,7 +28,7 @@ class ShoppingList {
       this.products,
       isRegistered = false,
       isInTheTrash = false,
-      deletionTimestamp,
+      DateTime? deletionTimestamp,
       DateTime? lastModified,
   }) :  _name = name,
         _totalPrice = totalPrice,
@@ -36,14 +36,13 @@ class ShoppingList {
         _isRegistered = isRegistered,
         _isInTheTrash = isInTheTrash,
         _deletionTimestamp = deletionTimestamp,
-        lastModified = lastModified ?? DateTime.now(),
         this.id = id ?? Helper.generateId();
 
   String getName() {
     return this._name;
   }
 
-  DateTime? getCreatedAt() {
+  DateTime getCreatedAt() {
     return createdAt;
   }
 
@@ -96,7 +95,7 @@ class ShoppingList {
       'is_registered': _isRegistered ? 1 : 0,
       'is_in_the_trash': _isInTheTrash ? 1 : 0,
       'deletion_timestamp': _deletionTimestamp?.toIso8601String(),
-      'last_modified': lastModified.toIso8601String(),
+      'last_modified': lastModified?.toIso8601String(),
     };
   }
 
@@ -125,7 +124,7 @@ class ShoppingList {
       'image': image,
       'products': products?.map((product) => product.toDatabase()).toList(),
       'is_registered': _isRegistered ? 1 : 0,
-      'lastModified': lastModified.toIso8601String(),
+      'lastModified': lastModified?.toIso8601String(),
     };
   }
 

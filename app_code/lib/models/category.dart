@@ -5,16 +5,18 @@ class Category {
   final String id;
   String _name;
   final bool isDefault;
-  late DateTime lastModified;
+  late DateTime? lastModified;
+  late DateTime createdAt;
 
   Category({
     String? id,
     required String name,
     this.isDefault = false,
     DateTime? lastModified,
+    DateTime? createdAt,
   })  : id = id ?? Helper.generateId(),
         _name = name,
-        lastModified = lastModified ?? DateTime.now();
+        createdAt = createdAt ?? DateTime.now();
 
   String getName(){
     return this._name;
@@ -26,6 +28,7 @@ class Category {
       name: json['name'],
       isDefault: json['is_default'] == 1,
       lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -34,7 +37,8 @@ class Category {
       'id': id,
       'name': _name,
       'is_default': isDefault ? 1 : 0,
-      'last_modified': lastModified.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'last_modified': lastModified?.toIso8601String(),
     };
   }
 
@@ -44,6 +48,7 @@ class Category {
       name: json['name'],
       isDefault: json['is_default'] == 1,
       lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -52,7 +57,8 @@ class Category {
       'id': id,
       'name': _name,
       'is_default': isDefault ? 1 : 0,
-      'lastModified': lastModified.toIso8601String(),
+      'lastModified': lastModified?.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 }

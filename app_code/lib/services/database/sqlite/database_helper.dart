@@ -43,6 +43,7 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         associations TEXT,
         is_visible INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
         last_modified TEXT NOT NULL
       )
     ''');
@@ -52,6 +53,7 @@ class DatabaseHelper {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         is_default INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
         last_modified TEXT NOT NULL
       )
     ''');
@@ -75,6 +77,7 @@ class DatabaseHelper {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         is_visible INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
         last_modified TEXT NOT NULL
       )
     ''');
@@ -97,6 +100,7 @@ class DatabaseHelper {
         category_id TEXT NOT NULL,
         price REAL NOT NULL,
         quantity INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
         last_modified TEXT NOT NULL,
         is_deleted INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY(list_id) REFERENCES shopping_list(id),

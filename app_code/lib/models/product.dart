@@ -5,7 +5,8 @@ class Product {
   String _name;
   Map<String, String> associations;
   bool isVisible;
-  late DateTime lastModified;
+  late DateTime? lastModified;
+  late DateTime createdAt;
 
   Product({
     String? id,
@@ -13,12 +14,13 @@ class Product {
     Map<String, String>? associations,
     bool isVisible = true,
     DateTime? lastModified,
+    DateTime? createdAt,
     bool isDeleted = false,
   })  : id = id ?? Helper.generateId(),
         _name = name,
         associations = associations ?? {},
         isVisible = isVisible,
-        lastModified = lastModified ?? DateTime.now();
+        createdAt = createdAt ?? DateTime.now();
 
   String getName() {
     return _name;
@@ -50,6 +52,7 @@ class Product {
       isVisible: (json['is_visible'] ?? 1) == 1,
       associations: associations,
       lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -58,7 +61,8 @@ class Product {
       'id': id,
       'name': _name,
       'is_visible': isVisible ? 1 : 0,
-      'last_modified': lastModified.toIso8601String(),
+      'last_modified': lastModified?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
     };
   }
 
@@ -69,6 +73,7 @@ class Product {
       associations: Map<String, String>.from(json['associations'] ?? {}),
       isVisible: json['isVisible'] ?? true,
       lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -77,7 +82,8 @@ class Product {
       'id': id,
       'name': _name,
       'isVisible': isVisible,
-      'lastModified': lastModified.toIso8601String(),
+      'lastModified': lastModified?.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 }

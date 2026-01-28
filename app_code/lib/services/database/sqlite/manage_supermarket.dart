@@ -11,6 +11,8 @@ class ManageSupermarket {
       'id': market.id,
       'name': market.getName(),
       'is_visible': market.isVisible ? 1 : 0,
+      'created_at': market.createdAt.toIso8601String(),
+      'last_modified': market.lastModified?.toIso8601String() ?? DateTime.now().toIso8601String(),
     });
 
     for (final cat in market.getCategories()) {
@@ -44,6 +46,8 @@ class ManageSupermarket {
         id: row['id'] as String,
         name: row['name'] as String,
         isVisible: row['is_visible'] == 1,
+        lastModified: DateTime.tryParse(row['last_modified'] as String? ?? '') ?? DateTime.now(),
+        createdAt: DateTime.tryParse(row['created_at'] as String? ?? '') ?? DateTime.now(),
         categories: categories.map(Category.fromDatabase).toList(),
       ));
     }
@@ -69,6 +73,7 @@ class ManageSupermarket {
       {
         'name': market.getName(),
         'is_visible': market.isVisible ? 1 : 0,
+        'last_modified': market.lastModified?.toIso8601String() ?? DateTime.now().toIso8601String(),
       },
       where: 'id = ?',
       whereArgs: [market.id],
@@ -115,6 +120,8 @@ class ManageSupermarket {
     return Supermarket(
       id: rows.first['id'] as String,
       name: rows.first['name'] as String,
+      lastModified: DateTime.tryParse(rows.first['last_modified'] as String? ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(rows.first['created_at'] as String? ?? '') ?? DateTime.now(),
       isVisible: rows.first['is_visible'] == 1,
       categories: categories.map(Category.fromDatabase).toList(),
     );

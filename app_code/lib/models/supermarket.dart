@@ -9,7 +9,8 @@ class Supermarket {
   String _name;
   List<Category> _categories;
   bool isVisible;
-  late DateTime lastModified;
+  late DateTime? lastModified;
+  late DateTime createdAt;
   
   Supermarket({
     String? id,
@@ -17,11 +18,12 @@ class Supermarket {
     List<Category>? categories,
     this.isVisible = true,
     DateTime? lastModified,
+    DateTime? createdAt,
     bool isDeleted = false,
   }) :  this.id = id ?? Helper.generateId(),
         _categories = categories ?? [],
         _name = name,
-        lastModified = lastModified ?? DateTime.now();
+        createdAt = createdAt ?? DateTime.now();
 
   String getName() {
     return _name;
@@ -51,8 +53,9 @@ class Supermarket {
     return Supermarket(
       id: json['id'],
       name: json['name'] ?? 'Supermarket',
-      isVisible: json['is_visible'],
+      isVisible: json['is_visible'] == 1,
       lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -61,8 +64,9 @@ class Supermarket {
       'id': id,
       'name': _name,
       'categoryIds': _categories.map((cat) => cat.id).toList(),
-      'is_visible': isVisible,
-      'last_modified': lastModified.toIso8601String(),
+      'is_visible': isVisible ? 1 : 0,
+      'created_at': createdAt.toIso8601String(),
+      'last_modified': lastModified?.toIso8601String(),
     };
   }
   
@@ -73,8 +77,9 @@ class Supermarket {
       categories: (json['categories'] as List<dynamic>?)
           ?.map((item) => Category.fromJson(item))
           .toList() ?? [],
-      isVisible: json['is_visible'],
+      isVisible: json['isVisible'] ?? true,
       lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -84,7 +89,8 @@ class Supermarket {
       'name': _name,
       'categories': _categories.map((cat) => cat.toJson()).toList(),
       'is_visible': isVisible,
-      'lastModified': lastModified.toIso8601String(),
+      'lastModified': lastModified?.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 }
