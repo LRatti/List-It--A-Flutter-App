@@ -9,7 +9,6 @@ class User {
   String? _userName;
   late DateTime? lastModified;
   late DateTime createdAt;
-  bool isDeleted;
 
   User({
     String? uid,
@@ -22,8 +21,7 @@ class User {
   }): 
       _userName = userName,
       uid = uid ?? Helper.generateId(),
-      createdAt = createdAt ?? DateTime.now(),
-      isDeleted = isDeleted {
+      createdAt = createdAt ?? DateTime.now(){
     this.uid = uid;
   }
       
@@ -54,7 +52,6 @@ class User {
       'user_name': _userName,
       'last_modified': lastModified?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
-      'is_deleted': isDeleted,
     };
   }
 
@@ -78,7 +75,6 @@ class User {
       'user_name': _userName,
       'lastModified': lastModified?.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
-      'isDeleted': isDeleted,
     };
   }
 }

@@ -17,6 +17,7 @@ class ShoppingList {
   bool _isInTheTrash = false;
   DateTime? _deletionTimestamp;
   late DateTime? lastModified;
+  bool isDeleted;
 
   ShoppingList(
       {String? id,
@@ -30,6 +31,7 @@ class ShoppingList {
       isInTheTrash = false,
       DateTime? deletionTimestamp,
       DateTime? lastModified,
+      this.isDeleted = false,
   }) :  _name = name,
         _totalPrice = totalPrice,
         _supermarket = supermarket ?? _getDefaultSupermarket(),
@@ -70,6 +72,10 @@ class ShoppingList {
     return _deletionTimestamp;
   }
 
+  bool getIsDeleted() {
+    return isDeleted;
+  }
+
   factory ShoppingList.fromDatabase(Map<String, dynamic> json) {
     return ShoppingList(
       id: json['id'],
@@ -81,6 +87,7 @@ class ShoppingList {
       isInTheTrash: json['is_in_the_trash'] == 1,
       deletionTimestamp: json['deletion_timestamp'] != null ? DateTime.tryParse(json['deletion_timestamp']) : null,
       lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
+      isDeleted: (json['is_deleted'] ?? 0) == 1,
     );
   }
 
@@ -96,6 +103,7 @@ class ShoppingList {
       'is_in_the_trash': _isInTheTrash ? 1 : 0,
       'deletion_timestamp': _deletionTimestamp?.toIso8601String(),
       'last_modified': lastModified?.toIso8601String(),
+      'is_deleted': isDeleted ? 1 : 0,
     };
   }
 
@@ -111,6 +119,7 @@ class ShoppingList {
           .toList(),
       isRegistered: json['is_registered'] == 1,
       lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
+      isDeleted: json['isDeleted'] ?? false,
     );
   }
 
@@ -125,6 +134,7 @@ class ShoppingList {
       'products': products?.map((product) => product.toDatabase()).toList(),
       'is_registered': _isRegistered ? 1 : 0,
       'lastModified': lastModified?.toIso8601String(),
+      'isDeleted': isDeleted,
     };
   }
 
@@ -194,6 +204,10 @@ class ShoppingList {
 
   void setDeletionTimestamp(DateTime? timestamp) {
     _deletionTimestamp = timestamp;
+  }
+
+  void setIsDeleted(bool isDeleted) {
+    this.isDeleted = isDeleted;
   }
 
   //TODO: take the supermarket from the json file containing the default one

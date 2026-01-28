@@ -33,7 +33,8 @@ class DatabaseHelper {
         is_registered INTEGER NOT NULL,
         last_modified TEXT NOT NULL,
         is_in_the_trash INTEGER NOT NULL DEFAULT 0,
-        deletion_timestamp TEXT
+        deletion_timestamp TEXT,
+        is_deleted INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
