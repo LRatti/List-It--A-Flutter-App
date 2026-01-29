@@ -81,7 +81,7 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                 children: [
                   Text(
                     categoryName,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -105,7 +105,7 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                     subtitle: Text('Quantity: ${product.quantity}'),
                     trailing: Text(
                       _formatCurrency(product.price),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   );
                 },
@@ -162,9 +162,9 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                     ),
                     const SizedBox(height: 12),
                     // "By category" title
-                    const Text(
+                    Text(
                       'By category',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     // Category list - not expanded, just normal height
@@ -180,9 +180,9 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                         return ListTile(
                           dense: true,
                           leading: CircleAvatar(backgroundColor: color, radius: 8),
-                          title: Text(e.key, style: const TextStyle(fontSize: 15)),
-                          subtitle: Text('${percent.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 12)),
-                          trailing: Text(_formatCurrency(e.value), style: const TextStyle(fontSize: 12)),
+                          title: Text(e.key, style: Theme.of(context).textTheme.titleSmall),
+                          subtitle: Text('${percent.toStringAsFixed(1)}%', style: Theme.of(context).textTheme.labelSmall),
+                          trailing: Text(_formatCurrency(e.value), style: Theme.of(context).textTheme.labelSmall),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
                           onTap: () => _showCategoryDetails(context, e.key, filtered),
                         );

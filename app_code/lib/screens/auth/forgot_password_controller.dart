@@ -94,7 +94,10 @@ abstract class ForgotPasswordController extends ConsumerState<ForgotPasswordScre
 
       // Navigate back to sign in
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Recovery email sent. Check your inbox.')),
+        buildAppSnackBar(
+          message: 'Recovery email sent. Check your inbox.',
+          context: context,
+        ),
       );
       //Navigator.of(context).pushNamedAndRemoveUntil('/signin', (route) => false);
     } catch (e) {

@@ -4,7 +4,7 @@ import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/widgets/password_text_field.dart';
 
 class SignInForm extends ConsumerStatefulWidget {
-  final dynamic authNotifier; // Keep for backward compatibility with tests
+  final dynamic authNotifier; // keep for backward compatibility
 
   const SignInForm({super.key, this.authNotifier});
 
@@ -23,6 +23,8 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   @override
   Widget build(BuildContext context) {
     final authNotifier = ref.read(authProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Form(
@@ -30,56 +32,51 @@ class _SignInFormState extends ConsumerState<SignInForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // intro text
-            const Center(child: Text('Sign in to your account.')),
+            // Intro text
+            Center(
+              child: Text(
+                'Sign in to your account.',
+                style: TextStyle(color: colorScheme.onBackground),
+              ),
+            ),
             const SizedBox(height: 16.0),
 
-            // email address
+            // Email field
             TextFormField(
               controller: _emailController,
               key: const Key('email_field'),
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(labelText: 'Email'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                return null;
-              },
+              validator: (value) =>
+                  (value == null || value.isEmpty) ? 'Please enter your email' : null,
             ),
             const SizedBox(height: 16.0),
 
-            // password
+            // Password field
             PasswordTextField(
               controller: _passwordController,
               fieldKey: const Key('password_field'),
               labelText: 'Password',
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
-                }
-                return null;
-              },
+              validator: (value) =>
+                  (value == null || value.isEmpty) ? 'Please enter your password' : null,
             ),
             const SizedBox(height: 16.0),
 
-            // error feedback
+            // Error feedback
             if (_errorFeedback != null)
               Text(
                 _errorFeedback!,
                 key: const Key('error_text'),
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: colorScheme.error),
               ),
             const SizedBox(height: 16.0),
 
-            // submit button
+            // Submit button
             ElevatedButton(
               key: const Key('sign_in_button'),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  setState(() {
-                    _errorFeedback = null;
-                  });
+                  setState(() => _errorFeedback = null);
 
                   final email = _emailController.text.trim();
                   final password = _passwordController.text.trim();
@@ -87,10 +84,8 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                   try {
                     await authNotifier.signIn(email, password);
                     if (context.mounted) {
-                      // Navigate to home screen after successful login
-                      Navigator.of(
-                        context,
-                      ).pushNamedAndRemoveUntil('/home', (route) => false);
+                      Navigator.of(context)
+                          .pushNamedAndRemoveUntil('/home', (route) => false);
                     }
                   } catch (e) {
                     setState(() {
@@ -102,6 +97,8 @@ class _SignInFormState extends ConsumerState<SignInForm> {
               child: const Text('Sign In'),
             ),
             const SizedBox(height: 8.0),
+
+            // Forgot password button
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(

@@ -6,7 +6,7 @@ import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
 import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
 import 'package:app_code/providers/test_providers/test_auth_provider.dart';
-import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 import 'package:app_code/services/map_launcher_service.dart';
 
 class TestNearestSupermarketNotifier extends NearestSupermarketNotifier {
@@ -40,10 +40,10 @@ class MockMapLauncherService extends MapLauncherService {
 }
 
 void main() {
-  late InMemoryAuthRepository authRepository;
+  late MockAuthRepository authRepository;
 
   setUp(() async {
-    authRepository = InMemoryAuthRepository();
+    authRepository = MockAuthRepository();
   });
 
   tearDown(() {

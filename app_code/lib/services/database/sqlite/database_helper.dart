@@ -87,6 +87,7 @@ class DatabaseHelper {
       CREATE TABLE supermarket_category(
         supermarket_id TEXT NOT NULL,
         category_id TEXT NOT NULL,
+        order_index INTEGER NOT NULL,
         PRIMARY KEY (supermarket_id, category_id),
         FOREIGN KEY(supermarket_id) REFERENCES supermarket(id),
         FOREIGN KEY(category_id) REFERENCES category(id)
@@ -107,6 +108,18 @@ class DatabaseHelper {
         FOREIGN KEY(list_id) REFERENCES shopping_list(id),
         FOREIGN KEY(product_id) REFERENCES product(id),
         FOREIGN KEY(category_id) REFERENCES category(id)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE recipe_cache(
+        list_id TEXT PRIMARY KEY,
+        recipe_name TEXT NOT NULL,
+        recipe_data TEXT NOT NULL,
+        error_message TEXT,
+        has_seen_notification INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY(list_id) REFERENCES shopping_list(id)
       )
     ''');
   }

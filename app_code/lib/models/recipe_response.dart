@@ -1,5 +1,5 @@
-import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
+import 'dart:convert';
 
 /// Represents a recipe response from Gemini with product list and recipe name
 class RecipeData {
@@ -37,4 +37,40 @@ class RecipeData {
       error: errorMessage,
     );
   }
+
+  /// Convert RecipeData to JSON for database storage
+  Map<String, dynamic> toJson() {
+    return {
+      'products': products.map((p) => p.getName()).toList(),
+      'quantities': quantities,
+      'productCategories': productCategories,
+      'recipeName': recipeName,
+      'error': error,
+    };
+  }
+
+  /// Create RecipeData from JSON
+  factory RecipeData.fromJson(Map<String, dynamic> json) {
+    return RecipeData(
+      products: (json['products'] as List<dynamic>)
+          .map((name) => Product(name: name as String))
+          .toList(),
+      quantities: List<String>.from(json['quantities'] as List<dynamic>),
+      productCategories:
+          List<String>.from(json['productCategories'] as List<dynamic>),
+      recipeName: json['recipeName'] as String,
+      error: json['error'] as String,
+    );
+  }
+
+  /// Convert to JSON string for database storage
+  String toJsonString() {
+    return jsonEncode(toJson());
+  }
+
+  /// Create from JSON string
+  factory RecipeData.fromJsonString(String jsonString) {
+    return RecipeData.fromJson(jsonDecode(jsonString) as Map<String, dynamic>);
+  }
 }
+

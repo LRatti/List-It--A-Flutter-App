@@ -33,7 +33,7 @@ class ShoppingList {
       DateTime? lastModified,
       this.isDeleted = false,
   }) :  _name = name,
-        _totalPrice = totalPrice,
+        _totalPrice = totalPrice ?? 0.0,
         _supermarket = supermarket ?? _getDefaultSupermarket(),
         _isRegistered = isRegistered,
         _isInTheTrash = isInTheTrash,
@@ -53,6 +53,7 @@ class ShoppingList {
   }
 
   double getTotalPrice() {
+    computeTotalPrice();
     return this._totalPrice ?? 0.0;
   }
 
@@ -138,6 +139,7 @@ class ShoppingList {
     };
   }
 
+  // Adds a product to the shopping list
   void addProduct(Product product, Category category) {
     PurchasedProduct purchasedProduct = PurchasedProduct(
       id: product.id,
@@ -150,6 +152,33 @@ class ShoppingList {
     products ??= [];
     products!.add(purchasedProduct);
   }
+
+  // Updates price and quantity of an existing purchased product
+  void registerProduct(String productName, double price, int quantity) {
+    PurchasedProduct? purchasedProduct = getProductByName(productName);
+
+    if(purchasedProduct != null) {
+      purchasedProduct.price = price;
+      purchasedProduct.quantity = quantity;
+    }
+  }
+
+  // Adds a PurchasedProduct directly
+  void addPurchasedProduct(PurchasedProduct purchasedProduct) {
+    products ??= [];
+    products!.add(purchasedProduct);
+  }
+
+  PurchasedProduct? getProductByName(String productName) {
+    if (products == null) return null;
+    for (var product in products!) {
+      if (product.product.getName() == productName) {
+        return product;
+      }
+    }
+    return null;
+  }
+
 
   void setPurchasedProducts(List<PurchasedProduct> products) {
     this.products = products;
@@ -173,10 +202,6 @@ class ShoppingList {
 
   void setSupermarket(Supermarket supermarket) {
     this._supermarket = supermarket;
-  }
-
-  void setTotalPrice(double totalPrice) {
-    this._totalPrice = totalPrice;
   }
 
   void computeTotalPrice() {
@@ -209,6 +234,39 @@ class ShoppingList {
   void setIsDeleted(bool isDeleted) {
     this.isDeleted = isDeleted;
   }
+
+  /// Calculates the number of days remaining before auto-deletion
+  /// Returns null if the list is not in trash or no deletion timestamp is set
+  int? getDaysUntilDeletion() {
+    if (!_isInTheTrash || _deletionTimestamp == null) {
+      return null;
+    }
+    
+    final now = DateTime.now();
+    final daysElapsed = now.difference(_deletionTimestamp!).inDays;
+    final daysRemaining = 30 - daysElapsed;
+    
+    // Return at least 0 days (when it's time to delete)
+    return daysRemaining > 0 ? daysRemaining : 0;
+  }
+
+  /// Get a user-friendly message about when the list will be deleted
+  String getDeletionMessage() {
+    final daysRemaining = getDaysUntilDeletion();
+    if (daysRemaining == null) {
+      return '';
+    }
+    
+    if (daysRemaining == 0) {
+      return 'Deleting now...';
+    } else if (daysRemaining == 1) {
+      return 'Delete in 1 day';
+    } else {
+      return 'Delete in $daysRemaining days';
+    }
+  }
+
+
 
   //TODO: take the supermarket from the json file containing the default one
   static Supermarket _getDefaultSupermarket() {

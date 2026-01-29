@@ -6,6 +6,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+Supermarket _market(String id,
+    {String name = 'Market', List<Category>? categories, bool isVisible = true}) {
+  return Supermarket(
+    id: id,
+    name: name,
+    isVisible: isVisible,
+    categories: categories ?? [Category(id: 'cat-$id', name: 'Cat $id')],
+  );
+}
+
 void main() {
   setUpAll(() async {
     sqfliteFfiInit();
@@ -23,180 +33,117 @@ void main() {
     await db.delete('category');
   });
 
-  test('adds and retrieves a supermarket by id', () async {
-    final category1 = Category(id: 'cat1', name: 'Fruit');
-    final category2 = Category(id: 'cat2', name: 'Vegetables');
+  test('addSupermarket saves market and categories', () async {
+    final market = _market('sup-1');
 
-    final supermarket = Supermarket(
-      id: 'sup1',
-      name: 'Super Market A',
-      categories: [category1, category2],
-    );
+    await ManageSupermarket.addSupermarket(market);
 
-    await ManageSupermarket.addSupermarket(supermarket);
-
-    final fetched = await ManageSupermarket.getSupermarketById('sup1');
+    final fetched = await ManageSupermarket.getSupermarketById('sup-1');
     expect(fetched, isNotNull);
-    expect(fetched!.id, 'sup1');
-    expect(fetched.getName(), 'Super Market A');
-    expect(fetched.getCategories().length, 2);
-    expect(fetched.getCategories().map((c) => c.id).toSet(), {'cat1', 'cat2'});
+    expect(fetched!.getCategories(), hasLength(1));
+    expect(fetched.getCategories().first.id, 'cat-sup-1');
   });
 
-  test('retrieves all supermarkets', () async {
-    final category = Category(id: 'cat1', name: 'Dairy');
+  test('getAllSupermarkets returns stored markets with ordered categories',
+      () async {
+    final marketA = _market('sup-a', categories: [
+      Category(id: 'c1', name: 'One'),
+      Category(id: 'c2', name: 'Two'),
+    ]);
+    final marketB = _market('sup-b');
 
-    final super1 = Supermarket(
-      id: 'sup1',
-      name: 'Market One',
-      categories: [category],
-    );
-
-    final super2 = Supermarket(
-      id: 'sup2',
-      name: 'Market Two',
-    );
-
-    await ManageSupermarket.addSupermarket(super1);
-    await ManageSupermarket.addSupermarket(super2);
+    await ManageSupermarket.addSupermarket(marketA);
+    await ManageSupermarket.addSupermarket(marketB);
 
     final all = await ManageSupermarket.getAllSupermarkets();
-    expect(all.length, 2);
-    expect(all.map((s) => s.id).toSet(), {'sup1', 'sup2'});
+    expect(all.map((m) => m.id).toSet(), {'sup-a', 'sup-b'});
+    final catOrder = all.firstWhere((m) => m.id == 'sup-a').getCategories();
+    expect(catOrder.map((c) => c.id).toList(), ['c1', 'c2']);
   });
 
-  test('finds supermarket by name', () async {
-    final category = Category(id: 'cat1', name: 'Bakery');
+  test('getSupermarketByName resolves by name', () async {
+    final market = _market('sup-name', name: 'Friendly');
+    await ManageSupermarket.addSupermarket(market);
 
-    final supermarket = Supermarket(
-      id: 'sup1',
-      name: 'City Market',
-      categories: [category],
-    );
+    final fetched = await ManageSupermarket.getSupermarketByName('Friendly');
+    final missing = await ManageSupermarket.getSupermarketByName('Nope');
 
-    await ManageSupermarket.addSupermarket(supermarket);
-
-    final found = await ManageSupermarket.getSupermarketByName('City Market');
-    expect(found, isNotNull);
-    expect(found!.id, 'sup1');
-    expect(found.getName(), 'City Market');
-    expect(found.getCategories().length, 1);
-  });
-
-  test('updates an existing supermarket', () async {
-    final category1 = Category(id: 'cat1', name: 'Meat');
-    final category2 = Category(id: 'cat2', name: 'Fish');
-
-    final supermarket = Supermarket(
-      id: 'sup1',
-      name: 'Original Name',
-      categories: [category1],
-    );
-
-    await ManageSupermarket.addSupermarket(supermarket);
-
-    supermarket.setName('Updated Name');
-    supermarket.setCategories([category1, category2]);
-
-    await ManageSupermarket.updateSupermarket(supermarket);
-
-    final updated = await ManageSupermarket.getSupermarketById('sup1');
-    expect(updated, isNotNull);
-    expect(updated!.getName(), 'Updated Name');
-    expect(updated.getCategories().length, 2);
-    expect(updated.getCategories().map((c) => c.getName()).toSet(), {'Meat', 'Fish'});
-  });
-
-  test('deletes a supermarket', () async {
-    final category = Category(id: 'cat1', name: 'Snacks');
-
-    final supermarket = Supermarket(
-      id: 'sup1',
-      name: 'Market to Delete',
-      categories: [category],
-    );
-
-    await ManageSupermarket.addSupermarket(supermarket);
-
-    await ManageSupermarket.deleteSupermarket('sup1');
-
-    final remaining = await ManageSupermarket.getAllSupermarkets();
-    expect(remaining, isEmpty);
-  });
-
-  test('deletes category associations when deleting supermarket', () async {
-    final db = await DatabaseHelper.database;
-
-    final category = Category(id: 'cat1', name: 'Beverages');
-
-    final supermarket = Supermarket(
-      id: 'sup1',
-      name: 'Market with Categories',
-      categories: [category],
-    );
-
-    await ManageSupermarket.addSupermarket(supermarket);
-
-    final associationsBefore = await db.query(
-      'supermarket_category',
-      where: 'supermarket_id = ?',
-      whereArgs: ['sup1'],
-    );
-    expect(associationsBefore.length, 1);
-
-    await ManageSupermarket.deleteSupermarket('sup1');
-
-    final associationsAfter = await db.query(
-      'supermarket_category',
-      where: 'supermarket_id = ?',
-      whereArgs: ['sup1'],
-    );
-    expect(associationsAfter, isEmpty);
-  });
-
-  test('handles supermarket with no categories', () async {
-    final supermarket = Supermarket(
-      id: 'sup1',
-      name: 'Empty Categories Market',
-    );
-
-    await ManageSupermarket.addSupermarket(supermarket);
-
-    final fetched = await ManageSupermarket.getSupermarketById('sup1');
     expect(fetched, isNotNull);
-    expect(fetched!.getName(), 'Empty Categories Market');
-    expect(fetched.getCategories(), isEmpty);
+    expect(fetched!.id, 'sup-name');
+    expect(missing, isNull);
   });
 
-  test('updates supermarket categories correctly', () async {
-    final cat1 = Category(id: 'cat1', name: 'Category 1');
-    final cat2 = Category(id: 'cat2', name: 'Category 2');
-    final cat3 = Category(id: 'cat3', name: 'Category 3');
+  test('updateSupermarket updates fields and category order', () async {
+    final market = _market('sup-up', categories: [
+      Category(id: 'ca', name: 'A'),
+      Category(id: 'cb', name: 'B'),
+    ]);
+    await ManageSupermarket.addSupermarket(market);
 
-    final supermarket = Supermarket(
-      id: 'sup1',
-      name: 'Market',
-      categories: [cat1, cat2],
+    final updated = Supermarket(
+      id: 'sup-up',
+      name: 'Updated',
+      isVisible: false,
+      categories: [Category(id: 'cb', name: 'B'), Category(id: 'ca', name: 'A')],
     );
 
-    await ManageSupermarket.addSupermarket(supermarket);
+    await ManageSupermarket.updateSupermarket(updated);
 
-    // Update to different categories
-    supermarket.setCategories([cat2, cat3]);
-    await ManageSupermarket.updateSupermarket(supermarket);
-
-    final updated = await ManageSupermarket.getSupermarketById('sup1');
-    expect(updated!.getCategories().length, 2);
-    expect(updated.getCategories().map((c) => c.id).toSet(), {'cat2', 'cat3'});
+    final fetched = await ManageSupermarket.getSupermarketById('sup-up');
+    expect(fetched, isNotNull);
+    expect(fetched!.getName(), 'Updated');
+    expect(fetched.isVisible, isFalse);
+    expect(fetched.getCategories().map((c) => c.id).toList(), ['cb', 'ca']);
   });
 
-  test('returns null when supermarket does not exist', () async {
-    final result = await ManageSupermarket.getSupermarketById('nonexistent');
-    expect(result, isNull);
+  test('replaceCategoriesOrder rewrites associations with new order', () async {
+    final market = _market('sup-repl', categories: [
+      Category(id: 'c1', name: 'One'),
+      Category(id: 'c2', name: 'Two'),
+    ]);
+    await ManageSupermarket.addSupermarket(market);
+
+    final newOrder = [Category(id: 'c2', name: 'Two'), Category(id: 'c1', name: 'One')];
+    await ManageSupermarket.replaceCategoriesOrder('sup-repl', newOrder);
+
+    final cats = await ManageSupermarket.getSupermarketCategories('sup-repl');
+    expect(cats.map((c) => c.id).toList(), ['c2', 'c1']);
   });
 
-  test('returns null when supermarket name not found', () async {
-    final result = await ManageSupermarket.getSupermarketByName('Nonexistent Market');
-    expect(result, isNull);
+  test('addCategoryToSupermarket inserts category at position', () async {
+    final market = _market('sup-add', categories: []);
+    await ManageSupermarket.addSupermarket(market);
+
+    final cat = Category(id: 'c-new', name: 'Fresh');
+    await ManageSupermarket.addCategoryToSupermarket('sup-add', cat, 0);
+
+    final cats = await ManageSupermarket.getSupermarketCategories('sup-add');
+    expect(cats.map((c) => c.id).toList(), ['c-new']);
   });
+
+  test('reorderCategories updates order_index for mapped categories', () async {
+    final market = _market('sup-reorder', categories: [
+      Category(id: 'c1', name: 'One'),
+      Category(id: 'c2', name: 'Two'),
+    ]);
+    await ManageSupermarket.addSupermarket(market);
+
+    await ManageSupermarket.reorderCategories('sup-reorder', {'c1': 1, 'c2': 0});
+
+    final cats = await ManageSupermarket.getSupermarketCategories('sup-reorder');
+    expect(cats.map((c) => c.id).toList(), ['c2', 'c1']);
+  });
+
+  test('deleteSupermarket removes market and category links', () async {
+    final market = _market('sup-del');
+    await ManageSupermarket.addSupermarket(market);
+
+    await ManageSupermarket.deleteSupermarket('sup-del');
+
+    final fetched = await ManageSupermarket.getSupermarketById('sup-del');
+    final cats = await ManageSupermarket.getSupermarketCategories('sup-del');
+    expect(fetched, isNull);
+    expect(cats, isEmpty);
+  });
+
 }

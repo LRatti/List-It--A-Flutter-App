@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/widgets/shopping_list_widget.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 
 class ShoppingListsGridView extends ConsumerStatefulWidget {
   final List<ShoppingList> lists;
@@ -47,7 +48,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Delete'),
           ),
         ],
@@ -76,6 +77,16 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
   }
 
   void _cancelSelection() {
+    setState(() {
+      _selectedIds.clear();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onDeletionModeChanged?.call(false);
+    });
+  }
+
+  void _resetSelection() {
+    if (!_selectionActive) return;
     setState(() {
       _selectedIds.clear();
     });
@@ -116,7 +127,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Delete'),
           ),
         ],
@@ -144,9 +155,17 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen for global navigation signals to clear selection and hide delete FAB
+    ref.listen(appNavigationSignalProvider, (prev, next) {
+      if (prev != next) {
+        _resetSelection();
+      }
+    });
+
     if (widget.lists.isEmpty) {
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        resizeToAvoidBottomInset: false,
         body: Center(child: Text(widget.emptyMessage)),
         floatingActionButton: widget.floatingActionButton,
       );
@@ -160,17 +179,18 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        resizeToAvoidBottomInset: false,
         appBar: _selectionActive
             ? AppBar(
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).colorScheme.primary,
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: _cancelSelection,
                 ),
                 title: Text(
                   '${_selectedIds.length} selected',
-                  style: const TextStyle(fontSize: 16),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               )
             : null,
@@ -228,7 +248,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
         floatingActionButton: _selectionActive
             ? FloatingActionButton(
                 onPressed: () => _deleteSelectedWithCallback(context),
-                backgroundColor: Colors.red,
+                backgroundColor: Theme.of(context).colorScheme.error,
                 child: const Icon(Icons.delete),
               )
             : widget.floatingActionButton,

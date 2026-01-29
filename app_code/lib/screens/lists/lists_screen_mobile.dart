@@ -48,6 +48,9 @@ class ListsScreenMobile extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.onSurface, // adapts to light/dark
+                ),
                 child: const Text("Cancel"),
               ),
               ElevatedButton(
@@ -62,6 +65,10 @@ class ListsScreenMobile extends ConsumerWidget {
                   }
                   if (context.mounted) Navigator.pop(context);
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                ),
                 child: const Text("Add"),
               ),
             ],
@@ -76,12 +83,12 @@ class ListsScreenMobile extends ConsumerWidget {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
 
     return shoppingListsAsync.when(
-      loading: () => const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+      loading: () => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(child: CircularProgressIndicator()),
       ),
       error: (error, _) => Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Center(child: Text(error.toString())),
       ),
       data: (lists) {
@@ -108,7 +115,10 @@ class ListsScreenMobile extends ConsumerWidget {
             );
           },
           floatingActionButton: FloatingActionButton(
+            heroTag: 'addShoppingListFAB',
             onPressed: () => _showAddShoppingListDialog(context, ref),
+            backgroundColor: Theme.of(context).colorScheme.primary,      // FAB background
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,    // Icon color
             child: const Icon(Icons.add),
           ),
         );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app_code/screens/settings/settings_screen_mobile.dart';
 import 'package:app_code/screens/trash/trash_screen_mobile.dart';
+import 'package:app_code/screens/profile/settings_screen.dart';
 
 class SideMenu extends StatelessWidget {
   final VoidCallback onClose;
@@ -12,27 +13,28 @@ class SideMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       width: 280,
-      color: Colors.white,
+      color: colorScheme.surface, // Main background matches theme
       child: Column(
         children: [
           Container(
-            color: Colors.blue,
+            color: colorScheme.primary, // Top bar background
             padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Menu',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
+                  icon: Icon(Icons.close, color: colorScheme.onPrimary),
                   onPressed: onClose,
                 ),
               ],
@@ -43,16 +45,27 @@ class SideMenu extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               children: [
                 ListTile(
-                  leading: const Icon(Icons.person, color: Colors.blue),
-                  title: const Text('Profile'),
+                  leading: Icon(Icons.person, color: colorScheme.primary),
+                  title: Text(
+                    'Profile',
+                    style: TextStyle(color: colorScheme.onSurface),
+                  ),
                   onTap: () {
                     onClose();
-                    // TODO: Navigate to profile screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SettingsScreen(),
+                      ),
+                    );
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.settings, color: Colors.blue),
-                  title: const Text('Settings'),
+                  leading: Icon(Icons.settings, color: colorScheme.primary),
+                  title: Text(
+                    'Settings',
+                    style: TextStyle(color: colorScheme.onSurface),
+                  ),
                   onTap: () {
                     onClose();
                     Navigator.push(
@@ -65,10 +78,10 @@ class SideMenu extends StatelessWidget {
                 ),
                 const Divider(),
                 ListTile(
-                  leading: const Icon(Icons.delete_outlined, color: Colors.red),
-                  title: const Text(
+                  leading: Icon(Icons.delete_outlined, color: colorScheme.error),
+                  title: Text(
                     'Trash',
-                    style: TextStyle(color: Colors.red),
+                    style: TextStyle(color: colorScheme.error),
                   ),
                   onTap: () {
                     onClose();

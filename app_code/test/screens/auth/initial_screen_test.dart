@@ -3,14 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/screens/auth/initial_screen.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
-import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  late InMemoryAuthRepository authRepository;
+  late MockAuthRepository authRepository;
 
   setUp(() async {
-    authRepository = InMemoryAuthRepository();
+    authRepository = MockAuthRepository();
     // Ensure anonymous user is signed in initially
     await authRepository.signInAnonymously();
     // Reset shared preferences for testing

@@ -3,13 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/screens/auth/welcome.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
-import 'package:app_code/repositories/test_repo/in_memory_auth_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 
 void main() {
-  late InMemoryAuthRepository repository;
+  late MockAuthRepository repository;
 
   setUp(() async {
-    repository = InMemoryAuthRepository();
+    repository = MockAuthRepository();
     // Ensure anonymous user is signed in (simulating app behavior)
     await repository.signInAnonymously();
   });

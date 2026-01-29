@@ -3,7 +3,7 @@ import 'package:app_code/utils/helper.dart';
 class Product {
   final String id;
   String _name;
-  Map<String, String> associations;
+  Map<String, String> associations; // supermarketId -> categoryId
   bool isVisible;
   late DateTime? lastModified;
   late DateTime createdAt;

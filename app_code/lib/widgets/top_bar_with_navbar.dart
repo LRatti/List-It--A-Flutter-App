@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
 import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
+import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
+import 'package:app_code/widgets/app_snackbar.dart';
 
 class TopBarWithNavBar extends ConsumerWidget {
   final bool isMenuOpen;
@@ -20,47 +22,39 @@ class TopBarWithNavBar extends ConsumerWidget {
     final authNotifier = ref.read(authProvider.notifier);
     final nearestSupermarketState = ref.watch(nearestSupermarketProvider);
     final mapLauncherService = ref.read(mapLauncherServiceProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         AppBar(
           title: const Text('My Shopping App'),
+          backgroundColor: colorScheme.surface, // AppBar background matches theme
+          foregroundColor: colorScheme.onSurface, // Text and icons
           actions: [
             authState.when(
               data: (user) {
                 if (user == null || user.isAnonymous) {
-                  // Show Sign In button for anonymous users
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: ElevatedButton(
                       key: const Key('sign_in_button'),
                       onPressed: () {
+                        ref.read(appNavigationSignalProvider.notifier).state++;
                         Navigator.of(context).pushNamed('/signin');
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                      ),
                       child: const Text('Sign In'),
                     ),
                   );
                 } else {
-                  // Show settings and logout for authenticated users
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        key: const Key('settings_button'),
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/settings');
-                        },
-                        icon: const Icon(Icons.settings),
-                      ),
-                      IconButton(
-                        key: const Key('logout_button'),
-                        onPressed: () async {
-                          await authNotifier.signOut();
-                        },
-                        icon: const Icon(Icons.logout),
-                      ),
-                    ],
+                  return IconButton(
+                    key: const Key('logout_button'),
+                    onPressed: () async => await authNotifier.signOut(),
+                    icon: Icon(Icons.logout, color: colorScheme.onSurface),
                   );
                 }
               },
@@ -69,30 +63,32 @@ class TopBarWithNavBar extends ConsumerWidget {
             ),
           ],
           leading: IconButton(
-            icon: const Icon(Icons.menu),
+            icon: Icon(Icons.menu, color: colorScheme.onSurface),
             onPressed: onMenuToggle,
           ),
+          elevation: 0,
         ),
-        // Nearest supermarket bar
+        // Nearest supermarket info bar
         Material(
           color: nearestSupermarketState.hasValidSupermarket
-              ? Colors.green[50]
-              : Colors.grey[200],
+              ? colorScheme.secondaryContainer
+              : colorScheme.surfaceVariant,
           child: InkWell(
             onTap: nearestSupermarketState.hasValidSupermarket
                 ? () async {
+                    ref.read(appNavigationSignalProvider.notifier).state++;
                     final supermarket = nearestSupermarketState.supermarket!;
                     final success = await mapLauncherService.openMap(
                       latitude: supermarket.latitude,
                       longitude: supermarket.longitude,
                       label: supermarket.name,
                     );
-                    
+
                     if (!success && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Unable to open map'),
-                          duration: Duration(seconds: 2),
+                        buildAppSnackBar(
+                          message: 'Unable to open map',
+                          context: context,
                         ),
                       );
                     }
@@ -109,21 +105,20 @@ class TopBarWithNavBar extends ConsumerWidget {
                         : Icons.location_off,
                     size: 20,
                     color: nearestSupermarketState.hasValidSupermarket
-                        ? Colors.green[700]
-                        : Colors.grey[600],
+                        ? colorScheme.secondary
+                        : colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       nearestSupermarketState.displayText,
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         fontWeight: nearestSupermarketState.hasValidSupermarket
                             ? FontWeight.w500
                             : FontWeight.normal,
                         color: nearestSupermarketState.hasValidSupermarket
-                            ? Colors.green[900]
-                            : Colors.grey[700],
+                            ? colorScheme.secondary
+                            : colorScheme.onSurfaceVariant,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -135,14 +130,16 @@ class TopBarWithNavBar extends ConsumerWidget {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(Colors.grey[600]),
+                        valueColor: AlwaysStoppedAnimation(
+                          colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   if (nearestSupermarketState.hasValidSupermarket)
                     Icon(
                       Icons.open_in_new,
                       size: 16,
-                      color: Colors.green[700],
+                      color: colorScheme.secondary,
                     ),
                 ],
               ),

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/widgets/top_bar_with_navbar.dart';
 import 'package:app_code/widgets/side_menu.dart';
 import 'package:app_code/screens/lists/lists_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarkets_screen_mobile.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
 import 'package:app_code/screens/stats/statistics_screen_mobile.dart';
+import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 
-class MobileHomePage extends StatefulWidget {
+class MobileHomePage extends ConsumerStatefulWidget {
   const MobileHomePage({super.key});
 
   @override
-  State<MobileHomePage> createState() => _MobileHomePageState();
+  ConsumerState<MobileHomePage> createState() => _MobileHomePageState();
 }
 
-class _MobileHomePageState extends State<MobileHomePage> {
-  int _selectedIndex = 0;
+class _MobileHomePageState extends ConsumerState<MobileHomePage> {
   bool _isMenuOpen = false;
 
   final List<Widget> _tabs = const [
@@ -25,21 +26,25 @@ class _MobileHomePageState extends State<MobileHomePage> {
   ];
 
   void _toggleMenu() {
-    setState(() {
-      _isMenuOpen = !_isMenuOpen;
-    });
+    ref.read(appNavigationSignalProvider.notifier).state++;
+    setState(() => _isMenuOpen = !_isMenuOpen);
+  }
+  void _closeMenu() {
+    ref.read(appNavigationSignalProvider.notifier).state++;
+    setState(() => _isMenuOpen = false);
   }
 
-  void _closeMenu() {
-    setState(() {
-      _isMenuOpen = false;
-    });
+  void _onTabChanged(int index) {
+    ref.read(navigationIndexProvider.notifier).state = index;
+    ref.read(appNavigationSignalProvider.notifier).state++;
   }
 
   @override
   Widget build(BuildContext context) {
+    final selectedIndex = ref.watch(navigationIndexProvider);
     final bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: SafeArea(
@@ -61,36 +66,32 @@ class _MobileHomePageState extends State<MobileHomePage> {
                         Container(
                           width: 80,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF7F9FC),
+                            color: Theme.of(context).scaffoldBackgroundColor,
                             border: Border(
                               right: BorderSide(
-                                color: Colors.grey.shade300,
+                                color: colorScheme.outline,
                                 width: 1,
                               ),
                             ),
                           ),
                           child: NavigationRail(
-                            backgroundColor: const Color(0xFFF7F9FC),
+                            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                             minWidth: 72,
                             labelType: NavigationRailLabelType.all,
-                            selectedIndex: _selectedIndex,
-                            scrollable: true ,
-                            onDestinationSelected: (int index) {
-                              setState(() {
-                                _selectedIndex = index;
-                              });
-                            },
+                            selectedIndex: selectedIndex,
+                            scrollable: true,
+                            onDestinationSelected: (int index) =>
+                              _onTabChanged(index),
                             selectedIconTheme:
-                                const IconThemeData(color: Colors.blue),
+                                IconThemeData(color: colorScheme.primary),
                             unselectedIconTheme:
-                                const IconThemeData(color: Colors.grey),
+                                IconThemeData(color: colorScheme.onSurfaceVariant),
                             selectedLabelTextStyle:
-                                const TextStyle(color: Colors.blue),
+                                TextStyle(color: colorScheme.primary),
                             unselectedLabelTextStyle:
-                                const TextStyle(color: Colors.grey),
+                                TextStyle(color: colorScheme.onSurfaceVariant),
                             useIndicator: true,
-                            indicatorColor:
-                                Colors.blueAccent.withOpacity(0.1),
+                            indicatorColor: colorScheme.primaryContainer, // subtle indicator
                             destinations: const [
                               NavigationRailDestination(
                                 icon: Icon(Icons.list_outlined),
@@ -118,7 +119,7 @@ class _MobileHomePageState extends State<MobileHomePage> {
 
                       Expanded(
                         child: IndexedStack(
-                          index: _selectedIndex,
+                          index: selectedIndex,
                           children: _tabs,
                         ),
                       ),
@@ -127,6 +128,8 @@ class _MobileHomePageState extends State<MobileHomePage> {
                 ),
               ],
             ),
+
+            // Side menu overlay
             if (_isMenuOpen)
               Positioned(
                 top: kToolbarHeight + 56,
@@ -136,13 +139,15 @@ class _MobileHomePageState extends State<MobileHomePage> {
                 child: Row(
                   children: [
                     SideMenu(
+                      key: const Key('side_menu'),
                       onClose: _closeMenu,
                     ),
                     Expanded(
                       child: GestureDetector(
                         onTap: _closeMenu,
                         child: Container(
-                          color: Colors.black.withOpacity(0.3),
+                          key: const Key('side_menu_scrim'),
+                          color: Colors.black.withValues(alpha: 0.3),
                         ),
                       ),
                     ),
@@ -155,37 +160,40 @@ class _MobileHomePageState extends State<MobileHomePage> {
 
       // Bottom navigation only in portrait
       bottomNavigationBar: isLandscape
-          ? null
-          : BottomNavigationBar(
-              currentIndex: _selectedIndex,
-              onTap: (int index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: Colors.blue,
-              unselectedItemColor: Colors.grey,
-              showUnselectedLabels: true,
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.list),
-                  label: 'Lists',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.history),
-                  label: 'History',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.store),
-                  label: 'Supermarkets',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.bar_chart),
-                  label: 'Statistics',
-                ),
-              ],
-            ),
+    ? null
+    : BottomNavigationBar(
+        currentIndex: selectedIndex,
+        onTap: (int index) => _onTabChanged(index),
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Theme.of(context).colorScheme.surface, // solid background
+        selectedItemColor: Theme.of(context).colorScheme.primary, // bright/visible
+        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold), // make selected label bold
+        showUnselectedLabels: true,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list_outlined),
+            activeIcon: Icon(Icons.list),
+            label: 'Lists',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history_outlined),
+            activeIcon: Icon(Icons.history),
+            label: 'History',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.store_outlined),
+            activeIcon: Icon(Icons.store),
+            label: 'Supermarkets',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart_outlined),
+            activeIcon: Icon(Icons.bar_chart),
+            label: 'Statistics',
+          ),
+        ],
+      ),
+
     );
   }
 }
