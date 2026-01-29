@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
-import 'package:app_code/repositories/real_app_repo/shopping_list_repository_db.dart';
+import 'package:app_code/repositories/sync/shopping_list_repository_sync.dart';
 import 'package:app_code/repositories/abstract/shopping_list_repository.dart';
 import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
 
@@ -9,7 +9,7 @@ final currentDateTimeProvider = Provider<DateTime>((ref) => DateTime.now());
 
 /// Provides the concrete repository implementation.
 final shoppingListRepositoryProvider = Provider<ShoppingListRepository>((ref) {
-  return ShoppingListRepositoryDb();
+  return ShoppingListRepositoryWithSync();
 });
 
 /// Exposes a Riverpod AsyncNotifier that holds all shopping lists.

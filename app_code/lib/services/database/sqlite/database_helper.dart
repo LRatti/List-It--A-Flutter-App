@@ -16,7 +16,7 @@ class DatabaseHelper {
 
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDb,
     );
   }
@@ -65,11 +65,7 @@ class DatabaseHelper {
         supermarket_id TEXT NOT NULL,
         category_id TEXT NOT NULL,
 
-        PRIMARY KEY (product_id, supermarket_id),
-
-        FOREIGN KEY (product_id) REFERENCES product(id),
-        FOREIGN KEY (supermarket_id) REFERENCES supermarket(id),
-        FOREIGN KEY (category_id) REFERENCES category(id)
+        PRIMARY KEY (product_id, supermarket_id)
       )
     ''');
 
@@ -88,9 +84,7 @@ class DatabaseHelper {
         supermarket_id TEXT NOT NULL,
         category_id TEXT NOT NULL,
         order_index INTEGER NOT NULL,
-        PRIMARY KEY (supermarket_id, category_id),
-        FOREIGN KEY(supermarket_id) REFERENCES supermarket(id),
-        FOREIGN KEY(category_id) REFERENCES category(id)
+        PRIMARY KEY (supermarket_id, category_id)
       )
     ''');
 
@@ -104,10 +98,7 @@ class DatabaseHelper {
         quantity INTEGER NOT NULL,
         created_at TEXT NOT NULL,
         last_modified TEXT NOT NULL,
-        is_deleted INTEGER NOT NULL DEFAULT 0,
-        FOREIGN KEY(list_id) REFERENCES shopping_list(id),
-        FOREIGN KEY(product_id) REFERENCES product(id),
-        FOREIGN KEY(category_id) REFERENCES category(id)
+        is_deleted INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -118,9 +109,24 @@ class DatabaseHelper {
         recipe_data TEXT NOT NULL,
         error_message TEXT,
         has_seen_notification INTEGER NOT NULL DEFAULT 0,
-        created_at TEXT NOT NULL,
-        FOREIGN KEY(list_id) REFERENCES shopping_list(id)
+        created_at TEXT NOT NULL
       )
     ''');
+
+    // Sync box table for offline-first writes and sync queue management
+    await db.execute('''
+      CREATE TABLE sync_box(
+        id TEXT PRIMARY KEY,
+        entity_id TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        operation TEXT NOT NULL,
+        last_modified TEXT NOT NULL,
+        UNIQUE(entity_id, entity_type)
+      )
+    ''');
+
+    // Create indexes for efficient querying
+    await db.execute('CREATE INDEX idx_sync_box_entity_type ON sync_box(entity_type)');
+    await db.execute('CREATE INDEX idx_sync_box_last_modified ON sync_box(last_modified)');
   }
 }

@@ -18,6 +18,7 @@ import 'package:app_code/providers/real_app_providers/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/font_size_provider.dart';
 import 'package:app_code/providers/real_app_providers/recipe_notification_service_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/sync_manager_provider.dart';
 
 // Styles
 import 'package:app_code/styles/scaled_typography.dart';
@@ -26,7 +27,7 @@ import 'package:app_code/styles/scaled_typography.dart';
 import 'package:app_code/services/mock/mock_data_seed.dart';
 
 /// Performs all initialization tasks required at app startup.
-/// This includes Firebase setup, mock data seeding, and cleanup operations.
+/// This includes Firebase setup, mock data seeding, cleanup operations, and sync engine initialization.
 Future<void> _runStartupTasks() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -43,6 +44,9 @@ Future<void> _runStartupTasks() async {
   try {
     // Clean up expired shopping lists (30+ days in trash)
     await container.read(shoppingListsProvider.notifier).cleanupExpiredLists();
+
+    // NOTE: Sync Manager will be initialized on first access via Riverpod provider
+    // This is handled automatically in MyApp widget via the syncInitializedProvider
   } finally {
     container.dispose();
   }
@@ -68,6 +72,13 @@ class MyApp extends ConsumerWidget {
 
     // Initialize notification service (side effect, no rebuild needed)
     ref.read(recipeNotificationServiceProvider);
+
+    // Initialize sync manager (side effect)
+    // This will setup pull listeners and periodic push sync
+    // Errors are logged but don't block UI
+    ref.watch(syncManagerProvider).whenData((_) {
+      // Sync manager is ready
+    });
 
     final lightColorScheme = ColorScheme.fromSeed(
       seedColor: Colors.blue,

@@ -30,7 +30,7 @@ class ManagePurchasedProduct {
       FROM purchased_product pp
       JOIN product p ON p.id = pp.product_id
       JOIN category c ON c.id = pp.category_id
-      WHERE pp.list_id = ?
+      WHERE pp.list_id = ? AND pp.is_deleted = 0
     ''', [listId]);
 
     return rows.map((row) {
@@ -52,7 +52,7 @@ class ManagePurchasedProduct {
       FROM purchased_product pp
       JOIN product p ON p.id = pp.product_id
       JOIN category c ON c.id = pp.category_id
-      WHERE pp.id = ?
+      WHERE pp.id = ? AND pp.is_deleted = 0
     ''', [id]);
 
     if (rows.isEmpty) return null;
@@ -95,7 +95,7 @@ class ManagePurchasedProduct {
       FROM purchased_product pp
       JOIN product p ON p.id = pp.product_id
       JOIN category c ON c.id = pp.category_id
-      WHERE pp.list_id = ? AND p.name = ?
+      WHERE pp.list_id = ? AND p.name = ? AND pp.is_deleted = 0
     ''', [listId, productName]);
 
     if (rows.isEmpty) return null;
