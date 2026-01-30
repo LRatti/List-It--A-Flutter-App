@@ -7,6 +7,7 @@ import 'package:app_code/repositories/sync/purchased_product_repository_sync.dar
 import 'package:app_code/repositories/sync/category_repository_sync.dart';
 import 'package:app_code/repositories/sync/supermarket_repository_sync.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
@@ -76,6 +77,27 @@ final syncManagerProvider = FutureProvider<SyncManager>((ref) async {
   // Initialize the sync manager
   await syncManager.initialize();
 
+  // Listen for remote sync updates and refresh UI providers
+  final remoteChangesSubscription = syncManager.remoteEntityChanges.listen(
+    (entityType) {
+      switch (entityType) {
+        case ENTITY_TYPE_SHOPPING_LIST:
+        case ENTITY_TYPE_PRODUCT:
+        case ENTITY_TYPE_PURCHASED_PRODUCT:
+        case ENTITY_TYPE_CATEGORY:
+        case ENTITY_TYPE_SUPERMARKET:
+          ref.invalidate(shoppingListsProvider);
+          break;
+      }
+    },
+  );
+
+  // Force a refresh of local UI data after initial pull completes
+  // This ensures remote data appears immediately after first login on a new device
+  if (currentUserId != null && !authStatus.isAnonymous) {
+    ref.invalidate(shoppingListsProvider);
+  }
+
   // If user just transitioned from anonymous to authenticated (uid exists but now not anonymous),
   // trigger a manual sync to push pending changes that were queued while offline
   if (currentUserId != null && !authStatus.isAnonymous) {
@@ -86,6 +108,8 @@ final syncManagerProvider = FutureProvider<SyncManager>((ref) async {
       // Trigger a manual sync to push any pending local changes to Firestore
       await syncManager.triggerManualSync();
       Logger().i('SyncManager: Post-login sync triggered to push queued changes');
+      // Refresh UI after post-login sync
+      ref.invalidate(shoppingListsProvider);
     } catch (e) {
       Logger().w('SyncManager: Post-login sync error (non-fatal)', error: e);
       // Don't rethrow - this is informational
@@ -94,6 +118,7 @@ final syncManagerProvider = FutureProvider<SyncManager>((ref) async {
 
   // Ensure cleanup when provider is invalidated
   ref.onDispose(() {
+    remoteChangesSubscription.cancel();
     syncManager.dispose();
   });
 

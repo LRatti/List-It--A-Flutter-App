@@ -97,7 +97,11 @@ class _ListDetailScreenMobileState
     _productController.clear();
   }
 
-  void _addProductToList(String category, String productName) {
+  void _addProductToList(
+    ShoppingList shoppingList,
+    String category,
+    String productName,
+  ) {
     final product = Product(name: productName);
 
     final categoryObj = ListDetailScreenMobile.mockCategories.firstWhere(
@@ -106,15 +110,15 @@ class _ListDetailScreenMobileState
     );
 
     final purchasedProduct = PurchasedProduct(
-      listId: widget.shoppingList.id,
+      listId: shoppingList.id,
       product: product,
       category: categoryObj,
       quantity: 1,
     );
 
-    widget.shoppingList.products ??= [];
-    widget.shoppingList.products!.add(purchasedProduct);
-    ref.read(shoppingListsProvider.notifier).updateList(widget.shoppingList);
+    shoppingList.products ??= [];
+    shoppingList.products!.add(purchasedProduct);
+    ref.read(shoppingListsProvider.notifier).updateList(shoppingList);
 
     // Remove the product from the results list after adding it
     final key = '${widget.shoppingList.id}_$productName';
@@ -131,15 +135,24 @@ class _ListDetailScreenMobileState
     final textTheme = Theme.of(context).textTheme;
     final categorizations =
         ref.watch(backgroundProductCategorizationProvider);
+    final shoppingList = ref.watch(shoppingListsProvider).maybeWhen(
+          data: (lists) => lists.firstWhere(
+            (list) => list.id == widget.shoppingList.id,
+            orElse: () => widget.shoppingList,
+          ),
+          orElse: () => widget.shoppingList,
+        );
 
     // Get all categorizations for this specific list, sorted by completion
     final listCategorizations = categorizations.entries
-        .where((entry) => entry.key.startsWith('${widget.shoppingList.id}_') && entry.value.isCompleted)
+        .where((entry) =>
+            entry.key.startsWith('${shoppingList.id}_') &&
+            entry.value.isCompleted)
         .toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.shoppingList.getName()),
+        title: Text(shoppingList.getName()),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -158,7 +171,7 @@ class _ListDetailScreenMobileState
                     context,
                     MaterialPageRoute(
                       builder: (_) => AddRecipeScreen(
-                        shoppingList: widget.shoppingList,
+                        shoppingList: shoppingList,
                         availableCategories:
                             ListDetailScreenMobile.mockCategories,
                       ),
@@ -356,7 +369,11 @@ class _ListDetailScreenMobileState
                               width: double.infinity,
                               child: ElevatedButton.icon(
                                 onPressed: () =>
-                                    _addProductToList(category, categorization.productName),
+                                    _addProductToList(
+                                      shoppingList,
+                                      category,
+                                      categorization.productName,
+                                    ),
                                 icon: const Icon(Icons.add_shopping_cart, size: 18),
                                 label: const Text('Add to List'),
                                 style: ElevatedButton.styleFrom(

@@ -89,6 +89,13 @@ class SyncEnginePush {
         );
         return;
       }
+      
+      // Handle DELETE operation with missing local data
+      // This can happen if a soft-deleted entity was already removed before sync ran
+      if (localData == null && entry.operation == SyncOperation.delete) {
+        _logger.w('SyncEngine: Local data not found for DELETE ${entry.entityType}/${entry.entityId}, marking as deleted in Firestore anyway');
+        // Continue to Firestore transaction to set isDeleted=true
+      }
 
       // Push dependencies first (before the main entity)
       if (localData != null && entry.operation == SyncOperation.upsert) {

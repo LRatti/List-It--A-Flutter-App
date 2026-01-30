@@ -15,6 +15,7 @@ class SyncEnginePull {
   final Map<String, SyncRepository> _syncRepositoryRegistry;
   final SharedPreferences _prefs;
   final Logger _logger;
+  final void Function(String entityType)? _onRemoteEntityChange;
 
   // Store snapshot listeners to manage them
   final Map<String, StreamSubscription> _listeners = {};
@@ -25,11 +26,13 @@ class SyncEnginePull {
     FirebaseFirestore? firestore,
     FirebaseAuth? firebaseAuth,
     Logger? logger,
+    void Function(String entityType)? onRemoteEntityChange,
   })  : _syncRepositoryRegistry = syncRepositoryRegistry,
         _prefs = prefs,
         _firestore = firestore ?? FirebaseFirestore.instance,
         _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _logger = logger ?? Logger();
+        _logger = logger ?? Logger(),
+        _onRemoteEntityChange = onRemoteEntityChange;
 
   /// Initialize sync pull: run cold start then setup live listeners
   Future<void> initializeSync() async {
@@ -284,6 +287,7 @@ class SyncEnginePull {
       // Apply the update via repository (no sync_box write)
       _logger.d('SyncEnginePull: Applying silent update for $entityType/$entityId');
       await repository.applyRemoteUpdate(remoteData);
+      _onRemoteEntityChange?.call(entityType);
     } catch (e) {
       _logger.e('SyncEnginePull: Error in silent update for $entityType', error: e);
       rethrow;

@@ -17,6 +17,9 @@ class SyncManager {
   final Map<String, SyncRepository> _syncRepositoryRegistry;
   final Logger _logger;
 
+  final StreamController<String> _remoteEntityChangesController =
+      StreamController<String>.broadcast();
+
   late final SyncEnginePush _pushEngine;
   late final SyncEnginePull _pullEngine;
   late final ConnectivityMonitor _connectivityMonitor;
@@ -30,6 +33,10 @@ class SyncManager {
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
+
+  /// Stream of entity types updated by remote sync (pull engine).
+  Stream<String> get remoteEntityChanges =>
+      _remoteEntityChangesController.stream;
 
   SyncManager({
     required Map<String, SyncRepository> syncRepositoryRegistry,
@@ -84,6 +91,7 @@ class SyncManager {
         firestore: _firestore,
         firebaseAuth: _firebaseAuth,
         logger: _logger,
+        onRemoteEntityChange: _handleRemoteEntityChange,
       );
 
       // Start pull sync (cold start + live listeners)
@@ -156,7 +164,13 @@ class SyncManager {
     _connectivitySubscription?.cancel();
     _connectivityMonitor.dispose();
     _pullEngine.dispose();
+    _remoteEntityChangesController.close();
     _isInitialized = false;
     _logger.i('SyncManager: Disposed');
+  }
+
+  void _handleRemoteEntityChange(String entityType) {
+    if (_remoteEntityChangesController.isClosed) return;
+    _remoteEntityChangesController.add(entityType);
   }
 }

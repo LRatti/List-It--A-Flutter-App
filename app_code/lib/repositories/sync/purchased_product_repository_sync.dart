@@ -74,6 +74,11 @@ class PurchasedProductRepositoryWithSync
     }
   }
 
+  /// Delete a purchased product (convenience method)
+  Future<void> delete(PurchasedProduct item) async {
+    await deleteById(item.id);
+  }
+
   Future<PurchasedProduct?> getById(String id) =>
       ManagePurchasedProduct.getPurchasedProductById(id);
 

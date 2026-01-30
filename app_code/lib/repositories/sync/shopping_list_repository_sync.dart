@@ -103,6 +103,7 @@ class ShoppingListRepositoryWithSync
 
   /// User initiates soft delete - marks for sync
   /// Note: Does NOT physically delete, just marks isDeleted=1
+  /// IMPORTANT: Also marks all associated purchased_products for deletion
   @override
   Future<void> delete(ShoppingList list) async {
     final db = await DatabaseHelper.database;
@@ -120,6 +121,18 @@ class ShoppingListRepositoryWithSync
       where: 'id = ?',
       whereArgs: [list.id],
     );
+
+    // CRITICAL: Cascade delete all purchased products associated with this list
+    // Must mark them for sync deletion so Firestore also removes them
+    final products = await ManagePurchasedProduct.getPurchasedProductsByList(list.id);
+    for (final product in products) {
+      if (!product.isDeleted) {
+        // Mark for soft delete and sync via the purchased product repository
+        product.isDeleted = true;
+        // Use the repository delete method to ensure proper sync_box append
+        await _purchasedProductRepo.delete(product);
+      }
+    }
 
     // IMPORTANT: Append to sync_box with delete operation
     await appendDeleteToSyncBox(
@@ -249,12 +262,14 @@ class ShoppingListRepositoryWithSync
   }
 
   /// Get local data for a shopping list (used by sync engine for comparison)
+  /// IMPORTANT: Returns soft-deleted items too (needed for DELETE sync operations)
+  /// The sync engine needs to see deleted items to propagate the deletion to Firestore
   @override
   Future<Map<String, dynamic>?> getLocalData(String id) async {
     final db = await DatabaseHelper.database;
     final rows = await db.query(
       'shopping_list',
-      where: 'id = ? AND is_deleted = 0',
+      where: 'id = ?',
       whereArgs: [id],
       limit: 1,
     );
