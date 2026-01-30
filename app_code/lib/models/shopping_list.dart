@@ -38,7 +38,8 @@ class ShoppingList {
         _isRegistered = isRegistered,
         _isInTheTrash = isInTheTrash,
         _deletionTimestamp = deletionTimestamp,
-        this.id = id ?? Helper.generateId();
+      lastModified = lastModified ?? createdAt,
+      this.id = id ?? Helper.generateId();
 
   String getName() {
     return this._name;

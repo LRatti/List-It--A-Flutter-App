@@ -21,7 +21,8 @@ class User {
   }): 
       _userName = userName,
       uid = uid ?? Helper.generateId(),
-      createdAt = createdAt ?? DateTime.now(){
+      createdAt = createdAt ?? DateTime.now(),
+      lastModified = lastModified ?? (createdAt ?? DateTime.now()){
     this.uid = uid;
   }
       

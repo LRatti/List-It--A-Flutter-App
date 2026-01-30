@@ -16,7 +16,8 @@ class Category {
     DateTime? createdAt,
   })  : id = id ?? Helper.generateId(),
         _name = name,
-        createdAt = createdAt ?? DateTime.now();
+        createdAt = createdAt ?? DateTime.now(),
+        lastModified = lastModified ?? (createdAt ?? DateTime.now());
 
   String getName(){
     return this._name;

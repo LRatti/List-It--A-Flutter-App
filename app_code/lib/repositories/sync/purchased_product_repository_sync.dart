@@ -197,13 +197,13 @@ class PurchasedProductRepositoryWithSync
 
     if (cleaned.containsKey('createdAt')) {
       final parsed = _parseTimestamp(cleaned['createdAt']);
-      cleaned['created_at'] = parsed?.toIso8601String();
+      cleaned['created_at'] = parsed?.toIso8601String() ?? DateTime.now().toIso8601String();
       cleaned.remove('createdAt');
     }
 
     if (cleaned.containsKey('lastModified')) {
       final parsed = _parseTimestamp(cleaned['lastModified']);
-      cleaned['last_modified'] = parsed?.toIso8601String();
+      cleaned['last_modified'] = parsed?.toIso8601String() ?? DateTime.now().toIso8601String();
       cleaned.remove('lastModified');
     }
 
@@ -217,6 +217,17 @@ class PurchasedProductRepositoryWithSync
 
     cleaned.putIfAbsent('price', () => 0.0);
     cleaned.putIfAbsent('quantity', () => 0);
+    
+    // Ensure required fields have default values if missing
+    if (!cleaned.containsKey('created_at') || cleaned['created_at'] == null) {
+      cleaned['created_at'] = DateTime.now().toIso8601String();
+    }
+    if (!cleaned.containsKey('last_modified') || cleaned['last_modified'] == null) {
+      cleaned['last_modified'] = DateTime.now().toIso8601String();
+    }
+    if (!cleaned.containsKey('is_deleted') || cleaned['is_deleted'] == null) {
+      cleaned['is_deleted'] = 0;
+    }
 
     return cleaned;
   }

@@ -20,7 +20,8 @@ class Product {
         _name = name,
         associations = associations ?? {},
         isVisible = isVisible,
-        createdAt = createdAt ?? DateTime.now();
+        createdAt = createdAt ?? DateTime.now(),
+        lastModified = lastModified ?? (createdAt ?? DateTime.now());
 
   String getName() {
     return _name;

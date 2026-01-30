@@ -90,6 +90,11 @@ class SyncEnginePush {
         return;
       }
 
+      // Push dependencies first (before the main entity)
+      if (localData != null && entry.operation == SyncOperation.upsert) {
+        await _pushDependencies(entry.entityType, localData, userId);
+      }
+
       // Run Firestore transaction
       await _firestore.runTransaction((transaction) async {
         // Construct the Firestore document path
@@ -168,5 +173,90 @@ class SyncEnginePush {
     }
 
     return null;
+  }
+
+  /// Push dependencies to Firestore before pushing the main entity
+  /// Ensures foreign key references exist in Firestore
+  Future<void> _pushDependencies(
+    String entityType,
+    Map<String, dynamic> localData,
+    String userId,
+  ) async {
+    try {
+      if (entityType == ENTITY_TYPE_PURCHASED_PRODUCT) {
+        // PurchasedProduct depends on Product and Category
+        await _pushDependency(
+          localData['product_id'],
+          ENTITY_TYPE_PRODUCT,
+          userId,
+        );
+        await _pushDependency(
+          localData['category_id'],
+          ENTITY_TYPE_CATEGORY,
+          userId,
+        );
+      } else if (entityType == ENTITY_TYPE_SHOPPING_LIST) {
+        // ShoppingList depends on Supermarket
+        final supermarketId = localData['supermarket_id'];
+        if (supermarketId != null) {
+          await _pushDependency(
+            supermarketId,
+            ENTITY_TYPE_SUPERMARKET,
+            userId,
+          );
+        }
+      }
+    } catch (e) {
+      _logger.w('SyncEngine: Error pushing dependencies for $entityType', error: e);
+      // Continue even if dependency push fails - main entity will still be pushed
+    }
+  }
+
+  /// Push a single dependency entity to Firestore if it doesn't exist
+  Future<void> _pushDependency(
+    String? entityId,
+    String entityType,
+    String userId,
+  ) async {
+    if (entityId == null || entityId.isEmpty) return;
+
+    try {
+      final repository = _syncRepositoryRegistry[entityType];
+      if (repository == null) {
+        _logger.w('SyncEngine: No repository for dependency $entityType');
+        return;
+      }
+
+      // Check if the dependency already exists in Firestore
+      final docRef = _firestore
+          .collection('Users')
+          .doc(userId)
+          .collection(entityType)
+          .doc(entityId);
+
+      final snapshot = await docRef.get();
+      if (snapshot.exists) {
+        _logger.d('SyncEngine: Dependency $entityType/$entityId already exists in Firestore');
+        return;
+      }
+
+      // Get local data for the dependency
+      final localData = await repository.getLocalData(entityId);
+      if (localData == null) {
+        _logger.w('SyncEngine: Local data not found for dependency $entityType/$entityId');
+        return;
+      }
+
+      // Push the dependency to Firestore
+      _logger.i('SyncEngine: Pushing dependency $entityType/$entityId to Firestore');
+      final dataToWrite = Map<String, dynamic>.from(localData);
+      dataToWrite['lastModified'] = FieldValue.serverTimestamp();
+      await docRef.set(dataToWrite);
+
+      _logger.i('SyncEngine: Successfully pushed dependency $entityType/$entityId');
+    } catch (e) {
+      _logger.e('SyncEngine: Error pushing dependency $entityType/$entityId', error: e);
+      // Don't rethrow - allow main entity push to proceed
+    }
   }
 }

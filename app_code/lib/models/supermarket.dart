@@ -23,7 +23,8 @@ class Supermarket {
   }) :  this.id = id ?? Helper.generateId(),
         _categories = categories ?? [],
         _name = name,
-        createdAt = createdAt ?? DateTime.now();
+        createdAt = createdAt ?? DateTime.now(),
+        lastModified = lastModified ?? (createdAt ?? DateTime.now());
 
   String getName() {
     return _name;

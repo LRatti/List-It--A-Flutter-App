@@ -28,6 +28,7 @@ class PurchasedProduct {
     bool isDeleted = false,
   }) : this.id = id ?? Helper.generateId(),
         createdAt = createdAt ?? DateTime.now(),
+        lastModified = lastModified ?? (createdAt ?? DateTime.now()),
         isDeleted = isDeleted;
 
   factory PurchasedProduct.fromDatabase(Map<String, dynamic> json, Category category, Product product) {
