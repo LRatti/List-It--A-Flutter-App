@@ -36,6 +36,9 @@ class _CategorySelectionScreenState
 
   /// Load available categories (not in current supermarket)
   Future<void> _loadAvailableCategories() async {
+    // Invalidate the provider to force a fresh fetch of categories
+    ref.invalidate(visibleCategoriesProvider);
+    
     final allCategories =
         await ref.read(visibleCategoriesProvider.future);
     
@@ -46,7 +49,8 @@ class _CategorySelectionScreenState
     setState(() {
       _availableCategories = allCategories
           .where((cat) => !currentIds.contains(cat.id))
-          .toList();
+          .toList()
+        ..sort((a, b) => a.getName().compareTo(b.getName())); // Sort alphabetically
     });
   }
 
@@ -73,9 +77,10 @@ class _CategorySelectionScreenState
       return;
     }
 
+    // Add new categories at the top of the list
     final updatedCategories = [
-      ...widget.currentCategories,
       ...selected,
+      ...widget.currentCategories,
     ];
 
     widget.onCategoriesSelected(updatedCategories);
