@@ -14,7 +14,7 @@ class Supermarket {
   
   Supermarket({
     String? id,
-    name = 'Default Supermarket', 
+    required String name, 
     List<Category>? categories,
     this.isVisible = true,
     DateTime? lastModified,
@@ -36,18 +36,22 @@ class Supermarket {
 
   void setName(String name) {
     _name = name;
+    lastModified = DateTime.now();
   }
 
   void setVisibility(bool visibility) {
     isVisible = visibility;
+    lastModified = DateTime.now();
   }
 
   void setCategories(List<Category> categories) {
     this._categories = categories;
+    lastModified = DateTime.now();
   }
 
   void addCategory(Category category){
       _categories.add(category);
+      lastModified = DateTime.now();
   }
 
   factory Supermarket.fromDatabase(Map<String, dynamic> json) {
@@ -89,7 +93,7 @@ class Supermarket {
       'id': id,
       'name': _name,
       'categories': _categories.map((cat) => cat.toJson()).toList(),
-      'is_visible': isVisible,
+      'isVisible': isVisible,
       'lastModified': lastModified?.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
     };

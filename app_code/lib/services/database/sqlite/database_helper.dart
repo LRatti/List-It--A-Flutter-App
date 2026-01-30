@@ -16,9 +16,21 @@ class DatabaseHelper {
 
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDb,
+      onUpgrade: _upgradeDb,
     );
+  }
+
+  static Future<void> _upgradeDb(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 3) {
+      // Add is_visible column to category table
+      try {
+        await db.execute('ALTER TABLE category ADD COLUMN is_visible INTEGER NOT NULL DEFAULT 1');
+      } catch (e) {
+        // Column might already exist, ignore
+      }
+    }
   }
 
   static Future<void> _createDb(Database db, int version) async {
@@ -54,6 +66,7 @@ class DatabaseHelper {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         is_default INTEGER NOT NULL,
+        is_visible INTEGER NOT NULL DEFAULT 1,
         created_at TEXT NOT NULL,
         last_modified TEXT NOT NULL
       )

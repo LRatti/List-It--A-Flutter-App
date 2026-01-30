@@ -2,9 +2,13 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/shopping_list.dart';
+import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/services/database/sqlite/manage_shopping_list.dart';
+import 'package:app_code/services/database/sqlite/manage_supermarket.dart';
+import 'package:app_code/services/database/sqlite/manage_category.dart';
+import 'package:app_code/utils/default_categories_loader.dart';
 
-/// Seeds local SQLite with a few mock shopping lists if the DB is empty.
+/// Seeds local SQLite with a default supermarket and categories, plus mock shopping lists if the DB is empty.
 Future<void> seedMockDataIfEmpty() async {
   try {
     print('📦 Checking for existing shopping lists...');
@@ -18,6 +22,27 @@ Future<void> seedMockDataIfEmpty() async {
 
     print('📦 Starting mock data seed...');
 
+    // ===== SEED DEFAULT CATEGORIES AND SUPERMARKET =====
+    print('📦 Loading default categories from JSON...');
+    final defaultCategories = await DefaultCategoriesLoader.loadDefaultCategories();
+    print('📦 Loaded ${defaultCategories.length} default categories');
+
+    // Save default categories to database
+    for (final category in defaultCategories) {
+      await ManageCategory.addCategory(category);
+    }
+    print('📦 Added ${defaultCategories.length} default categories to database');
+
+    // Create default supermarket with these categories
+    final defaultSupermarket = Supermarket(
+      name: 'Supermarket',
+      categories: defaultCategories,
+      isVisible: true,
+    );
+    await ManageSupermarket.addSupermarket(defaultSupermarket);
+    print('📦 Created default supermarket with ${defaultCategories.length} categories');
+
+    // ===== SEED MOCK SHOPPING LISTS =====
     final fish = Category(name: 'Fish');
     final drinks = Category(name: 'Drinks');
     final meat = Category(name: 'Meat');
@@ -178,4 +203,5 @@ Future<void> seedMockDataIfEmpty() async {
     print('Stack trace: $stackTrace');
   }
 }
+
 

@@ -8,6 +8,8 @@ import 'package:app_code/repositories/sync/category_repository_sync.dart';
 import 'package:app_code/repositories/sync/supermarket_repository_sync.dart';
 import 'package:app_code/providers/real_app_providers/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/supermarkets_notifier.dart';
+import 'package:app_code/providers/real_app_providers/categories_notifier.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
@@ -84,9 +86,13 @@ final syncManagerProvider = FutureProvider<SyncManager>((ref) async {
         case ENTITY_TYPE_SHOPPING_LIST:
         case ENTITY_TYPE_PRODUCT:
         case ENTITY_TYPE_PURCHASED_PRODUCT:
-        case ENTITY_TYPE_CATEGORY:
-        case ENTITY_TYPE_SUPERMARKET:
           ref.invalidate(shoppingListsProvider);
+          break;
+        case ENTITY_TYPE_CATEGORY:
+          ref.invalidate(categoriesProvider);
+          break;
+        case ENTITY_TYPE_SUPERMARKET:
+          ref.invalidate(supermarketsProvider);
           break;
       }
     },
@@ -96,6 +102,8 @@ final syncManagerProvider = FutureProvider<SyncManager>((ref) async {
   // This ensures remote data appears immediately after first login on a new device
   if (currentUserId != null && !authStatus.isAnonymous) {
     ref.invalidate(shoppingListsProvider);
+    ref.invalidate(categoriesProvider);
+    ref.invalidate(supermarketsProvider);
   }
 
   // If user just transitioned from anonymous to authenticated (uid exists but now not anonymous),
@@ -110,6 +118,8 @@ final syncManagerProvider = FutureProvider<SyncManager>((ref) async {
       Logger().i('SyncManager: Post-login sync triggered to push queued changes');
       // Refresh UI after post-login sync
       ref.invalidate(shoppingListsProvider);
+      ref.invalidate(categoriesProvider);
+      ref.invalidate(supermarketsProvider);
     } catch (e) {
       Logger().w('SyncManager: Post-login sync error (non-fatal)', error: e);
       // Don't rethrow - this is informational
@@ -131,3 +141,4 @@ final syncInitializedProvider = FutureProvider<bool>((ref) async {
   final syncManager = await ref.watch(syncManagerProvider.future);
   return syncManager.isInitialized;
 });
+

@@ -1,0 +1,72 @@
+{
+  "categories": [
+    {
+      "name": "Meat",
+      "isDefault": true
+    },
+    {
+      "name": "Wine Shop",
+      "isDefault": true
+    },
+    {
+      "name": "Flowers and Plants",
+      "isDefault": true
+    },
+    {
+      "name": "Fruit and Vegetables",
+      "isDefault": true
+    },
+    {
+      "name": "Loose Fruit and Vegetables",
+      "isDefault": true
+    },
+    {
+      "name": "Deli",
+      "isDefault": true
+    },
+    {
+      "name": "Deli with service counter",
+      "isDefault": true
+    },
+    {
+      "name": "Dairy and Cured Meats",
+      "isDefault": true
+    },
+    {
+      "name": "Butcher with service counter",
+      "isDefault": true
+    },
+    {
+      "name": "Non-Food",
+      "isDefault": true
+    },
+    {
+      "name": "Bread and Desserts",
+      "isDefault": true
+    },
+    {
+      "name": "Bread and Desserts with service counter",
+      "isDefault": true
+    },
+    {
+      "name": "Bakery",
+      "isDefault": true
+    },
+    {
+      "name": "Pastry",
+      "isDefault": true
+    },
+    {
+      "name": "Fish",
+      "isDefault": true
+    },
+    {
+      "name": "Fishmonger with service counter",
+      "isDefault": true
+    },
+    {
+      "name": "Sushi",
+      "isDefault": true
+    }
+  ]
+}

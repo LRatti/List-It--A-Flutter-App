@@ -1,0 +1,194 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/models/category.dart';
+import 'package:app_code/providers/real_app_providers/categories_notifier.dart';
+import 'package:app_code/widgets/app_snackbar.dart';
+
+class CategoryEditingScreen extends ConsumerStatefulWidget {
+  final Category? categoryToEdit;
+  final Function(Category)? onCategoryCreated;
+
+  const CategoryEditingScreen({
+    super.key,
+    this.categoryToEdit,
+    this.onCategoryCreated,
+  });
+
+  @override
+  ConsumerState<CategoryEditingScreen> createState() =>
+      _CategoryEditingScreenState();
+}
+
+class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
+  late TextEditingController _nameController;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(
+      text: widget.categoryToEdit?.getName() ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  /// Save the category (create or update)
+  Future<void> _saveCategory() async {
+    final name = _nameController.text.trim();
+    
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        buildAppSnackBar(
+          message: 'Category name cannot be empty',
+          isError: true,
+          context: context,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      if (widget.categoryToEdit != null) {
+        // Update existing category
+        widget.categoryToEdit!.setName(name);
+        await ref.read(categoriesProvider.notifier).updateCategory(
+          widget.categoryToEdit!,
+        );
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            buildAppSnackBar(
+              message: 'Category updated successfully',
+              isError: false,
+              context: context,
+            ),
+          );
+          Navigator.pop(context);
+        }
+      } else {
+        // Create new category
+        final newCategory = Category(
+          name: name,
+          isDefault: false,
+          isVisible: true,
+        );
+
+        await ref.read(categoriesProvider.notifier).addCategory(newCategory);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            buildAppSnackBar(
+              message: 'Category created successfully',
+              isError: false,
+              context: context,
+            ),
+          );
+
+          // Call the callback if provided
+          widget.onCategoryCreated?.call(newCategory);
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          buildAppSnackBar(
+            message: 'Error saving category: ${e.toString()}',
+            isError: true,
+            context: context,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEditing = widget.categoryToEdit != null;
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: Text(
+          isEditing ? 'Edit Category' : 'Create Category',
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        elevation: 0,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Instructions
+            Text(
+              isEditing
+                  ? 'Edit the category name below'
+                  : 'Enter a new category name',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            
+            // Name input field
+            TextField(
+              controller: _nameController,
+              enabled: !_isLoading,
+              decoration: InputDecoration(
+                labelText: 'Category Name',
+                hintText: 'e.g., Fruits and Vegetables',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: const Icon(Icons.label),
+              ),
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _saveCategory(),
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Save button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _saveCategory,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(Colors.white),
+                        ),
+                      )
+                    : Text(
+                        isEditing ? 'Update Category' : 'Create Category',
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
