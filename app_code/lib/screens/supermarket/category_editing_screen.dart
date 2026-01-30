@@ -76,7 +76,6 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
         // Create new category
         final newCategory = Category(
           name: name,
-          isDefault: false,
           isVisible: true,
         );
 

@@ -6,6 +6,8 @@ import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/services/database/sqlite/manage_shopping_list.dart';
 import 'package:app_code/services/database/sqlite/manage_supermarket.dart';
 import 'package:app_code/services/database/sqlite/manage_category.dart';
+import 'package:app_code/repositories/sync/category_repository_sync.dart';
+import 'package:app_code/repositories/sync/supermarket_repository_sync.dart';
 import 'package:app_code/utils/default_categories_loader.dart';
 
 /// Seeds local SQLite with a default supermarket and categories, plus mock shopping lists if the DB is empty.
@@ -27,20 +29,24 @@ Future<void> seedMockDataIfEmpty() async {
     final defaultCategories = await DefaultCategoriesLoader.loadDefaultCategories();
     print('📦 Loaded ${defaultCategories.length} default categories');
 
-    // Save default categories to database
+    // Save default categories to database using sync-aware repository
+    // This ensures they are queued in sync_box and will be synced to Firestore
+    final categoryRepo = CategoryRepositoryWithSync();
     for (final category in defaultCategories) {
-      await ManageCategory.addCategory(category);
+      await categoryRepo.add(category);
     }
-    print('📦 Added ${defaultCategories.length} default categories to database');
+    print('📦 Added ${defaultCategories.length} default categories to database (queued for Firestore sync)');
 
-    // Create default supermarket with these categories
+    // Create default supermarket with these categories using sync-aware repository
+    // This ensures the supermarket is queued in sync_box and will be synced to Firestore
+    final supermarketRepo = SupermarketRepositoryWithSync();
     final defaultSupermarket = Supermarket(
       name: 'Supermarket',
       categories: defaultCategories,
       isVisible: true,
     );
-    await ManageSupermarket.addSupermarket(defaultSupermarket);
-    print('📦 Created default supermarket with ${defaultCategories.length} categories');
+    await supermarketRepo.add(defaultSupermarket);
+    print('📦 Created default supermarket with ${defaultCategories.length} categories (queued for Firestore sync)');
 
     // ===== SEED MOCK SHOPPING LISTS =====
     final fish = Category(name: 'Fish');

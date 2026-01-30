@@ -4,7 +4,6 @@ class Category {
 
   final String id;
   String _name;
-  final bool isDefault;
   bool isVisible;
   late DateTime? lastModified;
   late DateTime createdAt;
@@ -12,7 +11,6 @@ class Category {
   Category({
     String? id,
     required String name,
-    this.isDefault = false,
     this.isVisible = true,
     DateTime? lastModified,
     DateTime? createdAt,
@@ -39,7 +37,6 @@ class Category {
     return Category(
       id: json['id'],
       name: json['name'],
-      isDefault: json['is_default'] == 1,
       isVisible: json['is_visible'] != 0, // Default to visible if not specified
       lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
@@ -50,7 +47,6 @@ class Category {
     return {
       'id': id,
       'name': _name,
-      'is_default': isDefault ? 1 : 0,
       'is_visible': isVisible ? 1 : 0,
       'created_at': createdAt.toIso8601String(),
       'last_modified': lastModified?.toIso8601String(),
@@ -61,7 +57,6 @@ class Category {
     return Category(
       id: json['id'],
       name: json['name'],
-      isDefault: json['is_default'] == 1,
       isVisible: json['isVisible'] != false,
       lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
@@ -72,7 +67,6 @@ class Category {
     return {
       'id': id,
       'name': _name,
-      'is_default': isDefault ? 1 : 0,
       'isVisible': isVisible,
       'lastModified': lastModified?.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),

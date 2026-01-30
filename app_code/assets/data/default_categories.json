@@ -1,72 +1,72 @@
 {
   "categories": [
     {
-      "name": "Meat",
-      "isDefault": true
+      "name": "Meat"
+      
     },
     {
-      "name": "Wine Shop",
-      "isDefault": true
+      "name": "Wine Shop"
+      
     },
     {
-      "name": "Flowers and Plants",
-      "isDefault": true
+      "name": "Flowers and Plants"
+      
     },
     {
-      "name": "Fruit and Vegetables",
-      "isDefault": true
+      "name": "Fruit and Vegetables"
+      
     },
     {
-      "name": "Loose Fruit and Vegetables",
-      "isDefault": true
+      "name": "Loose Fruit and Vegetables"
+      
     },
     {
-      "name": "Deli",
-      "isDefault": true
+      "name": "Deli"
+      
     },
     {
-      "name": "Deli with service counter",
-      "isDefault": true
+      "name": "Deli with service counter"
+      
     },
     {
-      "name": "Dairy and Cured Meats",
-      "isDefault": true
+      "name": "Dairy and Cured Meats"
+      
     },
     {
-      "name": "Butcher with service counter",
-      "isDefault": true
+      "name": "Butcher with service counter"
+      
     },
     {
-      "name": "Non-Food",
-      "isDefault": true
+      "name": "Non-Food"
+      
     },
     {
-      "name": "Bread and Desserts",
-      "isDefault": true
+      "name": "Bread and Desserts"
+      
     },
     {
-      "name": "Bread and Desserts with service counter",
-      "isDefault": true
+      "name": "Bread and Desserts with service counter"
+      
     },
     {
-      "name": "Bakery",
-      "isDefault": true
+      "name": "Bakery"
+      
     },
     {
-      "name": "Pastry",
-      "isDefault": true
+      "name": "Pastry"
+      
     },
     {
-      "name": "Fish",
-      "isDefault": true
+      "name": "Fish"
+      
     },
     {
-      "name": "Fishmonger with service counter",
-      "isDefault": true
+      "name": "Fishmonger with service counter"
+      
     },
     {
-      "name": "Sushi",
-      "isDefault": true
+      "name": "Sushi"
+      
     }
   ]
 }

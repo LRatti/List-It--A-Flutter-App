@@ -115,20 +115,13 @@ class SupermarketRepositoryWithSync
       );
     }
 
-    await _replaceCategories(db, entityId, data['categories'], data['categoryIds']);
+    await _replaceCategories(db, entityId, List<String>.from(data['categoryIds'] ?? []));
   }
 
   @override
   Future<Map<String, dynamic>?> getLocalData(String id) async {
-    final db = await DatabaseHelper.database;
-    final rows = await db.query(
-      'supermarket',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
-
-    return rows.isNotEmpty ? rows.first : null;
+    Supermarket? market = await ManageSupermarket.getSupermarketById(id);
+    return market?.toDatabase();
   }
 
   // ===== HELPERS =====
@@ -168,7 +161,6 @@ class SupermarketRepositoryWithSync
   Map<String, dynamic> _cleanFirebaseData(Map<String, dynamic> data) {
     final cleaned = Map<String, dynamic>.from(data);
 
-    cleaned.remove('categories');
     cleaned.remove('categoryIds');
 
     if (cleaned.containsKey('isVisible')) {
@@ -202,25 +194,8 @@ class SupermarketRepositoryWithSync
   Future<void> _replaceCategories(
     Database db,
     String supermarketId,
-    dynamic categoriesData,
-    dynamic categoryIdsData,
+    List<String> categoryIds,
   ) async {
-    final categoryIds = <String>[];
-
-    if (categoryIdsData is List) {
-      for (final id in categoryIdsData) {
-        if (id is String) categoryIds.add(id);
-      }
-    } else if (categoriesData is List) {
-      for (final item in categoriesData) {
-        if (item is Map) {
-          final id = item['id'];
-          if (id is String) categoryIds.add(id);
-          await _upsertCategory(db, item);
-        }
-      }
-    }
-
     await db.delete(
       'supermarket_category',
       where: 'supermarket_id = ?',

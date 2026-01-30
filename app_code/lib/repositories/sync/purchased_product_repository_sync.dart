@@ -289,7 +289,6 @@ class PurchasedProductRepositoryWithSync
     return Category(
       id: id,
       name: name,
-      isDefault: data['isDefault'] ?? data['is_default'] ?? false,
       lastModified: _parseTimestamp(data['lastModified'] ?? data['last_modified']) ??
           DateTime.now(),
       createdAt: _parseTimestamp(data['createdAt'] ?? data['created_at']) ?? DateTime.now(),

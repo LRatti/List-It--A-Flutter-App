@@ -42,7 +42,8 @@ class SyncEnginePush {
       }
 
       // Get all pending sync entries
-      final entries = await ManageSyncBox.getSyncEntriesByModificationTime();
+      // Create a snapshot copy to avoid concurrent modification errors when processing triggers new sync entries
+      final entries = (await ManageSyncBox.getSyncEntriesByModificationTime()).toList();
       if (entries.isEmpty) {
         _logger.i('SyncEngine: No pending sync entries');
         return;
@@ -132,7 +133,6 @@ class SyncEnginePush {
 
             if (entry.operation == SyncOperation.delete) {
               dataToWrite['isDeleted'] = true;
-              dataToWrite['lastModified'] = FieldValue.serverTimestamp();
             }
 
             transaction.set(docRef, dataToWrite, SetOptions(merge: true));
@@ -212,7 +212,18 @@ class SyncEnginePush {
             userId,
           );
         }
-      }
+      } 
+      // else if (entityType == ENTITY_TYPE_SUPERMARKET) {
+      //   // Supermarket depends on Categories (all associated categories must exist in Firestore)
+      //   final categoryIds = localData['categoryIds'] as List<String>? ?? [];
+      //   for (final categoryId in categoryIds) {
+      //     await _pushDependency(
+      //       categoryId,
+      //       ENTITY_TYPE_CATEGORY,
+      //       userId,
+      //     );
+      //   }
+      // }
     } catch (e) {
       _logger.w('SyncEngine: Error pushing dependencies for $entityType', error: e);
       // Continue even if dependency push fails - main entity will still be pushed

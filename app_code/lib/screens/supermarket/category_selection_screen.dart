@@ -162,12 +162,6 @@ class _CategorySelectionScreenState
                         category.getName(),
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                      subtitle: category.isDefault
-                          ? Text(
-                              'Default category',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            )
-                          : null,
                       value: isSelected,
                       onChanged: (value) {
                         setState(() {

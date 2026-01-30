@@ -70,6 +70,7 @@ class _SupermarketCustomizationScreenState
             context: context,
           ),
         );
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
@@ -104,7 +105,6 @@ class _SupermarketCustomizationScreenState
                 _categories.removeAt(index);
               });
               Navigator.pop(context);
-              _saveSupermarket();
             },
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
@@ -125,7 +125,6 @@ class _SupermarketCustomizationScreenState
       final category = _categories.removeAt(oldIndex);
       _categories.insert(newIndex, category);
     });
-    _saveSupermarket();
   }
 
   /// Navigate to category selection/addition screen
@@ -140,7 +139,6 @@ class _SupermarketCustomizationScreenState
             setState(() {
               _categories = List.from(newCategories);
             });
-            _saveSupermarket();
           },
         ),
       ),
@@ -151,7 +149,6 @@ class _SupermarketCustomizationScreenState
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        await _saveSupermarket();
         return true;
       },
       child: Scaffold(
@@ -160,11 +157,17 @@ class _SupermarketCustomizationScreenState
           title: const Text('Customize Supermarket'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () async {
-              await _saveSupermarket();
+            onPressed: () {
               if (mounted) Navigator.pop(context);
             },
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: _saveSupermarket,
+              tooltip: 'Save supermarket',
+            ),
+          ],
           elevation: 0,
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         ),
@@ -182,10 +185,6 @@ class _SupermarketCustomizationScreenState
                   ),
                   prefixIcon: const Icon(Icons.store),
                 ),
-                onChanged: (_) {
-                  // Auto-save on text change
-                  _saveSupermarket();
-                },
               ),
             ),
             // Categories list section

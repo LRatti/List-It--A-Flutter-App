@@ -198,8 +198,10 @@ class SyncEnginePull {
               DateTime? newestTimestamp;
 
               // Process all document changes (added, modified, removed)
-              for (final change in snapshot.docChanges) {
-                final data = change.doc.data() as Map<String, dynamic>?;
+              // Create a copy to avoid concurrent modification errors when callbacks trigger UI updates
+              final changes = snapshot.docChanges.toList();
+              for (final change in changes) {
+                final data = change.doc.data();
                 if (data == null) continue;
 
                 data['id'] = change.doc.id;

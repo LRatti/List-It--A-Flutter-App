@@ -50,12 +50,6 @@ class CategoriesNotifier extends AsyncNotifier<List<Category>> {
     final all = await _syncRepo.getAll();
     return all.where((cat) => cat.isVisible).toList();
   }
-
-  /// Get all visible default categories
-  Future<List<Category>> getVisibleDefaultCategories() async {
-    final visible = await getVisibleCategories();
-    return visible.where((cat) => cat.isDefault).toList();
-  }
 }
 
 /// Provider for all categories

@@ -65,7 +65,6 @@ class DatabaseHelper {
       CREATE TABLE category(
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
-        is_default INTEGER NOT NULL,
         is_visible INTEGER NOT NULL DEFAULT 1,
         created_at TEXT NOT NULL,
         last_modified TEXT NOT NULL

@@ -7,7 +7,6 @@ class DefaultCategoriesLoader {
   static const String _defaultCategoriesPath = 'assets/data/default_categories.json';
 
   /// Load default categories from the JSON file
-  /// Returns a list of Category objects with isDefault = true
   static Future<List<Category>> loadDefaultCategories() async {
     try {
       final jsonString = await rootBundle.loadString(_defaultCategoriesPath);
@@ -21,7 +20,6 @@ class DefaultCategoriesLoader {
       return categoriesList.map((categoryJson) {
         return Category(
           name: categoryJson['name'] ?? 'Unknown',
-          isDefault: true, // Always set isDefault to true for these
           isVisible: true,
         );
       }).toList();
