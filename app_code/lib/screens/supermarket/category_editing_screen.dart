@@ -133,7 +133,6 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
               enabled: !_isLoading,
               decoration: InputDecoration(
                 labelText: 'Category Name',
-                hintText: 'e.g., Fruits and Vegetables',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

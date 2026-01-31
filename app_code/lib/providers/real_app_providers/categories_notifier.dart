@@ -6,7 +6,8 @@ import 'package:app_code/services/database/sqlite/manage_category.dart';
 /// State notifier for managing categories
 /// Uses sync-aware repository for automatic Firestore synchronization
 class CategoriesNotifier extends AsyncNotifier<List<Category>> {
-  late final CategoryRepositoryWithSync _syncRepo = CategoryRepositoryWithSync();
+  late final CategoryRepositoryWithSync _syncRepo =
+      CategoryRepositoryWithSync();
 
   @override
   Future<List<Category>> build() async {
@@ -35,6 +36,24 @@ class CategoriesNotifier extends AsyncNotifier<List<Category>> {
     }
   }
 
+  /// Delete multiple categories (mark as invisible instead of actually deleting)
+  /// Returns the number of categories successfully deleted
+  Future<int> deleteCategories(List<String> ids) async {
+    int deletedCount = 0;
+
+    for (final id in ids) {
+      final category = await _syncRepo.getById(id);
+      if (category != null) {
+        category.setVisibility(false);
+        await _syncRepo.update(category);
+        deletedCount++;
+      }
+    }
+
+    ref.invalidateSelf();
+    return deletedCount;
+  }
+
   /// Get a category by ID
   Future<Category?> getCategoryById(String id) async {
     return await _syncRepo.getById(id);
@@ -55,19 +74,23 @@ class CategoriesNotifier extends AsyncNotifier<List<Category>> {
 /// Provider for all categories
 final categoriesProvider =
     AsyncNotifierProvider<CategoriesNotifier, List<Category>>(
-  () => CategoriesNotifier(),
-);
+      () => CategoriesNotifier(),
+    );
 
 /// Provider for getting a single category by ID
-final categoryByIdProvider =
-    FutureProvider.family<Category?, String>((ref, id) async {
+final categoryByIdProvider = FutureProvider.family<Category?, String>((
+  ref,
+  id,
+) async {
   final notifier = ref.watch(categoriesProvider.notifier);
   return await notifier.getCategoryById(id);
 });
 
 /// Provider for getting a single category by name
-final categoryByNameProvider =
-    FutureProvider.family<Category?, String>((ref, name) async {
+final categoryByNameProvider = FutureProvider.family<Category?, String>((
+  ref,
+  name,
+) async {
   final notifier = ref.watch(categoriesProvider.notifier);
   return await notifier.getCategoryByName(name);
 });

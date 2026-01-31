@@ -38,19 +38,18 @@ class _CategorySelectionScreenState
   Future<void> _loadAvailableCategories() async {
     // Invalidate the provider to force a fresh fetch of categories
     ref.invalidate(visibleCategoriesProvider);
-    
-    final allCategories =
-        await ref.read(visibleCategoriesProvider.future);
-    
+
+    final allCategories = await ref.read(visibleCategoriesProvider.future);
+
     // Filter out categories already in this supermarket
-    final currentIds =
-        widget.currentCategories.map((c) => c.id).toSet();
-    
+    final currentIds = widget.currentCategories.map((c) => c.id).toSet();
+
     setState(() {
-      _availableCategories = allCategories
-          .where((cat) => !currentIds.contains(cat.id))
-          .toList()
-        ..sort((a, b) => a.getName().compareTo(b.getName())); // Sort alphabetically
+      _availableCategories =
+          allCategories.where((cat) => !currentIds.contains(cat.id)).toList()
+            ..sort(
+              (a, b) => a.getName().compareTo(b.getName()),
+            ); // Sort alphabetically
     });
   }
 
@@ -78,10 +77,8 @@ class _CategorySelectionScreenState
     }
 
     // Combine and sort categories alphabetically
-    final updatedCategories = [
-      ...selected,
-      ...widget.currentCategories,
-    ]..sort((a, b) => a.getName().compareTo(b.getName()));
+    final updatedCategories = [...selected, ...widget.currentCategories]
+      ..sort((a, b) => a.getName().compareTo(b.getName()));
 
     widget.onCategoriesSelected(updatedCategories);
     Navigator.pop(context);
@@ -105,8 +102,82 @@ class _CategorySelectionScreenState
     );
   }
 
+  /// Delete selected categories after confirmation
+  Future<void> _deleteSelectedCategories() async {
+    final selected = _availableCategories
+        .where((cat) => _selectedCategoryIds.contains(cat.id))
+        .toList();
+
+    if (selected.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        buildAppSnackBar(
+          message: 'Please select at least one category to delete',
+          isError: true,
+          context: context,
+        ),
+      );
+      return;
+    }
+
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        content: Text(
+          selected.length == 1
+              ? "Want to delete '${selected.first.getName()}'?"
+              : 'Want to delete ${selected.length} categories?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        // Delete categories using the notifier
+        final deletedCount = await ref
+            .read(categoriesProvider.notifier)
+            .deleteCategories(selected.map((c) => c.id).toList());
+
+        if (mounted) {
+
+          // Clear selection and reload available categories
+          setState(() {
+            _selectedCategoryIds.clear();
+          });
+          await _loadAvailableCategories();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            buildAppSnackBar(
+              message: 'Failed to delete categories: $e',
+              isError: true,
+              context: context,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasSelection = _selectedCategoryIds.isNotEmpty;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -153,8 +224,7 @@ class _CategorySelectionScreenState
               itemCount: _availableCategories.length,
               itemBuilder: (context, index) {
                 final category = _availableCategories[index];
-                final isSelected =
-                    _selectedCategoryIds.contains(category.id);
+                final isSelected = _selectedCategoryIds.contains(category.id);
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(
@@ -177,41 +247,47 @@ class _CategorySelectionScreenState
                           }
                         });
                       },
-                      activeColor:
-                          Theme.of(context).colorScheme.primary,
+                      activeColor: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 );
               },
             ),
-      bottomNavigationBar: Padding(
+      bottomNavigationBar: hasSelection
+          ? Padding(
               padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => Navigator.pop(context),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                child: const Text('Delete'),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _deleteSelectedCategories,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                      child: const Text('Delete'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _addSelectedCategories,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                      ),
+                      child: const Text('Add'),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: _addSelectedCategories,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                ),
-                child: const Text('Add'),
-              ),
-            ),
-          ],
-              ),
-            ),
+            )
+          : null,
     );
   }
 }

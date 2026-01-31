@@ -157,7 +157,7 @@ class _SupermarketCustomizationScreenState
           children: [
             // Name editing section
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(8),
               child: TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -167,6 +167,20 @@ class _SupermarketCustomizationScreenState
                   ),
                   prefixIcon: const Icon(Icons.store),
                 ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: _navigateToCategorySelection,
+                style: OutlinedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                ),
+                child: const Text('Add Categories'),
+              ),
               ),
             ),
             // Categories list section
@@ -203,13 +217,6 @@ class _SupermarketCustomizationScreenState
                     ),
             ),
           ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'addCategoryFAB',
-          onPressed: _navigateToCategorySelection,
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          child: const Icon(Icons.add),
         ),
       ),
     );
