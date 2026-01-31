@@ -77,11 +77,11 @@ class _CategorySelectionScreenState
       return;
     }
 
-    // Add new categories at the top of the list
+    // Combine and sort categories alphabetically
     final updatedCategories = [
       ...selected,
       ...widget.currentCategories,
-    ];
+    ]..sort((a, b) => a.getName().compareTo(b.getName()));
 
     widget.onCategoriesSelected(updatedCategories);
     Navigator.pop(context);
@@ -185,7 +185,7 @@ class _CategorySelectionScreenState
               },
             ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             Expanded(
@@ -194,7 +194,7 @@ class _CategorySelectionScreenState
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                child: const Text('Cancel'),
+                child: const Text('Delete'),
               ),
             ),
             const SizedBox(width: 12),
@@ -210,8 +210,8 @@ class _CategorySelectionScreenState
               ),
             ),
           ],
-        ),
-      ),
+              ),
+            ),
     );
   }
 }

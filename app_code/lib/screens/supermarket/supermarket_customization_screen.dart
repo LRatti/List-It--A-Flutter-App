@@ -4,6 +4,7 @@ import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/providers/real_app_providers/supermarkets_notifier.dart';
 import 'package:app_code/screens/supermarket/category_selection_screen.dart';
+import 'package:app_code/screens/supermarket/category_editing_screen.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 
 class SupermarketCustomizationScreen extends ConsumerStatefulWidget {
@@ -63,13 +64,6 @@ class _SupermarketCustomizationScreenState
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          buildAppSnackBar(
-            message: 'Supermarket saved successfully',
-            isError: false,
-            context: context,
-          ),
-        );
         Navigator.pop(context);
       }
     } catch (e) {
@@ -87,33 +81,9 @@ class _SupermarketCustomizationScreenState
 
   /// Delete a category from the supermarket
   void _deleteCategory(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remove category'),
-        content: Text(
-          'Are you sure you want to remove "${_categories[index].getName()}" from this supermarket?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _categories.removeAt(index);
-              });
-              Navigator.pop(context);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
-    );
+    setState(() {
+      _categories.removeAt(index);
+    });
   }
 
   /// Reorder categories (called after drag)
@@ -140,6 +110,18 @@ class _SupermarketCustomizationScreenState
               _categories = List.from(newCategories);
             });
           },
+        ),
+      ),
+    );
+  }
+
+  /// Navigate to category editing screen to edit an existing category
+  void _navigateToCategoryEditing(Category category) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CategoryEditingScreen(
+          categoryToEdit: category,
         ),
       ),
     );
@@ -259,14 +241,7 @@ class _SupermarketCustomizationScreenState
             IconButton(
               icon: const Icon(Icons.edit_outlined),
               onPressed: () {
-                // TODO: Navigate to category editing screen
-                ScaffoldMessenger.of(context).showSnackBar(
-                  buildAppSnackBar(
-                    message: 'Edit feature coming soon',
-                    isError: false,
-                    context: context,
-                  ),
-                );
+                _navigateToCategoryEditing(category);
               },
               color: Theme.of(context).colorScheme.primary,
               tooltip: 'Edit category',

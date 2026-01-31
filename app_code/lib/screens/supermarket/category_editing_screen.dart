@@ -82,13 +82,6 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
         await ref.read(categoriesProvider.notifier).addCategory(newCategory);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            buildAppSnackBar(
-              message: 'Category created successfully',
-              isError: false,
-              context: context,
-            ),
-          );
 
           // Call the callback if provided
           widget.onCategoryCreated?.call(newCategory);
@@ -134,15 +127,6 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Instructions
-            Text(
-              isEditing
-                  ? 'Edit the category name below'
-                  : 'Enter a new category name',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 24),
-            
             // Name input field
             TextField(
               controller: _nameController,
@@ -181,7 +165,7 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
                         ),
                       )
                     : Text(
-                        isEditing ? 'Update Category' : 'Create Category',
+                        'Save',
                       ),
               ),
             ),
