@@ -4,12 +4,14 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_supermarket.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_category.dart';
 import 'package:app_code/repositories/sync/supermarket_repository_sync.dart';
-import 'package:app_code/services/database/sqlite/manage_supermarket.dart' as sqlite_supermarket;
+import 'package:app_code/services/database/sqlite/manage_supermarket.dart'
+    as sqlite_supermarket;
 
 /// State notifier for managing supermarkets list
 /// Uses sync-aware repository for automatic Firestore synchronization
 class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
-  late final SupermarketRepositoryWithSync _syncRepo = SupermarketRepositoryWithSync();
+  late final SupermarketRepositoryWithSync _syncRepo =
+      SupermarketRepositoryWithSync();
 
   @override
   Future<List<Supermarket>> build() async {
@@ -38,6 +40,24 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
     }
   }
 
+  /// Delete multiple supermarkets (mark as invisible instead of actually deleting)
+  /// Returns the number of supermarkets successfully deleted
+  Future<int> deleteSupermarkets(List<String> ids) async {
+    int deletedCount = 0;
+
+    for (final id in ids) {
+      final supermarket = await _syncRepo.getById(id);
+      if (supermarket != null) {
+        supermarket.setVisibility(false);
+        await _syncRepo.update(supermarket);
+        deletedCount++;
+      }
+    }
+
+    ref.invalidateSelf();
+    return deletedCount;
+  }
+
   /// Reorder categories in a supermarket (will be synced)
   Future<void> reorderCategories(
     String supermarketId,
@@ -47,13 +67,13 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
       supermarketId,
       categories,
     );
-    
+
     // Mark the supermarket as updated for sync
     final supermarket = await _syncRepo.getById(supermarketId);
     if (supermarket != null) {
       await _syncRepo.update(supermarket);
     }
-    
+
     ref.invalidateSelf();
   }
 
@@ -105,12 +125,14 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
 /// Provider for the supermarkets list
 final supermarketsProvider =
     AsyncNotifierProvider<SupermarketsNotifier, List<Supermarket>>(
-  () => SupermarketsNotifier(),
-);
+      () => SupermarketsNotifier(),
+    );
 
 /// Provider for getting a single supermarket by ID
-final supermarketByIdProvider =
-    FutureProvider.family<Supermarket?, String>((ref, id) async {
+final supermarketByIdProvider = FutureProvider.family<Supermarket?, String>((
+  ref,
+  id,
+) async {
   final notifier = ref.watch(supermarketsProvider.notifier);
   return await notifier.getSupermarketById(id);
 });
@@ -118,13 +140,14 @@ final supermarketByIdProvider =
 /// Provider for categories within a specific supermarket
 final supermarketCategoriesProvider =
     FutureProvider.family<List<Category>, String>((ref, supermarketId) async {
-  return await sqlite_supermarket.ManageSupermarket.getSupermarketCategories(
-    supermarketId,
-  );
-});
+      return await sqlite_supermarket
+          .ManageSupermarket.getSupermarketCategories(supermarketId);
+    });
 
 /// Provider for tracking the last created supermarket configuration
-final lastCreatedSupermarketProvider = FutureProvider<Supermarket?>((ref) async {
+final lastCreatedSupermarketProvider = FutureProvider<Supermarket?>((
+  ref,
+) async {
   final notifier = ref.watch(supermarketsProvider.notifier);
   return await notifier.getLastCreatedSupermarket();
 });

@@ -4,9 +4,21 @@ import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarkets_notifier.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
+import 'package:app_code/widgets/searchable_supermarkets_view.dart';
 
-class SupermarketsScreenMobile extends ConsumerWidget {
+class SupermarketsScreenMobile extends ConsumerStatefulWidget {
   const SupermarketsScreenMobile({super.key});
+
+  @override
+  ConsumerState<SupermarketsScreenMobile> createState() =>
+      _SupermarketsScreenMobileState();
+}
+
+class _SupermarketsScreenMobileState
+    extends ConsumerState<SupermarketsScreenMobile> {
+  void _handleDeletionModeChanged(bool isDeletionMode) {
+    // No-op: deletion mode is now handled by SearchableSupermarketsView
+  }
 
   /// Show dialog to add a new supermarket
   Future<void> _showAddSupermarketDialog(
@@ -70,9 +82,9 @@ class SupermarketsScreenMobile extends ConsumerWidget {
                   }
 
                   // Get the last created supermarket to use as template
-                  final lastSupermarket =
-                      await ref.read(supermarketsProvider.notifier)
-                          .getLastCreatedSupermarket();
+                  final lastSupermarket = await ref
+                      .read(supermarketsProvider.notifier)
+                      .getLastCreatedSupermarket();
 
                   // Create new supermarket with categories from the last one
                   final newSupermarket = Supermarket(
@@ -90,8 +102,9 @@ class SupermarketsScreenMobile extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            SupermarketCustomizationScreen(supermarket: newSupermarket),
+                        builder: (_) => SupermarketCustomizationScreen(
+                          supermarket: newSupermarket,
+                        ),
                       ),
                     );
                   }
@@ -110,7 +123,7 @@ class SupermarketsScreenMobile extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final supermarketsAsync = ref.watch(supermarketsProvider);
 
     return supermarketsAsync.when(
@@ -124,115 +137,17 @@ class SupermarketsScreenMobile extends ConsumerWidget {
       ),
       data: (supermarkets) {
         // Filter only visible supermarkets
-        final visibleSupermarkets =
-            supermarkets.where((s) => s.isVisible).toList();
+        final visibleSupermarkets = supermarkets
+            .where((s) => s.isVisible)
+            .toList();
 
-        return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: AppBar(
-            title: const Text('Supermarkets'),
-            elevation: 0,
-            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          ),
-          body: visibleSupermarkets.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.store_outlined,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No supermarkets yet',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Create your first supermarket to get started',
-                        style: Theme.of(context).textTheme.bodySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 0,
-                  ),
-                  itemCount: visibleSupermarkets.length,
-                  itemBuilder: (context, index) {
-                    final supermarket = visibleSupermarkets[index];
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 8,
-                      ),
-                      child: Card(
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 16,
-                          ),
-                          title: Text(
-                            supermarket.getName(),
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          subtitle: Text(
-                            '${supermarket.getCategories().length} categories',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Favorite/Star button
-                              IconButton(
-                                icon: const Icon(Icons.star_outline),
-                                onPressed: () {
-                                  // TODO: Implement favorite functionality
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    buildAppSnackBar(
-                                      message: 'Favorite feature coming soon',
-                                      isError: false,
-                                      context: context,
-                                    ),
-                                  );
-                                },
-                                color:
-                                    Theme.of(context).colorScheme.primary,
-                              ),
-                              // Edit button
-                              IconButton(
-                                icon: const Icon(Icons.edit_outlined),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          SupermarketCustomizationScreen(
-                                        supermarket: supermarket,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                color:
-                                    Theme.of(context).colorScheme.primary,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+        return SearchableSupermarketsView(
+          supermarkets: visibleSupermarkets,
+          emptyMessage: 'No supermarkets yet',
+          onDeletionModeChanged: _handleDeletionModeChanged,
           floatingActionButton: FloatingActionButton(
             heroTag: 'addSupermarketFAB',
-            onPressed: () =>
-                _showAddSupermarketDialog(context, ref),
+            onPressed: () => _showAddSupermarketDialog(context, ref),
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
             child: const Icon(Icons.add),

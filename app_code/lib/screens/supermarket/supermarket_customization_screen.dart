@@ -10,10 +10,7 @@ import 'package:app_code/widgets/app_snackbar.dart';
 class SupermarketCustomizationScreen extends ConsumerStatefulWidget {
   final Supermarket supermarket;
 
-  const SupermarketCustomizationScreen({
-    super.key,
-    required this.supermarket,
-  });
+  const SupermarketCustomizationScreen({super.key, required this.supermarket});
 
   @override
   ConsumerState<SupermarketCustomizationScreen> createState() =>
@@ -29,9 +26,7 @@ class _SupermarketCustomizationScreenState
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.supermarket.getName(),
-    );
+    _nameController = TextEditingController(text: widget.supermarket.getName());
     _categories = List.from(widget.supermarket.getCategories());
   }
 
@@ -59,9 +54,9 @@ class _SupermarketCustomizationScreenState
     widget.supermarket.setCategories(_categories);
 
     try {
-      await ref.read(supermarketsProvider.notifier).updateSupermarket(
-            widget.supermarket,
-          );
+      await ref
+          .read(supermarketsProvider.notifier)
+          .updateSupermarket(widget.supermarket);
 
       if (mounted) {
         Navigator.pop(context);
@@ -120,11 +115,60 @@ class _SupermarketCustomizationScreenState
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CategoryEditingScreen(
-          categoryToEdit: category,
-        ),
+        builder: (_) => CategoryEditingScreen(categoryToEdit: category),
       ),
     );
+  }
+
+  /// Delete the supermarket (mark as non-visible)
+  Future<void> _deleteSupermarket() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        content: Text(
+          "Want to delete '${widget.supermarket.getName()}'?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+            ),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ref
+            .read(supermarketsProvider.notifier)
+            .deleteSupermarket(widget.supermarket.id);
+
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            buildAppSnackBar(
+              message: 'Error deleting supermarket: ${e.toString()}',
+              isError: true,
+              context: context,
+            ),
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -171,16 +215,31 @@ class _SupermarketCustomizationScreenState
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: _navigateToCategorySelection,
-                style: OutlinedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                ),
-                child: const Text('Add Categories'),
-              ),
+              child: Row(
+                children: [
+                  // Delete button
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: _deleteSupermarket,
+                    color: Theme.of(context).colorScheme.error,
+                    iconSize: 28,
+                    tooltip: 'Delete supermarket',
+                  ),
+                  const SizedBox(width: 8),
+                  // Add categories button
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _navigateToCategorySelection,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
+                      ),
+                      child: const Text('Add Categories'),
+                    ),
+                  ),
+                ],
               ),
             ),
             // Categories list section
@@ -228,6 +287,8 @@ class _SupermarketCustomizationScreenState
       key: ValueKey(category.id),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: ListTile(
+        // Tap to edit category
+        onTap: () => _navigateToCategoryEditing(category),
         // Delete button on the left
         leading: IconButton(
           icon: const Icon(Icons.remove_circle_outline),
