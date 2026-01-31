@@ -9,8 +9,13 @@ import 'package:app_code/widgets/app_snackbar.dart';
 
 class SupermarketCustomizationScreen extends ConsumerStatefulWidget {
   final Supermarket supermarket;
+  final bool isCreationMode;
 
-  const SupermarketCustomizationScreen({super.key, required this.supermarket});
+  const SupermarketCustomizationScreen({
+    super.key,
+    required this.supermarket,
+    this.isCreationMode = false,
+  });
 
   @override
   ConsumerState<SupermarketCustomizationScreen> createState() =>
@@ -54,9 +59,15 @@ class _SupermarketCustomizationScreenState
     widget.supermarket.setCategories(_categories);
 
     try {
-      await ref
-          .read(supermarketsProvider.notifier)
-          .updateSupermarket(widget.supermarket);
+      if (widget.isCreationMode) {
+        await ref
+            .read(supermarketsProvider.notifier)
+            .addSupermarket(widget.supermarket);
+      } else {
+        await ref
+            .read(supermarketsProvider.notifier)
+            .updateSupermarket(widget.supermarket);
+      }
 
       if (mounted) {
         Navigator.pop(context);
@@ -120,8 +131,17 @@ class _SupermarketCustomizationScreenState
     );
   }
 
-  /// Delete the supermarket (mark as non-visible)
-  Future<void> _deleteSupermarket() async {
+  /// Delete or cancel the supermarket
+  /// In creation mode, simply cancel without saving
+  /// In edit mode, mark as non-visible after confirmation
+  Future<void> _deleteOrCancel() async {
+    if (widget.isCreationMode) {
+      if (mounted) {
+        Navigator.pop(context);
+      }
+      return;
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -180,7 +200,11 @@ class _SupermarketCustomizationScreenState
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          title: const Text('Customize Supermarket'),
+          title: Text(
+            widget.isCreationMode
+                ? 'Create Supermarket'
+                : 'Customize Supermarket',
+          ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
@@ -205,41 +229,12 @@ class _SupermarketCustomizationScreenState
               child: TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Supermarket Name',
+                  labelText: 'Enter Supermarket Name',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   prefixIcon: const Icon(Icons.store),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  // Delete button
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: _deleteSupermarket,
-                    color: Theme.of(context).colorScheme.error,
-                    iconSize: 28,
-                    tooltip: 'Delete supermarket',
-                  ),
-                  const SizedBox(width: 8),
-                  // Add categories button
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _navigateToCategorySelection,
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(
-                          context,
-                        ).colorScheme.onPrimary,
-                      ),
-                      child: const Text('Add Categories'),
-                    ),
-                  ),
-                ],
               ),
             ),
             // Categories list section
@@ -274,6 +269,37 @@ class _SupermarketCustomizationScreenState
                           _buildCategoryTile(i, _categories[i]),
                       ],
                     ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Row(
+                children: [
+                  // Delete button (or cancel in creation mode)
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: _deleteOrCancel,
+                    color: Theme.of(context).colorScheme.error,
+                    iconSize: 28,
+                    tooltip: widget.isCreationMode
+                        ? 'Cancel supermarket creation'
+                        : 'Delete supermarket',
+                  ),
+                  const SizedBox(width: 8),
+                  // Add categories button
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _navigateToCategorySelection,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
+                      ),
+                      child: const Text('Add Categories'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

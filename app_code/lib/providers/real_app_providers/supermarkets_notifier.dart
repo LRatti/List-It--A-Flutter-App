@@ -120,6 +120,32 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
     supermarkets.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return supermarkets.first;
   }
+
+  /// Get the last edited supermarket (for initializing new ones)
+  Future<Supermarket?> getLastEditedSupermarket() async {
+    final supermarkets = await _syncRepo.getAll();
+    final visible = supermarkets.where((s) => s.isVisible).toList();
+    if (visible.isEmpty) return null;
+
+    visible.sort((a, b) {
+      final aModified = a.lastModified ?? a.createdAt;
+      final bModified = b.lastModified ?? b.createdAt;
+      return bModified.compareTo(aModified);
+    });
+
+    final lastEdited = visible.first;
+
+    // Ensure categories are hydrated from SQLite (avoids empty template after cold start)
+    if (lastEdited.getCategories().isEmpty) {
+      final categories = await sqlite_supermarket
+          .ManageSupermarket.getSupermarketCategories(lastEdited.id);
+      if (categories.isNotEmpty) {
+        lastEdited.setCategories(categories);
+      }
+    }
+
+    return lastEdited;
+  }
 }
 
 /// Provider for the supermarkets list

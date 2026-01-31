@@ -63,13 +63,6 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
         );
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            buildAppSnackBar(
-              message: 'Category updated successfully',
-              isError: false,
-              context: context,
-            ),
-          );
           Navigator.pop(context);
         }
       } else {
