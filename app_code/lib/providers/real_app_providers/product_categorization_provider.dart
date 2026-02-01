@@ -103,7 +103,7 @@ class BackgroundProductCategorizationNotifier
 }
 
 /// Provides the Gemini repository for product categorization
-/// TODO: switch to real repository when needed
+/// TODO: switch to real repository from MockGeminiRepository() to GeminiRepositoryReal() when needed
 final productCategorizationRepositoryProvider =
     Provider<GeminiRepository>((ref) {
   return MockGeminiRepository();

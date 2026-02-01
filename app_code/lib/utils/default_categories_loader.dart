@@ -18,9 +18,12 @@ class DefaultCategoriesLoader {
 
       final categoriesList = jsonData['categories'] as List;
       return categoriesList.map((categoryJson) {
+        final isVisibleValue = categoryJson['isVisible'];
+        final isVisible = isVisibleValue is bool ? isVisibleValue : true;
+
         return Category(
           name: categoryJson['name'] ?? 'Unknown',
-          isVisible: true,
+          isVisible: isVisible,
         );
       }).toList();
     } catch (e) {

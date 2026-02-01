@@ -6,6 +6,8 @@ import 'package:app_code/providers/real_app_providers/supermarkets_notifier.dart
 import 'package:app_code/screens/supermarket/category_selection_screen.dart';
 import 'package:app_code/screens/supermarket/category_editing_screen.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
+import 'package:app_code/utils/uncategorized_category_utils.dart';
+import 'package:app_code/utils/uncategorized_category_initializer.dart';
 
 class SupermarketCustomizationScreen extends ConsumerStatefulWidget {
   final Supermarket supermarket;
@@ -45,6 +47,15 @@ class _SupermarketCustomizationScreenState
     super.dispose();
   }
 
+  bool _isHiddenCategory(Category category) {
+    return !category.isVisible ||
+        UncategorizedCategoryUtils.isUncategorized(category);
+  }
+
+  List<Category> _visibleCategories() {
+    return _categories.where((cat) => !_isHiddenCategory(cat)).toList();
+  }
+
   /// Save the supermarket with updated name and categories
   Future<void> _saveSupermarket() async {
     final name = _nameController.text.trim();
@@ -57,6 +68,13 @@ class _SupermarketCustomizationScreenState
         ),
       );
       return;
+    }
+
+    final uncategorized =
+        await UncategorizedCategoryInitializer.getUncategorized();
+
+    if (!_categories.any((cat) => cat.id == uncategorized.id)) {
+      _categories.insert(0, uncategorized);
     }
 
     widget.supermarket.setName(name);
@@ -98,20 +116,26 @@ class _SupermarketCustomizationScreenState
   }
 
   /// Delete a category from the supermarket
-  void _deleteCategory(int index) {
+  void _deleteCategory(Category category) {
     setState(() {
-      _categories.removeAt(index);
+      _categories.removeWhere((cat) => cat.id == category.id);
     });
   }
 
   /// Reorder categories (called after drag)
   void _onReorderCategory(int oldIndex, int newIndex) {
+    final visible = _visibleCategories();
+
     setState(() {
       if (newIndex > oldIndex) {
         newIndex -= 1;
       }
-      final category = _categories.removeAt(oldIndex);
-      _categories.insert(newIndex, category);
+
+      final category = visible.removeAt(oldIndex);
+      visible.insert(newIndex, category);
+
+      final hidden = _categories.where(_isHiddenCategory).toList();
+      _categories = [...hidden, ...visible];
     });
   }
 
@@ -205,6 +229,8 @@ class _SupermarketCustomizationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final visibleCategories = _visibleCategories();
+
     return WillPopScope(
       onWillPop: () async {
         return true;
@@ -251,7 +277,7 @@ class _SupermarketCustomizationScreenState
             ),
             // Categories list section
             Expanded(
-              child: _categories.isEmpty
+              child: visibleCategories.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -277,8 +303,8 @@ class _SupermarketCustomizationScreenState
                   : ReorderableListView(
                       onReorder: _onReorderCategory,
                       children: [
-                        for (int i = 0; i < _categories.length; i++)
-                          _buildCategoryTile(i, _categories[i]),
+                        for (int i = 0; i < visibleCategories.length; i++)
+                          _buildCategoryTile(i, visibleCategories[i]),
                       ],
                     ),
             ),
@@ -352,7 +378,7 @@ class _SupermarketCustomizationScreenState
         // Delete button on the left
         leading: IconButton(
           icon: const Icon(Icons.remove_circle_outline),
-          onPressed: () => _deleteCategory(index),
+          onPressed: () => _deleteCategory(category),
           color: Theme.of(context).colorScheme.error,
           tooltip: 'Remove category',
         ),

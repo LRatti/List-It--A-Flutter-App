@@ -1,6 +1,10 @@
 {
   "categories": [
     {
+      "name": "uncategorized",
+      "isVisible": false
+    },
+    {
       "name": "🥩 Meat"
       
     },

@@ -242,14 +242,6 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                             : Theme.of(context).textTheme.titleMedium?.color,
                       ),
                     ),
-                    subtitle: Text(
-                      '${supermarket.getCategories().length} categories',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.onPrimaryContainer
-                            : Theme.of(context).textTheme.bodySmall?.color,
-                      ),
-                    ),
                     trailing: _selectionActive
                         ? null
                         : Row(

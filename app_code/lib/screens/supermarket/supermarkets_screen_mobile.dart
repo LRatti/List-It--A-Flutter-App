@@ -4,6 +4,7 @@ import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarkets_notifier.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 import 'package:app_code/widgets/searchable_supermarkets_view.dart';
+import 'package:app_code/utils/uncategorized_category_initializer.dart';
 
 class SupermarketsScreenMobile extends ConsumerStatefulWidget {
   const SupermarketsScreenMobile({super.key});
@@ -26,9 +27,18 @@ class _SupermarketsScreenMobileState
     final lastSupermarket = await ref
       .read(supermarketsProvider.notifier)
       .getLastEditedSupermarket();
+    final uncategorized =
+        await UncategorizedCategoryInitializer.getUncategorized();
+
+    final templateCategories = lastSupermarket?.getCategories() ?? [];
+    final hasUncategorized = templateCategories
+        .any((cat) => cat.id == uncategorized.id);
+
     final newSupermarket = Supermarket(
       name: '',
-      categories: lastSupermarket?.getCategories() ?? [],
+      categories: hasUncategorized
+          ? templateCategories
+          : [uncategorized, ...templateCategories],
     );
 
     Navigator.push(

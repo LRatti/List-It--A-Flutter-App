@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/providers/real_app_providers/categories_notifier.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
+import 'package:app_code/utils/uncategorized_category_utils.dart';
 
 class CategoryEditingScreen extends ConsumerStatefulWidget {
   final Category? categoryToEdit;
@@ -45,6 +46,17 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
           message: 'Category name cannot be empty',
+          isError: true,
+          context: context,
+        ),
+      );
+      return;
+    }
+
+    if (name.trim().toLowerCase() == UncategorizedCategoryUtils.name) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        buildAppSnackBar(
+          message: 'The name "uncategorized" is reserved',
           isError: true,
           context: context,
         ),

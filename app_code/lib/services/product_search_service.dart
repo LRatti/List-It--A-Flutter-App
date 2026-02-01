@@ -2,6 +2,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/providers/real_app_providers/product_categorization_provider.dart';
 import 'package:app_code/services/database/sqlite/manage_product.dart';
+import 'package:app_code/utils/uncategorized_category_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Service for searching and categorizing products
@@ -66,18 +67,16 @@ class ProductSearchService {
       final category = availableCategories.firstWhere(
         (cat) => cat.id == categoryId,
         orElse: () => availableCategories.firstWhere(
-          (cat) => cat.getName().toLowerCase() == 'uncategorized',
-          orElse: () => Category(name: 'uncategorized'),
+          (cat) => UncategorizedCategoryUtils.isUncategorized(cat),
+          orElse: () =>
+              UncategorizedCategoryUtils.fallbackFrom(availableCategories),
         ),
       );
       return category;
     }
 
     // No association - return uncategorized
-    return availableCategories.firstWhere(
-      (cat) => cat.getName().toLowerCase() == 'uncategorized',
-      orElse: () => Category(name: 'uncategorized'),
-    );
+    return UncategorizedCategoryUtils.fallbackFrom(availableCategories);
   }
 
   /// Categorize product using Gemini and add association to supermarket
@@ -94,10 +93,7 @@ class ProductSearchService {
 
     final category = availableCategories.firstWhere(
       (cat) => cat.getName().toLowerCase() == categoryName.toLowerCase(),
-      orElse: () => availableCategories.firstWhere(
-        (cat) => cat.getName().toLowerCase() == 'uncategorized',
-        orElse: () => Category(name: 'uncategorized'),
-      ),
+      orElse: () => UncategorizedCategoryUtils.fallbackFrom(availableCategories),
     );
 
     // Add association for this supermarket

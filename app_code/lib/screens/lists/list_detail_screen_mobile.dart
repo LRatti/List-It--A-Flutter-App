@@ -13,6 +13,7 @@ import 'package:app_code/screens/supermarket/supermarket_customization_screen.da
 import 'package:app_code/services/product_search_service.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/widgets/draggable_product_list.dart';
+import 'package:app_code/utils/uncategorized_category_initializer.dart';
 
 /// Provider for the list detail controller
 final listDetailControllerProvider = ChangeNotifierProvider.family<
@@ -268,10 +269,13 @@ class _ListDetailScreenMobileState
   /// Navigate to supermarket customization
   Future<void> _navigateToSupermarketCustomization(Supermarket? supermarket,
       {bool isNew = false}) async {
+    final uncategorized =
+        await UncategorizedCategoryInitializer.getUncategorized();
+
     final targetSupermarket = supermarket ??
         Supermarket(
           name: '',
-          categories: [Category(name: 'uncategorized')],
+          categories: [uncategorized],
         );
 
     await Navigator.push(
@@ -551,9 +555,6 @@ class _ListDetailScreenMobileState
             controller.updateProduct(product);
           },
         ),
-
-        // Bottom spacing for buttons
-        const SizedBox(height: 80),
       ],
     );
   }

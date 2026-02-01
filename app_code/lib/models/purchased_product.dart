@@ -91,4 +91,8 @@ class PurchasedProduct {
     // ignore: unnecessary_this
     this.product = product;
   }
+
+  void setCategory(Category newCategory) {
+    category = newCategory;
+  }
 }

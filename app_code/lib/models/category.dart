@@ -72,4 +72,15 @@ class Category {
       'createdAt': createdAt.toIso8601String(),
     };
   }
+
+  /// Implement equality based on category ID
+  /// This is critical for proper categorization in controllers and UI
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Category && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

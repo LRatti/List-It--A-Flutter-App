@@ -28,6 +28,7 @@ import 'package:app_code/services/mock/mock_data_seed.dart';
 
 // Utils
 import 'package:app_code/utils/favorite_supermarket_initializer.dart';
+import 'package:app_code/utils/uncategorized_category_initializer.dart';
 
 /// Performs all initialization tasks required at app startup.
 /// This includes Firebase setup, mock data seeding, cleanup operations, and sync engine initialization.
@@ -41,6 +42,9 @@ Future<void> _runStartupTasks() async {
 
   // Seed mock data only if local database is empty
   await seedMockDataIfEmpty();
+
+  // Ensure a single hidden uncategorized category exists and is attached
+  await UncategorizedCategoryInitializer.ensureInitialized();
 
   // Ensure a favorite supermarket is initialized (handles fresh installs and upgrades)
   await FavoriteSupermarketInitializer.ensureFavoriteInitialized();

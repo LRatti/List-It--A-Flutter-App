@@ -8,6 +8,7 @@ import 'package:app_code/repositories/sync/product_repository_sync.dart';
 import 'package:app_code/repositories/sync/purchased_product_repository_sync.dart';
 import 'package:app_code/repositories/sync/shopping_list_repository_sync.dart';
 import 'package:app_code/services/database/sqlite/manage_product.dart';
+import 'package:app_code/utils/uncategorized_category_utils.dart';
 import 'package:flutter/foundation.dart' hide Category;
 
 /// State for products being categorized (in buffer zone)
@@ -100,10 +101,7 @@ class ListDetailController extends ChangeNotifier {
 
     final supermarketId = _selectedSupermarket!.id;
     final categories = _selectedSupermarket!.getCategories();
-    final uncategorized = categories.firstWhere(
-      (cat) => cat.getName().toLowerCase() == 'uncategorized',
-      orElse: () => Category(name: 'uncategorized'),
-    );
+    final uncategorized = UncategorizedCategoryUtils.fallbackFrom(categories);
 
     for (var purchasedProduct in _products) {
       final product = purchasedProduct.product;
@@ -201,7 +199,12 @@ class ListDetailController extends ChangeNotifier {
   void moveProductToCategory(PurchasedProduct product, Category newCategory) {
     final index = _products.indexWhere((p) => p.id == product.id);
     if (index != -1) {
+      // Update the purchased product's category
       _products[index].category = newCategory;
+      
+      // CRITICAL FIX: Update the category reference on the product parameter as well
+      // This ensures the PurchasedProduct model holds the correct category
+      product.category = newCategory;
       
       // Update product association for current supermarket
       if (_selectedSupermarket != null) {
@@ -211,12 +214,18 @@ class ListDetailController extends ChangeNotifier {
         );
         
         // Mark association change for persistence
+        // This saves to the associations table and syncs to Firestore
         _markAssociationChanged(
           _products[index].product.id,
           _selectedSupermarket!.id,
           newCategory.id,
         );
       }
+      
+      // CRITICAL FIX: Update the PurchasedProduct's lastModified timestamp
+      // This ensures the purchased_product row will be updated in the database
+      // with the new category_id when save() is called
+      _products[index].lastModified = DateTime.now();
       
       _hasChanges = true;
       notifyListeners();
@@ -235,6 +244,13 @@ class ListDetailController extends ChangeNotifier {
   }
 
   /// Get products grouped by category for the current supermarket
+  /// 
+  /// NEW BEHAVIOR: Always returns ALL categories from the selected supermarket,
+  /// even if they have no products. This allows users to see all available
+  /// categories upfront and drag products to any category.
+  /// 
+  /// CRITICAL: Categories are matched by ID (not object reference) to handle
+  /// the case where the same category is loaded as different object instances.
   Map<Category, List<PurchasedProduct>> getProductsByCategory() {
     if (_selectedSupermarket == null) {
       return {};
@@ -243,28 +259,36 @@ class ListDetailController extends ChangeNotifier {
     final categories = _selectedSupermarket!.getCategories();
     final Map<Category, List<PurchasedProduct>> grouped = {};
 
-    // Initialize with uncategorized first
-    final uncategorized = categories.firstWhere(
-      (cat) => cat.getName().toLowerCase() == 'uncategorized',
-      orElse: () => Category(name: 'uncategorized'),
-    );
-    grouped[uncategorized] = [];
-
-    // Initialize all other categories in order
+    // Initialize ALL categories with empty lists (even if they have no products)
+    // This ensures all category headers are displayed, allowing users to
+    // drag products to any category
     for (var category in categories) {
-      if (category.getName().toLowerCase() != 'uncategorized') {
-        grouped[category] = [];
-      }
+      grouped[category] = [];
     }
 
-    // Distribute products into categories
+    // Distribute products into their respective categories
+    // CRITICAL FIX: Match by category ID instead of object reference
+    // This handles the case where product.category is a different instance
+    // than the category in the supermarket's categories list
     for (var product in _products) {
-      final category = product.category;
-      if (grouped.containsKey(category)) {
-        grouped[category]!.add(product);
+      final productCategoryId = product.category.id;
+      
+      // Find matching category in supermarket's categories by ID
+      final matchingCategory = categories.firstWhere(
+        (cat) => cat.id == productCategoryId,
+        orElse: () {
+          // Category not found in supermarket - use uncategorized
+          return UncategorizedCategoryUtils.fallbackFrom(categories);
+        },
+      );
+      
+      // Add product to the matching category
+      if (grouped.containsKey(matchingCategory)) {
+        grouped[matchingCategory]!.add(product);
       } else {
-        // Fallback to uncategorized if category not found
-        grouped[uncategorized]!.add(product);
+        // This shouldn't happen since we initialized all categories,
+        // but handle it gracefully
+        grouped[matchingCategory] = [product];
       }
     }
 
@@ -306,9 +330,8 @@ class ListDetailController extends ChangeNotifier {
       
       // If this is the current supermarket, move product to uncategorized
       if (_selectedSupermarket?.id == supermarketId) {
-        final uncategorized = _selectedSupermarket!.getCategories().firstWhere(
-          (cat) => cat.getName().toLowerCase() == 'uncategorized',
-          orElse: () => Category(name: 'uncategorized'),
+        final uncategorized = UncategorizedCategoryUtils.fallbackFrom(
+          _selectedSupermarket!.getCategories(),
         );
         _products[productIndex].category = uncategorized;
       }

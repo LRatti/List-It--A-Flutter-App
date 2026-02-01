@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/repositories/sync/category_repository_sync.dart';
 import 'package:app_code/services/database/sqlite/manage_category.dart';
+import 'package:app_code/utils/uncategorized_category_utils.dart';
 
 /// State notifier for managing categories
 /// Uses sync-aware repository for automatic Firestore synchronization
@@ -29,7 +30,8 @@ class CategoriesNotifier extends AsyncNotifier<List<Category>> {
   /// Delete a category (mark as invisible instead of actually deleting)
   Future<void> deleteCategory(String id) async {
     final category = await _syncRepo.getById(id);
-    if (category != null) {
+    if (category != null &&
+        !UncategorizedCategoryUtils.isUncategorized(category)) {
       category.setVisibility(false);
       await _syncRepo.update(category);
       ref.invalidateSelf();
@@ -43,7 +45,8 @@ class CategoriesNotifier extends AsyncNotifier<List<Category>> {
 
     for (final id in ids) {
       final category = await _syncRepo.getById(id);
-      if (category != null) {
+      if (category != null &&
+          !UncategorizedCategoryUtils.isUncategorized(category)) {
         category.setVisibility(false);
         await _syncRepo.update(category);
         deletedCount++;

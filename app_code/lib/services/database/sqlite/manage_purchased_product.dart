@@ -33,14 +33,35 @@ class ManagePurchasedProduct {
       WHERE pp.list_id = ? AND pp.is_deleted = 0
     ''', [listId]);
 
-    return rows.map((row) {
+    final result = <PurchasedProduct>[];
+    
+    for (final row in rows) {
+      final productId = row['p_id'] as String;
+      
+      // CRITICAL FIX: Load product associations from the associations table
+      // This ensures products have correct supermarket->category mappings
+      final associationRows = await db.query(
+        'associations',
+        where: 'product_id = ?',
+        whereArgs: [productId],
+      );
+      
+      final associations = <String, String>{};
+      for (final assocRow in associationRows) {
+        final supermarketId = assocRow['supermarket_id'] as String;
+        final categoryId = assocRow['category_id'] as String;
+        associations[supermarketId] = categoryId;
+      }
+      
       final product = Product.fromDatabase(
         {'id': row['p_id'], 'name': row['p_name'], 'is_visible': row['p_visible']},
-        associations: {},
+        associations: associations,
       );
       final category = Category.fromDatabase({'id': row['c_id'], 'name': row['c_name']});
-      return PurchasedProduct.fromDatabase(row, category, product);
-    }).toList();
+      result.add(PurchasedProduct.fromDatabase(row, category, product));
+    }
+
+    return result;
   }
 
   static Future<PurchasedProduct?> getPurchasedProductById(String id) async {
@@ -58,9 +79,25 @@ class ManagePurchasedProduct {
     if (rows.isEmpty) return null;
 
     final row = rows.first;
+    final productId = row['p_id'] as String;
+    
+    // CRITICAL FIX: Load product associations from the associations table
+    final associationRows = await db.query(
+      'associations',
+      where: 'product_id = ?',
+      whereArgs: [productId],
+    );
+    
+    final associations = <String, String>{};
+    for (final assocRow in associationRows) {
+      final supermarketId = assocRow['supermarket_id'] as String;
+      final categoryId = assocRow['category_id'] as String;
+      associations[supermarketId] = categoryId;
+    }
+    
     final product = Product.fromDatabase(
       {'id': row['p_id'], 'name': row['p_name'], 'is_visible': row['p_visible']},
-      associations: {},
+      associations: associations,
     );
     final category = Category.fromDatabase({'id': row['c_id'], 'name': row['c_name']});
     return PurchasedProduct.fromDatabase(row, category, product);
@@ -101,9 +138,25 @@ class ManagePurchasedProduct {
     if (rows.isEmpty) return null;
 
     final row = rows.first;
+    final productId = row['p_id'] as String;
+    
+    // CRITICAL FIX: Load product associations from the associations table
+    final associationRows = await db.query(
+      'associations',
+      where: 'product_id = ?',
+      whereArgs: [productId],
+    );
+    
+    final associations = <String, String>{};
+    for (final assocRow in associationRows) {
+      final supermarketId = assocRow['supermarket_id'] as String;
+      final categoryId = assocRow['category_id'] as String;
+      associations[supermarketId] = categoryId;
+    }
+    
     final product = Product.fromDatabase(
       {'id': row['p_id'], 'name': row['p_name'], 'is_visible': row['p_visible']},
-      associations: {},
+      associations: associations,
     );
     final category = Category.fromDatabase({'id': row['c_id'], 'name': row['c_name']});
     return PurchasedProduct.fromDatabase(row, category, product);

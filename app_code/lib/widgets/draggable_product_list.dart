@@ -23,17 +23,15 @@ class DraggableProductList extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal:0),
       child: Column(
         children: productsByCategory.entries.map((entry) {
         final category = entry.key;
         final products = entry.value;
 
-        // Skip empty categories
-        if (products.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
+        // NEW BEHAVIOR: Always show category headers, even if empty
+        // This allows users to see all available categories upfront
+        // and drag products to any category
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -50,18 +48,30 @@ class DraggableProductList extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.folder,
-                        size: 20,
-                        color: colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           category.getName(),
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      // Show count badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: products.isEmpty 
+                              ? colorScheme.surfaceContainerHighest
+                              : colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${products.length}',
+                          style: textTheme.labelSmall?.copyWith(
+                            color: products.isEmpty
+                                ? colorScheme.onSurfaceVariant
+                                : colorScheme.onPrimaryContainer,
                           ),
                         ),
                       ),
@@ -83,16 +93,16 @@ class DraggableProductList extends StatelessWidget {
                 }
               },
             ),
-            // Products in this category
-            ...products.map((product) {
-              return _buildDraggableProductTile(
-                product,
-                colorScheme,
-                textTheme,
-                context,
-              );
-            }).toList(),
-            const SizedBox(height: 16),
+            // Products in this category (if any)
+            if (products.isNotEmpty)
+              ...products.map((product) {
+                return _buildDraggableProductTile(
+                  product,
+                  colorScheme,
+                  textTheme,
+                  context,
+                );
+              }).toList()
           ],
         );
         }).toList(),

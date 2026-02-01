@@ -176,6 +176,14 @@ class CategoryRepositoryWithSync
       cleaned.remove('isDefault');
     }
 
+    if (cleaned.containsKey('isVisible')) {
+      cleaned['is_visible'] = cleaned['isVisible'] == true ? 1 : 0;
+      cleaned.remove('isVisible');
+    } else if (cleaned.containsKey('is_visible')) {
+      final value = cleaned['is_visible'];
+      cleaned['is_visible'] = value == true || value == 1 ? 1 : 0;
+    }
+
     if (cleaned.containsKey('createdAt')) {
       final parsed = _parseTimestamp(cleaned['createdAt']);
       cleaned['created_at'] = parsed?.toIso8601String() ?? DateTime.now().toIso8601String();
@@ -189,6 +197,9 @@ class CategoryRepositoryWithSync
     }
     
     // Ensure required fields have default values if missing
+    if (!cleaned.containsKey('is_visible') || cleaned['is_visible'] == null) {
+      cleaned['is_visible'] = 1;
+    }
     if (!cleaned.containsKey('created_at') || cleaned['created_at'] == null) {
       cleaned['created_at'] = DateTime.now().toIso8601String();
     }

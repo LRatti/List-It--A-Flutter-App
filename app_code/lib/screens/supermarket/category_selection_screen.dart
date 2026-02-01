@@ -4,6 +4,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/providers/real_app_providers/categories_notifier.dart';
 import 'package:app_code/screens/supermarket/category_editing_screen.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
+import 'package:app_code/utils/uncategorized_category_utils.dart';
 
 class CategorySelectionScreen extends ConsumerStatefulWidget {
   final String supermarketId;
@@ -45,11 +46,13 @@ class _CategorySelectionScreenState
     final currentIds = widget.currentCategories.map((c) => c.id).toSet();
 
     setState(() {
-      _availableCategories =
-          allCategories.where((cat) => !currentIds.contains(cat.id)).toList()
-            ..sort(
-              (a, b) => a.getName().compareTo(b.getName()),
-            ); // Sort alphabetically
+      _availableCategories = allCategories
+          .where((cat) => !currentIds.contains(cat.id))
+          .where((cat) => !UncategorizedCategoryUtils.isUncategorized(cat))
+          .toList()
+        ..sort(
+          (a, b) => a.getName().compareTo(b.getName()),
+        ); // Sort alphabetically
     });
   }
 
