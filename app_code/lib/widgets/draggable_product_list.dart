@@ -3,7 +3,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/purchased_product.dart';
 
 /// Widget that allows dragging products across categories
-class DraggableProductList extends StatelessWidget {
+class DraggableProductList extends StatefulWidget {
   final Map<Category, List<PurchasedProduct>> productsByCategory;
   final Function(PurchasedProduct product, Category newCategory) onProductMoved;
   final Function(PurchasedProduct product) onProductRemoved;
@@ -18,14 +18,56 @@ class DraggableProductList extends StatelessWidget {
   });
 
   @override
+  State<DraggableProductList> createState() => _DraggableProductListState();
+}
+
+class _DraggableProductListState extends State<DraggableProductList> {
+  final Map<String, FocusNode> _focusNodes = {};
+  final Map<String, TextEditingController> _controllers = {};
+
+  @override
+  void dispose() {
+    // Clean up focus nodes and controllers
+    for (var node in _focusNodes.values) {
+      node.dispose();
+    }
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  FocusNode _getFocusNode(String productId) {
+    if (!_focusNodes.containsKey(productId)) {
+      _focusNodes[productId] = FocusNode();
+    }
+    return _focusNodes[productId]!;
+  }
+
+  TextEditingController _getController(String productId, String initialName) {
+    if (!_controllers.containsKey(productId)) {
+      _controllers[productId] = TextEditingController(text: initialName);
+    }
+    return _controllers[productId]!;
+  }
+
+  void _unfocusAll() {
+    // Unfocus all text fields
+    FocusScope.of(context).unfocus();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal:0),
-      child: Column(
-        children: productsByCategory.entries.map((entry) {
+    return GestureDetector(
+      onTap: _unfocusAll,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal:0),
+        child: Column(
+          children: widget.productsByCategory.entries.map((entry) {
         final category = entry.key;
         final products = entry.value;
 
@@ -89,7 +131,7 @@ class DraggableProductList extends StatelessWidget {
               onAccept: (product) {
                 // Only move if different category
                 if (product.category.id != category.id) {
-                  onProductMoved(product, category);
+                  widget.onProductMoved(product, category);
                 }
               },
             ),
@@ -105,7 +147,8 @@ class DraggableProductList extends StatelessWidget {
               }).toList()
           ],
         );
-        }).toList(),
+          }).toList(),
+        ),
       ),
     );
   }
@@ -117,7 +160,8 @@ class DraggableProductList extends StatelessWidget {
     TextTheme textTheme,
     BuildContext context,
   ) {
-    final controller = TextEditingController(text: product.product.getName());
+    final controller = _getController(product.id, product.product.getName());
+    final focusNode = _getFocusNode(product.id);
 
     return LongPressDraggable<PurchasedProduct>(
       data: product,
@@ -154,6 +198,7 @@ class DraggableProductList extends StatelessWidget {
         child: _buildProductTileContent(
           product,
           controller,
+          focusNode,
           colorScheme,
           textTheme,
           context,
@@ -162,6 +207,7 @@ class DraggableProductList extends StatelessWidget {
       child: _buildProductTileContent(
         product,
         controller,
+        focusNode,
         colorScheme,
         textTheme,
         context,
@@ -173,11 +219,17 @@ class DraggableProductList extends StatelessWidget {
   Widget _buildProductTileContent(
     PurchasedProduct product,
     TextEditingController controller,
+    FocusNode focusNode,
     ColorScheme colorScheme,
     TextTheme textTheme,
     BuildContext context,
   ) {
-    return Container(
+    return GestureDetector(
+      onTap: () {
+        // Prevent tap from propagating to parent GestureDetector
+        // This keeps the text field focused when tapping on the tile
+      },
+      child: Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
@@ -198,7 +250,7 @@ class DraggableProductList extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.remove_circle_outline, size: 20, color: colorScheme.error),
             onPressed: () {
-              onProductRemoved(product);
+              widget.onProductRemoved(product);
             },
             tooltip: 'Remove product',
           ),
@@ -206,6 +258,7 @@ class DraggableProductList extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
+              focusNode: focusNode,
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -213,61 +266,18 @@ class DraggableProductList extends StatelessWidget {
               style: textTheme.bodyLarge,
               onSubmitted: (value) {
                 if (value.trim().isNotEmpty && value.trim() != product.product.getName()) {
-                  onProductRenamed(product, value.trim());
+                  widget.onProductRenamed(product, value.trim());
                 }
+                focusNode.unfocus();
+              },
+              onTapOutside: (event) {
+                focusNode.unfocus();
               },
             ),
-          ),
-          // Edit button
-          IconButton(
-            icon: Icon(Icons.edit, size: 20, color: colorScheme.primary),
-            onPressed: () {
-              // Show dialog to edit product name
-              _showEditProductDialog(context, product, controller);
-            },
-            tooltip: 'Edit product',
           ),
         ],
       ),
-    );
-  }
-
-  /// Show dialog to edit product name
-  void _showEditProductDialog(
-    BuildContext context,
-    PurchasedProduct product,
-    TextEditingController controller,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Product'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Product name',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (controller.text.trim().isNotEmpty) {
-                  onProductRenamed(product, controller.text.trim());
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
+      ),
     );
   }
 }

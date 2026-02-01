@@ -309,6 +309,7 @@ class _ListDetailScreenMobileState
     return WillPopScope(
       onWillPop: _handleBack,
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           title: TextField(
@@ -350,8 +351,9 @@ class _ListDetailScreenMobileState
                 child: _buildProductList(controller, colorScheme, textTheme),
               ),
 
-              // Bottom buttons
-              _buildBottomButtons(colorScheme, controller),
+              // Bottom buttons - hidden when keyboard is visible
+              if (MediaQuery.of(context).viewInsets.bottom == 0)
+                _buildBottomButtons(colorScheme, controller),
             ],
           ),
         ),
