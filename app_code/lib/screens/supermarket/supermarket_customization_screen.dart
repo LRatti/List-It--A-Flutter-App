@@ -27,12 +27,16 @@ class _SupermarketCustomizationScreenState
   late TextEditingController _nameController;
   late List<Category> _categories;
   int? _draggingIndex;
+  late bool _isFavorite;
+  late bool _initialIsFavorite;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.supermarket.getName());
     _categories = List.from(widget.supermarket.getCategories());
+    _isFavorite = widget.supermarket.isFavorite;
+    _initialIsFavorite = widget.supermarket.isFavorite;
   }
 
   @override
@@ -57,16 +61,24 @@ class _SupermarketCustomizationScreenState
 
     widget.supermarket.setName(name);
     widget.supermarket.setCategories(_categories);
+    widget.supermarket.isFavorite = _isFavorite;
 
     try {
+      final notifier = ref.read(supermarketsProvider.notifier);
+
       if (widget.isCreationMode) {
-        await ref
-            .read(supermarketsProvider.notifier)
-            .addSupermarket(widget.supermarket);
+        await notifier.addSupermarket(widget.supermarket);
+        if (_isFavorite) {
+          await notifier.setFavoriteSupermarket(widget.supermarket.id);
+        }
       } else {
-        await ref
-            .read(supermarketsProvider.notifier)
-            .updateSupermarket(widget.supermarket);
+        await notifier.updateSupermarket(widget.supermarket);
+
+        if (_isFavorite) {
+          await notifier.setFavoriteSupermarket(widget.supermarket.id);
+        } else if (_initialIsFavorite) {
+          await notifier.clearFavoriteSupermarket(widget.supermarket.id);
+        }
       }
 
       if (mounted) {
@@ -297,6 +309,28 @@ class _SupermarketCustomizationScreenState
                       ),
                       child: const Text('Add Categories'),
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Favorite/Star button
+                  IconButton(
+                    icon: Icon(
+                      _isFavorite
+                          ? Icons.star
+                          : Icons.star_outline,
+                    ),
+                    onPressed: () {
+                      // Only toggle locally; persist on save
+                      setState(() {
+                        _isFavorite = !_isFavorite;
+                      });
+                    },
+                    color: _isFavorite
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.outline,
+                    iconSize: 28,
+                    tooltip: _isFavorite
+                        ? 'Remove from favorites'
+                        : 'Set as favorite',
                   ),
                 ],
               ),

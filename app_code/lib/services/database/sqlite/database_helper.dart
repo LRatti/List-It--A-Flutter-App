@@ -16,7 +16,7 @@ class DatabaseHelper {
 
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -27,6 +27,14 @@ class DatabaseHelper {
       // Add is_visible column to category table
       try {
         await db.execute('ALTER TABLE category ADD COLUMN is_visible INTEGER NOT NULL DEFAULT 1');
+      } catch (e) {
+        // Column might already exist, ignore
+      }
+    }
+    if (oldVersion < 4) {
+      // Add is_favorite column to supermarket table
+      try {
+        await db.execute('ALTER TABLE supermarket ADD COLUMN is_favorite INTEGER NOT NULL DEFAULT 0');
       } catch (e) {
         // Column might already exist, ignore
       }
@@ -86,6 +94,7 @@ class DatabaseHelper {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         is_visible INTEGER NOT NULL,
+        is_favorite INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL,
         last_modified TEXT NOT NULL
       )

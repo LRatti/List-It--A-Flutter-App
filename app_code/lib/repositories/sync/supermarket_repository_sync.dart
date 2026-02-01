@@ -168,6 +168,11 @@ class SupermarketRepositoryWithSync
       cleaned.remove('isVisible');
     }
 
+    if (cleaned.containsKey('isFavorite')) {
+      cleaned['is_favorite'] = cleaned['isFavorite'] == true ? 1 : 0;
+      cleaned.remove('isFavorite');
+    }
+
     if (cleaned.containsKey('createdAt')) {
       final parsed = _parseTimestamp(cleaned['createdAt']);
       cleaned['created_at'] = parsed?.toIso8601String() ?? DateTime.now().toIso8601String();
@@ -186,6 +191,9 @@ class SupermarketRepositoryWithSync
     }
     if (!cleaned.containsKey('last_modified') || cleaned['last_modified'] == null) {
       cleaned['last_modified'] = DateTime.now().toIso8601String();
+    }
+    if (!cleaned.containsKey('is_favorite') || cleaned['is_favorite'] == null) {
+      cleaned['is_favorite'] = 0;
     }
 
     return cleaned;

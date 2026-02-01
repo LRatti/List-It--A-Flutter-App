@@ -11,6 +11,7 @@ class ManageSupermarket {
       'id': market.id,
       'name': market.getName(),
       'is_visible': market.isVisible ? 1 : 0,
+      'is_favorite': market.isFavorite ? 1 : 0,
       'created_at': market.createdAt.toIso8601String(),
       'last_modified': market.lastModified?.toIso8601String() ?? DateTime.now().toIso8601String(),
     });
@@ -49,6 +50,7 @@ class ManageSupermarket {
         id: row['id'] as String,
         name: row['name'] as String,
         isVisible: row['is_visible'] == 1,
+        isFavorite: row['is_favorite'] == 1,
         lastModified: DateTime.tryParse(row['last_modified'] as String? ?? '') ?? DateTime.now(),
         createdAt: DateTime.tryParse(row['created_at'] as String? ?? '') ?? DateTime.now(),
         categories: categories.map(Category.fromDatabase).toList(),
@@ -76,6 +78,7 @@ class ManageSupermarket {
       {
         'name': market.getName(),
         'is_visible': market.isVisible ? 1 : 0,
+        'is_favorite': market.isFavorite ? 1 : 0,
         'last_modified': market.lastModified?.toIso8601String() ?? DateTime.now().toIso8601String(),
       },
       where: 'id = ?',
@@ -130,6 +133,7 @@ class ManageSupermarket {
       lastModified: DateTime.tryParse(rows.first['last_modified'] as String? ?? '') ?? DateTime.now(),
       createdAt: DateTime.tryParse(rows.first['created_at'] as String? ?? '') ?? DateTime.now(),
       isVisible: rows.first['is_visible'] == 1,
+      isFavorite: rows.first['is_favorite'] == 1,
       categories: categories.map(Category.fromDatabase).toList(),
     );
   }
@@ -224,5 +228,56 @@ class ManageSupermarket {
         whereArgs: [supermarketId, entry.key],
       );
     }
+  }
+
+  /// Set a supermarket as favorite (unset any previous favorite)
+  static Future<void> setFavoriteSupermarket(String supermarketId) async {
+    final db = await DatabaseHelper.database;
+
+    await db.transaction((txn) async {
+      // Clear favorite from all supermarkets
+      await txn.update(
+        'supermarket',
+        {'is_favorite': 0},
+        where: 'is_favorite = ?',
+        whereArgs: [1],
+      );
+
+      // Set the new favorite
+      await txn.update(
+        'supermarket',
+        {'is_favorite': 1},
+        where: 'id = ?',
+        whereArgs: [supermarketId],
+      );
+    });
+  }
+
+  /// Clear favorite status from a specific supermarket
+  static Future<void> clearFavoriteSupermarket(String supermarketId) async {
+    final db = await DatabaseHelper.database;
+
+    await db.update(
+      'supermarket',
+      {'is_favorite': 0},
+      where: 'id = ?',
+      whereArgs: [supermarketId],
+    );
+  }
+
+  /// Get the current favorite supermarket
+  static Future<Supermarket?> getFavoriteSupermarket() async {
+    final db = await DatabaseHelper.database;
+
+    final rows = await db.query(
+      'supermarket',
+      where: 'is_favorite = ?',
+      whereArgs: [1],
+    );
+
+    if (rows.isEmpty) return null;
+
+    final id = rows.first['id'] as String;
+    return getSupermarketById(id);
   }
 }

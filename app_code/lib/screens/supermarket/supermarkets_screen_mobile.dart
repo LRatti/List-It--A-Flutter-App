@@ -61,6 +61,14 @@ class _SupermarketsScreenMobileState
             .where((s) => s.isVisible)
             .toList();
 
+        // Show favorite supermarket first
+        visibleSupermarkets.sort((a, b) {
+          if (a.isFavorite == b.isFavorite) {
+            return a.getName().compareTo(b.getName());
+          }
+          return b.isFavorite ? 1 : -1;
+        });
+
         return SearchableSupermarketsView(
           supermarkets: visibleSupermarkets,
           emptyMessage: 'No supermarkets yet',

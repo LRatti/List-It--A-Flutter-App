@@ -146,6 +146,55 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
 
     return lastEdited;
   }
+
+  /// Set a supermarket as favorite (will unset any previous favorite)
+  Future<void> setFavoriteSupermarket(String supermarketId) async {
+    // Capture the previous favorite before updating local DB
+    final previousFavorite =
+        await sqlite_supermarket.ManageSupermarket.getFavoriteSupermarket();
+
+    // Update in database (clears previous favorite and sets new one)
+    await sqlite_supermarket.ManageSupermarket.setFavoriteSupermarket(
+      supermarketId,
+    );
+
+    // Update previous favorite in sync (if different)
+    if (previousFavorite != null && previousFavorite.id != supermarketId) {
+      final previous = await _syncRepo.getById(previousFavorite.id);
+      if (previous != null) {
+        previous.isFavorite = false;
+        await _syncRepo.update(previous);
+      }
+    }
+
+    // Update new favorite in sync
+    final supermarket = await _syncRepo.getById(supermarketId);
+    if (supermarket != null) {
+      supermarket.isFavorite = true;
+      await _syncRepo.update(supermarket);
+    }
+
+    ref.invalidateSelf();
+  }
+
+  /// Clear favorite status from a supermarket
+  Future<void> clearFavoriteSupermarket(String supermarketId) async {
+    await sqlite_supermarket.ManageSupermarket.clearFavoriteSupermarket(supermarketId);
+
+    // Get the supermarket and mark it as updated for sync
+    final supermarket = await _syncRepo.getById(supermarketId);
+    if (supermarket != null) {
+      supermarket.isFavorite = false;
+      await _syncRepo.update(supermarket);
+    }
+
+    ref.invalidateSelf();
+  }
+
+  /// Get the current favorite supermarket
+  Future<Supermarket?> getFavoriteSupermarket() async {
+    return await sqlite_supermarket.ManageSupermarket.getFavoriteSupermarket();
+  }
 }
 
 /// Provider for the supermarkets list
@@ -176,4 +225,12 @@ final lastCreatedSupermarketProvider = FutureProvider<Supermarket?>((
 ) async {
   final notifier = ref.watch(supermarketsProvider.notifier);
   return await notifier.getLastCreatedSupermarket();
+});
+
+/// Provider for tracking the favorite supermarket
+final favoriteSupermarketProvider = FutureProvider<Supermarket?>((
+  ref,
+) async {
+  final notifier = ref.watch(supermarketsProvider.notifier);
+  return await notifier.getFavoriteSupermarket();
 });

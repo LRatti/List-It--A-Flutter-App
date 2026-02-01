@@ -255,24 +255,42 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                         : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Favorite/Star button (placeholder)
+                              // Favorite/Star button
                               IconButton(
-                                icon: const Icon(Icons.star_outline),
-                                onPressed: () {
-                                  // TODO: Implement favorite functionality
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: const Text(
-                                        'Favorite feature coming soon',
+                                icon: Icon(
+                                  supermarket.isFavorite
+                                      ? Icons.star
+                                      : Icons.star_outline,
+                                ),
+                                onPressed: () async {
+                                  try {
+                                    if (supermarket.isFavorite) {
+                                      // Clear favorite
+                                      await ref
+                                          .read(supermarketsProvider.notifier)
+                                          .clearFavoriteSupermarket(supermarket.id);
+                                    } else {
+                                      // Set as favorite (will clear previous favorite)
+                                      await ref
+                                          .read(supermarketsProvider.notifier)
+                                          .setFavoriteSupermarket(supermarket.id);
+                                    }
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Error updating favorite: ${e.toString()}',
+                                        ),
+                                        backgroundColor:
+                                            Theme.of(context).colorScheme.error,
+                                        behavior: SnackBarBehavior.floating,
                                       ),
-                                      backgroundColor: Theme.of(
-                                        context,
-                                      ).colorScheme.surface,
-                                      behavior: SnackBarBehavior.floating,
-                                    ),
-                                  );
+                                    );
+                                  }
                                 },
-                                color: Theme.of(context).colorScheme.primary,
+                                color: supermarket.isFavorite
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.outline,
                               ),
                               // Edit button
                               IconButton(
