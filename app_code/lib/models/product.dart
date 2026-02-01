@@ -82,6 +82,7 @@ class Product {
     return {
       'id': id,
       'name': _name,
+      'associations': associations,
       'isVisible': isVisible,
       'lastModified': lastModified?.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),

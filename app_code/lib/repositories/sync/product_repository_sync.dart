@@ -123,7 +123,32 @@ class ProductRepositoryWithSync
       limit: 1,
     );
 
-    return rows.isNotEmpty ? rows.first : null;
+    if (rows.isEmpty) return null;
+
+    // Get product data
+    final productData = Map<String, dynamic>.from(rows.first);
+
+    // Get associations for this product
+    final associationRows = await db.query(
+      'associations',
+      where: 'product_id = ?',
+      whereArgs: [id],
+    );
+
+    // Build associations map
+    final associations = <String, String>{};
+    for (final row in associationRows) {
+      final supermarketId = row['supermarket_id'] as String;
+      final categoryId = row['category_id'] as String;
+      associations[supermarketId] = categoryId;
+    }
+
+    // Add associations to product data if any exist
+    if (associations.isNotEmpty) {
+      productData['associations'] = associations;
+    }
+
+    return productData;
   }
 
   // ===== HELPERS =====

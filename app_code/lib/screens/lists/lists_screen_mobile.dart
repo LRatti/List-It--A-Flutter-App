@@ -61,9 +61,23 @@ class ListsScreenMobile extends ConsumerWidget {
                       name: name,
                       createdAt: DateTime.now(),
                     );
+                    // Add to provider (but not fully persisted yet)
                     await ref.read(shoppingListsProvider.notifier).addList(newList);
+                    
+                    // Navigate to detail screen
+                    if (context.mounted) {
+                      Navigator.pop(context); // Close dialog
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ListDetailScreenMobile(
+                            shoppingList: newList,
+                            isNewList: true,
+                          ),
+                        ),
+                      );
+                    }
                   }
-                  if (context.mounted) Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,

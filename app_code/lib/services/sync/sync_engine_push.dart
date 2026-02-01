@@ -212,7 +212,7 @@ class SyncEnginePush {
             userId,
           );
         }
-      } 
+      }
       // else if (entityType == ENTITY_TYPE_SUPERMARKET) {
       //   // Supermarket depends on Categories (all associated categories must exist in Firestore)
       //   final categoryIds = localData['categoryIds'] as List<String>? ?? [];

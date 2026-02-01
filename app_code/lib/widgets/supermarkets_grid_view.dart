@@ -265,10 +265,23 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                                 onPressed: () async {
                                   try {
                                     if (supermarket.isFavorite) {
-                                      // Clear favorite
-                                      await ref
+                                      // Try to clear favorite (will fail if it's the only one)
+                                      final success = await ref
                                           .read(supermarketsProvider.notifier)
                                           .clearFavoriteSupermarket(supermarket.id);
+                                      
+                                      if (!success && mounted) {
+                                        // Show message explaining why favorite couldn't be cleared
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: const Text(
+                                              'Cannot remove favorite: You must have at least one favorite supermarket. Select a different one first.',
+                                            ),
+                                            backgroundColor: Theme.of(context).colorScheme.primary,
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
                                     } else {
                                       // Set as favorite (will clear previous favorite)
                                       await ref
@@ -276,16 +289,18 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                                           .setFavoriteSupermarket(supermarket.id);
                                     }
                                   } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Error updating favorite: ${e.toString()}',
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Error updating favorite: ${e.toString()}',
+                                          ),
+                                          backgroundColor:
+                                              Theme.of(context).colorScheme.error,
+                                          behavior: SnackBarBehavior.floating,
                                         ),
-                                        backgroundColor:
-                                            Theme.of(context).colorScheme.error,
-                                        behavior: SnackBarBehavior.floating,
-                                      ),
-                                    );
+                                      );
+                                    }
                                   }
                                 },
                                 color: supermarket.isFavorite

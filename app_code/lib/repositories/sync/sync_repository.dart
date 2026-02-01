@@ -25,3 +25,4 @@ const String ENTITY_TYPE_PURCHASED_PRODUCT = 'purchased_product';
 const String ENTITY_TYPE_CATEGORY = 'category';
 const String ENTITY_TYPE_SUPERMARKET = 'supermarket';
 const String ENTITY_TYPE_USER = 'user';
+const String ENTITY_TYPE_ASSOCIATION = 'association';

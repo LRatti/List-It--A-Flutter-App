@@ -5,7 +5,6 @@ import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/services/database/sqlite/manage_shopping_list.dart';
 import 'package:app_code/services/database/sqlite/manage_supermarket.dart';
-import 'package:app_code/services/database/sqlite/manage_category.dart';
 import 'package:app_code/repositories/sync/category_repository_sync.dart';
 import 'package:app_code/repositories/sync/supermarket_repository_sync.dart';
 import 'package:app_code/utils/default_categories_loader.dart';
@@ -44,9 +43,14 @@ Future<void> seedMockDataIfEmpty() async {
       name: 'Supermarket',
       categories: defaultCategories,
       isVisible: true,
+      isFavorite: true, // Set as favorite on first app usage
     );
     await supermarketRepo.add(defaultSupermarket);
     print('📦 Created default supermarket with ${defaultCategories.length} categories (queued for Firestore sync)');
+    
+    // Ensure the default supermarket is set as the favorite in SQLite
+    await ManageSupermarket.setFavoriteSupermarket(defaultSupermarket.id);
+    print('📦 Set default supermarket as favorite');
 
     // ===== SEED MOCK SHOPPING LISTS =====
     final fish = Category(name: 'Fish');

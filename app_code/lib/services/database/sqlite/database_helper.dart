@@ -62,7 +62,6 @@ class DatabaseHelper {
       CREATE TABLE product(
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
-        associations TEXT,
         is_visible INTEGER NOT NULL,
         created_at TEXT NOT NULL,
         last_modified TEXT NOT NULL

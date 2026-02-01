@@ -6,6 +6,7 @@ import 'package:app_code/repositories/sync/purchased_product_repository_sync.dar
 import 'package:app_code/services/database/sqlite/database_helper.dart';
 import 'package:app_code/services/database/sqlite/manage_shopping_list.dart';
 import 'package:app_code/services/database/sqlite/manage_purchased_product.dart';
+import 'package:app_code/services/database/sqlite/manage_supermarket.dart';
 import 'package:app_code/utils/monotonic_timestamp.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -156,6 +157,13 @@ class ShoppingListRepositoryWithSync
     for (final row in rows) {
       final list = ShoppingList.fromDatabase(row);
 
+      final supermarket = await ManageSupermarket.getSupermarketById(
+        row['supermarket_id'] as String,
+      );
+      if (supermarket != null) {
+        list.setSupermarket(supermarket);
+      }
+
       final products = await ManagePurchasedProduct.getPurchasedProductsByList(list.id);
       list.setPurchasedProducts(products);
 
@@ -177,6 +185,14 @@ class ShoppingListRepositoryWithSync
     if (rows.isEmpty) return null;
 
     final list = ShoppingList.fromDatabase(rows.first);
+
+    final supermarket = await ManageSupermarket.getSupermarketById(
+      rows.first['supermarket_id'] as String,
+    );
+    if (supermarket != null) {
+      list.setSupermarket(supermarket);
+    }
+
     final products = await ManagePurchasedProduct.getPurchasedProductsByList(id);
     list.setPurchasedProducts(products);
 
