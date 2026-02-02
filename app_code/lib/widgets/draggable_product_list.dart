@@ -8,6 +8,7 @@ class DraggableProductList extends StatefulWidget {
   final Function(PurchasedProduct product, Category newCategory) onProductMoved;
   final Function(PurchasedProduct product) onProductRemoved;
   final Function(PurchasedProduct product, String newName) onProductRenamed;
+  final ScrollController? scrollController;
 
   const DraggableProductList({
     super.key,
@@ -15,6 +16,7 @@ class DraggableProductList extends StatefulWidget {
     required this.onProductMoved,
     required this.onProductRemoved,
     required this.onProductRenamed,
+    this.scrollController,
   });
 
   @override
@@ -25,6 +27,10 @@ class _DraggableProductListState extends State<DraggableProductList> {
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, bool> _checkedProducts = {};
+  
+  // Auto-scroll support
+  bool _isDragging = false;
+  double _lastDragPosition = 0.0;
 
   @override
   void dispose() {
@@ -65,6 +71,65 @@ class _DraggableProductListState extends State<DraggableProductList> {
   void _unfocusAll() {
     // Unfocus all text fields
     FocusScope.of(context).unfocus();
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_isDragging) return;
+    
+    _lastDragPosition = details.globalPosition.dy;
+    _performAutoScroll();
+  }
+
+  void _performAutoScroll() {
+    final scrollController = widget.scrollController;
+    if (scrollController == null || !scrollController.hasClients) return;
+
+    final scrollThresholdTop = 400.0; // Pixels from edge to start scroll
+    final scrollThresholdBottom = 300.0; // Pixels from edge to start scroll
+    final maxScrollSpeed = 1.5; // Maximum pixels to scroll per frame
+
+    // Get screen height to determine scroll zones
+    final screenHeight = MediaQuery.of(context).size.height;
+    
+    // Calculate scroll speed based on distance from edge (gradual acceleration)
+    double scrollSpeed = 0.0;
+    
+    // Scroll down when near bottom
+    if (_lastDragPosition > screenHeight - scrollThresholdBottom) {
+      final distanceFromBottom = screenHeight - _lastDragPosition;
+      final normalizedDistance = (distanceFromBottom / scrollThresholdBottom).clamp(0.0, 1.0);
+      // Use quadratic curve for smoother, more gradual acceleration
+      scrollSpeed = maxScrollSpeed * (1 - normalizedDistance) * (1 - normalizedDistance * 0.5);
+      
+      final maxScroll = scrollController.position.maxScrollExtent;
+      final currentScroll = scrollController.offset;
+      if (currentScroll < maxScroll) {
+        scrollController.jumpTo(
+          (currentScroll + scrollSpeed).clamp(0.0, maxScroll),
+        );
+        // Continue scrolling if still dragging
+        if (_isDragging) {
+          Future.delayed(const Duration(milliseconds: 16), _performAutoScroll);
+        }
+      }
+    }
+    // Scroll up when near top
+    else if (_lastDragPosition < scrollThresholdTop) {
+      final normalizedDistance = (_lastDragPosition / scrollThresholdTop).clamp(0.0, 1.0);
+      // Use quadratic curve for smoother, more gradual acceleration
+      scrollSpeed = maxScrollSpeed * (1 - normalizedDistance) * (1 - normalizedDistance * 0.5);
+      
+      final currentScroll = scrollController.offset;
+      if (currentScroll > 0) {
+        scrollController.jumpTo(
+          (currentScroll - scrollSpeed).clamp(0.0, scrollController.position.maxScrollExtent),
+        );
+        // Continue scrolling if still dragging
+        if (_isDragging) {
+          Future.delayed(const Duration(milliseconds: 16), _performAutoScroll);
+        }
+      }
+    }
   }
 
   @override
@@ -178,12 +243,26 @@ class _DraggableProductListState extends State<DraggableProductList> {
             // Products in this category (if any)
             if (products.isNotEmpty)
               ...products.map((product) {
-                return _buildDraggableProductTile(
-                  product,
-                  colorScheme,
-                  textTheme,
-                  context,
-                  _isProductChecked(product.id),
+                return DragTarget<PurchasedProduct>(
+                  builder: (context, candidateData, rejectedData) {
+                    final isDropTarget = candidateData.isNotEmpty;
+                    return Container(
+                      child: _buildDraggableProductTile(
+                        product,
+                        colorScheme,
+                        textTheme,
+                        context,
+                        _isProductChecked(product.id),
+                      ),
+                    );
+                  },
+                  onWillAccept: (draggedProduct) => draggedProduct != null && draggedProduct.id != product.id,
+                  onAccept: (draggedProduct) {
+                    // Move the dragged product to this product's category
+                    if (draggedProduct.category.id != product.category.id) {
+                      widget.onProductMoved(draggedProduct, product.category);
+                    }
+                  },
                 );
               }).toList()
           ],
@@ -205,8 +284,24 @@ class _DraggableProductListState extends State<DraggableProductList> {
     final controller = _getController(product.id, product.product.getName());
     final focusNode = _getFocusNode(product.id);
 
-    return Draggable<PurchasedProduct>(
+    return LongPressDraggable<PurchasedProduct>(
       data: product,
+      onDragStarted: () {
+        setState(() {
+          _isDragging = true;
+        });
+      },
+      onDragUpdate: _handleDragUpdate,
+      onDragEnd: (_) {
+        setState(() {
+          _isDragging = false;
+        });
+      },
+      onDraggableCanceled: (_, __) {
+        setState(() {
+          _isDragging = false;
+        });
+      },
       feedback: Material(
         elevation: 6,
         borderRadius: BorderRadius.circular(8),

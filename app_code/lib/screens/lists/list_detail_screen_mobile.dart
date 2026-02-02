@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:collection/collection.dart';
-import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
-import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarkets_notifier.dart';
@@ -46,7 +43,10 @@ class _ListDetailScreenMobileState
   late TextEditingController _nameController;
   late TextEditingController _productSearchController;
   final FocusNode _nameFieldFocusNode = FocusNode();
+  final FocusNode _productSearchFocusNode = FocusNode();
   Key _supermarketDropdownKey = UniqueKey();
+  final ScrollController _listScrollController = ScrollController();
+
 
   @override
   void initState() {
@@ -95,6 +95,8 @@ class _ListDetailScreenMobileState
     _nameController.dispose();
     _productSearchController.dispose();
     _nameFieldFocusNode.dispose();
+    _productSearchFocusNode.dispose();
+    _listScrollController.dispose();
     super.dispose();
   }
 
@@ -381,17 +383,13 @@ class _ListDetailScreenMobileState
                 colorScheme,
               ),
 
-              // Product search
-              _buildProductSearch(colorScheme),
-
               // Product list with categories
               Expanded(
                 child: _buildProductList(controller, colorScheme, textTheme),
               ),
 
-              // Bottom buttons - hidden when keyboard is visible
-              if (MediaQuery.of(context).viewInsets.bottom == 0)
-                _buildBottomButtons(colorScheme, controller),
+              // Product search and action buttons (like WhatsApp)
+              _buildSearchAndActions(colorScheme, controller),
             ],
           ),
         ),
@@ -534,27 +532,84 @@ class _ListDetailScreenMobileState
     );
   }
 
-  /// Build product search field
-  Widget _buildProductSearch(ColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _productSearchController,
-              decoration: InputDecoration(
-                hintText: 'Enter product name...',
-                filled: true,
-                fillColor: colorScheme.surfaceContainerHighest,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onSubmitted: (_) => _addProduct(),
-            ),
+  /// Build bottom action bar with search and action buttons
+  Widget _buildSearchAndActions(
+    ColorScheme colorScheme,
+    ListDetailController controller,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
           ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+        child: Row(
+          children: [
+            // Add Recipe button
+            IconButton(
+              icon: const Icon(Icons.restaurant_menu),
+              tooltip: 'Add Recipe',
+              color: colorScheme.primary,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddRecipeScreen(
+                      shoppingList: widget.shoppingList,
+                      availableCategories:
+                          controller.selectedSupermarket?.getCategories() ?? [],
+                    ),
+                  ),
+                );
+              },
+            ),
+            // Search input
+            Expanded(
+              child: TextField(
+                controller: _productSearchController,
+                focusNode: _productSearchFocusNode,
+                textInputAction: TextInputAction.send,
+                decoration: InputDecoration(
+                  hintText: 'Add product...',
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  isDense: true,
+                ),
+                onSubmitted: (_) => _addProduct(),
+              ),
+            ),
+            const SizedBox(width: 4),
+            // Send/Add button
+            IconButton(
+              icon: const Icon(Icons.send),
+              tooltip: 'Add product',
+              color: colorScheme.primary,
+              onPressed: _addProduct,
+            ),
+            // Delete list button
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Delete list',
+              color: colorScheme.error,
+              onPressed: _deleteList,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -569,6 +624,7 @@ class _ListDetailScreenMobileState
     final bufferProducts = controller.bufferProducts;
 
     return ListView(
+      controller: _listScrollController,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       children: [
         // Buffer zone (products being categorized)
@@ -627,6 +683,7 @@ class _ListDetailScreenMobileState
         // Categorized products with drag-and-drop
         DraggableProductList(
           productsByCategory: productsByCategory,
+          scrollController: _listScrollController,
           onProductMoved: (product, newCategory) {
             controller.moveProductToCategory(product, newCategory);
           },
@@ -639,82 +696,6 @@ class _ListDetailScreenMobileState
           },
         ),
       ],
-    );
-  }
-
-  /// Build bottom action buttons
-  Widget _buildBottomButtons(
-    ColorScheme colorScheme,
-    ListDetailController controller,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Delete button
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: _deleteList,
-                color: colorScheme.error,
-                iconSize: 28,
-              ),
-            ],
-          ),
-          // Add Recipe button
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AddRecipeScreen(
-                    shoppingList: widget.shoppingList,
-                    availableCategories:
-                        controller.selectedSupermarket?.getCategories() ?? [],
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(Icons.restaurant_menu),
-            label: const Text('Add Recipe'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.secondaryContainer,
-              foregroundColor: colorScheme.onSecondaryContainer,
-            ),
-          ),
-          // Register button
-          ElevatedButton(
-            onPressed: () {
-              // TODO: Implement register flow
-              ScaffoldMessenger.of(context).showSnackBar(
-                buildAppSnackBar(
-                  message: 'Register feature coming soon',
-                  isError: false,
-                  context: context,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.primary,
-              foregroundColor: colorScheme.onPrimary,
-            ),
-            child: const Text('Register'),
-          ),
-        ],
-      ),
     );
   }
 }
