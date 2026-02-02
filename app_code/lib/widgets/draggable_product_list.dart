@@ -163,33 +163,30 @@ class _DraggableProductListState extends State<DraggableProductList> {
     final controller = _getController(product.id, product.product.getName());
     final focusNode = _getFocusNode(product.id);
 
-    return LongPressDraggable<PurchasedProduct>(
+    return Draggable<PurchasedProduct>(
       data: product,
       feedback: Material(
         elevation: 4,
         borderRadius: BorderRadius.circular(8),
-        child: Container(
-          width: 300,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: colorScheme.primary, width: 2),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.drag_indicator, color: colorScheme.onPrimaryContainer),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  product.product.getName(),
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onPrimaryContainer,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+        child: Card(
+          margin: EdgeInsets.zero,
+          child: SizedBox(
+            width: 300,
+            child: ListTile(
+              leading: Icon(
+                Icons.drag_indicator,
+                color: colorScheme.primary,
               ),
-            ],
+              title: Text(
+                product.product.getName(),
+                style: textTheme.bodyLarge,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: Icon(
+                Icons.drag_handle,
+                color: colorScheme.outline,
+              ),
+            ),
           ),
         ),
       ),
@@ -224,59 +221,45 @@ class _DraggableProductListState extends State<DraggableProductList> {
     TextTheme textTheme,
     BuildContext context,
   ) {
-    return GestureDetector(
-      onTap: () {
-        // Prevent tap from propagating to parent GestureDetector
-        // This keeps the text field focused when tapping on the tile
-      },
-      child: Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outline),
-      ),
-      child: Row(
-        children: [
-          // Drag handle
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Icon(
-              Icons.drag_indicator,
-              color: colorScheme.onSurfaceVariant,
-            ),
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: ListTile(
+        // Remove button on the left
+        leading: IconButton(
+          icon: const Icon(Icons.remove_circle_outline),
+          onPressed: () {
+            widget.onProductRemoved(product);
+          },
+          color: colorScheme.error,
+          tooltip: 'Remove product',
+        ),
+        // Product name in the center (editable)
+        title: TextField(
+          controller: controller,
+          focusNode: focusNode,
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.zero,
           ),
-          // Remove button
-          IconButton(
-            icon: Icon(Icons.remove_circle_outline, size: 20, color: colorScheme.error),
-            onPressed: () {
-              widget.onProductRemoved(product);
-            },
-            tooltip: 'Remove product',
+          style: textTheme.bodyLarge,
+          onSubmitted: (value) {
+            if (value.trim().isNotEmpty && value.trim() != product.product.getName()) {
+              widget.onProductRenamed(product, value.trim());
+            }
+            focusNode.unfocus();
+          },
+          onTapOutside: (event) {
+            focusNode.unfocus();
+          },
+        ),
+        // Drag handle on the right
+        trailing: ReorderableDragStartListener(
+          index: 0,
+          child: Icon(
+            Icons.drag_handle,
+            color: colorScheme.outline,
           ),
-          // Product name (editable)
-          Expanded(
-            child: TextField(
-              controller: controller,
-              focusNode: focusNode,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-              ),
-              style: textTheme.bodyLarge,
-              onSubmitted: (value) {
-                if (value.trim().isNotEmpty && value.trim() != product.product.getName()) {
-                  widget.onProductRenamed(product, value.trim());
-                }
-                focusNode.unfocus();
-              },
-              onTapOutside: (event) {
-                focusNode.unfocus();
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
       ),
     );
   }
