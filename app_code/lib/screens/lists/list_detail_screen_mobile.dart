@@ -44,7 +44,6 @@ class _ListDetailScreenMobileState
   late TextEditingController _productSearchController;
   final FocusNode _nameFieldFocusNode = FocusNode();
   final FocusNode _productSearchFocusNode = FocusNode();
-  Key _supermarketDropdownKey = UniqueKey();
   final ScrollController _listScrollController = ScrollController();
 
 
@@ -285,6 +284,267 @@ class _ListDetailScreenMobileState
     }
   }
 
+  /// Show supermarket selection popup menu
+  Future<void> _showSupermarketSelectionMenu(
+    List<Supermarket> visibleSupermarkets,
+    ListDetailController controller,
+    ColorScheme colorScheme,
+  ) async {
+    final selectedId = controller.selectedSupermarket?.id;
+    final hasSelected = selectedId != null &&
+        visibleSupermarkets.any((s) => s.id == selectedId);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: colorScheme.surface,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.85,
+          builder: (context, scrollController) {
+            return Column(
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 16.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Select Supermarket',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close,
+                                color: colorScheme.onSurface),
+                            onPressed: () => Navigator.pop(context),
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.zero,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        visibleSupermarkets.isEmpty
+                            ? 'No supermarkets yet. Create one to get started.'
+                            : '${visibleSupermarkets.length} supermarket${visibleSupermarkets.length != 1 ? 's' : ''} available',
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                // Scrollable list
+                Expanded(
+                  child: visibleSupermarkets.isEmpty
+                      ? _buildEmptyState(colorScheme)
+                      : ListView.separated(
+                          controller: scrollController,
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          itemCount: visibleSupermarkets.length,
+                          separatorBuilder: (_, __) => Divider(
+                            height: 1,
+                            indent: 24,
+                            endIndent: 24,
+                            color: colorScheme.outlineVariant.withOpacity(0.3),
+                          ),
+                          itemBuilder: (context, index) {
+                            final supermarket = visibleSupermarkets[index];
+                            final isSelected = selectedId == supermarket.id;
+                            return _buildSupermarketTile(
+                              supermarket,
+                              isSelected,
+                              controller,
+                              colorScheme,
+                            );
+                          },
+                        ),
+                ),
+                // Footer with create button
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    border: Border(
+                      top: BorderSide(
+                        color: colorScheme.outlineVariant.withOpacity(0.2),
+                      ),
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(16.0),
+                  child: SafeArea(
+                    top: false,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _navigateToSupermarketCustomization(
+                                null,
+                                isNew: true,
+                              );
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text('Create New'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colorScheme.primary,
+                              foregroundColor: colorScheme.onPrimary,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (hasSelected) ...[
+                          const SizedBox(width: 12),
+                          SizedBox(
+                            height: 48,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                _clearSupermarketSelection();
+                                Navigator.pop(context);
+                              },
+                              icon: const Icon(Icons.clear),
+                              label: const Text('Clear'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: colorScheme.primary,
+                                side: BorderSide(
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Build supermarket tile for the selection menu
+  Widget _buildSupermarketTile(
+    Supermarket supermarket,
+    bool isSelected,
+    ListDetailController controller,
+    ColorScheme colorScheme,
+  ) {
+    return Container(
+      color: isSelected ? colorScheme.primaryContainer.withOpacity(0.4) : null,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 24.0,
+          vertical: 4.0,
+        ),
+        leading: isSelected
+            ? Icon(
+                Icons.check_circle,
+                color: colorScheme.primary,
+                size: 24,
+              )
+            : Icon(
+                Icons.circle_outlined,
+                color: colorScheme.outlineVariant,
+                size: 24,
+              ),
+        title: Text(
+          supermarket.getName(),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected
+                ? colorScheme.primary
+                : colorScheme.onSurface,
+          ),
+        ),
+        trailing: Wrap(
+          spacing: 4,
+          children: [
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: IconButton(
+                icon: Icon(
+                  Icons.edit_outlined,
+                  color: colorScheme.primary,
+                  size: 20,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _navigateToSupermarketCustomization(supermarket);
+                },
+                tooltip: 'Edit supermarket',
+              ),
+            ),
+          ],
+        ),
+        onTap: () {
+          controller.updateSupermarket(supermarket);
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+  /// Build empty state widget for supermarket selection menu
+  Widget _buildEmptyState(ColorScheme colorScheme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.store_outlined,
+            size: 48,
+            color: colorScheme.outlineVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Supermarkets Yet',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Create a supermarket to organize\nyour shopping categories',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Navigate to supermarket customization
   Future<void> _navigateToSupermarketCustomization(
     Supermarket? supermarket, {
@@ -308,9 +568,6 @@ class _ListDetailScreenMobileState
 
     if (mounted) {
       FocusScope.of(context).unfocus();
-      setState(() {
-        _supermarketDropdownKey = UniqueKey();
-      });
     }
 
     // Refresh supermarkets list to reflect any changes
@@ -404,10 +661,32 @@ class _ListDetailScreenMobileState
     ColorScheme colorScheme,
   ) {
     return supermarketsAsync.when(
-      loading: () => const LinearProgressIndicator(),
-      error: (error, _) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Text('Error loading supermarkets: $error'),
+      loading: () => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: const LinearProgressIndicator(),
+      ),
+      error: (error, _) => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colorScheme.error),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.warning_amber, color: colorScheme.error, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Error loading supermarkets',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onErrorContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       data: (supermarkets) {
         final visibleSupermarkets = supermarkets
@@ -422,6 +701,9 @@ class _ListDetailScreenMobileState
         final hasSelected =
             selectedId != null &&
             visibleSupermarkets.any((s) => s.id == selectedId);
+        final selectedSupermarket = hasSelected
+            ? visibleSupermarkets.firstWhere((s) => s.id == selectedId)
+            : null;
 
         if (selectedId != null && !hasSelected) {
           WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -432,100 +714,105 @@ class _ListDetailScreenMobileState
 
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: colorScheme.outline),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.store),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    key: _supermarketDropdownKey,
-                    value: hasSelected ? selectedId : null,
-                    isExpanded: true,
-                    hint: Text(
-                      visibleSupermarkets.isEmpty
-                          ? 'No supermarkets available'
-                          : 'Select supermarket',
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: hasSelected
+                  ? colorScheme.primary
+                  : colorScheme.outlineVariant,
+              width: hasSelected ? 2 : 1,
+            ),
+            boxShadow: hasSelected
+                ? [
+                    BoxShadow(
+                      color: colorScheme.primary.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                    selectedItemBuilder: (context) {
-                      return visibleSupermarkets
-                          .map(
-                            (supermarket) => Align(
-                              alignment: Alignment.centerLeft,
+                  ]
+                : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                _showSupermarketSelectionMenu(
+                  visibleSupermarkets,
+                  controller,
+                  colorScheme,
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0,
+                  vertical: 12.0,
+                ),
+                child: Row(
+                  children: [
+                    // Leading store icon
+                    Icon(
+                      Icons.store,
+                      color: hasSelected
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    // Supermarket name (expanded)
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            selectedSupermarket?.getName() ??
+                                (visibleSupermarkets.isEmpty
+                                    ? 'Create a supermarket'
+                                    : 'Select supermarket'),
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                              fontWeight:
+                                  hasSelected ? FontWeight.w600 : FontWeight.w400,
+                              color: hasSelected
+                                  ? colorScheme.onSurface
+                                  : colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          if (selectedSupermarket != null &&
+                              selectedSupermarket.getCategories().isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2.0),
                               child: Text(
-                                supermarket.getName(),
+                                '${selectedSupermarket.getCategories().length} categories',
                                 overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
                               ),
                             ),
-                          )
-                          .toList();
-                    },
-                    items: [
-                      ...visibleSupermarkets.map((supermarket) {
-                        return DropdownMenuItem<String>(
-                          value: supermarket.id,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  supermarket.getName(),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.edit,
-                                  size: 20,
-                                  color: colorScheme.primary,
-                                ),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  _navigateToSupermarketCustomization(
-                                    supermarket,
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ],
-                    onChanged: visibleSupermarkets.isEmpty
-                        ? null
-                        : (String? newValue) {
-                            if (newValue != null) {
-                              final selected = visibleSupermarkets.firstWhere(
-                                (s) => s.id == newValue,
-                              );
-                              controller.updateSupermarket(selected);
-                            }
-                          },
-                  ),
+                        ],
+                      ),
+                    ),
+                    // Dropdown arrow indicator
+                    Icon(
+                      Icons.unfold_more,
+                      color: hasSelected
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant,
+                      size: 20,
+                    ),
+                  ],
                 ),
               ),
-              if (controller.selectedSupermarket != null) ...[
-                IconButton(
-                  icon: Icon(Icons.close, color: colorScheme.primary),
-                  onPressed: _clearSupermarketSelection,
-                  tooltip: 'Remove supermarket',
-                ),
-              ],
-              IconButton(
-                icon: Icon(Icons.add, color: colorScheme.primary),
-                onPressed: () {
-                  _navigateToSupermarketCustomization(null, isNew: true);
-                },
-                tooltip: 'New supermarket',
-              ),
-            ],
+            ),
           ),
         );
       },

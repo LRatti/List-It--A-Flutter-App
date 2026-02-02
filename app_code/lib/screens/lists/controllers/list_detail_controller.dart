@@ -193,7 +193,19 @@ class ListDetailController extends ChangeNotifier {
       price: 0.0,
     );
 
-    _products.add(purchasedProduct);
+    // Find the first product with the same category to insert before it
+    // This places new products at the top of their category
+    final firstIndexInCategory = _products.indexWhere(
+      (p) => p.category.id == category.id,
+    );
+    
+    if (firstIndexInCategory != -1) {
+      // Insert at the beginning of the category
+      _products.insert(firstIndexInCategory, purchasedProduct);
+    } else {
+      // No products in this category yet, add at the end
+      _products.add(purchasedProduct);
+    }
     
     // Track the association if we have a selected supermarket
     // This ensures new product categorizations are persisted and synced

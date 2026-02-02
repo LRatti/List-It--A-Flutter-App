@@ -110,8 +110,8 @@ class ListsScreenMobile extends ConsumerWidget {
             .where((l) => !l.getIsInTheTrash() && !l.getIsRegistered())
             .toList()
           ..sort((a, b) {
-            final ad = a.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
-            final bd = b.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final ad = a.getLastModified() ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final bd = b.getLastModified() ?? DateTime.fromMillisecondsSinceEpoch(0);
             return bd.compareTo(ad); // newest first
           });
         return SearchableShoppingListsView(

@@ -74,6 +74,10 @@ class ShoppingList {
     return _deletionTimestamp;
   }
 
+  DateTime? getLastModified() {
+    return lastModified;
+  }
+
   bool getIsDeleted() {
     return isDeleted;
   }
@@ -266,6 +270,8 @@ class ShoppingList {
       return 'Delete in $daysRemaining days';
     }
   }
+
+
 
 
 
