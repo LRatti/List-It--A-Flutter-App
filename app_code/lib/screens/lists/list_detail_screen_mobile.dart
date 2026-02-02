@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:collection/collection.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
@@ -14,6 +15,7 @@ import 'package:app_code/services/product_search_service.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/widgets/draggable_product_list.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
+import 'package:riverpod/src/framework.dart';
 
 /// Provider for the list detail controller
 final listDetailControllerProvider = ChangeNotifierProvider.family<
@@ -187,16 +189,7 @@ class _ListDetailScreenMobileState
 
       // Add to list
       controller.addProduct(result.product, result.category);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          buildAppSnackBar(
-            message: 'Added "$productName"',
-            isError: false,
-            context: context,
-          ),
-        );
-      }
+      
     } catch (e) {
       // Update buffer with error
       controller.updateBufferProduct(
@@ -288,14 +281,12 @@ class _ListDetailScreenMobileState
       ),
     );
 
-    // Refresh supermarkets and update controller if a new one was created
+    // Refresh supermarkets and update controller
     ref.invalidate(supermarketsProvider);
-    if (isNew) {
-      final lastEdited = await ref.read(supermarketsProvider.notifier).getLastEditedSupermarket();
-      if (lastEdited != null) {
-        final controller = ref.read(listDetailControllerProvider(widget.shoppingList));
+    final controller = ref.read(listDetailControllerProvider(widget.shoppingList));
+    final lastEdited = await ref.read(lastEditedSupermarketProvider.future);
+    if (lastEdited != null) {
         controller.updateSupermarket(lastEdited);
-      }
     }
   }
 
@@ -468,18 +459,9 @@ class _ListDetailScreenMobileState
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                prefixIcon: const Icon(Icons.search),
               ),
               onSubmitted: (_) => _addProduct(),
             ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.add_circle),
-            onPressed: _addProduct,
-            iconSize: 36,
-            color: colorScheme.primary,
-            tooltip: 'Add product',
           ),
         ],
       ),
@@ -564,7 +546,7 @@ class _ListDetailScreenMobileState
   /// Build bottom action buttons
   Widget _buildBottomButtons(ColorScheme colorScheme, ListDetailController controller) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         boxShadow: [
@@ -587,12 +569,6 @@ class _ListDetailScreenMobileState
                 onPressed: _deleteList,
                 color: colorScheme.error,
                 iconSize: 28,
-              ),
-              Text(
-                'Delete',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: colorScheme.error,
-                    ),
               ),
             ],
           ),

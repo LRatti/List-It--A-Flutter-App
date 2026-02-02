@@ -87,10 +87,16 @@ class ListDetailController extends ChangeNotifier {
 
   /// Update selected supermarket and recategorize products
   void updateSupermarket(Supermarket newSupermarket) {
-    if (_selectedSupermarket?.id != newSupermarket.id) {
+    final isNew = _selectedSupermarket?.id != newSupermarket.id;
+    final isUpdated = _selectedSupermarket?.id == newSupermarket.id && 
+        _selectedSupermarket != newSupermarket;
+    
+    if (isNew || isUpdated) {
       _selectedSupermarket = newSupermarket;
       _recategorizeProductsForSupermarket();
-      _hasChanges = true;
+      if (isNew) {
+        _hasChanges = true;
+      }
       notifyListeners();
     }
   }

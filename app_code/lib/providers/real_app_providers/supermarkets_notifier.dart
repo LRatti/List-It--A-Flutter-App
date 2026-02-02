@@ -305,3 +305,11 @@ final favoriteSupermarketProvider = FutureProvider<Supermarket?>((
   final notifier = ref.watch(supermarketsProvider.notifier);
   return await notifier.getFavoriteSupermarket();
 });
+
+/// Provider for tracking the last edited supermarket configuration
+final lastEditedSupermarketProvider = FutureProvider<Supermarket?>((
+  ref,
+) async {
+  final notifier = ref.watch(supermarketsProvider.notifier);
+  return await notifier.getLastEditedSupermarket();
+});
