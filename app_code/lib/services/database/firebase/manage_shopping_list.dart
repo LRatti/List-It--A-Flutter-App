@@ -71,17 +71,23 @@ class FirebaseShoppingListManager {
         Supermarket supermarket;
         ShoppingList shoppingList;
         List<PurchasedProduct> purchasedProducts = [];
-        if (doc.data() != null && doc.data()!['supermarket_id'] != null) {
-          supermarket = await _supermarkets.doc(doc.data()!['supermarket_id']).get().then((supermarketDoc) => Supermarket.fromDatabase(supermarketDoc.data()!));
+        if (doc.data() != null) {
           shoppingList = ShoppingList.fromDatabase(doc.data()!);
-          shoppingList.setSupermarket(supermarket);
+          final supermarketId = doc.data()!['supermarket_id'];
+          if (supermarketId != null) {
+            supermarket = await _supermarkets
+                .doc(supermarketId)
+                .get()
+                .then((supermarketDoc) => Supermarket.fromDatabase(supermarketDoc.data()!));
+            shoppingList.setSupermarket(supermarket);
+          }
           // Fetch and set purchased products
           purchasedProducts = await _purchasedProductManager.getPurchasedProductByList(listId);
           shoppingList.setPurchasedProducts(purchasedProducts);
           return shoppingList;
         } else {
-          // Handle case where supermarket data is missing
-          print(  "Supermarket data is missing for shopping list with id $listId.");
+          // Handle case where list data is missing
+          print("Shopping list data is missing for id $listId.");
           return null;
         }
       } else {

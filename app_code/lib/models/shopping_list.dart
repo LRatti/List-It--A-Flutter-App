@@ -9,7 +9,7 @@ class ShoppingList {
   final String id;
   String _name;
   final DateTime createdAt;
-  Supermarket _supermarket;
+  Supermarket? _supermarket;
   double? _totalPrice;
   String? image;
   List<PurchasedProduct>? products;
@@ -32,9 +32,9 @@ class ShoppingList {
       DateTime? deletionTimestamp,
       DateTime? lastModified,
       this.isDeleted = false,
-  }) :  _name = name,
-        _totalPrice = totalPrice ?? 0.0,
-        _supermarket = supermarket ?? _getDefaultSupermarket(),
+    }) :  _name = name,
+      _totalPrice = totalPrice ?? 0.0,
+      _supermarket = supermarket,
         _isRegistered = isRegistered,
         _isInTheTrash = isInTheTrash,
         _deletionTimestamp = deletionTimestamp,
@@ -98,7 +98,7 @@ class ShoppingList {
       'id': id,
       'name': _name,
       'created_at': createdAt?.toIso8601String(),
-      'supermarket_id': _supermarket.id,
+      'supermarket_id': _supermarket?.id,
       'total_price': _totalPrice,
       'image': image,
       'is_registered': _isRegistered ? 1 : 0,
@@ -130,7 +130,7 @@ class ShoppingList {
       'id': id,
       'name': _name,
       'created_at': createdAt?.toIso8601String(),
-      'supermarket_id': _supermarket.id,
+      'supermarket_id': _supermarket?.id,
       'total_price': _totalPrice,
       'image': image,
       'products': products?.map((product) => product.toDatabase()).toList(),
@@ -201,7 +201,7 @@ class ShoppingList {
     this._name = newName;
   }
 
-  void setSupermarket(Supermarket supermarket) {
+  void setSupermarket(Supermarket? supermarket) {
     this._supermarket = supermarket;
   }
 
@@ -269,19 +269,5 @@ class ShoppingList {
 
 
 
-  //TODO: take the supermarket from the json file containing the default one
-  static Supermarket _getDefaultSupermarket() {
-    Category defaultCategory = Category(
-      id: 'default_category',
-      name: 'Default Category',
-    );
 
-    List<Category> categories = [defaultCategory];
-
-    return Supermarket(
-      id: 'default',
-      name: 'Default Supermarket', 
-      categories: categories,
-    );
-  }
 }

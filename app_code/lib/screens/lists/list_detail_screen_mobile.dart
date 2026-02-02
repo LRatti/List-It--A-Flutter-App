@@ -43,6 +43,7 @@ class _ListDetailScreenMobileState
   late TextEditingController _nameController;
   late TextEditingController _productSearchController;
   final FocusNode _nameFieldFocusNode = FocusNode();
+  Key _supermarketDropdownKey = UniqueKey();
 
   @override
   void initState() {
@@ -55,6 +56,10 @@ class _ListDetailScreenMobileState
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadFavoriteSupermarket();
       });
+    } else if (widget.shoppingList.getSupermarket() == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _clearSupermarketSelection();
+      });
     }
   }
 
@@ -65,6 +70,12 @@ class _ListDetailScreenMobileState
     if (favorite != null) {
       controller.updateSupermarket(favorite);
     }
+  }
+
+  Future<void> _clearSupermarketSelection() async {
+    final controller = ref.read(listDetailControllerProvider(widget.shoppingList));
+    final uncategorized = await UncategorizedCategoryInitializer.getUncategorized();
+    await controller.clearSupermarket(uncategorized: uncategorized);
   }
 
   @override
@@ -157,15 +168,12 @@ class _ListDetailScreenMobileState
     final supermarket = controller.selectedSupermarket;
 
     if (supermarket == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          buildAppSnackBar(
-            message: 'Please select a supermarket',
-            isError: true,
-            context: context,
-          ),
-        );
-      }
+      // No supermarket selected: place product in uncategorized
+      _productSearchController.clear();
+      final uncategorized = await UncategorizedCategoryInitializer.getUncategorized();
+      final existing = await controller.searchExistingProduct(productName);
+      final product = existing ?? Product(name: productName);
+      controller.addProduct(product, uncategorized);
       return;
     }
 
@@ -271,7 +279,7 @@ class _ListDetailScreenMobileState
           categories: [uncategorized],
         );
 
-    await Navigator.push(
+    final updatedSupermarket = await Navigator.push<Supermarket?>(
       context,
       MaterialPageRoute(
         builder: (_) => SupermarketCustomizationScreen(
@@ -281,13 +289,33 @@ class _ListDetailScreenMobileState
       ),
     );
 
+    if (mounted) {
+      FocusScope.of(context).unfocus();
+      setState(() {
+        _supermarketDropdownKey = UniqueKey();
+      });
+    }
+
     // Refresh supermarkets and update controller
     ref.invalidate(supermarketsProvider);
     final controller = ref.read(listDetailControllerProvider(widget.shoppingList));
-    final lastEdited = await ref.read(lastEditedSupermarketProvider.future);
-    if (lastEdited != null) {
-        controller.updateSupermarket(lastEdited);
+
+    if (updatedSupermarket != null) {
+      controller.updateSupermarket(updatedSupermarket);
+      return;
     }
+
+    final lastModified = isNew
+        ? await ref.refresh(lastCreatedSupermarketProvider.future)
+        : await ref.refresh(lastEditedSupermarketProvider.future);
+
+    if (lastModified != null) {
+      controller.updateSupermarket(lastModified);
+    } else {
+      await _clearSupermarketSelection();
+    }
+
+    
   }
 
   @override
@@ -374,6 +402,13 @@ class _ListDetailScreenMobileState
         final selectedId = controller.selectedSupermarket?.id;
         final hasSelected = selectedId != null &&
             visibleSupermarkets.any((s) => s.id == selectedId);
+
+        if (selectedId != null && !hasSelected) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            if (!mounted) return;
+            await _clearSupermarketSelection();
+          });
+        }
         
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -390,9 +425,25 @@ class _ListDetailScreenMobileState
               Expanded(
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
+                    key: _supermarketDropdownKey,
                     value: hasSelected ? selectedId : null,
                     isExpanded: true,
-                    hint: const Text('Select supermarket'),
+                    hint: Text(
+                      visibleSupermarkets.isEmpty
+                          ? 'No supermarkets available'
+                          : 'Select supermarket',
+                    ),
+                    selectedItemBuilder: (context) {
+                      return visibleSupermarkets
+                          .map((supermarket) => Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  supermarket.getName(),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ))
+                          .toList();
+                    },
                     items: [
                       ...visibleSupermarkets.map((supermarket) {
                         return DropdownMenuItem<String>(
@@ -410,6 +461,7 @@ class _ListDetailScreenMobileState
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
                                 onPressed: () {
+                                  Navigator.of(context).pop();
                                   _navigateToSupermarketCustomization(supermarket);
                                 },
                               ),
@@ -418,17 +470,26 @@ class _ListDetailScreenMobileState
                         );
                       }).toList(),
                     ],
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        final selected = visibleSupermarkets.firstWhere(
-                          (s) => s.id == newValue,
-                        );
-                        controller.updateSupermarket(selected);
-                      }
-                    },
+                    onChanged: visibleSupermarkets.isEmpty
+                        ? null
+                        : (String? newValue) {
+                            if (newValue != null) {
+                              final selected = visibleSupermarkets.firstWhere(
+                                (s) => s.id == newValue,
+                              );
+                              controller.updateSupermarket(selected);
+                            }
+                          },
                   ),
                 ),
               ),
+              if (controller.selectedSupermarket != null) ...[
+                IconButton(
+                  icon: Icon(Icons.close, color: colorScheme.primary),
+                  onPressed: _clearSupermarketSelection,
+                  tooltip: 'Remove supermarket',
+                ),
+              ],
               IconButton(
                 icon: Icon(Icons.add, color: colorScheme.primary),
                 onPressed: () {

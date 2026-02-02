@@ -100,7 +100,7 @@ class _SupermarketCustomizationScreenState
       }
 
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context, widget.supermarket);
       }
     } catch (e) {
       if (mounted) {

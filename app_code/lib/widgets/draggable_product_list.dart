@@ -24,6 +24,7 @@ class DraggableProductList extends StatefulWidget {
 class _DraggableProductListState extends State<DraggableProductList> {
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, TextEditingController> _controllers = {};
+  final Map<String, bool> _checkedProducts = {};
 
   @override
   void dispose() {
@@ -49,6 +50,16 @@ class _DraggableProductListState extends State<DraggableProductList> {
       _controllers[productId] = TextEditingController(text: initialName);
     }
     return _controllers[productId]!;
+  }
+
+  bool _isProductChecked(String productId) {
+    return _checkedProducts[productId] ?? false;
+  }
+
+  void _setProductChecked(String productId, bool checked) {
+    setState(() {
+      _checkedProducts[productId] = checked;
+    });
   }
 
   void _unfocusAll() {
@@ -80,49 +91,78 @@ class _DraggableProductListState extends State<DraggableProductList> {
             // Category header - Drag target for entire category
             DragTarget<PurchasedProduct>(
               builder: (context, candidateData, rejectedData) {
+                final isDropTarget = candidateData.isNotEmpty;
                 return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+                  margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
                   decoration: BoxDecoration(
-                    color: candidateData.isNotEmpty
-                        ? colorScheme.primaryContainer.withOpacity(0.3)
+                    color: isDropTarget
+                        ? colorScheme.primaryContainer.withOpacity(0.2)
                         : Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: isDropTarget
+                            ? colorScheme.primary
+                            : colorScheme.outline.withOpacity(0.3),
+                        width: isDropTarget ? 2.5 : 1.5,
+                      ),
+                    ),
                   ),
                   child: Row(
                     children: [
+                      // Category icon indicator
+                      Container(
+                        width: 4,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          category.getName(),
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.primary,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              category.getName(),
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: colorScheme.onSurface,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       // Show count badge
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: products.isEmpty 
                               ? colorScheme.surfaceContainerHighest
-                              : colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(12),
+                              : colorScheme.primary,
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
                           '${products.length}',
-                          style: textTheme.labelSmall?.copyWith(
+                          style: textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
                             color: products.isEmpty
                                 ? colorScheme.onSurfaceVariant
-                                : colorScheme.onPrimaryContainer,
+                                : colorScheme.onPrimary,
                           ),
                         ),
                       ),
-                      if (candidateData.isNotEmpty)
+                      if (isDropTarget) ...[
+                        const SizedBox(width: 8),
                         Icon(
-                          Icons.add_circle_outline,
+                          Icons.add_circle,
                           size: 20,
                           color: colorScheme.primary,
                         ),
+                      ],
                     ],
                   ),
                 );
@@ -143,6 +183,7 @@ class _DraggableProductListState extends State<DraggableProductList> {
                   colorScheme,
                   textTheme,
                   context,
+                  _isProductChecked(product.id),
                 );
               }).toList()
           ],
@@ -159,6 +200,7 @@ class _DraggableProductListState extends State<DraggableProductList> {
     ColorScheme colorScheme,
     TextTheme textTheme,
     BuildContext context,
+    bool isChecked,
   ) {
     final controller = _getController(product.id, product.product.getName());
     final focusNode = _getFocusNode(product.id);
@@ -166,32 +208,35 @@ class _DraggableProductListState extends State<DraggableProductList> {
     return Draggable<PurchasedProduct>(
       data: product,
       feedback: Material(
-        elevation: 4,
+        elevation: 6,
         borderRadius: BorderRadius.circular(8),
-        child: Card(
-          margin: EdgeInsets.zero,
-          child: SizedBox(
-            width: 300,
-            child: ListTile(
-              leading: Icon(
-                Icons.drag_indicator,
-                color: colorScheme.primary,
-              ),
-              title: Text(
-                product.product.getName(),
-                style: textTheme.bodyLarge,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: Icon(
-                Icons.drag_handle,
-                color: colorScheme.outline,
+        child: Transform.scale(
+          scale: 1.05,
+          child: Card(
+            margin: EdgeInsets.zero,
+            child: SizedBox(
+              width: 300,
+              child: ListTile(
+                leading: Checkbox(
+                  value: false,
+                  onChanged: null,
+                ),
+                title: Text(
+                  product.product.getName(),
+                  style: textTheme.bodyLarge,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: Icon(
+                  Icons.drag_handle,
+                  color: colorScheme.outline,
+                ),
               ),
             ),
           ),
         ),
       ),
       childWhenDragging: Opacity(
-        opacity: 0.5,
+        opacity: 0.3,
         child: _buildProductTileContent(
           product,
           controller,
@@ -199,6 +244,7 @@ class _DraggableProductListState extends State<DraggableProductList> {
           colorScheme,
           textTheme,
           context,
+          isChecked,
         ),
       ),
       child: _buildProductTileContent(
@@ -208,6 +254,7 @@ class _DraggableProductListState extends State<DraggableProductList> {
         colorScheme,
         textTheme,
         context,
+        isChecked,
       ),
     );
   }
@@ -220,18 +267,21 @@ class _DraggableProductListState extends State<DraggableProductList> {
     ColorScheme colorScheme,
     TextTheme textTheme,
     BuildContext context,
+    bool isChecked,
   ) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: ListTile(
-        // Remove button on the left
-        leading: IconButton(
-          icon: const Icon(Icons.remove_circle_outline),
-          onPressed: () {
-            widget.onProductRemoved(product);
+        // Remove checkbox on the left
+        leading: Checkbox(
+          value: isChecked,
+          onChanged: (value) {
+            if (value == true) {
+              _setProductChecked(product.id, true);
+            } else {
+              _setProductChecked(product.id, false);
+            }
           },
-          color: colorScheme.error,
-          tooltip: 'Remove product',
         ),
         // Product name in the center (editable)
         title: TextField(
@@ -243,12 +293,21 @@ class _DraggableProductListState extends State<DraggableProductList> {
           ),
           style: textTheme.bodyLarge,
           onSubmitted: (value) {
-            if (value.trim().isNotEmpty && value.trim() != product.product.getName()) {
+            if (value.trim().isEmpty) {
+              // Remove product if name is cleared
+              widget.onProductRemoved(product);
+            } else if (value.trim() != product.product.getName()) {
+              // Rename product if name changed
               widget.onProductRenamed(product, value.trim());
             }
             focusNode.unfocus();
           },
           onTapOutside: (event) {
+            final value = controller.text.trim();
+            if (value.isEmpty) {
+              // Remove product if name is cleared
+              widget.onProductRemoved(product);
+            }
             focusNode.unfocus();
           },
         ),

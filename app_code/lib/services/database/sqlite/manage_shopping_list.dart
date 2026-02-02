@@ -30,9 +30,11 @@ class ManageShoppingList {
 
     final list = ShoppingList.fromDatabase(rows.first);
 
-    final supermarket =
-        await ManageSupermarket.getSupermarketById(rows.first['supermarket_id'] as String);
-    if (supermarket != null) list.setSupermarket(supermarket);
+    final supermarketId = rows.first['supermarket_id'] as String?;
+    if (supermarketId != null) {
+      final supermarket = await ManageSupermarket.getSupermarketById(supermarketId);
+      if (supermarket != null) list.setSupermarket(supermarket);
+    }
 
     final products =
         await ManagePurchasedProduct.getPurchasedProductsByList(id);
@@ -50,9 +52,11 @@ class ManageShoppingList {
     for (final row in rows) {
       final list = ShoppingList.fromDatabase(row);
 
-      final supermarket = await ManageSupermarket.getSupermarketById(
-          row['supermarket_id'] as String);
-      if (supermarket != null) list.setSupermarket(supermarket);
+      final supermarketId = row['supermarket_id'] as String?;
+      if (supermarketId != null) {
+        final supermarket = await ManageSupermarket.getSupermarketById(supermarketId);
+        if (supermarket != null) list.setSupermarket(supermarket);
+      }
 
       final products =
           await ManagePurchasedProduct.getPurchasedProductsByList(list.id);

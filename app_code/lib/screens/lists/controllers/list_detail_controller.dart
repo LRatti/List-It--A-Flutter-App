@@ -51,6 +51,7 @@ class ListDetailController extends ChangeNotifier {
   // In-memory state
   String _listName;
   Supermarket? _selectedSupermarket;
+  Category? _uncategorizedFallback;
   List<PurchasedProduct> _products = [];
   final List<PurchasedProduct> _originalProducts; // Deep copy for comparison
   final Map<String, BufferProduct> _bufferProducts = {};
@@ -93,10 +94,36 @@ class ListDetailController extends ChangeNotifier {
     
     if (isNew || isUpdated) {
       _selectedSupermarket = newSupermarket;
+      _uncategorizedFallback = null;
       _recategorizeProductsForSupermarket();
       if (isNew) {
         _hasChanges = true;
       }
+      notifyListeners();
+    }
+  }
+
+  /// Clear selected supermarket and move all products to uncategorized
+  Future<void> clearSupermarket({Category? uncategorized}) async {
+    final fallback = uncategorized ?? _uncategorizedFallback ??
+        UncategorizedCategoryUtils.fallbackFrom(const []);
+
+    final selectionChanged = _selectedSupermarket != null;
+    bool categoryChanged = false;
+
+    _selectedSupermarket = null;
+    _uncategorizedFallback = fallback;
+
+    for (var purchasedProduct in _products) {
+      if (purchasedProduct.category.id != fallback.id) {
+        purchasedProduct.category = fallback;
+        purchasedProduct.lastModified = DateTime.now();
+        categoryChanged = true;
+      }
+    }
+
+    if (selectionChanged || categoryChanged) {
+      _hasChanges = true;
       notifyListeners();
     }
   }
@@ -259,7 +286,13 @@ class ListDetailController extends ChangeNotifier {
   /// the case where the same category is loaded as different object instances.
   Map<Category, List<PurchasedProduct>> getProductsByCategory() {
     if (_selectedSupermarket == null) {
-      return {};
+      final fallback = _uncategorizedFallback ??
+          UncategorizedCategoryUtils.fallbackFrom(const []);
+      _uncategorizedFallback = fallback;
+
+      return {
+        fallback: List.unmodifiable(_products),
+      };
     }
 
     final categories = _selectedSupermarket!.getCategories();
@@ -357,9 +390,7 @@ class ListDetailController extends ChangeNotifier {
     try {
       // 1. Update shopping list name and supermarket
       _originalList.setName(_listName);
-      if (_selectedSupermarket != null) {
-        _originalList.setSupermarket(_selectedSupermarket!);
-      }
+      _originalList.setSupermarket(_selectedSupermarket);
 
       await _listRepo.update(_originalList);
 
