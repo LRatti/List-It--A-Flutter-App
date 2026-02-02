@@ -19,17 +19,9 @@ class BufferProduct {
   final bool isLoading;
   final String? error;
 
-  BufferProduct({
-    required this.name,
-    this.isLoading = true,
-    this.error,
-  });
+  BufferProduct({required this.name, this.isLoading = true, this.error});
 
-  BufferProduct copyWith({
-    String? name,
-    bool? isLoading,
-    String? error,
-  }) {
+  BufferProduct copyWith({String? name, bool? isLoading, String? error}) {
     return BufferProduct(
       name: name ?? this.name,
       isLoading: isLoading ?? this.isLoading,
@@ -40,7 +32,7 @@ class BufferProduct {
 
 /// Controller that manages in-memory state for list detail screen
 /// All changes are deferred to persistence layer until save() is called
-/// 
+///
 /// This controller uses Riverpod providers for all persistence operations,
 /// ensuring consistency with the app's architecture.
 class ListDetailController extends ChangeNotifier {
@@ -54,7 +46,7 @@ class ListDetailController extends ChangeNotifier {
   List<PurchasedProduct> _products = [];
   final List<PurchasedProduct> _originalProducts; // Deep copy for comparison
   final Map<String, BufferProduct> _bufferProducts = {};
-  
+
   // Track changes
   bool _hasChanges = false;
 
@@ -63,18 +55,24 @@ class ListDetailController extends ChangeNotifier {
     required Ref ref,
     Supermarket? initialSupermarket,
     List<PurchasedProduct>? initialProducts,
-  })  : _originalList = shoppingList,
-        _ref = ref,
-        _listName = shoppingList.getName(),
-        _selectedSupermarket = initialSupermarket ?? shoppingList.getSupermarket(),
-        _products = List.from(initialProducts ?? shoppingList.getProducts() ?? []),
-        _originalProducts = List.from(initialProducts ?? shoppingList.getProducts() ?? []);
+  }) : _originalList = shoppingList,
+       _ref = ref,
+       _listName = shoppingList.getName(),
+       _selectedSupermarket =
+           initialSupermarket ?? shoppingList.getSupermarket(),
+       _products = List.from(
+         initialProducts ?? shoppingList.getProducts() ?? [],
+       ),
+       _originalProducts = List.from(
+         initialProducts ?? shoppingList.getProducts() ?? [],
+       );
 
   // Getters
   String get listName => _listName;
   Supermarket? get selectedSupermarket => _selectedSupermarket;
   List<PurchasedProduct> get products => List.unmodifiable(_products);
-  Map<String, BufferProduct> get bufferProducts => Map.unmodifiable(_bufferProducts);
+  Map<String, BufferProduct> get bufferProducts =>
+      Map.unmodifiable(_bufferProducts);
   bool get hasChanges => _hasChanges;
   String get listId => _originalList.id;
 
@@ -90,9 +88,10 @@ class ListDetailController extends ChangeNotifier {
   /// Update selected supermarket and recategorize products
   void updateSupermarket(Supermarket newSupermarket) {
     final isNew = _selectedSupermarket?.id != newSupermarket.id;
-    final isUpdated = _selectedSupermarket?.id == newSupermarket.id && 
+    final isUpdated =
+        _selectedSupermarket?.id == newSupermarket.id &&
         _selectedSupermarket != newSupermarket;
-    
+
     if (isNew || isUpdated) {
       _selectedSupermarket = newSupermarket;
       _uncategorizedFallback = null;
@@ -106,7 +105,9 @@ class ListDetailController extends ChangeNotifier {
 
   /// Clear selected supermarket and move all products to uncategorized
   Future<void> clearSupermarket({Category? uncategorized}) async {
-    final fallback = uncategorized ?? _uncategorizedFallback ??
+    final fallback =
+        uncategorized ??
+        _uncategorizedFallback ??
         UncategorizedCategoryUtils.fallbackFrom(const []);
 
     final selectionChanged = _selectedSupermarket != null;
@@ -139,7 +140,7 @@ class ListDetailController extends ChangeNotifier {
 
     for (var purchasedProduct in _products) {
       final product = purchasedProduct.product;
-      
+
       // Check if product has association with this supermarket
       if (product.associations.containsKey(supermarketId)) {
         final categoryId = product.associations[supermarketId]!;
@@ -162,7 +163,11 @@ class ListDetailController extends ChangeNotifier {
   }
 
   /// Update buffer product state
-  void updateBufferProduct(String productName, {bool? isLoading, String? error}) {
+  void updateBufferProduct(
+    String productName, {
+    bool? isLoading,
+    String? error,
+  }) {
     if (_bufferProducts.containsKey(productName)) {
       _bufferProducts[productName] = _bufferProducts[productName]!.copyWith(
         isLoading: isLoading,
@@ -199,7 +204,7 @@ class ListDetailController extends ChangeNotifier {
     final firstIndexInCategory = _products.indexWhere(
       (p) => p.category.id == category.id,
     );
-    
+
     if (firstIndexInCategory != -1) {
       // Insert at the beginning of the category
       _products.insert(firstIndexInCategory, purchasedProduct);
@@ -207,7 +212,7 @@ class ListDetailController extends ChangeNotifier {
       // No products in this category yet, add at the end
       _products.add(purchasedProduct);
     }
-    
+
     // Track the association if we have a selected supermarket
     // This ensures new product categorizations are persisted and synced
     if (_selectedSupermarket != null) {
@@ -217,10 +222,10 @@ class ListDetailController extends ChangeNotifier {
         category.id,
       );
     }
-    
+
     _hasChanges = true;
     notifyListeners();
-    
+
     return purchasedProduct;
   }
 
@@ -241,11 +246,24 @@ class ListDetailController extends ChangeNotifier {
     }
   }
 
+  /// Toggle the bought status of a purchased product
+  /// This updates the isBought flag and marks the product as modified
+  void toggleProductBought(PurchasedProduct product, bool isBought) {
+    final index = _products.indexWhere((p) => p.id == product.id);
+    if (index != -1) {
+      // Update the isBought flag
+      _products[index].isBought = isBought;
+      // Mark as modified for persistence
+      _products[index].lastModified = DateTime.now();
+      _hasChanges = true;
+      notifyListeners();
+    }
+  }
 
-// Update a purchased product's name with proper product reference handling
-  /// 
+  // Update a purchased product's name with proper product reference handling
+  ///
   /// This method implements the following logic:
-  /// 
+  ///
   /// 1. Check if a product with [newName] already exists in the database
   /// 2. If it exists:
   ///    - Update the purchased product to reference the existing product
@@ -254,15 +272,15 @@ class ListDetailController extends ChangeNotifier {
   ///    - Create a new product with [newName]
   ///    - Copy relevant associations from the old product if applicable
   ///    - Update the purchased product to reference the new product
-  /// 
+  ///
   /// This ensures that renaming a purchased product in one list does not
   /// affect purchased products in other lists, even if they originally had
   /// the same name.
-  /// 
+  ///
   /// Parameters:
   /// - [purchasedProduct]: The purchased product to update
   /// - [newName]: The new name for the product
-  /// 
+  ///
   /// Returns: The updated [PurchasedProduct] with the new product reference
   static Future<PurchasedProduct> updateProductName(
     PurchasedProduct purchasedProduct,
@@ -302,10 +320,10 @@ class ListDetailController extends ChangeNotifier {
   }
 
   /// Check if a product update would create a duplicate reference
-  /// 
+  ///
   /// In some cases, renaming a product might result in it having the same
   /// name as another product. This method helps detect such scenarios.
-  /// 
+  ///
   /// Returns: true if the new name matches an existing product
   static Future<bool> wouldCreateDuplicate(
     String newName,
@@ -316,17 +334,17 @@ class ListDetailController extends ChangeNotifier {
   }
 
   /// Update a purchased product's name with proper product reference handling
-  /// 
+  ///
   /// This method implements the fix for the product update bug. When a user
   /// renames a purchased product, this method ensures that:
   /// 1. A new product is created if the name is unique
   /// 2. An existing product is referenced if one with that name exists
   /// 3. The original product is NOT modified, preventing cascading updates
-  /// 
+  ///
   /// The key difference from direct product.setName():
   /// - Direct modification: changes the shared Product object, affecting all references
   /// - This method: updates the product REFERENCE, keeping other products intact
-  /// 
+  ///
   /// Example:
   /// - List A has PurchasedProduct1 -> Product "Apple"
   /// - List B has PurchasedProduct2 -> Product "Apple" (same object reference!)
@@ -339,10 +357,7 @@ class ListDetailController extends ChangeNotifier {
     String newName,
   ) async {
     // Use the handler to safely update the product reference
-    final updatedProduct = await updateProductName(
-      purchasedProduct,
-      newName,
-    );
+    final updatedProduct = await updateProductName(purchasedProduct, newName);
 
     // Update the in-memory state with the new product reference
     updateProduct(updatedProduct);
@@ -354,18 +369,18 @@ class ListDetailController extends ChangeNotifier {
     if (index != -1) {
       // Update the purchased product's category
       _products[index].category = newCategory;
-      
+
       // CRITICAL FIX: Update the category reference on the product parameter as well
       // This ensures the PurchasedProduct model holds the correct category
       product.category = newCategory;
-      
+
       // Update product association for current supermarket
       if (_selectedSupermarket != null) {
         _products[index].product.addAssociation(
           _selectedSupermarket!.id,
           newCategory.id,
         );
-        
+
         // Mark association change for persistence
         // This saves to the associations table and syncs to Firestore
         _markAssociationChanged(
@@ -374,12 +389,12 @@ class ListDetailController extends ChangeNotifier {
           newCategory.id,
         );
       }
-      
+
       // CRITICAL FIX: Update the PurchasedProduct's lastModified timestamp
       // This ensures the purchased_product row will be updated in the database
       // with the new category_id when save() is called
       _products[index].lastModified = DateTime.now();
-      
+
       _hasChanges = true;
       notifyListeners();
     }
@@ -397,22 +412,21 @@ class ListDetailController extends ChangeNotifier {
   }
 
   /// Get products grouped by category for the current supermarket
-  /// 
+  ///
   /// NEW BEHAVIOR: Always returns ALL categories from the selected supermarket,
   /// even if they have no products. This allows users to see all available
   /// categories upfront and drag products to any category.
-  /// 
+  ///
   /// CRITICAL: Categories are matched by ID (not object reference) to handle
   /// the case where the same category is loaded as different object instances.
   Map<Category, List<PurchasedProduct>> getProductsByCategory() {
     if (_selectedSupermarket == null) {
-      final fallback = _uncategorizedFallback ??
+      final fallback =
+          _uncategorizedFallback ??
           UncategorizedCategoryUtils.fallbackFrom(const []);
       _uncategorizedFallback = fallback;
 
-      return {
-        fallback: List.unmodifiable(_products),
-      };
+      return {fallback: List.unmodifiable(_products)};
     }
 
     final categories = _selectedSupermarket!.getCategories();
@@ -431,7 +445,7 @@ class ListDetailController extends ChangeNotifier {
     // than the category in the supermarket's categories list
     for (var product in _products) {
       final productCategoryId = product.category.id;
-      
+
       // Find matching category in supermarket's categories by ID
       final matchingCategory = categories.firstWhere(
         (cat) => cat.id == productCategoryId,
@@ -440,7 +454,7 @@ class ListDetailController extends ChangeNotifier {
           return UncategorizedCategoryUtils.fallbackFrom(categories);
         },
       );
-      
+
       // Add product to the matching category
       if (grouped.containsKey(matchingCategory)) {
         grouped[matchingCategory]!.add(product);
@@ -456,9 +470,17 @@ class ListDetailController extends ChangeNotifier {
 
   /// Mark an association change for persistence
   /// Uses the associations provider to track pending changes
-  void _markAssociationChanged(String productId, String supermarketId, String categoryId) {
+  void _markAssociationChanged(
+    String productId,
+    String supermarketId,
+    String categoryId,
+  ) {
     final associationsNotifier = _ref.read(associationsProvider.notifier);
-    associationsNotifier.markAssociationChanged(productId, supermarketId, categoryId);
+    associationsNotifier.markAssociationChanged(
+      productId,
+      supermarketId,
+      categoryId,
+    );
   }
 
   /// Save all changes to database (called on screen exit)
@@ -470,34 +492,41 @@ class ListDetailController extends ChangeNotifier {
       // 1. Update shopping list name and supermarket using provider
       _originalList.setName(_listName);
       _originalList.setSupermarket(_selectedSupermarket);
-      
+
       final listNotifier = _ref.read(shoppingListsProvider.notifier);
       await listNotifier.updateList(_originalList);
 
       // 2. Handle products - process name changes and create/update products
       final productsNotifier = _ref.read(productsProvider.notifier);
-      final purchasedProductsNotifier = _ref.read(purchasedProductsProvider.notifier);
-      
+      final purchasedProductsNotifier = _ref.read(
+        purchasedProductsProvider.notifier,
+      );
+
       for (var purchasedProduct in _products) {
         final product = purchasedProduct.product;
-        
+
         // Check if product with this name exists
-        final existingProduct = await ManageProduct.getProductByName(product.getName());
-        
+        final existingProduct = await ManageProduct.getProductByName(
+          product.getName(),
+        );
+
         if (existingProduct != null) {
           // Product name matches existing product - use existing product reference
           purchasedProduct.product = existingProduct;
-        } else  {
-          // New product 
+        } else {
+          // New product
           await productsNotifier.addProduct(product);
         }
 
         // 3. Save/update purchased product via provider
-        final existingPurchased = await purchasedProductsNotifier.getPurchasedProductById(purchasedProduct.id);
+        final existingPurchased = await purchasedProductsNotifier
+            .getPurchasedProductById(purchasedProduct.id);
         if (existingPurchased == null) {
           await purchasedProductsNotifier.addPurchasedProduct(purchasedProduct);
         } else {
-          await purchasedProductsNotifier.updatePurchasedProduct(purchasedProduct);
+          await purchasedProductsNotifier.updatePurchasedProduct(
+            purchasedProduct,
+          );
         }
       }
 
@@ -505,7 +534,7 @@ class ListDetailController extends ChangeNotifier {
       final originalProductIds = _originalProducts.map((p) => p.id).toSet();
       final currentProductIds = _products.map((p) => p.id).toSet();
       final deletedIds = originalProductIds.difference(currentProductIds);
-      
+
       for (var deletedId in deletedIds) {
         await purchasedProductsNotifier.deletePurchasedProductById(deletedId);
       }
@@ -537,5 +566,5 @@ class ListDetailController extends ChangeNotifier {
   void dispose() {
     _bufferProducts.clear();
     super.dispose();
-  } 
+  }
 }

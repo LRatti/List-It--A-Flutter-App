@@ -118,7 +118,8 @@ class DatabaseHelper {
         quantity INTEGER NOT NULL,
         created_at TEXT NOT NULL,
         last_modified TEXT NOT NULL,
-        is_deleted INTEGER NOT NULL DEFAULT 0
+        is_deleted INTEGER NOT NULL DEFAULT 0,
+        is_bought INTEGER NOT NULL DEFAULT 0
       )
     ''');
 

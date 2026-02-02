@@ -21,10 +21,7 @@ final listDetailControllerProvider =
       ref,
       shoppingList,
     ) {
-      return ListDetailController(
-        shoppingList: shoppingList,
-        ref: ref,
-      );
+      return ListDetailController(shoppingList: shoppingList, ref: ref);
     });
 
 class ListDetailScreenMobile extends ConsumerStatefulWidget {
@@ -49,7 +46,6 @@ class _ListDetailScreenMobileState
   final FocusNode _nameFieldFocusNode = FocusNode();
   final FocusNode _productSearchFocusNode = FocusNode();
   final ScrollController _listScrollController = ScrollController();
-
 
   @override
   void initState() {
@@ -286,7 +282,8 @@ class _ListDetailScreenMobileState
     ColorScheme colorScheme,
   ) async {
     final selectedId = controller.selectedSupermarket?.id;
-    final hasSelected = selectedId != null &&
+    final hasSelected =
+        selectedId != null &&
         visibleSupermarkets.any((s) => s.id == selectedId);
 
     await showModalBottomSheet<void>(
@@ -320,16 +317,14 @@ class _ListDetailScreenMobileState
                         children: [
                           Text(
                             'Select Supermarket',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           IconButton(
-                            icon: Icon(Icons.close,
-                                color: colorScheme.onSurface),
+                            icon: Icon(
+                              Icons.close,
+                              color: colorScheme.onSurface,
+                            ),
                             onPressed: () => Navigator.pop(context),
                             constraints: const BoxConstraints(),
                             padding: EdgeInsets.zero,
@@ -341,8 +336,7 @@ class _ListDetailScreenMobileState
                         visibleSupermarkets.isEmpty
                             ? 'No supermarkets yet. Create one to get started.'
                             : '${visibleSupermarkets.length} supermarket${visibleSupermarkets.length != 1 ? 's' : ''} available',
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -424,9 +418,7 @@ class _ListDetailScreenMobileState
                               label: const Text('Clear'),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: colorScheme.primary,
-                                side: BorderSide(
-                                  color: colorScheme.primary,
-                                ),
+                                side: BorderSide(color: colorScheme.primary),
                               ),
                             ),
                           ),
@@ -458,11 +450,7 @@ class _ListDetailScreenMobileState
           vertical: 4.0,
         ),
         leading: isSelected
-            ? Icon(
-                Icons.check_circle,
-                color: colorScheme.primary,
-                size: 24,
-              )
+            ? Icon(Icons.check_circle, color: colorScheme.primary, size: 24)
             : Icon(
                 Icons.circle_outlined,
                 color: colorScheme.outlineVariant,
@@ -472,9 +460,7 @@ class _ListDetailScreenMobileState
           supermarket.getName(),
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected
-                ? colorScheme.primary
-                : colorScheme.onSurface,
+            color: isSelected ? colorScheme.primary : colorScheme.onSurface,
           ),
         ),
         trailing: Wrap(
@@ -768,16 +754,15 @@ class _ListDetailScreenMobileState
                                     ? 'Create a supermarket'
                                     : 'Select supermarket'),
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
-                              fontWeight:
-                                  hasSelected ? FontWeight.w600 : FontWeight.w400,
-                              color: hasSelected
-                                  ? colorScheme.onSurface
-                                  : colorScheme.onSurfaceVariant,
-                            ),
+                                  fontWeight: hasSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  color: hasSelected
+                                      ? colorScheme.onSurface
+                                      : colorScheme.onSurfaceVariant,
+                                ),
                           ),
                           if (selectedSupermarket != null &&
                               selectedSupermarket.getCategories().isNotEmpty)
@@ -786,12 +771,10 @@ class _ListDetailScreenMobileState
                               child: Text(
                                 '${selectedSupermarket.getCategories().length} categories',
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
+                                style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
                               ),
                             ),
                         ],
@@ -848,7 +831,8 @@ class _ListDetailScreenMobileState
                       builder: (_) => AddRecipeScreen(
                         shoppingList: widget.shoppingList,
                         availableCategories:
-                            controller.selectedSupermarket?.getCategories() ?? [],
+                            controller.selectedSupermarket?.getCategories() ??
+                            [],
                       ),
                     ),
                   );
@@ -980,6 +964,10 @@ class _ListDetailScreenMobileState
             // This ensures that renaming a product in one list does not affect
             // purchased products in other lists, even if they originally had the same name
             await controller.updatePurchasedProductName(product, newName);
+          },
+          onProductBoughtToggled: (product, isBought) {
+            // Update the bought status of the product
+            controller.toggleProductBought(product, isBought);
           },
         ),
       ],

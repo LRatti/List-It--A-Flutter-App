@@ -8,6 +8,8 @@ class DraggableProductList extends StatefulWidget {
   final Function(PurchasedProduct product, Category newCategory) onProductMoved;
   final Function(PurchasedProduct product) onProductRemoved;
   final Function(PurchasedProduct product, String newName) onProductRenamed;
+  final Function(PurchasedProduct product, bool isBought)?
+  onProductBoughtToggled;
   final ScrollController? scrollController;
 
   const DraggableProductList({
@@ -16,6 +18,7 @@ class DraggableProductList extends StatefulWidget {
     required this.onProductMoved,
     required this.onProductRemoved,
     required this.onProductRenamed,
+    this.onProductBoughtToggled,
     this.scrollController,
   });
 
@@ -26,8 +29,7 @@ class DraggableProductList extends StatefulWidget {
 class _DraggableProductListState extends State<DraggableProductList> {
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, TextEditingController> _controllers = {};
-  final Map<String, bool> _checkedProducts = {};
-  
+
   // Auto-scroll support
   bool _isDragging = false;
   double _lastDragPosition = 0.0;
@@ -58,16 +60,6 @@ class _DraggableProductListState extends State<DraggableProductList> {
     return _controllers[productId]!;
   }
 
-  bool _isProductChecked(String productId) {
-    return _checkedProducts[productId] ?? false;
-  }
-
-  void _setProductChecked(String productId, bool checked) {
-    setState(() {
-      _checkedProducts[productId] = checked;
-    });
-  }
-
   void _unfocusAll() {
     // Unfocus all text fields
     FocusScope.of(context).unfocus();
@@ -75,7 +67,7 @@ class _DraggableProductListState extends State<DraggableProductList> {
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (!_isDragging) return;
-    
+
     _lastDragPosition = details.globalPosition.dy;
     _performAutoScroll();
   }
@@ -90,17 +82,21 @@ class _DraggableProductListState extends State<DraggableProductList> {
 
     // Get screen height to determine scroll zones
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     // Calculate scroll speed based on distance from edge (gradual acceleration)
     double scrollSpeed = 0.0;
-    
+
     // Scroll down when near bottom
     if (_lastDragPosition > screenHeight - scrollThresholdBottom) {
       final distanceFromBottom = screenHeight - _lastDragPosition;
-      final normalizedDistance = (distanceFromBottom / scrollThresholdBottom).clamp(0.0, 1.0);
+      final normalizedDistance = (distanceFromBottom / scrollThresholdBottom)
+          .clamp(0.0, 1.0);
       // Use quadratic curve for smoother, more gradual acceleration
-      scrollSpeed = maxScrollSpeed * (1 - normalizedDistance) * (1 - normalizedDistance * 0.5);
-      
+      scrollSpeed =
+          maxScrollSpeed *
+          (1 - normalizedDistance) *
+          (1 - normalizedDistance * 0.5);
+
       final maxScroll = scrollController.position.maxScrollExtent;
       final currentScroll = scrollController.offset;
       if (currentScroll < maxScroll) {
@@ -115,14 +111,23 @@ class _DraggableProductListState extends State<DraggableProductList> {
     }
     // Scroll up when near top
     else if (_lastDragPosition < scrollThresholdTop) {
-      final normalizedDistance = (_lastDragPosition / scrollThresholdTop).clamp(0.0, 1.0);
+      final normalizedDistance = (_lastDragPosition / scrollThresholdTop).clamp(
+        0.0,
+        1.0,
+      );
       // Use quadratic curve for smoother, more gradual acceleration
-      scrollSpeed = maxScrollSpeed * (1 - normalizedDistance) * (1 - normalizedDistance * 0.5);
-      
+      scrollSpeed =
+          maxScrollSpeed *
+          (1 - normalizedDistance) *
+          (1 - normalizedDistance * 0.5);
+
       final currentScroll = scrollController.offset;
       if (currentScroll > 0) {
         scrollController.jumpTo(
-          (currentScroll - scrollSpeed).clamp(0.0, scrollController.position.maxScrollExtent),
+          (currentScroll - scrollSpeed).clamp(
+            0.0,
+            scrollController.position.maxScrollExtent,
+          ),
         );
         // Continue scrolling if still dragging
         if (_isDragging) {
@@ -141,131 +146,142 @@ class _DraggableProductListState extends State<DraggableProductList> {
       onTap: _unfocusAll,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal:0),
+        padding: const EdgeInsets.symmetric(horizontal: 0),
         child: Column(
           children: widget.productsByCategory.entries.map((entry) {
-        final category = entry.key;
-        final products = entry.value;
+            final category = entry.key;
+            final products = entry.value;
 
-        // NEW BEHAVIOR: Always show category headers, even if empty
-        // This allows users to see all available categories upfront
-        // and drag products to any category
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Category header - Drag target for entire category
-            DragTarget<PurchasedProduct>(
-              builder: (context, candidateData, rejectedData) {
-                final isDropTarget = candidateData.isNotEmpty;
-                return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-                  margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-                  decoration: BoxDecoration(
-                    color: isDropTarget
-                        ? colorScheme.primaryContainer.withOpacity(0.2)
-                        : Colors.transparent,
-                    border: Border(
-                      bottom: BorderSide(
+            // NEW BEHAVIOR: Always show category headers, even if empty
+            // This allows users to see all available categories upfront
+            // and drag products to any category
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Category header - Drag target for entire category
+                DragTarget<PurchasedProduct>(
+                  builder: (context, candidateData, rejectedData) {
+                    final isDropTarget = candidateData.isNotEmpty;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12.0,
+                        horizontal: 12.0,
+                      ),
+                      margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                      decoration: BoxDecoration(
                         color: isDropTarget
-                            ? colorScheme.primary
-                            : colorScheme.outline.withOpacity(0.3),
-                        width: isDropTarget ? 2.5 : 1.5,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      // Category icon indicator
-                      Container(
-                        width: 4,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              category.getName(),
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: colorScheme.onSurface,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Show count badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: products.isEmpty 
-                              ? colorScheme.surfaceContainerHighest
-                              : colorScheme.primary,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Text(
-                          '${products.length}',
-                          style: textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: products.isEmpty
-                                ? colorScheme.onSurfaceVariant
-                                : colorScheme.onPrimary,
+                            ? colorScheme.primaryContainer.withOpacity(0.2)
+                            : Colors.transparent,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDropTarget
+                                ? colorScheme.primary
+                                : colorScheme.outline.withOpacity(0.3),
+                            width: isDropTarget ? 2.5 : 1.5,
                           ),
                         ),
                       ),
-                      if (isDropTarget) ...[
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.add_circle,
-                          size: 20,
-                          color: colorScheme.primary,
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              },
-              onWillAccept: (data) => data != null,
-              onAccept: (product) {
-                // Only move if different category
-                if (product.category.id != category.id) {
-                  widget.onProductMoved(product, category);
-                }
-              },
-            ),
-            // Products in this category (if any)
-            if (products.isNotEmpty)
-              ...products.map((product) {
-                return DragTarget<PurchasedProduct>(
-                  builder: (context, candidateData, rejectedData) {
-                    return Container(
-                      child: _buildDraggableProductTile(
-                        product,
-                        colorScheme,
-                        textTheme,
-                        context,
-                        _isProductChecked(product.id),
+                      child: Row(
+                        children: [
+                          // Category icon indicator
+                          Container(
+                            width: 4,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  category.getName(),
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: colorScheme.onSurface,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Show count badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: products.isEmpty
+                                  ? colorScheme.surfaceContainerHighest
+                                  : colorScheme.primary,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
+                              '${products.length}',
+                              style: textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: products.isEmpty
+                                    ? colorScheme.onSurfaceVariant
+                                    : colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                          if (isDropTarget) ...[
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.add_circle,
+                              size: 20,
+                              color: colorScheme.primary,
+                            ),
+                          ],
+                        ],
                       ),
                     );
                   },
-                  onWillAccept: (draggedProduct) => draggedProduct != null && draggedProduct.id != product.id,
-                  onAccept: (draggedProduct) {
-                    // Move the dragged product to this product's category
-                    if (draggedProduct.category.id != product.category.id) {
-                      widget.onProductMoved(draggedProduct, product.category);
+                  onWillAccept: (data) => data != null,
+                  onAccept: (product) {
+                    // Only move if different category
+                    if (product.category.id != category.id) {
+                      widget.onProductMoved(product, category);
                     }
                   },
-                );
-              }).toList()
-          ],
-        );
+                ),
+                // Products in this category (if any)
+                if (products.isNotEmpty)
+                  ...products.map((product) {
+                    return DragTarget<PurchasedProduct>(
+                      builder: (context, candidateData, rejectedData) {
+                        return Container(
+                          child: _buildDraggableProductTile(
+                            product,
+                            colorScheme,
+                            textTheme,
+                            context,
+                            product.isBought,
+                          ),
+                        );
+                      },
+                      onWillAccept: (draggedProduct) =>
+                          draggedProduct != null &&
+                          draggedProduct.id != product.id,
+                      onAccept: (draggedProduct) {
+                        // Move the dragged product to this product's category
+                        if (draggedProduct.category.id != product.category.id) {
+                          widget.onProductMoved(
+                            draggedProduct,
+                            product.category,
+                          );
+                        }
+                      },
+                    );
+                  }).toList(),
+              ],
+            );
           }).toList(),
         ),
       ),
@@ -311,19 +327,13 @@ class _DraggableProductListState extends State<DraggableProductList> {
             child: SizedBox(
               width: 300,
               child: ListTile(
-                leading: Checkbox(
-                  value: false,
-                  onChanged: null,
-                ),
+                leading: Checkbox(value: false, onChanged: null),
                 title: Text(
                   product.product.getName(),
                   style: textTheme.bodyLarge,
                   overflow: TextOverflow.ellipsis,
                 ),
-                trailing: Icon(
-                  Icons.drag_handle,
-                  color: colorScheme.outline,
-                ),
+                trailing: Icon(Icons.drag_handle, color: colorScheme.outline),
               ),
             ),
           ),
@@ -366,14 +376,12 @@ class _DraggableProductListState extends State<DraggableProductList> {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: ListTile(
-        // Remove checkbox on the left
+        // Checkbox on the left to mark products as bought
         leading: Checkbox(
           value: isChecked,
           onChanged: (value) {
-            if (value == true) {
-              _setProductChecked(product.id, true);
-            } else {
-              _setProductChecked(product.id, false);
+            if (widget.onProductBoughtToggled != null) {
+              widget.onProductBoughtToggled!(product, value ?? false);
             }
           },
         ),
@@ -427,10 +435,7 @@ class _DraggableProductListState extends State<DraggableProductList> {
             const SizedBox(width: 6),
             ReorderableDragStartListener(
               index: 0,
-              child: Icon(
-                Icons.drag_handle,
-                color: colorScheme.outline,
-              ),
+              child: Icon(Icons.drag_handle, color: colorScheme.outline),
             ),
           ],
         ),

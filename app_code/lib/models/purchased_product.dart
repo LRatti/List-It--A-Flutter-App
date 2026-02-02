@@ -47,6 +47,7 @@ class PurchasedProduct {
   late DateTime? lastModified;
   late DateTime createdAt;
   bool isDeleted;
+  bool isBought;
   
   PurchasedProduct({
     String? id,
@@ -58,10 +59,12 @@ class PurchasedProduct {
     DateTime? lastModified,
     DateTime? createdAt,
     bool isDeleted = false,
+    bool isBought = false,
   }) : this.id = id ?? Helper.generateId(),
         createdAt = createdAt ?? DateTime.now(),
         lastModified = lastModified ?? (createdAt ?? DateTime.now()),
-        isDeleted = isDeleted;
+        isDeleted = isDeleted,
+        isBought = isBought;
 
   factory PurchasedProduct.fromDatabase(Map<String, dynamic> json, Category category, Product product) {
     return PurchasedProduct(
@@ -74,6 +77,7 @@ class PurchasedProduct {
       lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
       isDeleted: (json['is_deleted'] ?? 0) == 1,
+      isBought: (json['is_bought'] ?? 0) == 1,
     );
   }
 
@@ -88,6 +92,7 @@ class PurchasedProduct {
       'created_at': createdAt.toIso8601String(),
       'last_modified': lastModified?.toIso8601String(),
       'is_deleted': isDeleted ? 1 : 0,
+      'is_bought': isBought ? 1 : 0,
     };
   }
 
@@ -102,6 +107,7 @@ class PurchasedProduct {
       lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       isDeleted: json['isDeleted'] ?? false,
+      isBought: json['isBought'] ?? false,
     );
   }
 
@@ -116,6 +122,7 @@ class PurchasedProduct {
       'lastModified': lastModified?.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
       'isDeleted': isDeleted,
+      'isBought': isBought,
     };
   }
 
