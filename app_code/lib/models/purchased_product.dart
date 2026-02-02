@@ -3,6 +3,38 @@ import 'package:app_code/models/product.dart';
 import 'package:isar/isar.dart';
 import 'package:app_code/utils/helper.dart';
 
+/// Represents a purchased product (item) in a shopping list
+/// 
+/// A PurchasedProduct is a specific instance of a Product added to a shopping list.
+/// It maintains a reference to the Product object and tracks its quantity, price,
+/// and category within the context of a specific supermarket.
+/// 
+/// IMPORTANT - Product Reference Management:
+/// ===========================================
+/// 
+/// The [product] field holds a reference to a Product object. Multiple
+/// PurchasedProduct instances can reference the same Product object.
+/// 
+/// When updating a purchased product's information:
+/// - Quantity, price, category: Update directly on this PurchasedProduct
+/// - Product name: NEVER use product.setName()
+///   Instead: Update the [product] field to reference a different Product
+/// 
+/// Why? Because setName() modifies the shared Product object, affecting
+/// all other PurchasedProducts that reference it across different lists.
+/// 
+/// Example Scenario:
+/// -----------------
+/// User has:
+/// - List A (Supermarket X) with PurchasedProduct1 pointing to Product "Apple"
+/// - List B (Supermarket X) with PurchasedProduct2 pointing to Product "Apple"
+/// 
+/// If the user renames PurchasedProduct1 to "Red Apple":
+/// - WRONG: purchasedProduct1.product.setName("Red Apple")
+///   Result: Both lists show "Red Apple" ❌
+/// 
+/// - RIGHT: purchasedProduct1.product = Product(name: "Red Apple")
+///   Result: List A shows "Red Apple", List B still shows "Apple" ✅
 @collection
 class PurchasedProduct {
 

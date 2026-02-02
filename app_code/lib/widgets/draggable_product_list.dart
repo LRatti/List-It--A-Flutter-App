@@ -245,7 +245,6 @@ class _DraggableProductListState extends State<DraggableProductList> {
               ...products.map((product) {
                 return DragTarget<PurchasedProduct>(
                   builder: (context, candidateData, rejectedData) {
-                    final isDropTarget = candidateData.isNotEmpty;
                     return Container(
                       child: _buildDraggableProductTile(
                         product,

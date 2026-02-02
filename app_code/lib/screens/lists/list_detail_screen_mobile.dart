@@ -171,15 +171,6 @@ class _ListDetailScreenMobileState
   Future<void> _addProduct() async {
     final productName = _productSearchController.text.trim();
     if (productName.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          buildAppSnackBar(
-            message: 'Please enter a product name',
-            isError: true,
-            context: context,
-          ),
-        );
-      }
       return;
     }
 
@@ -984,9 +975,11 @@ class _ListDetailScreenMobileState
           onProductRemoved: (product) {
             controller.removeProduct(product);
           },
-          onProductRenamed: (product, newName) {
-            product.product.setName(newName);
-            controller.updateProduct(product);
+          onProductRenamed: (product, newName) async {
+            // Use the controller's method to properly handle product name updates
+            // This ensures that renaming a product in one list does not affect
+            // purchased products in other lists, even if they originally had the same name
+            await controller.updatePurchasedProductName(product, newName);
           },
         ),
       ],

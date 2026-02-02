@@ -1,5 +1,39 @@
 import 'package:app_code/utils/helper.dart';
 
+/// Represents a unique product in the system
+/// 
+/// A Product is a global entity that can be referenced by multiple PurchasedProduct
+/// instances across different shopping lists. It maintains a unique ID and name,
+/// along with category associations for each supermarket.
+/// 
+/// CRITICAL DESIGN NOTE - Product References and Updates:
+/// =====================================================
+/// 
+/// Products are shared references across PurchasedProduct instances. This means
+/// multiple PurchasedProduct objects can point to the same Product instance.
+/// 
+/// When updating a product's name:
+/// - NEVER directly modify the Product object with setName() if it may be
+///   referenced by multiple PurchasedProduct instances
+/// - Instead, update the PurchasedProduct's product REFERENCE to point to
+///   a different Product (either new or existing)
+/// 
+/// Example of the Bug:
+/// -------------------
+/// List A has PurchasedProduct1 -> Product (id=P1, name="Apple")
+/// List B has PurchasedProduct2 -> Product (id=P1, name="Apple") [SAME OBJECT!]
+/// 
+/// If you do: purchasedProduct1.product.setName("Red Apple")
+/// Result: Both products become "Red Apple" because they reference the same object
+/// 
+/// Correct Approach:
+/// -----------------
+/// When updating a purchased product's name:
+/// 1. Find or create a Product with the new name
+/// 2. Update the PurchasedProduct to reference this new Product
+/// 3. The original Product remains unchanged
+/// 
+/// See: PurchasedProductUpdateHandler for the correct implementation
 class Product {
   final String id;
   String _name;

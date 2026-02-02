@@ -10,6 +10,7 @@ import 'package:app_code/providers/real_app_providers/purchased_products_notifie
 import 'package:app_code/providers/real_app_providers/associations_notifier.dart';
 import 'package:app_code/services/database/sqlite/manage_product.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
+import 'package:app_code/screens/lists/controllers/purchased_product_update_handler.dart';
 import 'package:flutter/foundation.dart' hide Category;
 
 /// State for products being categorized (in buffer zone)
@@ -240,6 +241,113 @@ class ListDetailController extends ChangeNotifier {
     }
   }
 
+
+// Update a purchased product's name with proper product reference handling
+  /// 
+  /// This method implements the following logic:
+  /// 
+  /// 1. Check if a product with [newName] already exists in the database
+  /// 2. If it exists:
+  ///    - Update the purchased product to reference the existing product
+  ///    - Preserve all associations and metadata
+  /// 3. If it doesn't exist:
+  ///    - Create a new product with [newName]
+  ///    - Copy relevant associations from the old product if applicable
+  ///    - Update the purchased product to reference the new product
+  /// 
+  /// This ensures that renaming a purchased product in one list does not
+  /// affect purchased products in other lists, even if they originally had
+  /// the same name.
+  /// 
+  /// Parameters:
+  /// - [purchasedProduct]: The purchased product to update
+  /// - [newName]: The new name for the product
+  /// 
+  /// Returns: The updated [PurchasedProduct] with the new product reference
+  static Future<PurchasedProduct> updateProductName(
+    PurchasedProduct purchasedProduct,
+    String newName,
+  ) async {
+    // Validation: Skip update if name hasn't changed
+    if (purchasedProduct.product.getName() == newName) {
+      return purchasedProduct;
+    }
+
+    // 1. Look up existing product with the new name
+    final existingProduct = await ManageProduct.getProductByName(newName);
+
+    if (existingProduct != null) {
+      // Case 1: Product with new name exists - reuse it
+      // This handles the scenario where the user renames to match an existing product
+      purchasedProduct.product = existingProduct;
+    } else {
+      // Case 2: Product with new name doesn't exist - create new product
+      // This is the common case where we're creating a truly new product
+      final newProduct = Product(
+        name: newName,
+        // Copy associations from the old product if they exist
+        // This preserves category mappings in the supermarket
+        associations: Map<String, String>.from(
+          purchasedProduct.product.associations,
+        ),
+      );
+
+      purchasedProduct.product = newProduct;
+    }
+
+    // Update the timestamp to reflect the modification
+    purchasedProduct.lastModified = DateTime.now();
+
+    return purchasedProduct;
+  }
+
+  /// Check if a product update would create a duplicate reference
+  /// 
+  /// In some cases, renaming a product might result in it having the same
+  /// name as another product. This method helps detect such scenarios.
+  /// 
+  /// Returns: true if the new name matches an existing product
+  static Future<bool> wouldCreateDuplicate(
+    String newName,
+    String currentProductId,
+  ) async {
+    final existingProduct = await ManageProduct.getProductByName(newName);
+    return existingProduct != null && existingProduct.id != currentProductId;
+  }
+
+  /// Update a purchased product's name with proper product reference handling
+  /// 
+  /// This method implements the fix for the product update bug. When a user
+  /// renames a purchased product, this method ensures that:
+  /// 1. A new product is created if the name is unique
+  /// 2. An existing product is referenced if one with that name exists
+  /// 3. The original product is NOT modified, preventing cascading updates
+  /// 
+  /// The key difference from direct product.setName():
+  /// - Direct modification: changes the shared Product object, affecting all references
+  /// - This method: updates the product REFERENCE, keeping other products intact
+  /// 
+  /// Example:
+  /// - List A has PurchasedProduct1 -> Product "Apple"
+  /// - List B has PurchasedProduct2 -> Product "Apple" (same object reference!)
+  /// - User renames PurchasedProduct1 to "Red Apple"
+  /// - OLD BUG: Both products become "Red Apple" because they share the same object
+  /// - NEW FIX: PurchasedProduct1 -> Product "Red Apple" (new product)
+  ///           PurchasedProduct2 -> Product "Apple" (unchanged)
+  Future<void> updatePurchasedProductName(
+    PurchasedProduct purchasedProduct,
+    String newName,
+  ) async {
+    // Use the handler to safely update the product reference
+    final updatedProduct = await updateProductName(
+      purchasedProduct,
+      newName,
+    );
+
+    // Update the in-memory state with the new product reference
+    updateProduct(updatedProduct);
+  }
+
   /// Move product to a different category (drag and drop)
   void moveProductToCategory(PurchasedProduct product, Category newCategory) {
     final index = _products.indexWhere((p) => p.id == product.id);
@@ -376,21 +484,12 @@ class ListDetailController extends ChangeNotifier {
         // Check if product with this name exists
         final existingProduct = await ManageProduct.getProductByName(product.getName());
         
-        if (existingProduct != null && existingProduct.id != product.id) {
+        if (existingProduct != null) {
           // Product name matches existing product - use existing product reference
           purchasedProduct.product = existingProduct;
-        } else if (existingProduct == null) {
-          // New product - ensure it exists in database via provider
-          final check = await productsNotifier.getProductById(product.id);
-          if (check == null) {
-            await productsNotifier.addProduct(product);
-          } else {
-            // Update existing product
-            await productsNotifier.updateProduct(product);
-          }
-        } else {
-          // Same product, just update via provider
-          await productsNotifier.updateProduct(product);
+        } else  {
+          // New product 
+          await productsNotifier.addProduct(product);
         }
 
         // 3. Save/update purchased product via provider
