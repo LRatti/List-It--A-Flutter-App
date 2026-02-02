@@ -18,10 +18,13 @@ import 'package:app_code/utils/uncategorized_category_initializer.dart';
 import 'package:riverpod/src/framework.dart';
 
 /// Provider for the list detail controller
-final listDetailControllerProvider = ChangeNotifierProvider.family<
-    ListDetailController, ShoppingList>((ref, shoppingList) {
-  return ListDetailController(shoppingList: shoppingList);
-});
+final listDetailControllerProvider =
+    ChangeNotifierProvider.family<ListDetailController, ShoppingList>((
+      ref,
+      shoppingList,
+    ) {
+      return ListDetailController(shoppingList: shoppingList);
+    });
 
 class ListDetailScreenMobile extends ConsumerStatefulWidget {
   final ShoppingList shoppingList;
@@ -48,9 +51,11 @@ class _ListDetailScreenMobileState
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.shoppingList.getName());
+    _nameController = TextEditingController(
+      text: widget.shoppingList.getName(),
+    );
     _productSearchController = TextEditingController();
-    
+
     // Initialize controller with favorite supermarket if new list
     if (widget.isNewList) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -64,17 +69,24 @@ class _ListDetailScreenMobileState
   }
 
   Future<void> _loadFavoriteSupermarket() async {
-    final controller = ref.read(listDetailControllerProvider(widget.shoppingList));
-    final favorite = await ref.read(supermarketsProvider.notifier).getFavoriteSupermarket();
-    
+    final controller = ref.read(
+      listDetailControllerProvider(widget.shoppingList),
+    );
+    final favorite = await ref
+        .read(supermarketsProvider.notifier)
+        .getFavoriteSupermarket();
+
     if (favorite != null) {
       controller.updateSupermarket(favorite);
     }
   }
 
   Future<void> _clearSupermarketSelection() async {
-    final controller = ref.read(listDetailControllerProvider(widget.shoppingList));
-    final uncategorized = await UncategorizedCategoryInitializer.getUncategorized();
+    final controller = ref.read(
+      listDetailControllerProvider(widget.shoppingList),
+    );
+    final uncategorized =
+        await UncategorizedCategoryInitializer.getUncategorized();
     await controller.clearSupermarket(uncategorized: uncategorized);
   }
 
@@ -88,23 +100,25 @@ class _ListDetailScreenMobileState
 
   /// Handle back button - save changes before exiting
   Future<bool> _handleBack() async {
-    final controller = ref.read(listDetailControllerProvider(widget.shoppingList));
-    
+    final controller = ref.read(
+      listDetailControllerProvider(widget.shoppingList),
+    );
+
     // Update list name from text field
     controller.updateListName(_nameController.text.trim());
-    
+
     // If no changes, just go back
     if (!controller.hasChanges) {
       return true;
     }
-    
+
     try {
       // Save all changes
       await controller.save();
       return true;
     } catch (e) {
       if (!mounted) return false;
-      
+
       // Show error and ask user what to do
       final shouldDiscard = await showDialog<bool>(
         context: context,
@@ -119,8 +133,8 @@ class _ListDetailScreenMobileState
               Text(
                 e.toString(),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
               const SizedBox(height: 16),
               const Text('What would you like to do?'),
@@ -142,7 +156,7 @@ class _ListDetailScreenMobileState
           ],
         ),
       );
-      
+
       // If user chose to discard, allow navigation
       return shouldDiscard ?? false;
     }
@@ -164,13 +178,16 @@ class _ListDetailScreenMobileState
       return;
     }
 
-    final controller = ref.read(listDetailControllerProvider(widget.shoppingList));
+    final controller = ref.read(
+      listDetailControllerProvider(widget.shoppingList),
+    );
     final supermarket = controller.selectedSupermarket;
 
     if (supermarket == null) {
       // No supermarket selected: place product in uncategorized
       _productSearchController.clear();
-      final uncategorized = await UncategorizedCategoryInitializer.getUncategorized();
+      final uncategorized =
+          await UncategorizedCategoryInitializer.getUncategorized();
       final existing = await controller.searchExistingProduct(productName);
       final product = existing ?? Product(name: productName);
       controller.addProduct(product, uncategorized);
@@ -197,7 +214,6 @@ class _ListDetailScreenMobileState
 
       // Add to list
       controller.addProduct(result.product, result.category);
-      
     } catch (e) {
       // Update buffer with error
       controller.updateBufferProduct(
@@ -223,9 +239,7 @@ class _ListDetailScreenMobileState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        content: Text(
-          "Delete '${widget.shoppingList.getName()}'?",
-        ),
+        content: Text("Delete '${widget.shoppingList.getName()}'?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -247,7 +261,9 @@ class _ListDetailScreenMobileState
     );
 
     if (confirmed == true) {
-      final controller = ref.read(listDetailControllerProvider(widget.shoppingList));
+      final controller = ref.read(
+        listDetailControllerProvider(widget.shoppingList),
+      );
       try {
         await controller.deleteList();
         if (mounted) {
@@ -268,16 +284,15 @@ class _ListDetailScreenMobileState
   }
 
   /// Navigate to supermarket customization
-  Future<void> _navigateToSupermarketCustomization(Supermarket? supermarket,
-      {bool isNew = false}) async {
+  Future<void> _navigateToSupermarketCustomization(
+    Supermarket? supermarket, {
+    bool isNew = false,
+  }) async {
     final uncategorized =
         await UncategorizedCategoryInitializer.getUncategorized();
 
-    final targetSupermarket = supermarket ??
-        Supermarket(
-          name: '',
-          categories: [uncategorized],
-        );
+    final targetSupermarket =
+        supermarket ?? Supermarket(name: '', categories: [uncategorized]);
 
     final updatedSupermarket = await Navigator.push<Supermarket?>(
       context,
@@ -296,31 +311,31 @@ class _ListDetailScreenMobileState
       });
     }
 
-    // Refresh supermarkets and update controller
+    // Refresh supermarkets list to reflect any changes
     ref.invalidate(supermarketsProvider);
-    final controller = ref.read(listDetailControllerProvider(widget.shoppingList));
 
+    // Only update the selected supermarket if changes were saved
+    // If user cancelled (updatedSupermarket == null), keep the current selection
     if (updatedSupermarket != null) {
-      controller.updateSupermarket(updatedSupermarket);
-      return;
+      // CRITICAL: Wait for supermarketsProvider to finish refreshing
+      // This ensures the newly created/edited supermarket is loaded
+      // before we try to select it in the controller
+      await ref.read(supermarketsProvider.future);
+
+      if (mounted) {
+        final controller = ref.read(
+          listDetailControllerProvider(widget.shoppingList),
+        );
+        controller.updateSupermarket(updatedSupermarket);
+      }
     }
-
-    final lastModified = isNew
-        ? await ref.refresh(lastCreatedSupermarketProvider.future)
-        : await ref.refresh(lastEditedSupermarketProvider.future);
-
-    if (lastModified != null) {
-      controller.updateSupermarket(lastModified);
-    } else {
-      await _clearSupermarketSelection();
-    }
-
-    
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = ref.watch(listDetailControllerProvider(widget.shoppingList));
+    final controller = ref.watch(
+      listDetailControllerProvider(widget.shoppingList),
+    );
     final supermarketsAsync = ref.watch(supermarketsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -360,7 +375,11 @@ class _ListDetailScreenMobileState
           child: Column(
             children: [
               // Supermarket dropdown
-              _buildSupermarketDropdown(supermarketsAsync, controller, colorScheme),
+              _buildSupermarketDropdown(
+                supermarketsAsync,
+                controller,
+                colorScheme,
+              ),
 
               // Product search
               _buildProductSearch(colorScheme),
@@ -396,11 +415,14 @@ class _ListDetailScreenMobileState
         final visibleSupermarkets = supermarkets
             .where((s) => s.isVisible)
             .fold<Map<String, Supermarket>>({}, (map, s) {
-          map[s.id] = s;
-          return map;
-        }).values.toList();
+              map[s.id] = s;
+              return map;
+            })
+            .values
+            .toList();
         final selectedId = controller.selectedSupermarket?.id;
-        final hasSelected = selectedId != null &&
+        final hasSelected =
+            selectedId != null &&
             visibleSupermarkets.any((s) => s.id == selectedId);
 
         if (selectedId != null && !hasSelected) {
@@ -409,7 +431,7 @@ class _ListDetailScreenMobileState
             await _clearSupermarketSelection();
           });
         }
-        
+
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -435,13 +457,15 @@ class _ListDetailScreenMobileState
                     ),
                     selectedItemBuilder: (context) {
                       return visibleSupermarkets
-                          .map((supermarket) => Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  supermarket.getName(),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ))
+                          .map(
+                            (supermarket) => Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                supermarket.getName(),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
                           .toList();
                     },
                     items: [
@@ -457,12 +481,18 @@ class _ListDetailScreenMobileState
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.edit, size: 20, color: colorScheme.primary),
+                                icon: Icon(
+                                  Icons.edit,
+                                  size: 20,
+                                  color: colorScheme.primary,
+                                ),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
                                 onPressed: () {
                                   Navigator.of(context).pop();
-                                  _navigateToSupermarketCustomization(supermarket);
+                                  _navigateToSupermarketCustomization(
+                                    supermarket,
+                                  );
                                 },
                               ),
                             ],
@@ -565,9 +595,17 @@ class _ListDetailScreenMobileState
                       ),
                     )
                   else if (buffer.error != null)
-                    Icon(Icons.error_outline, color: colorScheme.error, size: 20)
+                    Icon(
+                      Icons.error_outline,
+                      color: colorScheme.error,
+                      size: 20,
+                    )
                   else
-                    Icon(Icons.check_circle, color: colorScheme.primary, size: 20),
+                    Icon(
+                      Icons.check_circle,
+                      color: colorScheme.primary,
+                      size: 20,
+                    ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -605,7 +643,10 @@ class _ListDetailScreenMobileState
   }
 
   /// Build bottom action buttons
-  Widget _buildBottomButtons(ColorScheme colorScheme, ListDetailController controller) {
+  Widget _buildBottomButtons(
+    ColorScheme colorScheme,
+    ListDetailController controller,
+  ) {
     return Container(
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
@@ -641,7 +682,8 @@ class _ListDetailScreenMobileState
                 MaterialPageRoute(
                   builder: (_) => AddRecipeScreen(
                     shoppingList: widget.shoppingList,
-                    availableCategories: controller.selectedSupermarket?.getCategories() ?? [],
+                    availableCategories:
+                        controller.selectedSupermarket?.getCategories() ?? [],
                   ),
                 ),
               );
