@@ -1,3 +1,4 @@
+import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -20,7 +21,10 @@ final listDetailControllerProvider =
       ref,
       shoppingList,
     ) {
-      return ListDetailController(shoppingList: shoppingList);
+      return ListDetailController(
+        shoppingList: shoppingList,
+        ref: ref,
+      );
     });
 
 class ListDetailScreenMobile extends ConsumerStatefulWidget {
@@ -596,6 +600,7 @@ class _ListDetailScreenMobileState
       listDetailControllerProvider(widget.shoppingList),
     );
     final supermarketsAsync = ref.watch(supermarketsProvider);
+    final shoppingListsAsync = ref.read(shoppingListsProvider.notifier);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -844,17 +849,19 @@ class _ListDetailScreenMobileState
               icon: const Icon(Icons.restaurant_menu),
               tooltip: 'Add Recipe',
               color: colorScheme.primary,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AddRecipeScreen(
-                      shoppingList: widget.shoppingList,
-                      availableCategories:
-                          controller.selectedSupermarket?.getCategories() ?? [],
+              onPressed: () async {
+                if (await _handleBack()) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AddRecipeScreen(
+                        shoppingList: widget.shoppingList,
+                        availableCategories:
+                            controller.selectedSupermarket?.getCategories() ?? [],
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
               },
             ),
             // Search input

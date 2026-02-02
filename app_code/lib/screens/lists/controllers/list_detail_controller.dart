@@ -1,12 +1,13 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
-import 'package:app_code/repositories/sync/association_repository_sync.dart';
-import 'package:app_code/repositories/sync/product_repository_sync.dart';
-import 'package:app_code/repositories/sync/purchased_product_repository_sync.dart';
-import 'package:app_code/repositories/sync/shopping_list_repository_sync.dart';
+import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/products_notifier.dart';
+import 'package:app_code/providers/real_app_providers/purchased_products_notifier.dart';
+import 'package:app_code/providers/real_app_providers/associations_notifier.dart';
 import 'package:app_code/services/database/sqlite/manage_product.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
 import 'package:flutter/foundation.dart' hide Category;
@@ -38,15 +39,12 @@ class BufferProduct {
 
 /// Controller that manages in-memory state for list detail screen
 /// All changes are deferred to persistence layer until save() is called
+/// 
+/// This controller uses Riverpod providers for all persistence operations,
+/// ensuring consistency with the app's architecture.
 class ListDetailController extends ChangeNotifier {
   final ShoppingList _originalList;
-  final ProductRepositoryWithSync _productRepo = ProductRepositoryWithSync();
-  final PurchasedProductRepositoryWithSync _purchasedProductRepo =
-      PurchasedProductRepositoryWithSync();
-  final ShoppingListRepositoryWithSync _listRepo =
-      ShoppingListRepositoryWithSync();
-  final AssociationRepositoryWithSync _associationRepo =
-      AssociationRepositoryWithSync();
+  final Ref _ref; // Riverpod ref for provider access
 
   // In-memory state
   String _listName;
@@ -61,9 +59,11 @@ class ListDetailController extends ChangeNotifier {
 
   ListDetailController({
     required ShoppingList shoppingList,
+    required Ref ref,
     Supermarket? initialSupermarket,
     List<PurchasedProduct>? initialProducts,
   })  : _originalList = shoppingList,
+        _ref = ref,
         _listName = shoppingList.getName(),
         _selectedSupermarket = initialSupermarket ?? shoppingList.getSupermarket(),
         _products = List.from(initialProducts ?? shoppingList.getProducts() ?? []),
@@ -346,67 +346,30 @@ class ListDetailController extends ChangeNotifier {
     return grouped;
   }
 
-  // Track association changes that need to be persisted
-  final Map<String, Map<String, String>> _pendingAssociations = {};
-  
-  // Track association deletions that need to be persisted
-  final List<({String productId, String supermarketId})> _pendingAssociationDeletions = [];
-
   /// Mark an association change for persistence
+  /// Uses the associations provider to track pending changes
   void _markAssociationChanged(String productId, String supermarketId, String categoryId) {
-    if (!_pendingAssociations.containsKey(productId)) {
-      _pendingAssociations[productId] = {};
-    }
-    _pendingAssociations[productId]![supermarketId] = categoryId;
-  }
-
-  /// Mark an association for deletion
-  void _markAssociationDeleted(String productId, String supermarketId) {
-    _pendingAssociationDeletions.add(
-      (productId: productId, supermarketId: supermarketId),
-    );
-  }
-
-  /// Remove an association between a product and a supermarket
-  /// This is exposed for UI-triggered association removal
-  Future<void> removeAssociation(String productId, String supermarketId) async {
-    // Find the product in the current list
-    final productIndex = _products.indexWhere((p) => p.product.id == productId);
-    
-    if (productIndex != -1) {
-      final product = _products[productIndex].product;
-      
-      // Remove from in-memory associations map
-      product.associations.remove(supermarketId);
-      
-      // If this is the current supermarket, move product to uncategorized
-      if (_selectedSupermarket?.id == supermarketId) {
-        final uncategorized = UncategorizedCategoryUtils.fallbackFrom(
-          _selectedSupermarket!.getCategories(),
-        );
-        _products[productIndex].category = uncategorized;
-      }
-      
-      // Mark for deletion
-      _markAssociationDeleted(productId, supermarketId);
-      
-      _hasChanges = true;
-      notifyListeners();
-    }
+    final associationsNotifier = _ref.read(associationsProvider.notifier);
+    associationsNotifier.markAssociationChanged(productId, supermarketId, categoryId);
   }
 
   /// Save all changes to database (called on screen exit)
+  /// Uses Riverpod providers for all persistence operations
   Future<void> save() async {
     if (!_hasChanges) return;
 
     try {
-      // 1. Update shopping list name and supermarket
+      // 1. Update shopping list name and supermarket using provider
       _originalList.setName(_listName);
       _originalList.setSupermarket(_selectedSupermarket);
-
-      await _listRepo.update(_originalList);
+      
+      final listNotifier = _ref.read(shoppingListsProvider.notifier);
+      await listNotifier.updateList(_originalList);
 
       // 2. Handle products - process name changes and create/update products
+      final productsNotifier = _ref.read(productsProvider.notifier);
+      final purchasedProductsNotifier = _ref.read(purchasedProductsProvider.notifier);
+      
       for (var purchasedProduct in _products) {
         final product = purchasedProduct.product;
         
@@ -417,25 +380,25 @@ class ListDetailController extends ChangeNotifier {
           // Product name matches existing product - use existing product reference
           purchasedProduct.product = existingProduct;
         } else if (existingProduct == null) {
-          // New product - ensure it exists in database
-          final check = await _productRepo.getById(product.id);
+          // New product - ensure it exists in database via provider
+          final check = await productsNotifier.getProductById(product.id);
           if (check == null) {
-            await _productRepo.add(product);
+            await productsNotifier.addProduct(product);
           } else {
             // Update existing product
-            await _productRepo.update(product);
+            await productsNotifier.updateProduct(product);
           }
         } else {
-          // Same product, just update
-          await _productRepo.update(product);
+          // Same product, just update via provider
+          await productsNotifier.updateProduct(product);
         }
 
-        // 3. Save/update purchased product
-        final existingPurchased = await _purchasedProductRepo.getById(purchasedProduct.id);
+        // 3. Save/update purchased product via provider
+        final existingPurchased = await purchasedProductsNotifier.getPurchasedProductById(purchasedProduct.id);
         if (existingPurchased == null) {
-          await _purchasedProductRepo.add(purchasedProduct);
+          await purchasedProductsNotifier.addPurchasedProduct(purchasedProduct);
         } else {
-          await _purchasedProductRepo.update(purchasedProduct);
+          await purchasedProductsNotifier.updatePurchasedProduct(purchasedProduct);
         }
       }
 
@@ -445,26 +408,18 @@ class ListDetailController extends ChangeNotifier {
       final deletedIds = originalProductIds.difference(currentProductIds);
       
       for (var deletedId in deletedIds) {
-        await _purchasedProductRepo.deleteById(deletedId);
+        await purchasedProductsNotifier.deletePurchasedProductById(deletedId);
       }
 
-      // 5. Persist all pending association changes using BATCH OPERATION
+      // 5. Persist all pending association changes using provider's batch operation
       // This ensures associations are saved to the associations table
       // and will be synced to Firestore by the sync-engine
       // Using batch operation creates only ONE sync_box entry per product
       // instead of one entry per association (performance optimization)
-      if (_pendingAssociations.isNotEmpty) {
-        await _associationRepo.addBatch(_pendingAssociations);
+      final associationsNotifier = _ref.read(associationsProvider.notifier);
+      if (associationsNotifier.hasPendingAssociations()) {
+        await associationsNotifier.flushAssociations();
       }
-      
-      // 6. Persist all pending association deletions using BATCH OPERATION
-      if (_pendingAssociationDeletions.isNotEmpty) {
-        await _associationRepo.deleteBatch(_pendingAssociationDeletions);
-      }
-      
-      // Clear pending changes after save
-      _pendingAssociations.clear();
-      _pendingAssociationDeletions.clear();
 
       _hasChanges = false;
     } catch (e) {
@@ -472,15 +427,16 @@ class ListDetailController extends ChangeNotifier {
     }
   }
 
-  /// Delete the shopping list (move to trash)
+  /// Delete the shopping list (move to trash) using provider
   Future<void> deleteList() async {
     _originalList.setIsInTheTrash(true);
-    await _listRepo.update(_originalList);
+    final listNotifier = _ref.read(shoppingListsProvider.notifier);
+    await listNotifier.updateList(_originalList);
   }
 
   @override
   void dispose() {
     _bufferProducts.clear();
     super.dispose();
-  }
+  } 
 }

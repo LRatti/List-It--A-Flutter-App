@@ -5,6 +5,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/models/product.dart';
 
@@ -147,16 +148,13 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
         }
 
         ref.read(shoppingListsProvider.notifier).updateList(widget.shoppingList);
+
+        // Ensure the open ListDetailScreen refreshes its controller
+        // so the newly added products appear immediately.
+        ref.invalidate(listDetailControllerProvider(widget.shoppingList));
+
         ref.read(backgroundRecipeProvider.notifier).clearSearchForList(widget.shoppingList.id);
 
-        final addedCount = recipe.products.length - _deletedIndices.length;
-        ScaffoldMessenger.of(context).showSnackBar(
-          buildAppSnackBar(
-            message: '$addedCount products added to "${widget.shoppingList.getName()}"',
-            isError: false,
-            context: context,
-          ),
-        );
         Navigator.pop(context);
       }
     });

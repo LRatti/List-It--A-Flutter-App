@@ -406,13 +406,34 @@ class _DraggableProductListState extends State<DraggableProductList> {
             focusNode.unfocus();
           },
         ),
-        // Drag handle on the right
-        trailing: ReorderableDragStartListener(
-          index: 0,
-          child: Icon(
-            Icons.drag_handle,
-            color: colorScheme.outline,
-          ),
+        // Actions on the right: remove + drag handle
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Remove button
+            IconButton(
+              icon: Icon(
+                Icons.remove_circle_outline,
+                size: 20,
+                color: colorScheme.error,
+              ),
+              onPressed: () {
+                widget.onProductRemoved(product);
+              },
+              tooltip: 'Remove product',
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(),
+              padding: EdgeInsets.zero,
+            ),
+            const SizedBox(width: 6),
+            ReorderableDragStartListener(
+              index: 0,
+              child: Icon(
+                Icons.drag_handle,
+                color: colorScheme.outline,
+              ),
+            ),
+          ],
         ),
       ),
     );
