@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/models/category.dart';
-import 'package:app_code/providers/real_app_providers/supermarkets_notifier.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/screens/supermarket/category_selection_screen.dart';
 import 'package:app_code/screens/supermarket/category_editing_screen.dart';
 import 'package:app_code/widgets/app_snackbar.dart';

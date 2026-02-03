@@ -1,6 +1,6 @@
 import 'package:app_code/models/user.dart';
-import 'package:app_code/providers/real_app_providers/auth_provider.dart';
-import 'package:app_code/providers/real_app_providers/user_details_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/user_details_provider.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/screens/profile/settings_screen.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';

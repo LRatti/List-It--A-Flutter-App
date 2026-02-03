@@ -5,8 +5,8 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/screens/lists/add_recipe_screen_mobile.dart';
-import 'package:app_code/providers/real_app_providers/product_categorization_provider.dart';
-import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/product/product_categorization_provider.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 
 class ListDetailScreenMobile extends ConsumerStatefulWidget {

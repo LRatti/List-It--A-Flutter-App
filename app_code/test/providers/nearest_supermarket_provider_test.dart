@@ -1,9 +1,9 @@
-import 'package:app_code/providers/real_app_providers/location_repository_provider.dart';
-import 'package:app_code/providers/real_app_providers/supermarket_location_repository_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/location_repository_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/supermarket_location_repository_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/nearest_supermarket_provider.dart';
 import 'package:app_code/providers/test_providers/test_nearest_supermarket_provider.dart';
 import 'package:app_code/models/nearby_supermarket.dart';
 

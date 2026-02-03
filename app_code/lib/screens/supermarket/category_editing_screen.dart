@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/category.dart';
-import 'package:app_code/providers/real_app_providers/categories_notifier.dart';
+import 'package:app_code/providers/real_app_providers/category/categories_notifier.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
 

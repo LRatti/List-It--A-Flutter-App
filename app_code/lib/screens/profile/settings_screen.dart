@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:app_code/models/user.dart';
-import 'package:app_code/providers/real_app_providers/auth_provider.dart';
-import 'package:app_code/providers/real_app_providers/email_verification_provider.dart';
-import 'package:app_code/providers/real_app_providers/password_reset_cooldown_provider.dart';
-import 'package:app_code/providers/real_app_providers/user_details_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/email_verification_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/password_reset_cooldown_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/user_details_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/widgets/password_text_field.dart';

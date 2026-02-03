@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
+import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/providers/real_app_providers/global_keys_provider.dart';
 import 'package:app_code/services/recipe_notification_service.dart';
 

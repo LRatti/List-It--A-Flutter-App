@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 
 void main() {

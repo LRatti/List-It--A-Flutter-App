@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 
 class TrashDialog extends ConsumerWidget {
   const TrashDialog({super.key});

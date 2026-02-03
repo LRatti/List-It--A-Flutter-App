@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/product.dart';
-import 'package:app_code/providers/real_app_providers/product_repositories_provider.dart';
+import 'package:app_code/providers/real_app_providers/product/product_repositories_provider.dart';
 
 /// Notifier for managing products
 /// Handles add, update, and delete operations with automatic sync

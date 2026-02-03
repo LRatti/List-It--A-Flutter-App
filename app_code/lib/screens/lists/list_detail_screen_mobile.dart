@@ -1,11 +1,11 @@
-import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
-import 'package:app_code/providers/real_app_providers/supermarkets_notifier.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/screens/lists/controllers/list_detail_controller.dart';
 import 'package:app_code/screens/lists/add_recipe_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';

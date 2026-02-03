@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/nearby_supermarket.dart';
-import 'package:app_code/providers/real_app_providers/location_repository_provider.dart';
-import 'package:app_code/providers/real_app_providers/supermarket_location_repository_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/location_repository_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/supermarket_location_repository_provider.dart';
 import 'package:geolocator/geolocator.dart';
 
 /// State for nearest supermarket feature

@@ -1,6 +1,6 @@
 import 'package:app_code/models/shopping_list.dart';
-import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
-import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/providers/real_app_providers/auth_provider.dart';
-import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
-import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/nearest_supermarket_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/map_launcher_service_provider.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 

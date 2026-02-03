@@ -7,9 +7,9 @@ import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
-import 'package:app_code/providers/real_app_providers/supermarkets_notifier.dart';
-import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
-import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
 

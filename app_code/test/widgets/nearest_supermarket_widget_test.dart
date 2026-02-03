@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/models/nearby_supermarket.dart';
-import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/nearest_supermarket_provider.dart';
 
 /// Widget integration tests for nearest supermarket feature
 /// Note: Full widget rendering tests with TopBarWithNavBar are skipped due to

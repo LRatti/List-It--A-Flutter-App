@@ -5,7 +5,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/recipe_response.dart';
 import 'package:app_code/models/shopping_list.dart';
 
-import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
+import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
 

@@ -1,5 +1,5 @@
 import 'package:app_code/models/user.dart';
-import 'package:app_code/providers/real_app_providers/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/screens/auth/forgot_password.dart';
 import 'package:flutter/material.dart';

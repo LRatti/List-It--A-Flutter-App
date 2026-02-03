@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:app_code/providers/real_app_providers/auth_provider.dart';
-import 'package:app_code/providers/real_app_providers/email_verification_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/auth/email_verification_provider.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

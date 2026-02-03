@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/supermarket.dart';
-import 'package:app_code/providers/real_app_providers/supermarkets_notifier.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 import 'package:app_code/widgets/searchable_supermarkets_view.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';

@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:app_code/services/recipe_notification_service.dart';
-import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
+import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/models/recipe_response.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/category.dart';

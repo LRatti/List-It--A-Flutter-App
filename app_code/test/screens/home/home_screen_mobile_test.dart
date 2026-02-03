@@ -6,12 +6,12 @@ import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.da
 import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_location_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_supermarket_location_repository.dart';
-import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
-import 'package:app_code/providers/real_app_providers/auth_provider.dart';
-import 'package:app_code/providers/real_app_providers/location_repository_provider.dart';
-import 'package:app_code/providers/real_app_providers/supermarket_location_repository_provider.dart';
-import 'package:app_code/providers/real_app_providers/nearest_supermarket_provider.dart';
-import 'package:app_code/providers/real_app_providers/map_launcher_service_provider.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/location_repository_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/supermarket_location_repository_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/nearest_supermarket_provider.dart';
+import 'package:app_code/providers/real_app_providers/nearest-supermarket/map_launcher_service_provider.dart';
 import 'package:app_code/providers/test_providers/test_auth_provider.dart';
 import 'package:app_code/services/map_launcher_service.dart';
 

@@ -1,6 +1,6 @@
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
-import 'package:app_code/providers/real_app_providers/product_categorization_provider.dart';
+import 'package:app_code/providers/real_app_providers/product/product_categorization_provider.dart';
 import 'package:app_code/services/database/sqlite/manage_product.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

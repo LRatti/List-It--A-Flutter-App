@@ -14,11 +14,11 @@ import 'package:app_code/screens/settings/settings_screen_mobile.dart';
 
 // Providers
 import 'package:app_code/providers/real_app_providers/global_keys_provider.dart';
-import 'package:app_code/providers/real_app_providers/theme_provider.dart';
-import 'package:app_code/providers/real_app_providers/font_size_provider.dart';
-import 'package:app_code/providers/real_app_providers/recipe_notification_service_provider.dart';
-import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
-import 'package:app_code/providers/real_app_providers/sync_manager_provider.dart';
+import 'package:app_code/providers/real_app_providers/app-style/theme_provider.dart';
+import 'package:app_code/providers/real_app_providers/app-style/font_size_provider.dart';
+import 'package:app_code/providers/real_app_providers/recipe/recipe_notification_service_provider.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/sync/sync_manager_provider.dart';
 
 // Styles
 import 'package:app_code/styles/scaled_typography.dart';

@@ -1,4 +1,4 @@
-import 'package:app_code/providers/real_app_providers/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/utils/statistics_calculator.dart';
 import 'package:app_code/widgets/period_selector.dart';
 import 'package:app_code/widgets/statistics_pie_chart.dart';

@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/repositories/sync/shopping_list_repository_sync.dart';
 import 'package:app_code/repositories/abstract/shopping_list_repository.dart';
-import 'package:app_code/providers/real_app_providers/recipe_provider.dart';
+import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 
 /// Provides the current time (injectable for testability).
 final currentDateTimeProvider = Provider<DateTime>((ref) => DateTime.now());
