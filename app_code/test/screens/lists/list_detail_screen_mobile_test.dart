@@ -5,6 +5,9 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/models/category.dart';
+import 'package:app_code/models/product.dart';
+import 'package:app_code/models/purchased_product.dart';
+import 'package:app_code/utils/uncategorized_category_initializer.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
@@ -60,6 +63,7 @@ void main() {
       String id,
       String name, {
       Supermarket? supermarket,
+      List<PurchasedProduct>? products,
     }) {
       final list = ShoppingList(
         id: id,
@@ -68,6 +72,9 @@ void main() {
       );
       if (supermarket != null) {
         list.setSupermarket(supermarket);
+      }
+      if (products != null) {
+        list.setPurchasedProducts(products);
       }
       return list;
     }
@@ -94,9 +101,11 @@ void main() {
           lastEditedSupermarketProvider.overrideWith((ref) async {
             return mockSupermarketNotifier.getLastEditedSupermarket();
           }),
-          selectedListProvider.overrideWith((ref) async {
-            return SelectedListState(list: shoppingList, supermarket: null);
-          }),
+          selectedListProvider.overrideWith(
+            () => TestSelectedListNotifier(
+              SelectedListState(list: shoppingList, supermarket: null),
+            ),
+          ),
         ],
         child: MaterialApp(
           home: const ListDetailScreenMobile(),
@@ -277,6 +286,71 @@ void main() {
         expect(find.byType(ListDetailScreenMobile), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'clear button unselects supermarket and moves products to uncategorized',
+      (tester) async {
+        // Given: A shopping list with a selected supermarket and categorized products
+        final dairy = createCategory('cat-1', 'Dairy');
+        final bakery = createCategory('cat-2', 'Bakery');
+        final supermarket = createSupermarket(
+          'sm-1',
+          'My Supermarket',
+          categories: [dairy, bakery],
+        );
+
+        final product1 = Product(name: 'Milk');
+        final product2 = Product(name: 'Bread');
+
+        final purchased1 = PurchasedProduct(
+          listId: 'list-1',
+          product: product1,
+          category: dairy,
+        );
+        final purchased2 = PurchasedProduct(
+          listId: 'list-1',
+          product: product2,
+          category: bakery,
+        );
+
+        final shoppingList = createShoppingList(
+          'list-1',
+          'Groceries',
+          supermarket: supermarket,
+          products: [purchased1, purchased2],
+        );
+
+        await tester.pumpWidget(
+          createTestWidget(
+            shoppingList,
+            availableSupermarkets: [supermarket],
+            lastEditedSupermarket: supermarket,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Open supermarket selection menu
+        await tester.tap(find.text('My Supermarket'));
+        await tester.pumpAndSettle();
+
+        // Tap Clear
+        await tester.tap(find.widgetWithText(OutlinedButton, 'Clear'));
+        await tester.pumpAndSettle();
+
+        // Then: supermarket is unselected and all products are uncategorized
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ListDetailScreenMobile)),
+        );
+        final controller = container.read(listDetailControllerProvider);
+        expect(controller.selectedSupermarket, isNull);
+
+        final uncategorized =
+            await UncategorizedCategoryInitializer.getUncategorized();
+        for (final product in controller.products) {
+          expect(product.category.id, uncategorized.id);
+        }
+      },
+    );
   });
 }
 
@@ -352,5 +426,16 @@ class MockSupermarketNotifier extends SupermarketsNotifier {
     if (_favorite?.id == id) {
       _favorite = null;
     }
+  }
+}
+
+class TestSelectedListNotifier extends SelectedListNotifier {
+  TestSelectedListNotifier(this._state);
+
+  final SelectedListState _state;
+
+  @override
+  Future<SelectedListState> build() async {
+    return _state;
   }
 }

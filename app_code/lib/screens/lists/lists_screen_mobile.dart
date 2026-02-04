@@ -59,24 +59,20 @@ class ListsScreenMobile extends ConsumerWidget {
                 onPressed: () async {
                   final name = controller.text.trim();
                   if (name.isNotEmpty) {
-                    final newList = ShoppingList(
-                      name: name,
-                      createdAt: DateTime.now(),
-                    );
-                    // Add to provider (but not fully persisted yet)
-                    await ref.read(shoppingListsProvider.notifier).addList(newList);
-                    
                     // Load favorite supermarket for new list
                     final favorite = await ref
                         .read(supermarketsProvider.notifier)
                         .getFavoriteSupermarket();
-                    
-                    if (favorite != null) {
-                      await ref
-                          .read(selectedListProvider.notifier)
-                          .updateSelectedSupermarket(favorite);
-                    }
-                    
+
+                    final newList = ShoppingList(
+                      name: name,
+                      createdAt: DateTime.now(),
+                      supermarket: favorite,
+                    );
+
+                    // Add to provider (but not fully persisted yet)
+                    await ref.read(shoppingListsProvider.notifier).addList(newList);
+
                     // Navigate to detail screen
                     if (context.mounted) {
                       // Select the list in the notifier before navigating
@@ -133,6 +129,8 @@ class ListsScreenMobile extends ConsumerWidget {
           onListTap: (context, list) async {
             // Select the list in the notifier before navigating
             await ref.read(selectedListProvider.notifier).selectList(list);
+            await ref.read(selectedListProvider.notifier)
+                .updateSelectedSupermarket(list.getSupermarket());
             Navigator.push(
               context,
               MaterialPageRoute(

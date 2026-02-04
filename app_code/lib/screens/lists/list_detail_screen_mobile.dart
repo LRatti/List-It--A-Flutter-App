@@ -26,7 +26,7 @@ final listDetailControllerProvider =
       if (shoppingList == null) {
         throw StateError('No shopping list selected');
       }
-      
+
       return ListDetailController(shoppingList: shoppingList, ref: ref);
     });
 
@@ -61,7 +61,12 @@ class _ListDetailScreenMobileState
     }
   }
 
-  Future<void> _clearSupermarketSelection() async {
+  Future<void> _clearSupermarketSelection(
+    ListDetailController controller,
+  ) async {
+    final uncategorized =
+        await UncategorizedCategoryInitializer.getUncategorized();
+    await controller.clearSupermarket(uncategorized: uncategorized);
     // Clear supermarket from notifier when it's no longer available
     await ref
         .read(selectedListProvider.notifier)
@@ -93,6 +98,11 @@ class _ListDetailScreenMobileState
     try {
       // Save all changes
       await controller.save();
+      // Clear the selection and invalidate providers to ensure fresh data on reopen
+      // This forces shoppingListsProvider to reload from database, ensuring UI shows latest changes
+      ref.read(selectedListProvider.notifier).clearSelection();
+      ref.invalidate(selectedListProvider);
+      ref.invalidate(shoppingListsProvider);
       return true;
     } catch (e) {
       if (!mounted) return false;
@@ -384,7 +394,7 @@ class _ListDetailScreenMobileState
                             height: 48,
                             child: OutlinedButton.icon(
                               onPressed: () {
-                                _clearSupermarketSelection();
+                                _clearSupermarketSelection(controller);
                                 Navigator.pop(context);
                               },
                               icon: const Icon(Icons.clear),
@@ -681,7 +691,7 @@ class _ListDetailScreenMobileState
         if (selectedId != null && !hasSelected) {
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             if (!mounted) return;
-            await _clearSupermarketSelection();
+            await _clearSupermarketSelection(controller);
           });
         }
 
