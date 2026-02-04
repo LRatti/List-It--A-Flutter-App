@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/selected_supermarket_notifier.dart';
 import 'package:app_code/screens/supermarket/supermarkets_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 
@@ -28,15 +29,21 @@ class FakeSupermarketsNotifier extends SupermarketsNotifier {
     setFavoriteCount++;
   }
 
-  @override
-  Future<void> clearFavoriteSupermarket(String supermarketId) async {
-    clearFavoriteCount++;
-  }
+
 
   @override
   Future<void> addSupermarket(Supermarket supermarket) async {
     addCount++;
   }
+}
+
+class FakeSelectedSupermarketNotifier extends SelectedSupermarketNotifier {
+  FakeSelectedSupermarketNotifier(this.supermarket);
+
+  final Supermarket? supermarket;
+
+  @override
+  Future<Supermarket?> build() async => supermarket;
 }
 
 void main() {
@@ -52,12 +59,8 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            supermarketsProvider.overrideWith(() => fakeNotifier),
-          ],
-          child: const MaterialApp(
-            home: SupermarketsScreenMobile(),
-          ),
+          overrides: [supermarketsProvider.overrideWith(() => fakeNotifier)],
+          child: const MaterialApp(home: SupermarketsScreenMobile()),
         ),
       );
 
@@ -73,17 +76,18 @@ void main() {
     testWidgets('favorite toggle persists only on save', (tester) async {
       final supermarket = Supermarket(id: 's1', name: 'My Market');
       final fakeNotifier = FakeSupermarketsNotifier([supermarket]);
+      final fakeSelectedNotifier = FakeSelectedSupermarketNotifier(supermarket);
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             supermarketsProvider.overrideWith(() => fakeNotifier),
-          ],
-          child: MaterialApp(
-            home: SupermarketCustomizationScreen(
-              supermarket: supermarket,
-              isCreationMode: false,
+            selectedSupermarketProvider.overrideWith(
+              () => fakeSelectedNotifier,
             ),
+          ],
+          child: const MaterialApp(
+            home: SupermarketCustomizationScreen(isCreationMode: false),
           ),
         ),
       );
@@ -106,17 +110,18 @@ void main() {
     testWidgets('check button persists favorite change', (tester) async {
       final supermarket = Supermarket(id: 's1', name: 'My Market');
       final fakeNotifier = FakeSupermarketsNotifier([supermarket]);
+      final fakeSelectedNotifier = FakeSelectedSupermarketNotifier(supermarket);
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             supermarketsProvider.overrideWith(() => fakeNotifier),
-          ],
-          child: MaterialApp(
-            home: SupermarketCustomizationScreen(
-              supermarket: supermarket,
-              isCreationMode: false,
+            selectedSupermarketProvider.overrideWith(
+              () => fakeSelectedNotifier,
             ),
+          ],
+          child: const MaterialApp(
+            home: SupermarketCustomizationScreen(isCreationMode: false),
           ),
         ),
       );

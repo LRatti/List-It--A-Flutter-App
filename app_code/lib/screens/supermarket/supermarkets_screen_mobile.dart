@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/selected_supermarket_notifier.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 import 'package:app_code/widgets/searchable_supermarkets_view.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
@@ -22,32 +23,16 @@ class _SupermarketsScreenMobileState
 
   /// Navigate to supermarket customization screen to create a new supermarket
   void _navigateToCreateSupermarket(BuildContext context) async {
-    // Create an empty supermarket for creation mode
-    // Get the last edited supermarket to use as template
-    final lastSupermarket = await ref
-      .read(supermarketsProvider.notifier)
-      .getLastEditedSupermarket();
-    final uncategorized =
-        await UncategorizedCategoryInitializer.getUncategorized();
-
-    final templateCategories = lastSupermarket?.getCategories() ?? [];
-    final hasUncategorized = templateCategories
-        .any((cat) => cat.id == uncategorized.id);
-
-    final newSupermarket = Supermarket(
-      name: '',
-      categories: hasUncategorized
-          ? templateCategories
-          : [uncategorized, ...templateCategories],
-    );
+    // Initialize the selected supermarket notifier for creation mode
+    await ref
+        .read(selectedSupermarketProvider.notifier)
+        .initializeForCreation();
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SupermarketCustomizationScreen(
-          supermarket: newSupermarket,
-          isCreationMode: true,
-        ),
+        builder: (_) =>
+            const SupermarketCustomizationScreen(isCreationMode: true),
       ),
     );
   }

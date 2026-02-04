@@ -11,6 +11,7 @@ import 'package:app_code/providers/real_app_providers/associations/associations_
 import 'package:app_code/services/database/sqlite/manage_product.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
 import 'package:app_code/screens/lists/controllers/purchased_product_update_handler.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/refreshed_supermarket_notifier.dart';
 import 'package:flutter/foundation.dart' hide Category;
 
 /// State for products being categorized (in buffer zone)
@@ -65,7 +66,10 @@ class ListDetailController extends ChangeNotifier {
        ),
        _originalProducts = List.from(
          initialProducts ?? shoppingList.getProducts() ?? [],
-       );
+       ) {
+    // Initialize listener to refreshedSupermarketNotifier
+    _initializeRefreshedSupermarketListener();
+  }
 
   // Getters
   String get listName => _listName;
@@ -75,6 +79,22 @@ class ListDetailController extends ChangeNotifier {
       Map.unmodifiable(_bufferProducts);
   bool get hasChanges => _hasChanges;
   String get listId => _originalList.id;
+
+  /// Initialize listener to refreshedSupermarketNotifier
+  /// This allows the controller to automatically react to supermarket changes
+  /// from the supermarket customization screen without UI-layer listeners
+  void _initializeRefreshedSupermarketListener() {
+    _ref.listen<AsyncValue<Supermarket?>>(
+      refreshedSupermarketNotifier,
+      (previous, next) {
+        next.whenData((selectedSupermarket) {
+          if (selectedSupermarket != null) {
+            updateSupermarket(selectedSupermarket);
+          }
+        });
+      },
+    );
+  }
 
   /// Update list name
   void updateListName(String newName) {

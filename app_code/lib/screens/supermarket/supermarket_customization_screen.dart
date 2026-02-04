@@ -1,8 +1,10 @@
+import 'package:app_code/providers/real_app_providers/supermarket/refreshed_supermarket_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/selected_supermarket_notifier.dart';
 import 'package:app_code/screens/supermarket/category_selection_screen.dart';
 import 'package:app_code/screens/supermarket/category_editing_screen.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
@@ -10,12 +12,10 @@ import 'package:app_code/utils/uncategorized_category_utils.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
 
 class SupermarketCustomizationScreen extends ConsumerStatefulWidget {
-  final Supermarket supermarket;
   final bool isCreationMode;
 
   const SupermarketCustomizationScreen({
     super.key,
-    required this.supermarket,
     this.isCreationMode = false,
   });
 
@@ -28,17 +28,35 @@ class _SupermarketCustomizationScreenState
     extends ConsumerState<SupermarketCustomizationScreen> {
   late TextEditingController _nameController;
   late List<Category> _categories;
-  int? _draggingIndex;
   late bool _isFavorite;
   late bool _initialIsFavorite;
+  Supermarket? _currentSupermarket;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.supermarket.getName());
-    _categories = List.from(widget.supermarket.getCategories());
-    _isFavorite = widget.supermarket.isFavorite;
-    _initialIsFavorite = widget.supermarket.isFavorite;
+    _nameController = TextEditingController();
+    _categories = [];
+    _isFavorite = false;
+    _initialIsFavorite = false;
+
+    // Initialize from selected supermarket after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSupermarket();
+    });
+  }
+
+  void _loadSupermarket() {
+    final selectedSupermarket = ref.read(selectedSupermarketValueProvider);
+    if (selectedSupermarket != null) {
+      setState(() {
+        _currentSupermarket = selectedSupermarket;
+        _nameController.text = selectedSupermarket.getName();
+        _categories = List.from(selectedSupermarket.getCategories());
+        _isFavorite = selectedSupermarket.isFavorite;
+        _initialIsFavorite = selectedSupermarket.isFavorite;
+      });
+    }
   }
 
   @override
@@ -58,6 +76,17 @@ class _SupermarketCustomizationScreenState
 
   /// Save the supermarket with updated name and categories
   Future<void> _saveSupermarket() async {
+    if (_currentSupermarket == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        buildAppSnackBar(
+          message: 'No supermarket loaded to save',
+          isError: true,
+          context: context,
+        ),
+      );
+      return;
+    }
+
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -77,31 +106,39 @@ class _SupermarketCustomizationScreenState
       _categories.insert(0, uncategorized);
     }
 
-    widget.supermarket.setName(name);
-    widget.supermarket.setCategories(_categories);
-    widget.supermarket.isFavorite = _isFavorite;
+    _currentSupermarket!.setName(name);
+    _currentSupermarket!.setCategories(_categories);
+    _currentSupermarket!.isFavorite = _isFavorite;
 
     try {
       final notifier = ref.read(supermarketsProvider.notifier);
 
       if (widget.isCreationMode) {
-        await notifier.addSupermarket(widget.supermarket);
+        await notifier.addSupermarket(_currentSupermarket!);
+        // Wait for supermarketsProvider to refresh after adding
+        await ref.read(supermarketsProvider.future);
         if (_isFavorite) {
-          await notifier.setFavoriteSupermarket(widget.supermarket.id);
+          await notifier.setFavoriteSupermarket(_currentSupermarket!.id);
         }
       } else {
-        await notifier.updateSupermarket(widget.supermarket);
+        await notifier.updateSupermarket(_currentSupermarket!);
 
         if (_isFavorite) {
-          await notifier.setFavoriteSupermarket(widget.supermarket.id);
+          await notifier.setFavoriteSupermarket(_currentSupermarket!.id);
         } else if (_initialIsFavorite) {
-          await notifier.clearFavoriteSupermarket(widget.supermarket.id);
+          await notifier.clearFavoriteSupermarket(_currentSupermarket!.id);
         }
       }
 
+      await ref
+          .read(refreshedSupermarketNotifier.notifier)
+          .setSupermarket(_currentSupermarket);
+
       if (mounted) {
-        Navigator.pop(context, widget.supermarket);
+        Navigator.pop(context);
       }
+
+      ref.invalidate(selectedSupermarketProvider);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -141,11 +178,13 @@ class _SupermarketCustomizationScreenState
 
   /// Navigate to category selection/addition screen
   void _navigateToCategorySelection() {
+    if (_currentSupermarket == null) return;
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => CategorySelectionScreen(
-          supermarketId: widget.supermarket.id,
+          supermarketId: _currentSupermarket!.id,
           currentCategories: _categories,
           onCategoriesSelected: (newCategories) {
             setState(() {
@@ -178,12 +217,12 @@ class _SupermarketCustomizationScreenState
       return;
     }
 
+    if (_currentSupermarket == null) return;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        content: Text(
-          "Want to delete '${widget.supermarket.getName()}'?",
-        ),
+        content: Text("Want to delete '${_currentSupermarket!.getName()}'?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -208,7 +247,7 @@ class _SupermarketCustomizationScreenState
       try {
         await ref
             .read(supermarketsProvider.notifier)
-            .deleteSupermarket(widget.supermarket.id);
+            .deleteSupermarket(_currentSupermarket!.id);
 
         if (mounted) {
           Navigator.pop(context);
@@ -229,8 +268,41 @@ class _SupermarketCustomizationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final selectedSupermarketAsync = ref.watch(selectedSupermarketProvider);
     final visibleCategories = _visibleCategories();
 
+    return selectedSupermarketAsync.when(
+      data: (supermarket) {
+        if (supermarket == null && _currentSupermarket == null) {
+          return Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            appBar: AppBar(title: const Text('Customization')),
+            body: const Center(child: Text('No supermarket selected')),
+          );
+        }
+
+        return _buildScreen(context, visibleCategories);
+      },
+      loading: () => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          title: Text(
+            widget.isCreationMode
+                ? 'Create Supermarket'
+                : 'Customize Supermarket',
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(title: const Text('Error')),
+        body: Center(child: Text('Error loading supermarket: $error')),
+      ),
+    );
+  }
+
+  Widget _buildScreen(BuildContext context, List<Category> visibleCategories) {
     return WillPopScope(
       onWillPop: () async {
         return true;
@@ -339,11 +411,7 @@ class _SupermarketCustomizationScreenState
                   const SizedBox(width: 8),
                   // Favorite/Star button
                   IconButton(
-                    icon: Icon(
-                      _isFavorite
-                          ? Icons.star
-                          : Icons.star_outline,
-                    ),
+                    icon: Icon(_isFavorite ? Icons.star : Icons.star_outline),
                     onPressed: () {
                       // Only toggle locally; persist on save
                       setState(() {

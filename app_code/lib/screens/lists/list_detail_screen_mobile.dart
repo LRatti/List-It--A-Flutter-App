@@ -6,6 +6,7 @@ import 'package:app_code/models/product.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/selected_supermarket_notifier.dart';
 import 'package:app_code/screens/lists/controllers/list_detail_controller.dart';
 import 'package:app_code/screens/lists/add_recipe_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
@@ -526,48 +527,54 @@ class _ListDetailScreenMobileState
     );
   }
 
-  /// Navigate to supermarket customization
-  Future<void> _navigateToSupermarketCustomization(
-    Supermarket? supermarket, {
-    bool isNew = false,
-  }) async {
+  Future<Supermarket> _getNewSupermarket() async {
+    final lastSupermarket = await ref
+        .read(supermarketsProvider.notifier)
+        .getLastEditedSupermarket();
     final uncategorized =
         await UncategorizedCategoryInitializer.getUncategorized();
 
-    final targetSupermarket =
-        supermarket ?? Supermarket(name: '', categories: [uncategorized]);
+    final templateCategories = lastSupermarket?.getCategories() ?? [];
+    final hasUncategorized = templateCategories.any(
+      (cat) => cat.id == uncategorized.id,
+    );
 
-    final updatedSupermarket = await Navigator.push<Supermarket?>(
+    final supermarket = Supermarket(
+      name: '',
+      categories: hasUncategorized
+          ? templateCategories
+          : [uncategorized, ...templateCategories],
+    );
+    return supermarket;
+  }
+
+  /// Navigate to supermarket customization
+  void _navigateToSupermarketCustomization(
+    Supermarket? supermarket, {
+    bool isNew = false,
+  }) async {
+    // Initialize the selected supermarket notifier
+    if (isNew) {
+      await ref
+          .read(selectedSupermarketProvider.notifier)
+          .initializeForCreation();
+    } else if (supermarket != null) {
+      await ref
+          .read(selectedSupermarketProvider.notifier)
+          .initializeForEditWithInstance(supermarket);
+    }
+
+    // Simply navigate without awaiting the result
+    // The selected_supermarket_provider will be watched and trigger updates
+    Navigator.push<Supermarket?>(
       context,
       MaterialPageRoute(
-        builder: (_) => SupermarketCustomizationScreen(
-          supermarket: targetSupermarket,
-          isCreationMode: isNew,
-        ),
+        builder: (_) => SupermarketCustomizationScreen(isCreationMode: isNew),
       ),
     );
 
     if (mounted) {
       FocusScope.of(context).unfocus();
-    }
-
-    // Refresh supermarkets list to reflect any changes
-    ref.invalidate(supermarketsProvider);
-
-    // Only update the selected supermarket if changes were saved
-    // If user cancelled (updatedSupermarket == null), keep the current selection
-    if (updatedSupermarket != null) {
-      // CRITICAL: Wait for supermarketsProvider to finish refreshing
-      // This ensures the newly created/edited supermarket is loaded
-      // before we try to select it in the controller
-      await ref.read(supermarketsProvider.future);
-
-      if (mounted) {
-        final controller = ref.read(
-          listDetailControllerProvider(widget.shoppingList),
-        );
-        controller.updateSupermarket(updatedSupermarket);
-      }
     }
   }
 
@@ -577,7 +584,6 @@ class _ListDetailScreenMobileState
       listDetailControllerProvider(widget.shoppingList),
     );
     final supermarketsAsync = ref.watch(supermarketsProvider);
-    final shoppingListsAsync = ref.read(shoppingListsProvider.notifier);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 

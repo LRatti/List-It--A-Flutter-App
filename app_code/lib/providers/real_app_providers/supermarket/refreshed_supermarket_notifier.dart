@@ -9,7 +9,7 @@ import 'package:app_code/repositories/sync/supermarket_repository_sync.dart';
 /// - Loads an initial selection from the favorite supermarket if available.
 /// - Falls back to the first visible supermarket when no favorite exists.
 /// - Exposes simple APIs to select, clear, and refresh the selection.
-class SelectedSupermarketNotifier extends AsyncNotifier<Supermarket?> {
+class RefreshedSupermarketNotifier extends AsyncNotifier<Supermarket?> {
   late final SupermarketRepositoryWithSync _repo =
       SupermarketRepositoryWithSync();
 
@@ -19,17 +19,10 @@ class SelectedSupermarketNotifier extends AsyncNotifier<Supermarket?> {
   }
 
   /// Select a specific supermarket instance (in-memory only).
-  Future<void> setSelectedSupermarket(Supermarket? supermarket) async {
+  Future<void> setSupermarket(Supermarket? supermarket) async {
     state = AsyncValue.data(supermarket);
   }
-
-  /// Select a supermarket by its ID (loads fresh data from storage).
-  Future<void> selectById(String id) async {
-    state = await AsyncValue.guard(() async {
-      return _repo.getById(id);
-    });
-  }
-
+  
   /// Clear the current selection.
   Future<void> clearSelection() async {
     state = const AsyncValue.data(null);
@@ -53,40 +46,6 @@ class SelectedSupermarketNotifier extends AsyncNotifier<Supermarket?> {
     });
   }
 
-  /// Initialize for creation mode with a template from the last edited supermarket
-  Future<void> initializeForCreation() async {
-    state = await AsyncValue.guard(() async {
-      final lastSupermarket = await ref
-          .read(supermarketsProvider.notifier)
-          .getLastEditedSupermarket();
-      final uncategorized =
-          await UncategorizedCategoryInitializer.getUncategorized();
-
-      final templateCategories = lastSupermarket?.getCategories() ?? [];
-      final hasUncategorized = templateCategories.any(
-        (cat) => cat.id == uncategorized.id,
-      );
-
-      final newSupermarket = Supermarket(
-        name: '',
-        categories: hasUncategorized
-            ? templateCategories
-            : [uncategorized, ...templateCategories],
-      );
-      return newSupermarket;
-    });
-  }
-
-  /// Initialize for editing an existing supermarket by ID
-  Future<void> initializeForEdit(String id) async {
-    await selectById(id);
-  }
-
-  /// Initialize for editing an existing supermarket instance
-  Future<void> initializeForEditWithInstance(Supermarket supermarket) async {
-    await setSelectedSupermarket(supermarket);
-  }
-
   Future<Supermarket?> _loadInitialSelection() async {
     // Default to null - callers should explicitly initialize
     return null;
@@ -94,15 +53,15 @@ class SelectedSupermarketNotifier extends AsyncNotifier<Supermarket?> {
 }
 
 /// Provider for the selected supermarket state.
-final selectedSupermarketProvider =
-    AsyncNotifierProvider<SelectedSupermarketNotifier, Supermarket?>(
-      SelectedSupermarketNotifier.new,
+final refreshedSupermarketNotifier =
+    AsyncNotifierProvider<RefreshedSupermarketNotifier, Supermarket?>(
+      RefreshedSupermarketNotifier.new,
     );
 
 /// Convenience provider to get the current value synchronously.
 /// Returns null while loading or on error.
-final selectedSupermarketValueProvider = Provider<Supermarket?>((ref) {
-  final async = ref.watch(selectedSupermarketProvider);
+final refreshedSupermarketValueProvider = Provider<Supermarket?>((ref) {
+  final async = ref.watch(refreshedSupermarketNotifier);
   return async.when(
     data: (value) => value,
     loading: () => null,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/selected_supermarket_notifier.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 
@@ -84,9 +85,7 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        content: Text(
-          'Want to delete $count supermarket(s)?'
-        ),
+        content: Text('Want to delete $count supermarket(s)?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -188,12 +187,7 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
               )
             : null,
         body: ListView.builder(
-          padding: EdgeInsets.only(
-            left: 8,
-            right: 8,
-            top: 8,
-            bottom: 80,
-          ),
+          padding: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 80),
           itemCount: widget.supermarkets.length,
           itemBuilder: (context, index) {
             final supermarket = widget.supermarkets[index];
@@ -207,18 +201,24 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                     ? Theme.of(context).colorScheme.primaryContainer
                     : Theme.of(context).cardColor,
                 child: InkWell(
-                  onTap: () {
+                  onTap: () async {
                     if (_selectionActive) {
                       _toggleSelection(supermarket);
                     } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SupermarketCustomizationScreen(
-                            supermarket: supermarket,
+                      // Set the selected supermarket before navigating
+                      await ref
+                          .read(selectedSupermarketProvider.notifier)
+                          .initializeForEditWithInstance(supermarket);
+
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const SupermarketCustomizationScreen(),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     }
                   },
                   onLongPress: () => _toggleSelection(supermarket),
@@ -260,16 +260,22 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                                       // Try to clear favorite (will fail if it's the only one)
                                       final success = await ref
                                           .read(supermarketsProvider.notifier)
-                                          .clearFavoriteSupermarket(supermarket.id);
-                                      
+                                          .clearFavoriteSupermarket(
+                                            supermarket.id,
+                                          );
+
                                       if (!success && mounted) {
                                         // Show message explaining why favorite couldn't be cleared
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           SnackBar(
                                             content: const Text(
                                               'Cannot remove favorite: You must have at least one favorite supermarket. Select a different one first.',
                                             ),
-                                            backgroundColor: Theme.of(context).colorScheme.primary,
+                                            backgroundColor: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
                                             behavior: SnackBarBehavior.floating,
                                           ),
                                         );
@@ -278,17 +284,22 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                                       // Set as favorite (will clear previous favorite)
                                       await ref
                                           .read(supermarketsProvider.notifier)
-                                          .setFavoriteSupermarket(supermarket.id);
+                                          .setFavoriteSupermarket(
+                                            supermarket.id,
+                                          );
                                     }
                                   } catch (e) {
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         SnackBar(
                                           content: Text(
                                             'Error updating favorite: ${e.toString()}',
                                           ),
-                                          backgroundColor:
-                                              Theme.of(context).colorScheme.error,
+                                          backgroundColor: Theme.of(
+                                            context,
+                                          ).colorScheme.error,
                                           behavior: SnackBarBehavior.floating,
                                         ),
                                       );
@@ -302,16 +313,25 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                               // Edit button
                               IconButton(
                                 icon: const Icon(Icons.edit_outlined),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          SupermarketCustomizationScreen(
-                                            supermarket: supermarket,
-                                          ),
-                                    ),
-                                  );
+                                onPressed: () async {
+                                  // Set the selected supermarket before navigating
+                                  await ref
+                                      .read(
+                                        selectedSupermarketProvider.notifier,
+                                      )
+                                      .initializeForEditWithInstance(
+                                        supermarket,
+                                      );
+
+                                  if (context.mounted) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const SupermarketCustomizationScreen(),
+                                      ),
+                                    );
+                                  }
                                 },
                                 color: Theme.of(context).colorScheme.primary,
                               ),
