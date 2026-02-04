@@ -1,10 +1,10 @@
 import 'package:app_code/models/category.dart';
 
 class UncategorizedCategoryUtils {
-  static const String name = 'uncategorized';
+  static const String name = 'Uncategorized';
 
   static bool isUncategorized(Category category) {
-    return category.getName().trim().toLowerCase() == name;
+    return category.getName().trim().toLowerCase() == name.toLowerCase();
   }
 
   static Category? findIn(List<Category> categories) {

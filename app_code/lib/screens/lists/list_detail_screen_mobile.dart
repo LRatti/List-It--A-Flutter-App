@@ -8,6 +8,7 @@ import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/screens/lists/controllers/list_detail_controller.dart';
 import 'package:app_code/screens/lists/add_recipe_screen_mobile.dart';
+import 'package:app_code/screens/lists/register-list/register_shopping_list_screen_mobile.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 import 'package:app_code/services/product_search_service.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
@@ -272,6 +273,53 @@ class _ListDetailScreenMobileState
           );
         }
       }
+    }
+  }
+
+  /// Handle cart button - navigate to register shopping list screen
+  /// This allows the user to fill in quantity and price for bought products
+  Future<void> _handleCartButton() async {
+    final controller = ref.read(
+      listDetailControllerProvider(widget.shoppingList),
+    );
+
+    // Update list name from text field before saving
+    controller.updateListName(_nameController.text.trim());
+
+    try {
+      // Save all current changes before navigating to register screen
+      await controller.save();
+      
+      if (mounted) {
+        // Refresh the list to get the latest data
+        final updatedList = widget.shoppingList;
+        
+        // Navigate to register shopping list screen
+        await Navigator.push<void>(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RegisterShoppingListScreenMobile(
+              shoppingList: updatedList,
+              accessedFromListDetail: true,
+            ),
+          ),
+        );
+        
+        // After returning, refresh to reflect any changes
+        if (mounted) {
+          ref.invalidate(listDetailControllerProvider(widget.shoppingList));
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        buildAppSnackBar(
+          message: 'Error: ${e.toString()}',
+          isError: true,
+          context: context,
+        ),
+      );
     }
   }
 
@@ -614,7 +662,8 @@ class _ListDetailScreenMobileState
           actions: [
             IconButton(
               icon: const Icon(Icons.shopping_cart),
-              onPressed: (){},
+              tooltip: 'Register list',
+              onPressed: _handleCartButton,
             ),
           ],
           elevation: 0,

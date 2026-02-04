@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/screens/lists/register-list/register_shopping_list_screen_mobile.dart';
 import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
 
 class HistoryScreenMobile extends ConsumerWidget {
@@ -32,8 +33,21 @@ class HistoryScreenMobile extends ConsumerWidget {
           lists: registeredLists,
           emptyMessage: 'No registered lists yet.',
           showRegistered: true,
+          onListTap: (context, shoppingList) {
+            // Navigate to register shopping list screen when a registered list is tapped
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => RegisterShoppingListScreenMobile(
+                  shoppingList: shoppingList,
+                  accessedFromListDetail: false,
+                ),
+              ),
+            );
+          },
         );
       },
     );
   }
 }
+
