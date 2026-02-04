@@ -17,6 +17,7 @@ class MobileHomePage extends ConsumerStatefulWidget {
 
 class _MobileHomePageState extends ConsumerState<MobileHomePage> {
   bool _isMenuOpen = false;
+  bool _didApplyRouteArgs = false;
 
   final List<Widget> _tabs = const [
     ListsScreenMobile(key: ValueKey('lists_tab')),
@@ -41,6 +42,37 @@ class _MobileHomePageState extends ConsumerState<MobileHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // // Listen to navigation intent and apply it after frame rendering
+    ref.listen<HomeTab?>(homeTabNavigationIntentProvider, (previous, next) {
+      if (next == null) {
+        return;
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final targetIndex = homeTabIndex[next] ?? 0;
+        if (mounted && ref.read(navigationIndexProvider) != targetIndex) {
+          ref.read(navigationIndexProvider.notifier).state = targetIndex;
+        }
+
+        // Reset intent after consuming it
+        if (mounted) {
+          ref.read(homeTabNavigationIntentProvider.notifier).state = null;
+        }
+      });
+    });
+
+    // Check for route arguments on first build
+    if (!_didApplyRouteArgs) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final routeArgs = ModalRoute.of(context)?.settings.arguments;
+        final currentIntent = ref.read(homeTabNavigationIntentProvider);
+        if (routeArgs is HomeTab && currentIntent == null && mounted) {
+          ref.read(homeTabNavigationIntentProvider.notifier).state = routeArgs;
+        }
+      });
+      _didApplyRouteArgs = true;
+    }
+
     final selectedIndex = ref.watch(navigationIndexProvider);
     final bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;

@@ -1,3 +1,4 @@
+import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,6 +16,7 @@ import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/widgets/draggable_product_list.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
 import 'package:riverpod/src/framework.dart';
+import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
 
 /// Provider for the list detail controller
 final listDetailControllerProvider =
@@ -277,7 +279,8 @@ class _ListDetailScreenMobileState
   }
 
   /// Handle cart button - navigate to register shopping list screen
-  /// This allows the user to fill in quantity and price for bought products
+  /// This decouples the screens by using push instead of awaiting the result.
+  /// The register screen handles its own navigation back based on the source.
   Future<void> _handleCartButton() async {
     final controller = ref.read(
       listDetailControllerProvider(widget.shoppingList),
@@ -291,24 +294,20 @@ class _ListDetailScreenMobileState
       await controller.save();
       
       if (mounted) {
-        // Refresh the list to get the latest data
-        final updatedList = widget.shoppingList;
+        // Set the navigation source to indicate this came from list_detail
+        ref.read(registerShoppingListSourceProvider.notifier).state =
+            RegisterShoppingListSource.listDetail;
         
-        // Navigate to register shopping list screen
-        await Navigator.push<void>(
+        // Navigate to register shopping list screen without awaiting
+        // This decouples the navigation - register screen handles its own navigation
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => RegisterShoppingListScreenMobile(
-              shoppingList: updatedList,
-              accessedFromListDetail: true,
+              shoppingList: widget.shoppingList,
             ),
           ),
         );
-        
-        // After returning, refresh to reflect any changes
-        if (mounted) {
-          ref.invalidate(listDetailControllerProvider(widget.shoppingList));
-        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -655,7 +654,14 @@ class _ListDetailScreenMobileState
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
               if (await _handleBack()) {
-                if (mounted) Navigator.pop(context);
+                if (mounted) {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/home',
+                    (route) => false, // Keep the home/root route
+                    arguments: HomeTab.lists,
+
+                  );
+                };
               }
             },
           ),

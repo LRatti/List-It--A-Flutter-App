@@ -1,4 +1,5 @@
 import 'package:app_code/screens/history/history_screen_mobile.dart';
+import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -150,7 +151,6 @@ class MyApp extends ConsumerWidget {
         '/signin': (context) => const WelcomeScreen(),
         '/verification': (context) => const VerificationScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),
-        '/history': (context) => const HistoryScreenMobile(),
       },
     );
   }

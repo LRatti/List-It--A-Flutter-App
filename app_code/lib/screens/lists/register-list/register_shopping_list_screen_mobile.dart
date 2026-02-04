@@ -1,12 +1,15 @@
+import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/screens/lists/register-list/register_shopping_list_controller.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
+import 'package:app_code/screens/lists/lists_screen_mobile.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
 
 /// Provider for the register shopping list controller
 final registerShoppingListControllerProvider =
@@ -19,14 +22,10 @@ final registerShoppingListControllerProvider =
 
 class RegisterShoppingListScreenMobile extends ConsumerStatefulWidget {
   final ShoppingList shoppingList;
-  /// Whether this screen was accessed from list_detail_screen_mobile (cart button)
-  /// If true, going back via pencil button should return to lists_screen, not history
-  final bool accessedFromListDetail;
 
   const RegisterShoppingListScreenMobile({
     super.key,
     required this.shoppingList,
-    this.accessedFromListDetail = false,
   });
 
   @override
@@ -70,17 +69,23 @@ class _RegisterShoppingListScreenMobileState
     super.dispose();
   }
 
-  /// Handle back button - save quantity/price changes but don't register
+  /// Handle back button - navigate back to the source screen (history or list_detail)
+  /// Saves any quantity/price changes before navigating back
   Future<void> _handleBack() async {
     final controller = ref.read(
       registerShoppingListControllerProvider(widget.shoppingList),
     );
+    final source = ref.read(registerShoppingListSourceProvider);
 
     try {
       // Persist any quantity/price changes
       await controller.persistChanges();
       
       if (mounted) {
+        // Clear the navigation source
+        ref.read(registerShoppingListSourceProvider.notifier).state = null;
+        
+        // Navigate back to the previous screen
         Navigator.pop(context);
       }
     } catch (e) {
@@ -107,8 +112,15 @@ class _RegisterShoppingListScreenMobileState
       await controller.registerList();
       
       if (mounted) {
-        // Pop back to history screen
-        Navigator.pop(context);
+        // Clear the navigation source
+        ref.read(registerShoppingListSourceProvider.notifier).state = null;
+        
+        // Pop to get back to the source screen, then navigate to history
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/home',
+          (route) => false, // Keep the home/root route
+          arguments: HomeTab.history,
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -123,7 +135,10 @@ class _RegisterShoppingListScreenMobileState
     }
   }
 
-  /// Handle pencil button - open list_detail_screen for further editing
+  /// Handle pencil button - navigate to lists_screen for further editing
+  /// This allows the user to:
+  /// - Go back to lists_screen
+  /// - Edit or navigate to other screens from there
   Future<void> _handleOpenForEditing() async {
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
@@ -157,24 +172,16 @@ class _RegisterShoppingListScreenMobileState
       await controller.unregisterList();
       
       if (mounted) {
-        // Navigate to list_detail_screen
-        // When user closes list_detail, they return to this register screen,
-        // which will then close and return to the screen that opened register
-        final updatedList = controller.shoppingList;
-        Navigator.of(context).push(
+        // Clear the navigation source
+        ref.read(registerShoppingListSourceProvider.notifier).state = null;
+        
+        // Navigate to lists_screen (replaces the navigation stack to avoid stacking)
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (_) => ListDetailScreenMobile(
-              shoppingList: updatedList,
-              isNewList: false,
-            ),
+            builder: (_) => ListDetailScreenMobile(shoppingList: widget.shoppingList),
           ),
-        ).then((_) {
-          // After list_detail closes, close this screen too
-          // This returns user to the screen that originally opened register
-          if (mounted) {
-            Navigator.pop(context);
-          }
-        });
+          (route) => route.isFirst, // Keep the home/root route
+        );
       }
     } catch (e) {
       if (!mounted) return;
