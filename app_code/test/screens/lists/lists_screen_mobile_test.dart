@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
+import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/screens/lists/lists_screen_mobile.dart';
+import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/selected_list_notifier.dart';
 import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
@@ -226,6 +229,107 @@ void main() {
       expect(find.byType(FloatingActionButton), findsOneWidget);
     });
   });
+
+  group('ListsScreenMobile - Navigation to ListDetailScreenMobile', () {
+    late MockShoppingListRepository mockRepo;
+    late MockRecipeCacheRepository mockRecipeCache;
+    late MockSelectedListNotifier mockSelectedListNotifier;
+
+    setUp(() {
+      mockRepo = MockShoppingListRepository();
+      mockRecipeCache = MockRecipeCacheRepository();
+      mockSelectedListNotifier = MockSelectedListNotifier();
+    });
+
+    /// Helper to create a test widget with providers
+    Widget createTestWidget({List<ShoppingList>? initialLists}) {
+      // Pre-populate repository if needed
+      if (initialLists != null) {
+        for (final list in initialLists) {
+          mockRepo.add(list);
+        }
+      }
+
+      return ProviderScope(
+        overrides: [
+          shoppingListRepositoryProvider.overrideWithValue(mockRepo),
+          recipeCacheRepositoryProvider.overrideWithValue(mockRecipeCache),
+          selectedListProvider.overrideWith(() => mockSelectedListNotifier),
+        ],
+        child: const MaterialApp(
+          home: ListsScreenMobile(),
+        ),
+      );
+    }
+
+    /// Helper to create a test widget for detail screen with null list
+    Widget createDetailScreenWithNullList() {
+      final nullListNotifier = MockSelectedListNotifier();
+      nullListNotifier.setList(null);
+
+      return ProviderScope(
+        overrides: [
+          shoppingListRepositoryProvider.overrideWithValue(mockRepo),
+          recipeCacheRepositoryProvider.overrideWithValue(mockRecipeCache),
+          selectedListProvider.overrideWith(() => nullListNotifier),
+        ],
+        child: const MaterialApp(
+          home: ListDetailScreenMobile(),
+        ),
+      );
+    }
+
+    /// Helper to create a shopping list
+    ShoppingList createList(
+      String id,
+      String name, {
+      DateTime? createdAt,
+      bool isInTrash = false,
+      bool isRegistered = false,
+    }) {
+      return ShoppingList(
+        id: id,
+        name: name,
+        createdAt: createdAt ?? DateTime.now(),
+        isInTheTrash: isInTrash,
+        isRegistered: isRegistered,
+      );
+    }
+
+    testWidgets('tapping on an existing shopping list navigates to list detail screen', (tester) async {
+      final testList = createList('list-1', 'Groceries');
+      await tester.pumpWidget(createTestWidget(initialLists: [testList]));
+      await tester.pumpAndSettle();
+
+      // Verify the list is displayed
+      expect(find.text('Groceries'), findsOneWidget);
+
+      // Tap on the shopping list
+      await tester.tap(find.text('Groceries'));
+      await tester.pumpAndSettle();
+
+      // Verify we navigated to the detail screen
+      // The detail screen should show the list name in the app bar
+      expect(find.byType(ListDetailScreenMobile), findsOneWidget);
+    });
+
+    testWidgets('list detail screen shows empty state when no list is selected', (tester) async {
+      final testList = createList('list-1', 'Groceries');
+      await tester.pumpWidget(createTestWidget(initialLists: [testList]));
+      await tester.pumpAndSettle();
+      // Verify the list is displayed
+      expect(find.text('Groceries'), findsOneWidget);
+
+      // Tap on the shopping list
+      await tester.tap(find.text('Groceries'));
+      await tester.pumpAndSettle();
+
+      // Verify empty state is displayed
+      expect(find.text('Shopping List'), findsOneWidget); // AppBar title
+      expect(find.text('No list selected'), findsOneWidget); // Empty state message
+      expect(find.byType(CircularProgressIndicator), findsNothing); // Not loading
+    });
+  });
 }
 
 /// Mock repository that throws errors for testing error handling
@@ -233,5 +337,75 @@ class _FailingShoppingListRepository extends MockShoppingListRepository {
   @override
   Future<List<ShoppingList>> getAll() async {
     throw Exception('Failed to load lists');
+  }
+}
+
+/// Mock implementation of SelectedListNotifier for testing
+class MockSelectedListNotifier extends SelectedListNotifier {
+  ShoppingList? _list;
+  Supermarket? _supermarket;
+
+  void setList(ShoppingList? list) {
+    _list = list;
+  }
+
+  void setSupermarket(Supermarket? supermarket) {
+    _supermarket = supermarket;
+  }
+
+  @override
+  Future<SelectedListState> build() async {
+    return SelectedListState(list: _list, supermarket: _supermarket);
+  }
+
+  @override
+  Future<void> selectList(ShoppingList list) async {
+    _list = list;
+    _supermarket = list.getSupermarket();
+    state = AsyncValue.data(
+      SelectedListState(list: _list, supermarket: _supermarket),
+    );
+  }
+
+  @override
+  Future<void> clearSelection() async {
+    _list = null;
+    _supermarket = null;
+    state = AsyncValue.data(
+      SelectedListState(list: null, supermarket: null),
+    );
+  }
+
+  @override
+  Future<void> updateSelectedList(ShoppingList updatedList) async {
+    if (_list != null && _list!.id == updatedList.id) {
+      _list = updatedList;
+      state = AsyncValue.data(
+        SelectedListState(list: _list, supermarket: _supermarket),
+      );
+    }
+  }
+
+  @override
+  String? getSelectedListId() {
+    return _list?.id;
+  }
+
+  @override
+  bool isSelected(String listId) {
+    return _list?.id == listId;
+  }
+
+  @override
+  Future<void> updateSelectedSupermarket(Supermarket? supermarket) async {
+    _supermarket = supermarket;
+    state = AsyncValue.data(
+      SelectedListState(list: _list, supermarket: _supermarket),
+    );
+  }
+
+  @override
+  Supermarket? getSelectedSupermarket() {
+    return _supermarket;
   }
 }

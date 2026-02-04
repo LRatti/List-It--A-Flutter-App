@@ -1,4 +1,5 @@
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/selected_list_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -18,21 +19,20 @@ import 'package:riverpod/src/framework.dart';
 
 /// Provider for the list detail controller
 final listDetailControllerProvider =
-    ChangeNotifierProvider.family<ListDetailController, ShoppingList>((
-      ref,
-      shoppingList,
-    ) {
+    ChangeNotifierProvider<ListDetailController>((ref) {
+      final selectedListState = ref.watch(selectedListProvider).value;
+      final shoppingList = selectedListState?.list;
+      
+      if (shoppingList == null) {
+        throw StateError('No shopping list selected');
+      }
+      
       return ListDetailController(shoppingList: shoppingList, ref: ref);
     });
 
 class ListDetailScreenMobile extends ConsumerStatefulWidget {
-  final ShoppingList shoppingList;
-  final bool isNewList;
-
   const ListDetailScreenMobile({
     super.key,
-    required this.shoppingList,
-    this.isNewList = false,
   });
 
   @override
@@ -51,43 +51,21 @@ class _ListDetailScreenMobileState
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.shoppingList.getName(),
-    );
+    _nameController = TextEditingController();
     _productSearchController = TextEditingController();
-
-    // Initialize controller with favorite supermarket if new list
-    if (widget.isNewList) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loadFavoriteSupermarket();
-      });
-    } else if (widget.shoppingList.getSupermarket() == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _clearSupermarketSelection();
-      });
-    }
   }
 
-  Future<void> _loadFavoriteSupermarket() async {
-    final controller = ref.read(
-      listDetailControllerProvider(widget.shoppingList),
-    );
-    final favorite = await ref
-        .read(supermarketsProvider.notifier)
-        .getFavoriteSupermarket();
-
-    if (favorite != null) {
-      controller.updateSupermarket(favorite);
+  void _syncNameController(ShoppingList shoppingList) {
+    if (_nameController.text != shoppingList.getName()) {
+      _nameController.text = shoppingList.getName();
     }
   }
 
   Future<void> _clearSupermarketSelection() async {
-    final controller = ref.read(
-      listDetailControllerProvider(widget.shoppingList),
-    );
-    final uncategorized =
-        await UncategorizedCategoryInitializer.getUncategorized();
-    await controller.clearSupermarket(uncategorized: uncategorized);
+    // Clear supermarket from notifier when it's no longer available
+    await ref
+        .read(selectedListProvider.notifier)
+        .updateSelectedSupermarket(null);
   }
 
   @override
@@ -102,9 +80,7 @@ class _ListDetailScreenMobileState
 
   /// Handle back button - save changes before exiting
   Future<bool> _handleBack() async {
-    final controller = ref.read(
-      listDetailControllerProvider(widget.shoppingList),
-    );
+    final controller = ref.read(listDetailControllerProvider);
 
     // Update list name from text field
     controller.updateListName(_nameController.text.trim());
@@ -171,9 +147,7 @@ class _ListDetailScreenMobileState
       return;
     }
 
-    final controller = ref.read(
-      listDetailControllerProvider(widget.shoppingList),
-    );
+    final controller = ref.read(listDetailControllerProvider);
     final supermarket = controller.selectedSupermarket;
 
     if (supermarket == null) {
@@ -229,10 +203,11 @@ class _ListDetailScreenMobileState
 
   /// Delete shopping list
   Future<void> _deleteList() async {
+    final controller = ref.read(listDetailControllerProvider);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        content: Text("Delete '${widget.shoppingList.getName()}'?"),
+        content: Text("Delete '${controller.listName}'?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -254,9 +229,6 @@ class _ListDetailScreenMobileState
     );
 
     if (confirmed == true) {
-      final controller = ref.read(
-        listDetailControllerProvider(widget.shoppingList),
-      );
       try {
         await controller.deleteList();
         if (mounted) {
@@ -489,6 +461,10 @@ class _ListDetailScreenMobileState
         ),
         onTap: () {
           controller.updateSupermarket(supermarket);
+          // // Update notifier with selected supermarket
+          // ref
+          //     .read(selectedListProvider.notifier)
+          //     .updateSelectedSupermarket(supermarket);
           Navigator.pop(context);
         },
       ),
@@ -527,32 +503,16 @@ class _ListDetailScreenMobileState
     );
   }
 
-  Future<Supermarket> _getNewSupermarket() async {
-    final lastSupermarket = await ref
-        .read(supermarketsProvider.notifier)
-        .getLastEditedSupermarket();
-    final uncategorized =
-        await UncategorizedCategoryInitializer.getUncategorized();
-
-    final templateCategories = lastSupermarket?.getCategories() ?? [];
-    final hasUncategorized = templateCategories.any(
-      (cat) => cat.id == uncategorized.id,
-    );
-
-    final supermarket = Supermarket(
-      name: '',
-      categories: hasUncategorized
-          ? templateCategories
-          : [uncategorized, ...templateCategories],
-    );
-    return supermarket;
-  }
-
   /// Navigate to supermarket customization
   void _navigateToSupermarketCustomization(
     Supermarket? supermarket, {
     bool isNew = false,
   }) async {
+    // // Update the selected list notifier with the supermarket being customized
+    // await ref
+    //     .read(selectedListProvider.notifier)
+    //     .setSupermarketBeingCustomized(supermarket);
+
     // Initialize the selected supermarket notifier
     if (isNew) {
       await ref
@@ -567,27 +527,50 @@ class _ListDetailScreenMobileState
     // Simply navigate without awaiting the result
     // The selected_supermarket_provider will be watched and trigger updates
     Navigator.push<Supermarket?>(
-      context,
+      this.context,
       MaterialPageRoute(
         builder: (_) => SupermarketCustomizationScreen(isCreationMode: isNew),
       ),
     );
 
     if (mounted) {
-      FocusScope.of(context).unfocus();
+      FocusScope.of(this.context).unfocus();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = ref.watch(
-      listDetailControllerProvider(widget.shoppingList),
-    );
-    final supermarketsAsync = ref.watch(supermarketsProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final selectedListState = ref.watch(selectedListProvider);
+    
+    return selectedListState.when(
+      loading: () => Scaffold(
+        appBar: AppBar(title: const Text('Shopping List')),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        appBar: AppBar(title: const Text('Shopping List')),
+        body: Center(child: Text('Error: $error')),
+      ),
+      data: (selectedListData) {
+        final currentShoppingList = selectedListData.list;
+        
+        // If no list is selected, show empty state
+        if (currentShoppingList == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Shopping List')),
+            body: const Center(child: Text('No list selected')),
+          );
+        }
+        
+        // Sync name controller when list changes
+        _syncNameController(currentShoppingList);
+        
+        final controller = ref.watch(listDetailControllerProvider);
+        final supermarketsAsync = ref.watch(supermarketsProvider);
+        final colorScheme = Theme.of(context).colorScheme;
+        final textTheme = Theme.of(context).textTheme;
 
-    return WillPopScope(
+        return WillPopScope(
       onWillPop: _handleBack,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
@@ -634,11 +617,13 @@ class _ListDetailScreenMobileState
               ),
 
               // Product search and action buttons (like WhatsApp)
-              _buildSearchAndActions(colorScheme, controller),
+              _buildSearchAndActions(colorScheme, controller, currentShoppingList),
             ],
           ),
         ),
       ),
+    );
+      },
     );
   }
 
@@ -808,6 +793,7 @@ class _ListDetailScreenMobileState
   Widget _buildSearchAndActions(
     ColorScheme colorScheme,
     ListDetailController controller,
+    ShoppingList currentShoppingList,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -835,7 +821,7 @@ class _ListDetailScreenMobileState
                     context,
                     MaterialPageRoute(
                       builder: (_) => AddRecipeScreen(
-                        shoppingList: widget.shoppingList,
+                        shoppingList: currentShoppingList,
                         availableCategories:
                             controller.selectedSupermarket?.getCategories() ??
                             [],

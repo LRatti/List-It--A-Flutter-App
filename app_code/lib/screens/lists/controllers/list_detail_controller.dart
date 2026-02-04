@@ -1,3 +1,4 @@
+import 'package:app_code/providers/real_app_providers/shopping_list/selected_list_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
@@ -120,6 +121,10 @@ class ListDetailController extends ChangeNotifier {
         _hasChanges = true;
       }
       notifyListeners();
+      // Update notifier with selected supermarket
+      // _ref
+      //     .read(selectedListProvider.notifier)
+      //     .updateSelectedSupermarket(newSupermarket);
     }
   }
 

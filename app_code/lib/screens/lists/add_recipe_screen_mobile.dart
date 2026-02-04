@@ -149,10 +149,6 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
 
         ref.read(shoppingListsProvider.notifier).updateList(widget.shoppingList);
 
-        // Ensure the open ListDetailScreen refreshes its controller
-        // so the newly added products appear immediately.
-        ref.invalidate(listDetailControllerProvider(widget.shoppingList));
-
         ref.read(backgroundRecipeProvider.notifier).clearSearchForList(widget.shoppingList.id);
 
         Navigator.pop(context);

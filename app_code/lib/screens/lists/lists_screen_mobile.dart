@@ -1,7 +1,9 @@
+import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/selected_list_notifier.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
 
@@ -64,16 +66,26 @@ class ListsScreenMobile extends ConsumerWidget {
                     // Add to provider (but not fully persisted yet)
                     await ref.read(shoppingListsProvider.notifier).addList(newList);
                     
+                    // Load favorite supermarket for new list
+                    final favorite = await ref
+                        .read(supermarketsProvider.notifier)
+                        .getFavoriteSupermarket();
+                    
+                    if (favorite != null) {
+                      await ref
+                          .read(selectedListProvider.notifier)
+                          .updateSelectedSupermarket(favorite);
+                    }
+                    
                     // Navigate to detail screen
                     if (context.mounted) {
+                      // Select the list in the notifier before navigating
+                      await ref.read(selectedListProvider.notifier).selectList(newList);
                       Navigator.pop(context); // Close dialog
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ListDetailScreenMobile(
-                            shoppingList: newList,
-                            isNewList: true,
-                          ),
+                          builder: (_) => const ListDetailScreenMobile(),
                         ),
                       );
                     }
@@ -118,13 +130,13 @@ class ListsScreenMobile extends ConsumerWidget {
           lists: activeLists,
           emptyMessage: 'No lists yet.',
           showRegistered: false,
-          onListTap: (context, list) {
+          onListTap: (context, list) async {
+            // Select the list in the notifier before navigating
+            await ref.read(selectedListProvider.notifier).selectList(list);
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => ListDetailScreenMobile(
-                  shoppingList: list,
-                ),
+                builder: (_) => const ListDetailScreenMobile(),
               ),
             );
           },
