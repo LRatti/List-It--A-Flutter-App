@@ -170,7 +170,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
-        title: const Text('Add Recipe'),
+        title: const Text('Add Recipe')
       ),
       body: SafeArea(
         child: Column(

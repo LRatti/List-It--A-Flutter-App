@@ -611,6 +611,13 @@ class _ListDetailScreenMobileState
               }
             },
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: (){},
+            ),
+          ],
+          elevation: 0,
         ),
         body: SafeArea(
           child: Column(
