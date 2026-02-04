@@ -129,8 +129,6 @@ class ListsScreenMobile extends ConsumerWidget {
           onListTap: (context, list) async {
             // Select the list in the notifier before navigating
             await ref.read(selectedListProvider.notifier).selectList(list);
-            await ref.read(selectedListProvider.notifier)
-                .updateSelectedSupermarket(list.getSupermarket());
             Navigator.push(
               context,
               MaterialPageRoute(

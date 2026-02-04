@@ -2,7 +2,6 @@ import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lis
 import 'package:app_code/providers/real_app_providers/shopping_list/selected_list_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
@@ -15,20 +14,18 @@ import 'package:app_code/services/product_search_service.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/widgets/draggable_product_list.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
-import 'package:riverpod/src/framework.dart';
 
 /// Provider for the list detail controller
-final listDetailControllerProvider =
-    ChangeNotifierProvider<ListDetailController>((ref) {
-      final selectedListState = ref.watch(selectedListProvider).value;
-      final shoppingList = selectedListState?.list;
-      
-      if (shoppingList == null) {
-        throw StateError('No shopping list selected');
-      }
+final listDetailControllerProvider = Provider<ListDetailController>((ref) {
+  final selectedListState = ref.watch(selectedListProvider).value;
+  final shoppingList = selectedListState?.list;
+  
+  if (shoppingList == null) {
+    throw StateError('No shopping list selected');
+  }
 
-      return ListDetailController(shoppingList: shoppingList, ref: ref);
-    });
+  return ListDetailController(shoppingList: shoppingList, ref: ref);
+});
 
 class ListDetailScreenMobile extends ConsumerStatefulWidget {
   const ListDetailScreenMobile({
@@ -55,9 +52,9 @@ class _ListDetailScreenMobileState
     _productSearchController = TextEditingController();
   }
 
-  void _syncNameController(ShoppingList shoppingList) {
-    if (_nameController.text != shoppingList.getName()) {
-      _nameController.text = shoppingList.getName();
+  void _syncNameController(String listName) {
+    if (_nameController.text != listName) {
+      _nameController.text = listName;
     }
   }
 
@@ -67,10 +64,6 @@ class _ListDetailScreenMobileState
     final uncategorized =
         await UncategorizedCategoryInitializer.getUncategorized();
     await controller.clearSupermarket(uncategorized: uncategorized);
-    // Clear supermarket from notifier when it's no longer available
-    await ref
-        .read(selectedListProvider.notifier)
-        .updateSelectedSupermarket(null);
   }
 
   @override
@@ -471,10 +464,6 @@ class _ListDetailScreenMobileState
         ),
         onTap: () {
           controller.updateSupermarket(supermarket);
-          // // Update notifier with selected supermarket
-          // ref
-          //     .read(selectedListProvider.notifier)
-          //     .updateSelectedSupermarket(supermarket);
           Navigator.pop(context);
         },
       ),
@@ -518,11 +507,6 @@ class _ListDetailScreenMobileState
     Supermarket? supermarket, {
     bool isNew = false,
   }) async {
-    // // Update the selected list notifier with the supermarket being customized
-    // await ref
-    //     .read(selectedListProvider.notifier)
-    //     .setSupermarketBeingCustomized(supermarket);
-
     // Initialize the selected supermarket notifier
     if (isNew) {
       await ref
@@ -561,8 +545,8 @@ class _ListDetailScreenMobileState
         appBar: AppBar(title: const Text('Shopping List')),
         body: Center(child: Text('Error: $error')),
       ),
-      data: (selectedListData) {
-        final currentShoppingList = selectedListData.list;
+      data: (state) {
+        final currentShoppingList = state.list;
         
         // If no list is selected, show empty state
         if (currentShoppingList == null) {
@@ -572,10 +556,10 @@ class _ListDetailScreenMobileState
           );
         }
         
-        // Sync name controller when list changes
-        _syncNameController(currentShoppingList);
+        // Sync name controller when list name changes
+        _syncNameController(state.listName);
         
-        final controller = ref.watch(listDetailControllerProvider);
+        final controller = ref.read(listDetailControllerProvider);
         final supermarketsAsync = ref.watch(supermarketsProvider);
         final colorScheme = Theme.of(context).colorScheme;
         final textTheme = Theme.of(context).textTheme;
@@ -643,6 +627,9 @@ class _ListDetailScreenMobileState
     ListDetailController controller,
     ColorScheme colorScheme,
   ) {
+    // Watch the state to get the current supermarket
+    final state = ref.watch(selectedListProvider).value;
+    
     return supermarketsAsync.when(
       loading: () => Container(
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -672,6 +659,10 @@ class _ListDetailScreenMobileState
         ),
       ),
       data: (supermarkets) {
+        if (state == null) {
+          return const SizedBox.shrink();
+        }
+        
         final visibleSupermarkets = supermarkets
             .where((s) => s.isVisible)
             .fold<Map<String, Supermarket>>({}, (map, s) {
@@ -680,7 +671,7 @@ class _ListDetailScreenMobileState
             })
             .values
             .toList();
-        final selectedId = controller.selectedSupermarket?.id;
+        final selectedId = state.supermarket?.id;
         final hasSelected =
             selectedId != null &&
             visibleSupermarkets.any((s) => s.id == selectedId);
@@ -805,6 +796,10 @@ class _ListDetailScreenMobileState
     ListDetailController controller,
     ShoppingList currentShoppingList,
   ) {
+    // Watch the state to get the current supermarket
+    final state = ref.watch(selectedListProvider).value;
+    final selectedSupermarket = state?.supermarket;
+    
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -833,8 +828,7 @@ class _ListDetailScreenMobileState
                       builder: (_) => AddRecipeScreen(
                         shoppingList: currentShoppingList,
                         availableCategories:
-                            controller.selectedSupermarket?.getCategories() ??
-                            [],
+                            selectedSupermarket?.getCategories() ?? [],
                       ),
                     ),
                   );
@@ -891,8 +885,14 @@ class _ListDetailScreenMobileState
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
+    // Watch the state to get products and buffer products
+    final state = ref.watch(selectedListProvider).value;
+    if (state == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
     final productsByCategory = controller.getProductsByCategory();
-    final bufferProducts = controller.bufferProducts;
+    final bufferProducts = state.bufferProducts;
 
     return ListView(
       controller: _listScrollController,

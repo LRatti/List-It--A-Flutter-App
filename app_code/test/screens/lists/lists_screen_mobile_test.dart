@@ -355,7 +355,14 @@ class MockSelectedListNotifier extends SelectedListNotifier {
 
   @override
   Future<SelectedListState> build() async {
-    return SelectedListState(list: _list, supermarket: _supermarket);
+    return SelectedListState(
+      list: _list,
+      supermarket: _supermarket,
+      listName: _list?.getName() ?? '',
+      products: List.from(_list?.getProducts() ?? []),
+      bufferProducts: {},
+      hasChanges: false,
+    );
   }
 
   @override
@@ -372,16 +379,29 @@ class MockSelectedListNotifier extends SelectedListNotifier {
     _list = null;
     _supermarket = null;
     state = AsyncValue.data(
-      SelectedListState(list: null, supermarket: null),
+      SelectedListState(
+        list: null,
+        supermarket: null,
+        listName: '',
+        products: [],
+        bufferProducts: {},
+        hasChanges: false,
+      ),
     );
   }
 
-  @override
   Future<void> updateSelectedList(ShoppingList updatedList) async {
     if (_list != null && _list!.id == updatedList.id) {
       _list = updatedList;
       state = AsyncValue.data(
-        SelectedListState(list: _list, supermarket: _supermarket),
+        SelectedListState(
+          list: _list,
+          supermarket: _supermarket,
+          listName: _list?.getName() ?? '',
+          products: List.from(_list?.getProducts() ?? []),
+          bufferProducts: {},
+          hasChanges: false,
+        ),
       );
     }
   }
@@ -396,11 +416,17 @@ class MockSelectedListNotifier extends SelectedListNotifier {
     return _list?.id == listId;
   }
 
-  @override
   Future<void> updateSelectedSupermarket(Supermarket? supermarket) async {
     _supermarket = supermarket;
     state = AsyncValue.data(
-      SelectedListState(list: _list, supermarket: _supermarket),
+      SelectedListState(
+        list: _list,
+        supermarket: _supermarket,
+        listName: _list?.getName() ?? '',
+        products: List.from(_list?.getProducts() ?? []),
+        bufferProducts: {},
+        hasChanges: false,
+      ),
     );
   }
 

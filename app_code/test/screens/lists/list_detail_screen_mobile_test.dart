@@ -103,7 +103,14 @@ void main() {
           }),
           selectedListProvider.overrideWith(
             () => TestSelectedListNotifier(
-              SelectedListState(list: shoppingList, supermarket: null),
+              SelectedListState(
+                list: shoppingList,
+                supermarket: null,
+                listName: shoppingList.getName(),
+                products: List.from(shoppingList.getProducts()),
+                bufferProducts: {},
+                hasChanges: false,
+              ),
             ),
           ),
         ],
