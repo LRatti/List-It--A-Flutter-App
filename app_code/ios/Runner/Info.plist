@@ -70,5 +70,8 @@
 	<string>This app needs your location to find nearby supermarkets.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs your location to find nearby supermarkets.</string>
+	<!-- Camera permission -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to your camera to scan receipts for automatic price and quantity extraction.</string>
 </dict>
 </plist>

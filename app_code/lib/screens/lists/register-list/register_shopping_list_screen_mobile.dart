@@ -10,6 +10,7 @@ import 'package:app_code/screens/history/history_screen_mobile.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
+import 'package:app_code/screens/camera/receipt_camera_screen.dart';
 
 /// Provider for the register shopping list controller
 final registerShoppingListControllerProvider =
@@ -196,6 +197,38 @@ class _RegisterShoppingListScreenMobileState
     }
   }
 
+  /// Handle camera button - persist changes and navigate to camera screen
+  Future<void> _handleCamera() async {
+    final controller = ref.read(
+      registerShoppingListControllerProvider(widget.shoppingList),
+    );
+
+    try {
+      // Persist any quantity/price changes before navigating to camera
+      await controller.persistChanges();
+      
+      if (mounted) {
+        // Navigate to camera screen
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ReceiptCameraScreen(),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        buildAppSnackBar(
+          message: 'Error saving changes: ${e.toString()}',
+          isError: true,
+          context: context,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = ref.watch(
@@ -255,21 +288,14 @@ class _RegisterShoppingListScreenMobileState
         floatingActionButton: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            // Camera button (placeholder for later implementation)
+            // Camera button
             FloatingActionButton(
               heroTag: 'camera_btn',
               mini: true,
               backgroundColor: colorScheme.primaryContainer,
               foregroundColor: colorScheme.onPrimaryContainer,
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  buildAppSnackBar(
-                    message: 'Camera feature coming soon',
-                    context: context,
-                  ),
-                );
-              },
-              tooltip: 'Add receipt photo',
+              onPressed: _handleCamera,
+              tooltip: 'Scan receipt',
               child: const Icon(Icons.camera_alt),
             ),
             const SizedBox(height: 12),
