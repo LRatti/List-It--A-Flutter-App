@@ -11,6 +11,7 @@ import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
 import 'package:app_code/screens/camera/receipt_camera_screen.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 
 /// Provider for the register shopping list controller
 final registerShoppingListControllerProvider =
@@ -22,11 +23,11 @@ final registerShoppingListControllerProvider =
     });
 
 class RegisterShoppingListScreenMobile extends ConsumerStatefulWidget {
-  final ShoppingList shoppingList;
+  final String shoppingListId;
 
   const RegisterShoppingListScreenMobile({
     super.key,
-    required this.shoppingList,
+    required this.shoppingListId,
   });
 
   @override
@@ -42,20 +43,7 @@ class _RegisterShoppingListScreenMobileState
   @override
   void initState() {
     super.initState();
-    // Initialize text controllers for each bought product
-    final controller = ref.read(
-      registerShoppingListControllerProvider(widget.shoppingList),
-    );
-    final boughtProducts = controller.getBoughtProducts();
-    
-    for (final product in boughtProducts) {
-      _quantityControllers[product.id] = TextEditingController(
-        text: controller.getQuantity(product.id).toString(),
-      );
-      _priceControllers[product.id] = TextEditingController(
-        text: controller.getPrice(product.id).toStringAsFixed(2),
-      );
-    }
+    // Text controllers will be initialized in build() once we have the shopping list
   }
 
   @override
@@ -72,9 +60,9 @@ class _RegisterShoppingListScreenMobileState
 
   /// Handle back button - navigate back to the source screen (history or list_detail)
   /// Saves any quantity/price changes before navigating back
-  Future<void> _handleBack() async {
+  Future<void> _handleBack(ShoppingList shoppingList) async {
     final controller = ref.read(
-      registerShoppingListControllerProvider(widget.shoppingList),
+      registerShoppingListControllerProvider(shoppingList),
     );
     final source = ref.read(registerShoppingListSourceProvider);
 
@@ -103,9 +91,9 @@ class _RegisterShoppingListScreenMobileState
   }
 
   /// Handle check button - register the list and navigate to history
-  Future<void> _handleRegister() async {
+  Future<void> _handleRegister(ShoppingList shoppingList) async {
     final controller = ref.read(
-      registerShoppingListControllerProvider(widget.shoppingList),
+      registerShoppingListControllerProvider(shoppingList),
     );
 
     try {
@@ -140,7 +128,7 @@ class _RegisterShoppingListScreenMobileState
   /// This allows the user to:
   /// - Go back to lists_screen
   /// - Edit or navigate to other screens from there
-  Future<void> _handleOpenForEditing() async {
+  Future<void> _handleOpenForEditing(ShoppingList shoppingList) async {
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
@@ -165,7 +153,7 @@ class _RegisterShoppingListScreenMobileState
     if (confirmed != true) return;
 
     final controller = ref.read(
-      registerShoppingListControllerProvider(widget.shoppingList),
+      registerShoppingListControllerProvider(shoppingList),
     );
 
     try {
@@ -179,7 +167,7 @@ class _RegisterShoppingListScreenMobileState
         // Navigate to lists_screen (replaces the navigation stack to avoid stacking)
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (_) => ListDetailScreenMobile(shoppingList: widget.shoppingList),
+            builder: (_) => ListDetailScreenMobile(shoppingList: shoppingList),
           ),
           (route) => route.isFirst, // Keep the home/root route
         );
@@ -198,9 +186,9 @@ class _RegisterShoppingListScreenMobileState
   }
 
   /// Handle camera button - persist changes and navigate to camera screen
-  Future<void> _handleCamera() async {
+  Future<void> _handleCamera(ShoppingList shoppingList) async {
     final controller = ref.read(
-      registerShoppingListControllerProvider(widget.shoppingList),
+      registerShoppingListControllerProvider(shoppingList),
     );
 
     try {
@@ -231,47 +219,79 @@ class _RegisterShoppingListScreenMobileState
 
   @override
   Widget build(BuildContext context) {
-    final controller = ref.watch(
-      registerShoppingListControllerProvider(widget.shoppingList),
-    );
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final boughtProducts = controller.getBoughtProducts();
-
-    return WillPopScope(
-      onWillPop: () async {
-        await _handleBack();
-        return false;
-      },
-      child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: AppBar(
-          title: Text(
-            controller.listName,
-            style: textTheme.titleLarge?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: _handleBack,
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.check),
-              tooltip: 'Register list',
-              onPressed: _handleRegister,
-            ),
-          ],
-          elevation: 0,
+    // Fetch fresh shopping list data from the database
+    final shoppingListAsync = ref.watch(shoppingListProvider(widget.shoppingListId));
+    
+    return shoppingListAsync.when(
+      loading: () => const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
         ),
-        body: SafeArea(
-          child: Column(
-            children: [
+      ),
+      error: (error, stackTrace) => Scaffold(
+        body: Center(
+          child: Text('Error loading shopping list: $error'),
+        ),
+      ),
+      data: (shoppingList) {
+        // Initialize text controllers only once when we have the shopping list
+        if (_quantityControllers.isEmpty && _priceControllers.isEmpty) {
+          final controller = ref.read(
+            registerShoppingListControllerProvider(shoppingList),
+          );
+          final boughtProducts = controller.getBoughtProducts();
+          
+          for (final product in boughtProducts) {
+            _quantityControllers[product.id] = TextEditingController(
+              text: controller.getQuantity(product.id).toString(),
+            );
+            _priceControllers[product.id] = TextEditingController(
+              text: controller.getPrice(product.id).toStringAsFixed(2),
+            );
+          }
+        }
+
+        final controller = ref.watch(
+          registerShoppingListControllerProvider(shoppingList),
+        );
+        final colorScheme = Theme.of(context).colorScheme;
+        final textTheme = Theme.of(context).textTheme;
+        final boughtProducts = controller.getBoughtProducts();
+
+        return WillPopScope(
+          onWillPop: () async {
+            await _handleBack(shoppingList);
+            return false;
+          },
+          child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            appBar: AppBar(
+              title: Text(
+                controller.listName,
+                style: textTheme.titleLarge?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => _handleBack(shoppingList),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.check),
+                  tooltip: 'Register list',
+                  onPressed: () => _handleRegister(shoppingList),
+                ),
+              ],
+              elevation: 0,
+            ),
+            body: SafeArea(
+              child: Column(
+                children: [
               // Supermarket display (fixed, non-interactive)
-              _buildSupermarketDisplay(controller, colorScheme, textTheme),
+              _buildSupermarketDisplay(shoppingList, controller, colorScheme, textTheme),
 
               // Bought products list
               Expanded(
@@ -294,7 +314,7 @@ class _RegisterShoppingListScreenMobileState
               mini: true,
               backgroundColor: colorScheme.primaryContainer,
               foregroundColor: colorScheme.onPrimaryContainer,
-              onPressed: _handleCamera,
+              onPressed: () => _handleCamera(shoppingList),
               tooltip: 'Scan receipt',
               child: const Icon(Icons.camera_alt),
             ),
@@ -305,24 +325,27 @@ class _RegisterShoppingListScreenMobileState
               mini: true,
               backgroundColor: colorScheme.secondaryContainer,
               foregroundColor: colorScheme.onSecondaryContainer,
-              onPressed: _handleOpenForEditing,
+              onPressed: () => _handleOpenForEditing(shoppingList),
               tooltip: 'Continue editing',
               child: const Icon(Icons.edit),
             ),
           ],
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      ),
+          ),
+        );
+      },
     );
   }
 
   /// Build the supermarket display (fixed, non-interactive)
   Widget _buildSupermarketDisplay(
+    ShoppingList shoppingList,
     RegisterShoppingListController controller,
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
-    final supermarket = widget.shoppingList.getSupermarket();
+    final supermarket = shoppingList.getSupermarket();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

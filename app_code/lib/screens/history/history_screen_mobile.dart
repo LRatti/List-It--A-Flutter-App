@@ -39,12 +39,13 @@ class HistoryScreenMobile extends ConsumerWidget {
             ref.read(registerShoppingListSourceProvider.notifier).state =
                 RegisterShoppingListSource.history;
             
-            // Navigate to register shopping list screen
+            // Navigate to register shopping list screen with only the ID
+            // The register screen will fetch fresh data from the database
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => RegisterShoppingListScreenMobile(
-                  shoppingList: shoppingList,
+                  shoppingListId: shoppingList.id,
                 ),
               ),
             );

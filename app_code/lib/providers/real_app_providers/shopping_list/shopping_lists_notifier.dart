@@ -18,6 +18,23 @@ final shoppingListsProvider =
       ShoppingListsNotifier.new,
     );
 
+/// Provides a single shopping list by ID, fetching fresh data from the repository.
+/// This ensures the shopping list always has the latest state from the database,
+/// including any changes made in other screens (e.g., toggled products).
+/// 
+/// Uses .autoDispose to ensure the provider refetches data each time it's watched,
+/// preventing stale cached data from being displayed after database updates.
+final shoppingListProvider =
+    FutureProvider.family.autoDispose<ShoppingList, String>((ref, id) async {
+  final repository = ref.watch(shoppingListRepositoryProvider);
+  final allLists = await repository.getAll();
+  final list = allLists.firstWhere(
+    (l) => l.id == id,
+    orElse: () => throw Exception('Shopping list with ID $id not found'),
+  );
+  return list;
+});
+
 /// Manages shopping lists state and delegates persistence to the repository.
 /// 
 /// Design principles:

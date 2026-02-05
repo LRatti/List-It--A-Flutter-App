@@ -281,6 +281,8 @@ class _ListDetailScreenMobileState
   /// Handle cart button - navigate to register shopping list screen
   /// This decouples the screens by using push instead of awaiting the result.
   /// The register screen handles its own navigation back based on the source.
+  /// Passes the shopping list ID to ensure the register screen fetches fresh data
+  /// with all changes (including toggled products) from the database.
   Future<void> _handleCartButton() async {
     final controller = ref.read(
       listDetailControllerProvider(widget.shoppingList),
@@ -300,11 +302,12 @@ class _ListDetailScreenMobileState
         
         // Navigate to register shopping list screen without awaiting
         // This decouples the navigation - register screen handles its own navigation
+        // Pass only the ID - the register screen will fetch fresh data from the database
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => RegisterShoppingListScreenMobile(
-              shoppingList: widget.shoppingList,
+              shoppingListId: widget.shoppingList.id,
             ),
           ),
         );
