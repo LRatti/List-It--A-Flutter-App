@@ -1,4 +1,6 @@
 import 'package:app_code/models/category.dart';
+import 'package:app_code/models/purchased_product.dart';
+import 'package:app_code/models/receipt_match.dart';
 import 'package:app_code/models/recipe_response.dart';
 import 'package:app_code/repositories/abstract/gemini_repository.dart';
 import 'package:app_code/services/gemini/gemini_service.dart';
@@ -36,6 +38,21 @@ class GeminiRepositoryReal implements GeminiRepository {
       );
     } catch (e) {
       return 'uncategorized';
+    }
+  }
+
+  @override
+  Future<List<ReceiptMatch>> extractReceiptMatches({
+    required String receiptText,
+    required List<PurchasedProduct> purchasedProducts,
+  }) async {
+    try {
+      return await _geminiService.extractReceiptMatches(
+        receiptText: receiptText,
+        purchasedProducts: purchasedProducts,
+      );
+    } catch (e) {
+      rethrow;
     }
   }
 }

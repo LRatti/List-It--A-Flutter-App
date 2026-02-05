@@ -55,4 +55,43 @@ Your task:
 IMPORTANT: Return ONLY the category name as plain text, no JSON, no quotes, no additional text.
 ''';
   }
+
+  /// Builds a receipt extraction prompt for prices and quantities.
+  static String buildReceiptExtractionPrompt({
+    required String receiptText,
+    required String purchasedProducts,
+  }) {
+    return '''
+You are an expert receipt parser.
+
+Given the receipt text and the list of purchased products (with their IDs and names),
+return a JSON object that maps ONLY the products you can confidently match.
+
+Rules:
+1. Return JSON ONLY. No markdown, no explanations, no extra text.
+2. Include ONLY products from the provided list.
+3. For each matched product, return its product_id, quantity, and price.
+4. Quantity must be an integer. If quantity is not explicit, infer 1.
+5. Price must be a number using a dot as decimal separator.
+6. Omit any product if you cannot confidently match it or if price is missing.
+
+Return JSON with this exact structure:
+{
+  "matches": [
+    {
+      "product_id": "<id>",
+      "product_name": "<name>",
+      "quantity": 1,
+      "price": 2.99
+    }
+  ]
+}
+
+Purchased products list:
+$purchasedProducts
+
+Receipt text:
+$receiptText
+''';
+  }
 }

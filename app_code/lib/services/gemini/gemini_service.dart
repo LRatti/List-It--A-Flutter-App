@@ -1,9 +1,12 @@
 import 'package:app_code/models/category.dart';
+import 'package:app_code/models/purchased_product.dart';
+import 'package:app_code/models/receipt_match.dart';
 import 'package:app_code/models/recipe_response.dart';
 import 'package:app_code/services/gemini/gemini_client.dart';
 import 'package:app_code/services/gemini/gemini_exception_handler.dart';
 import 'package:app_code/services/gemini/gemini_prompt_builder.dart';
 import 'package:app_code/services/gemini/gemini_response_parser.dart';
+import 'package:app_code/services/receipt/receipt_response_parser.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class GeminiService {
@@ -81,6 +84,51 @@ class GeminiService {
       return matchingCategory.getName();
     } catch (e) {
       return 'uncategorized';
+    }
+  }
+
+  /// Extracts prices and quantities for purchased products from receipt text.
+  Future<List<ReceiptMatch>> extractReceiptMatches({
+    required String receiptText,
+    required List<PurchasedProduct> purchasedProducts,
+  }) async {
+    try {
+      final purchasedProductsText = purchasedProducts
+          .map((p) => '- id: ${p.id}, name: ${p.product.getName()}')
+          .join('\n');
+
+      final prompt = GeminiPromptBuilder.buildReceiptExtractionPrompt(
+        receiptText: receiptText,
+        purchasedProducts: purchasedProductsText,
+      );
+
+      final responseText = await _client.generateText(prompt);
+
+      if (responseText.isEmpty) {
+        throw Exception('Receipt service did not return a response.');
+      }
+
+      return ReceiptResponseParser.parse(responseText);
+    } on GenerativeAIException catch (e) {
+      final msg = e.message ?? e.toString();
+      final lowerMsg = msg.toLowerCase();
+
+      if (lowerMsg.contains('quota') ||
+          lowerMsg.contains('rate limit') ||
+          lowerMsg.contains('exceeded')) {
+        throw Exception('Receipt service is temporarily unavailable. Try again later.');
+      }
+
+      if (lowerMsg.contains('socket') ||
+          lowerMsg.contains('connection') ||
+          lowerMsg.contains('timeout') ||
+          lowerMsg.contains('network')) {
+        throw Exception('Connection error. Check your internet and try again.');
+      }
+
+      throw Exception('Receipt service failed. Please try again.');
+    } catch (e) {
+      throw Exception('Receipt processing failed. Please try again.');
     }
   }
 }

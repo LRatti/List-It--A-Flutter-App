@@ -1,6 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'dart:io';
+
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/models/receipt_match.dart';
+import 'package:app_code/models/shopping_list.dart';
+import 'package:app_code/screens/lists/register-list/register_shopping_list_controller_provider.dart';
 
 /// Camera screen for capturing receipt images
 /// 
@@ -14,21 +19,28 @@ import 'dart:io';
 /// Navigation:
 /// - Back button: Returns to register shopping list screen (discards photo)
 /// - Reload button: Allows retaking the photo
-/// - Check button: Shows progress dialog, then returns (photo discarded for now)
-class ReceiptCameraScreen extends StatefulWidget {
-  const ReceiptCameraScreen({super.key});
+/// - Check button: Processes receipt and returns to register screen
+class ReceiptCameraScreen extends ConsumerStatefulWidget {
+  final ShoppingList shoppingList;
+
+  const ReceiptCameraScreen({
+    super.key,
+    required this.shoppingList,
+  });
 
   @override
-  State<ReceiptCameraScreen> createState() => _ReceiptCameraScreenState();
+  ConsumerState<ReceiptCameraScreen> createState() =>
+      _ReceiptCameraScreenState();
 }
 
-class _ReceiptCameraScreenState extends State<ReceiptCameraScreen> {
+class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
   CameraController? _controller;
   List<CameraDescription>? _cameras;
   bool _isCameraInitialized = false;
   XFile? _capturedImage;
   bool _isLoading = true;
   String? _errorMessage;
+  bool _isTakingPicture = false;
 
   @override
   void initState() {
@@ -99,8 +111,17 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen> {
       return;
     }
 
+    if (_isTakingPicture || _controller!.value.isTakingPicture) {
+      return;
+    }
+
     try {
+      _isTakingPicture = true;
       final image = await _controller!.takePicture();
+
+      // Pause preview to avoid accumulating buffers after capture
+      await _controller!.pausePreview();
+      
       setState(() {
         _capturedImage = image;
       });
@@ -113,6 +134,8 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen> {
           ),
         );
       }
+    } finally {
+      _isTakingPicture = false;
     }
   }
 
@@ -121,10 +144,16 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen> {
     setState(() {
       _capturedImage = null;
     });
+
+    if (_controller != null && _controller!.value.isInitialized) {
+      _controller!.resumePreview();
+    }
   }
 
   /// Handle check button - show progress dialog and return
   Future<void> _handleConfirm() async {
+    if (_capturedImage == null) return;
+
     // Show progress dialog
     showDialog(
       context: context,
@@ -151,14 +180,36 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen> {
       ),
     );
 
-    // Simulate processing time
-    await Future.delayed(const Duration(seconds: 2));
+    List<ReceiptMatch> matches = [];
 
-    if (mounted) {
+    try {
+      final controller = ref.read(
+        registerShoppingListControllerProvider(widget.shoppingList),
+      );
+
+      matches = await controller.applyReceiptFromImage(
+        File(_capturedImage!.path),
+      );
+
+      if (!mounted) return;
+
       // Close the dialog
       Navigator.pop(context);
-      // Return to register screen
+
+      // Return to register screen with matches (if any)
+      Navigator.pop(context, matches);
+    } catch (e) {
+      if (!mounted) return;
+
+      // Close the dialog
       Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
     }
   }
 

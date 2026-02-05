@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/purchased_product.dart';
-import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/models/receipt_match.dart';
+import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/purchased_products/purchased_products_notifier.dart';
+import 'package:app_code/providers/real_app_providers/receipt/receipt_processing_provider.dart';
+import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 
 /// Controller that manages state for register_shopping_list_screen
 /// This screen allows users to register (archive) a shopping list by filling in
@@ -133,6 +137,81 @@ class RegisterShoppingListController extends ChangeNotifier {
         await purchasedProductsNotifier.updatePurchasedProduct(product);
       }
     }
+  }
+
+  /// Apply receipt matches (quantity/price) and persist updates.
+  Future<List<ReceiptMatch>> applyReceiptFromImage(File imageFile) async {
+    final boughtProducts = getBoughtProducts();
+    if (boughtProducts.isEmpty) {
+      return [];
+    }
+
+    final ocrService = _ref.read(receiptOcrServiceProvider);
+    final receiptText = await ocrService.extractText(imageFile);
+
+    if (receiptText.trim().isEmpty) {
+      throw Exception('No readable text found in the receipt image.');
+    }
+
+    final geminiRepository = _ref.read(receiptGeminiRepositoryProvider);
+    final matches = await geminiRepository.extractReceiptMatches(
+      receiptText: receiptText,
+      purchasedProducts: boughtProducts,
+    );
+
+    if (matches.isEmpty) {
+      return [];
+    }
+
+    final purchasedProductsNotifier =
+        _ref.read(purchasedProductsProvider.notifier);
+
+    final boughtById = {
+      for (final product in boughtProducts) product.id: product,
+    };
+    final boughtByName = {
+      for (final product in boughtProducts)
+        _normalizeName(product.product.getName()): product,
+    };
+
+    final applied = <ReceiptMatch>[];
+
+    for (final match in matches) {
+      final product = match.productId != null
+          ? boughtById[match.productId!]
+          : boughtByName[_normalizeName(match.productName ?? '')];
+
+      if (product == null) continue;
+
+      var changed = false;
+
+      if (match.quantity >= 0 && match.quantity != product.quantity) {
+        product.quantity = match.quantity;
+        _quantityUpdates[product.id] = match.quantity;
+        changed = true;
+      }
+
+      if (match.price >= 0 && match.price != product.price) {
+        product.price = match.price;
+        _priceUpdates[product.id] = match.price;
+        changed = true;
+      }
+
+      if (changed) {
+        product.lastModified = DateTime.now();
+        await purchasedProductsNotifier.updatePurchasedProduct(product);
+        applied.add(match);
+      }
+    }
+
+    _hasChanges = _quantityUpdates.isNotEmpty || _priceUpdates.isNotEmpty;
+    notifyListeners();
+
+    return applied;
+  }
+
+  String _normalizeName(String name) {
+    return name.toLowerCase().trim();
   }
 
   /// Register the shopping list (set is_registered to true)

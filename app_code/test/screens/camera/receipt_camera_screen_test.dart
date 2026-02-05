@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/screens/camera/receipt_camera_screen.dart';
 
 /// Tests for ReceiptCameraScreen
@@ -11,11 +12,16 @@ import 'package:app_code/screens/camera/receipt_camera_screen.dart';
 void main() {
   group('ReceiptCameraScreen', () {
     testWidgets('should build without errors', (WidgetTester tester) async {
+      final shoppingList = ShoppingList(
+        name: 'Test List',
+        createdAt: DateTime.now(),
+      );
+
       // Build the widget
       await tester.pumpWidget(
-        const ProviderScope(
+        ProviderScope(
           child: MaterialApp(
-            home: ReceiptCameraScreen(),
+            home: ReceiptCameraScreen(shoppingList: shoppingList),
           ),
         ),
       );
@@ -25,11 +31,16 @@ void main() {
     });
 
     testWidgets('should show loading indicator initially', (WidgetTester tester) async {
+      final shoppingList = ShoppingList(
+        name: 'Test List',
+        createdAt: DateTime.now(),
+      );
+
       // Build the widget
       await tester.pumpWidget(
-        const ProviderScope(
+        ProviderScope(
           child: MaterialApp(
-            home: ReceiptCameraScreen(),
+            home: ReceiptCameraScreen(shoppingList: shoppingList),
           ),
         ),
       );
@@ -39,11 +50,16 @@ void main() {
     });
 
     testWidgets('should have scaffold as root widget', (WidgetTester tester) async {
+      final shoppingList = ShoppingList(
+        name: 'Test List',
+        createdAt: DateTime.now(),
+      );
+
       // Build the widget
       await tester.pumpWidget(
-        const ProviderScope(
+        ProviderScope(
           child: MaterialApp(
-            home: ReceiptCameraScreen(),
+            home: ReceiptCameraScreen(shoppingList: shoppingList),
           ),
         ),
       );

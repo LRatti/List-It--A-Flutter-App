@@ -1,5 +1,7 @@
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
+import 'package:app_code/models/purchased_product.dart';
+import 'package:app_code/models/receipt_match.dart';
 import 'package:app_code/models/recipe_response.dart';
 import 'package:app_code/repositories/abstract/gemini_repository.dart';
 import 'dart:math';
@@ -121,6 +123,16 @@ class MockGeminiRepository implements GeminiRepository {
     }
 
     return _findCategory(categories, 'uncategorized');
+  }
+
+  @override
+  Future<List<ReceiptMatch>> extractReceiptMatches({
+    required String receiptText,
+    required List<PurchasedProduct> purchasedProducts,
+  }) async {
+    // Simulate processing time
+    await Future.delayed(const Duration(seconds: 2));
+    return [];
   }
 
   String _findCategory(List<Category> categories, String targetName) {

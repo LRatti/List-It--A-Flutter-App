@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
+import 'package:app_code/models/receipt_match.dart';
 import 'package:app_code/screens/lists/register-list/register_shopping_list_controller.dart';
+import 'package:app_code/screens/lists/register-list/register_shopping_list_controller_provider.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/screens/lists/lists_screen_mobile.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
@@ -12,15 +14,6 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
 import 'package:app_code/screens/camera/receipt_camera_screen.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
-
-/// Provider for the register shopping list controller
-final registerShoppingListControllerProvider =
-    ChangeNotifierProvider.family<RegisterShoppingListController, ShoppingList>((
-      ref,
-      shoppingList,
-    ) {
-      return RegisterShoppingListController(shoppingList: shoppingList, ref: ref);
-    });
 
 class RegisterShoppingListScreenMobile extends ConsumerStatefulWidget {
   final String shoppingListId;
@@ -197,12 +190,16 @@ class _RegisterShoppingListScreenMobileState
       
       if (mounted) {
         // Navigate to camera screen
-        await Navigator.push(
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const ReceiptCameraScreen(),
+            builder: (_) => ReceiptCameraScreen(shoppingList: shoppingList),
           ),
         );
+
+        if (result is List) {
+          _applyReceiptUpdates(result, shoppingList);
+        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -215,6 +212,38 @@ class _RegisterShoppingListScreenMobileState
         ),
       );
     }
+  }
+
+  void _applyReceiptUpdates(List<dynamic> result, ShoppingList shoppingList) {
+    final controller = ref.read(
+      registerShoppingListControllerProvider(shoppingList),
+    );
+
+    final boughtProducts = controller.getBoughtProducts();
+    final nameToId = {
+      for (final product in boughtProducts)
+        product.product.getName().toLowerCase().trim(): product.id,
+    };
+
+    for (final item in result) {
+      if (item is! ReceiptMatch) continue;
+
+      final productId = item.productId ??
+          nameToId[item.productName?.toLowerCase().trim() ?? ''];
+      if (productId == null) continue;
+
+      final quantityController = _quantityControllers[productId];
+      if (quantityController != null) {
+        quantityController.text = item.quantity.toString();
+      }
+
+      final priceController = _priceControllers[productId];
+      if (priceController != null) {
+        priceController.text = item.price.toStringAsFixed(2);
+      }
+    }
+
+    setState(() {});
   }
 
   @override
