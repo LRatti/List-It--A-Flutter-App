@@ -28,7 +28,6 @@ class _SupermarketCustomizationScreenState
     extends ConsumerState<SupermarketCustomizationScreen> {
   late TextEditingController _nameController;
   late List<Category> _categories;
-  int? _draggingIndex;
   late bool _isFavorite;
   late bool _initialIsFavorite;
 

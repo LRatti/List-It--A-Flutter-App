@@ -98,6 +98,7 @@ class Supermarket {
     );
   }
 
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

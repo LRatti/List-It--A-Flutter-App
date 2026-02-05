@@ -1,18 +1,16 @@
-import 'package:app_code/screens/history/history_screen_mobile.dart';
-import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
 
-// Screens
+// Screens - Responsive versions
 import 'package:app_code/screens/auth/auth_gate.dart';
 import 'package:app_code/screens/auth/welcome.dart';
 import 'package:app_code/screens/auth/forgot_password.dart';
 import 'package:app_code/screens/profile/verification_screen.dart';
-import 'package:app_code/screens/home/home_screen_mobile.dart';
-import 'package:app_code/screens/settings/settings_screen_mobile.dart';
+import 'package:app_code/screens/home/home_screen.dart';
+import 'package:app_code/screens/settings/settings_screen.dart';
 
 // Providers
 import 'package:app_code/providers/real_app_providers/global_keys_provider.dart';
@@ -146,8 +144,8 @@ class MyApp extends ConsumerWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const AuthGate(),
-        '/home': (context) => const MobileHomePage(),
-        '/settings': (context) => const SettingsScreenMobile(),
+        '/home': (context) => const ResponsiveHomePage(),
+        '/settings': (context) => const SettingsScreenResponsive(),
         '/signin': (context) => const WelcomeScreen(),
         '/verification': (context) => const VerificationScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),

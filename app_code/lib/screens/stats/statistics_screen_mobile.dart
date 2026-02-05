@@ -158,7 +158,7 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                     // Pie chart
                     SizedBox(
                       height: 200,
-                      child: StatisticsPieChart(entries: entries, total: total),
+                      child: StatisticsPieChart(entries: entries, total: total, onCategoryTap: (categoryName) {},),
                     ),
                     const SizedBox(height: 12),
                     // "By category" title

@@ -7,7 +7,7 @@ class StatisticsPieChart extends StatelessWidget {
   const StatisticsPieChart({
     super.key,
     required this.entries,
-    required this.total,
+    required this.total, required Null Function(dynamic categoryName) onCategoryTap,
   });
 
   /// List of category names and their spending amounts

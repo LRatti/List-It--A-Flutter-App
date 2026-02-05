@@ -40,7 +40,7 @@ class RegisterShoppingListController extends ChangeNotifier {
 
   /// Get all bought products from the list
   List<PurchasedProduct> getBoughtProducts() {
-    return (_originalList.getProducts() ?? [])
+    return (_originalList.getProducts())
         .where((pp) => pp.isBought)
         .toList();
   }
@@ -48,7 +48,7 @@ class RegisterShoppingListController extends ChangeNotifier {
   /// Get quantity for a product (from updates or original)
   int getQuantity(String productId) {
     return _quantityUpdates[productId] ?? 
-           (_originalList.getProducts()?.firstWhere(
+           (_originalList.getProducts().firstWhere(
              (pp) => pp.id == productId,
              orElse: () => PurchasedProduct(
                listId: listId,
@@ -56,13 +56,13 @@ class RegisterShoppingListController extends ChangeNotifier {
                category: null as dynamic,
                quantity: 0,
              ),
-           ).quantity ?? 0);
+           ).quantity);
   }
 
   /// Get price for a product (from updates or original)
   double getPrice(String productId) {
     return _priceUpdates[productId] ?? 
-           (_originalList.getProducts()?.firstWhere(
+           (_originalList.getProducts().firstWhere(
              (pp) => pp.id == productId,
              orElse: () => PurchasedProduct(
                listId: listId,
@@ -70,7 +70,7 @@ class RegisterShoppingListController extends ChangeNotifier {
                category: null as dynamic,
                price: 0.0,
              ),
-           ).price ?? 0.0);
+           ).price);
   }
 
   /// Update quantity for a product
@@ -78,7 +78,7 @@ class RegisterShoppingListController extends ChangeNotifier {
     if (quantity < 0) return;
     
     // Check if this is actually a change from the original
-    final boughtProduct = _originalList.getProducts()?.firstWhere(
+    final boughtProduct = _originalList.getProducts().firstWhere(
       (pp) => pp.id == productId && pp.isBought,
       orElse: () => null as dynamic,
     );
@@ -99,7 +99,7 @@ class RegisterShoppingListController extends ChangeNotifier {
   void updatePrice(String productId, double price) {
     if (price < 0) return;
     
-    final boughtProduct = _originalList.getProducts()?.firstWhere(
+    final boughtProduct = _originalList.getProducts().firstWhere(
       (pp) => pp.id == productId && pp.isBought,
       orElse: () => null as dynamic,
     );
