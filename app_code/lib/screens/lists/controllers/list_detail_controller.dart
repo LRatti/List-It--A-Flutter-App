@@ -518,7 +518,12 @@ class ListDetailController extends ChangeNotifier {
           await productsNotifier.addProduct(product);
         }
 
-        // 3. Save/update purchased product via provider
+        // 3. Ensure lastModified is set if product has changes (including isBought toggles)
+        // This is critical for the sync engine to detect and sync the isBought flag
+        purchasedProduct.lastModified ??= DateTime.now();
+
+        // 4. Save/update purchased product via provider
+        // This persists all fields including isBought flag to database
         final existingPurchased = await purchasedProductsNotifier
             .getPurchasedProductById(purchasedProduct.id);
         if (existingPurchased == null) {

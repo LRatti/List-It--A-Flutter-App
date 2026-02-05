@@ -44,13 +44,14 @@ Future<void> seedMockDataIfEmpty() async {
       categories: defaultCategories,
       isVisible: true,
       isFavorite: true, // Set as favorite on first app usage
+      isDefault: true,
     );
     await supermarketRepo.add(defaultSupermarket);
     print('📦 Created default supermarket with ${defaultCategories.length} categories (queued for Firestore sync)');
     
-    // Ensure the default supermarket is set as the favorite in SQLite
-    await ManageSupermarket.setFavoriteSupermarket(defaultSupermarket.id);
-    print('📦 Set default supermarket as favorite');
+    // // Ensure the default supermarket is set as the favorite in SQLite
+    // await ManageSupermarket.setFavoriteSupermarket(defaultSupermarket.id);
+    // print('📦 Set default supermarket as favorite');
 
     // ===== SEED MOCK SHOPPING LISTS =====
     final fish = Category(name: 'Fish');

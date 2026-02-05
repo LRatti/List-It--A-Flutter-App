@@ -22,11 +22,14 @@ class SupermarketRepositoryWithSync
 
     await ManageSupermarket.addSupermarket(market);
 
-    await appendUpsertToSyncBox(
+    if(!market.isDefault) {
+      await appendUpsertToSyncBox(
       market.id,
       getEntityType(),
       market.lastModified!,
     );
+    }
+    
   }
 
   Future<void> update(Supermarket market) async {
@@ -173,6 +176,11 @@ class SupermarketRepositoryWithSync
       cleaned.remove('isFavorite');
     }
 
+    if (cleaned.containsKey('isDefault')) {
+      cleaned['is_default'] = cleaned['isDefault'] == true ? 1 : 0;
+      cleaned.remove('isDefault');
+    }
+
     if (cleaned.containsKey('createdAt')) {
       final parsed = _parseTimestamp(cleaned['createdAt']);
       cleaned['created_at'] = parsed?.toIso8601String() ?? DateTime.now().toIso8601String();
@@ -194,6 +202,9 @@ class SupermarketRepositoryWithSync
     }
     if (!cleaned.containsKey('is_favorite') || cleaned['is_favorite'] == null) {
       cleaned['is_favorite'] = 0;
+    }
+    if (!cleaned.containsKey('is_default') || cleaned['is_default'] == null) {
+      cleaned['is_default'] = 0;
     }
 
     return cleaned;

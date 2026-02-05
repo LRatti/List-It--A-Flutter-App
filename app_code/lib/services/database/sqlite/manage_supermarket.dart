@@ -12,6 +12,7 @@ class ManageSupermarket {
       'name': market.getName(),
       'is_visible': market.isVisible ? 1 : 0,
       'is_favorite': market.isFavorite ? 1 : 0,
+      'is_default': market.isDefault ? 1 : 0,
       'created_at': market.createdAt.toIso8601String(),
       'last_modified': market.lastModified?.toIso8601String() ?? DateTime.now().toIso8601String(),
     });
@@ -51,6 +52,7 @@ class ManageSupermarket {
         name: row['name'] as String,
         isVisible: row['is_visible'] == 1,
         isFavorite: row['is_favorite'] == 1,
+        isDefault: row['is_default'] == 1,
         lastModified: DateTime.tryParse(row['last_modified'] as String? ?? '') ?? DateTime.now(),
         createdAt: DateTime.tryParse(row['created_at'] as String? ?? '') ?? DateTime.now(),
         categories: categories.map(Category.fromDatabase).toList(),
@@ -79,6 +81,7 @@ class ManageSupermarket {
         'name': market.getName(),
         'is_visible': market.isVisible ? 1 : 0,
         'is_favorite': market.isFavorite ? 1 : 0,
+        'is_default': market.isDefault ? 1 : 0,
         'last_modified': market.lastModified?.toIso8601String() ?? DateTime.now().toIso8601String(),
       },
       where: 'id = ?',

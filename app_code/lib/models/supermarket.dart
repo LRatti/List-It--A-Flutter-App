@@ -10,6 +10,7 @@ class Supermarket {
   List<Category> _categories;
   bool isVisible;
   bool isFavorite;
+  bool isDefault;
   late DateTime? lastModified;
   late DateTime createdAt;
   
@@ -19,6 +20,7 @@ class Supermarket {
     List<Category>? categories,
     this.isVisible = true,
     this.isFavorite = false,
+    this.isDefault = false,
     DateTime? lastModified,
     DateTime? createdAt,
     bool isDeleted = false,
@@ -62,6 +64,7 @@ class Supermarket {
       name: json['name'] ?? 'Supermarket',
       isVisible: json['is_visible'] == 1,
       isFavorite: json['is_favorite'] == 1,
+      isDefault: json['is_default'] == 1,
       lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
     );
@@ -74,6 +77,7 @@ class Supermarket {
       'categoryIds': _categories.map((cat) => cat.id).toList(),
       'is_visible': isVisible ? 1 : 0,
       'is_favorite': isFavorite ? 1 : 0,
+      'is_default': isDefault ? 1 : 0,
       'created_at': createdAt.toIso8601String(),
       'last_modified': lastModified?.toIso8601String(),
     };
@@ -88,6 +92,7 @@ class Supermarket {
           .toList() ?? [],
       isVisible: json['isVisible'] ?? true,
       isFavorite: json['isFavorite'] ?? false,
+      isDefault: json['isDefault'] ?? false,
       lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
@@ -100,6 +105,7 @@ class Supermarket {
       'categories': _categories.map((cat) => cat.toJson()).toList(),
       'isVisible': isVisible,
       'isFavorite': isFavorite,
+      'isDefault': isDefault,
       'lastModified': lastModified?.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
     };

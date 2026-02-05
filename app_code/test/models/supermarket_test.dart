@@ -11,6 +11,7 @@ void main() {
       expect(market.getName(), 'Local');
       expect(market.getCategories(), isEmpty);
       expect(market.isVisible, true);
+      expect(market.isDefault, false);
     });
 
     test('setters and addCategory', () {
@@ -87,8 +88,24 @@ void main() {
     });
 
     test('fromDatabase handles is_visible correctly', () {
-      final dbVisible = {'id': 's1', 'name': 'Visible', 'is_visible': true};
-      final dbHidden = {'id': 's2', 'name': 'Hidden', 'is_visible': false};
+      final dbVisible = {
+        'id': 's1',
+        'name': 'Visible',
+        'is_visible': 1,
+        'is_favorite': 0,
+        'is_default': 0,
+        'created_at': DateTime.now().toIso8601String(),
+        'last_modified': DateTime.now().toIso8601String(),
+      };
+      final dbHidden = {
+        'id': 's2',
+        'name': 'Hidden',
+        'is_visible': 0,
+        'is_favorite': 0,
+        'is_default': 0,
+        'created_at': DateTime.now().toIso8601String(),
+        'last_modified': DateTime.now().toIso8601String(),
+      };
 
       final visibleMarket = Supermarket.fromDatabase(dbVisible);
       final hiddenMarket = Supermarket.fromDatabase(dbHidden);
@@ -175,6 +192,114 @@ void main() {
       final market = Supermarket(name: longName);
 
       expect(market.getName(), longName);
+    });
+
+    test('isDefault defaults to false', () {
+      final market = Supermarket(name: 'Market');
+      
+      expect(market.isDefault, false);
+    });
+
+    test('isDefault can be set to true in constructor', () {
+      final market = Supermarket(name: 'Market', isDefault: true);
+      
+      expect(market.isDefault, true);
+    });
+
+    test('toDatabase includes isDefault field', () {
+      final marketDefault = Supermarket(name: 'Default', isDefault: true);
+      final marketNonDefault = Supermarket(name: 'NonDefault', isDefault: false);
+
+      final dbDefault = marketDefault.toDatabase();
+      final dbNonDefault = marketNonDefault.toDatabase();
+
+      expect(dbDefault['is_default'], 1);
+      expect(dbNonDefault['is_default'], 0);
+    });
+
+    test('fromDatabase parses isDefault correctly', () {
+      final dbDefault = {
+        'id': 's1',
+        'name': 'Default',
+        'is_visible': 1,
+        'is_favorite': 0,
+        'is_default': 1,
+        'created_at': DateTime.now().toIso8601String(),
+        'last_modified': DateTime.now().toIso8601String(),
+      };
+      
+      final dbNonDefault = {
+        'id': 's2',
+        'name': 'NonDefault',
+        'is_visible': 1,
+        'is_favorite': 0,
+        'is_default': 0,
+        'created_at': DateTime.now().toIso8601String(),
+        'last_modified': DateTime.now().toIso8601String(),
+      };
+
+      final marketDefault = Supermarket.fromDatabase(dbDefault);
+      final marketNonDefault = Supermarket.fromDatabase(dbNonDefault);
+
+      expect(marketDefault.isDefault, true);
+      expect(marketNonDefault.isDefault, false);
+    });
+
+    test('toJson includes isDefault field', () {
+      final marketDefault = Supermarket(name: 'Default', isDefault: true);
+      final marketNonDefault = Supermarket(name: 'NonDefault', isDefault: false);
+
+      final jsonDefault = marketDefault.toJson();
+      final jsonNonDefault = marketNonDefault.toJson();
+
+      expect(jsonDefault['isDefault'], true);
+      expect(jsonNonDefault['isDefault'], false);
+    });
+
+    test('fromJson parses isDefault correctly', () {
+      final jsonDefault = {
+        'id': 's1',
+        'name': 'Default',
+        'isVisible': true,
+        'isFavorite': false,
+        'isDefault': true,
+        'categories': [],
+        'createdAt': DateTime.now().toIso8601String(),
+        'lastModified': DateTime.now().toIso8601String(),
+      };
+      
+      final jsonNonDefault = {
+        'id': 's2',
+        'name': 'NonDefault',
+        'isVisible': true,
+        'isFavorite': false,
+        'isDefault': false,
+        'categories': [],
+        'createdAt': DateTime.now().toIso8601String(),
+        'lastModified': DateTime.now().toIso8601String(),
+      };
+
+      final marketDefault = Supermarket.fromJson(jsonDefault);
+      final marketNonDefault = Supermarket.fromJson(jsonNonDefault);
+
+      expect(marketDefault.isDefault, true);
+      expect(marketNonDefault.isDefault, false);
+    });
+
+    test('fromJson defaults to false when isDefault is missing', () {
+      final json = {
+        'id': 's1',
+        'name': 'Market',
+        'isVisible': true,
+        'isFavorite': false,
+        'categories': [],
+        'createdAt': DateTime.now().toIso8601String(),
+        'lastModified': DateTime.now().toIso8601String(),
+      };
+
+      final market = Supermarket.fromJson(json);
+
+      expect(market.isDefault, false);
     });
   });
 }
