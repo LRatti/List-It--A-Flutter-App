@@ -22,6 +22,27 @@ class ScreenSize {
   /// Large desktop - very large screens >= 1200 dp
   static const double largeDesktopMin = 1200.0;
 
+  // Immutable at-launch classification (phone vs tablet+)
+  static bool? _isTabletAtLaunch;
+
+  /// True if the app started on a tablet-sized screen (tablet or larger)
+  static bool? get isTabletAtLaunch => _isTabletAtLaunch;
+
+  /// True if the app started on a phone-sized screen
+  static bool? get isPhoneAtLaunch =>
+      _isTabletAtLaunch == null ? null : !_isTabletAtLaunch!;
+
+  /// Initialize the at-launch device type using a raw width.
+  /// This is intentionally one-shot and will not change after first set.
+  static void initializeDeviceTypeFromWidth(double width) {
+    _isTabletAtLaunch ??= width >= tabletMin;
+    if(isTabletAtLaunch == true) {
+      debugPrint('Tablet');
+    } else {
+      debugPrint('Phone');
+    }
+  }
+
   /// Get the current screen width
   static double getWidth(BuildContext context) {
     return MediaQuery.of(context).size.width;

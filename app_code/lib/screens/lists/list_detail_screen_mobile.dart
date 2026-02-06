@@ -630,7 +630,7 @@ class _ListDetailScreenMobileState
     final supermarketsAsync = ref.watch(supermarketsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isMobile = ScreenSize.isMobile(context);
+    final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
 
     return WillPopScope(
       onWillPop: _handleBack,

@@ -46,7 +46,7 @@ class _SettingsScreenResponsiveState extends ConsumerState<SettingsScreenRespons
     
 
     final themeMode = ref.watch(themeModeValueProvider);
-    final isMobile = ScreenSize.isMobile(context);
+    final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 

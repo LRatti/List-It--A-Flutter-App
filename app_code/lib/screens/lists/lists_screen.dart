@@ -76,7 +76,9 @@ class _ListsScreenResponsiveState extends ConsumerState<ListsScreenResponsive> {
                     if (context.mounted) {
                       Navigator.pop(context);
                       
-                      if (ScreenSize.isMobile(context)) {
+                        final isPhone = ScreenSize.isPhoneAtLaunch ??
+                          ScreenSize.isMobile(context);
+                        if (isPhone) {
                         // Mobile: Navigate to detail screen
                         Navigator.push(
                           context,
@@ -112,7 +114,8 @@ class _ListsScreenResponsiveState extends ConsumerState<ListsScreenResponsive> {
     return Consumer(
       builder: (context, ref, _) {
         final shoppingListsAsync = ref.watch(shoppingListsProvider);
-        final isMobile = ScreenSize.isMobile(context);
+        final isMobile = ScreenSize.isPhoneAtLaunch ??
+          ScreenSize.isMobile(context);
 
         // Watch screen size provider to rebuild on size/orientation changes
         ref.watch(screenSizeProvider);

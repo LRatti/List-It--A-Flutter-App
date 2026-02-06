@@ -103,7 +103,8 @@ class _RegisterShoppingListScreenMobileState
       await controller.registerList();
       
       if (mounted) {
-        final isMobile = ScreenSize.isMobile(context);
+        final isMobile = ScreenSize.isPhoneAtLaunch ??
+          ScreenSize.isMobile(context);
         ref.read(registerShoppingListSourceProvider.notifier).state = null;
         if (isMobile) {
           // Mobile: Navigate to history using full screen navigation

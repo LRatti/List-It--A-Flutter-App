@@ -26,7 +26,7 @@ class _HistoryScreenResponsiveState extends ConsumerState<HistoryScreenResponsiv
   @override
   Widget build(BuildContext context) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
-    final isMobile = ScreenSize.isMobile(context);
+    final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
 
     // Watch screen size provider to rebuild on size/orientation changes
     ref.watch(screenSizeProvider);

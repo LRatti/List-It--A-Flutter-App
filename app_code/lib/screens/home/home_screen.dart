@@ -47,7 +47,8 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
     ref.read(navigationIndexProvider.notifier).state = index;
     ref.read(appNavigationSignalProvider.notifier).state++;
     // Close drawer on mobile after tab selection
-    if (ScreenSize.isMobile(context) && _isMenuOpen) {
+    final isPhone = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
+    if (isPhone && _isMenuOpen) {
       _closeMenu();
     }
   }
@@ -86,8 +87,9 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
     }
 
     final selectedIndex = ref.watch(navigationIndexProvider);
-    final isMobile = ScreenSize.isMobile(context);
-    final isTabletOrLarger = ScreenSize.isTablet(context) || ScreenSize.isDesktop(context);
+    final isPhone = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
+    final isTabletOrLarger = ScreenSize.isTabletAtLaunch ??
+      (ScreenSize.isTablet(context) || ScreenSize.isDesktop(context));
     final colorScheme = Theme.of(context).colorScheme;
 
     // Watch screen size provider to rebuild on size/orientation changes
@@ -127,7 +129,7 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
             ),
 
             // Side menu overlay - only on mobile
-            if (isMobile && _isMenuOpen)
+            if (isPhone && _isMenuOpen)
               Positioned(
                 top: kToolbarHeight + 56,
                 left: 0,
@@ -156,7 +158,7 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
       ),
 
       // Bottom navigation bar - only on mobile
-      bottomNavigationBar: isMobile
+        bottomNavigationBar: isPhone
           ? _buildBottomNavigationBar(colorScheme, selectedIndex)
           : null,
     );
@@ -200,7 +202,7 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
 
   /// Build the persistent navigation rail for tablet/desktop screens
   Widget _buildNavigationRail(ColorScheme colorScheme, int selectedIndex) {
-    final isTablet = ScreenSize.isTablet(context);
+    final isTablet = ScreenSize.isTabletAtLaunch ?? ScreenSize.isTablet(context);
     
     return Container(
       width: isTablet ? 80 : 100, // Wider on desktop

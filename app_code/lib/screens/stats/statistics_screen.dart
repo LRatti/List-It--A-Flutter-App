@@ -122,8 +122,7 @@ class _StatisticsScreenResponsiveState
   Widget build(BuildContext context) {
     
     final listsAsync = ref.watch(shoppingListsProvider);
-    final isMobile = ScreenSize.isMobile(context);
-    final isTablet = ScreenSize.isTablet(context);
+    final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
 
     // Watch screen size provider to rebuild on size/orientation changes
     ref.watch(screenSizeProvider);

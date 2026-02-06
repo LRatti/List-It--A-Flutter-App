@@ -29,12 +29,17 @@ import 'package:app_code/services/mock/mock_data_seed.dart';
 // Utils
 import 'package:app_code/utils/favorite_supermarket_initializer.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
+import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:app_code/widgets/app_screen_size_listener.dart';
 
 /// Performs all initialization tasks required at app startup.
 /// This includes Firebase setup, mock data seeding, cleanup operations, and sync engine initialization.
 Future<void> _runStartupTasks() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final view = WidgetsBinding.instance.platformDispatcher.views.first;
+  final size = view.physicalSize / view.devicePixelRatio;
+  ScreenSize.initializeDeviceTypeFromWidth(size.width);
 
   // Initialize Firebase
   await Firebase.initializeApp(

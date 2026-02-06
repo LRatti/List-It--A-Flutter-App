@@ -62,7 +62,7 @@ class _SupermarketsScreenResponsiveState
   @override
   Widget build(BuildContext context) {
     final supermarketsAsync = ref.watch(supermarketsProvider);
-    final isMobile = ScreenSize.isMobile(context);
+    final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
 
     // Watch screen size provider to rebuild on size/orientation changes
     ref.watch(screenSizeProvider);
