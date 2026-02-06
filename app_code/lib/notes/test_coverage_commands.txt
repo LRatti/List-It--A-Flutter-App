@@ -29,6 +29,65 @@ foreach ($line in $lcov) {
 $files | Sort-Object Coverage -Descending | Format-Table -AutoSize
 
 
+--------------------------------------------
+Print the covererage results per specified files in terminal:
+--------------------------------------------
+
+cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"
+
+# Files we want coverage for (relative paths as in lcov.info)
+$targetFiles = @(
+
+    //SPECIFY THE SPECIFIC TESTS HERE. FOR EXAMPLE:
+    /*
+    "lib/models/receipt_match.dart",
+    "lib/utils/uncategorized_category_initializer.dart",
+    "lib/utils/screen_size_helper.dart",
+    "lib/services/database/sqlite/manage_purchased_product.dart",
+    "lib/services/gemini/gemini_service.dart",
+    "lib/utils/monotonic_timestamp.dart",
+    "lib/utils/default_categories_loader.dart",
+    "lib/utils/favorite_supermarket_initializer.dart"
+    */
+)
+
+$lcov = Get-Content coverage\lcov.info
+$files = @()
+
+$file = ""
+$totalLines = 0
+
+foreach ($line in $lcov) {
+    if ($line -match "^SF:(.*)") {
+        # Normalize path separators
+        $file = $matches[1] -replace "\\", "/"
+    }
+    elseif ($line -match "^LF:(\d+)") {
+        $totalLines = [int]$matches[1]
+    }
+    elseif ($line -match "^LH:(\d+)") {
+        $coveredLines = [int]$matches[1]
+
+        if ($targetFiles -contains $file) {
+            $coverage = if ($totalLines -gt 0) {
+                [math]::Round(($coveredLines / $totalLines) * 100, 2)
+            } else {
+                0
+            }
+
+            $files += [PSCustomObject]@{
+                File     = $file
+                Covered  = $coveredLines
+                Total    = $totalLines
+                Coverage = "$coverage%"
+            }
+        }
+    }
+}
+
+$files | Sort-Object Coverage -Descending | Format-Table -AutoSize
+
+
 ------------------------------------------
 Open summary HTML:
 ------------------------------------------
@@ -64,3 +123,4 @@ $rows
 $out = "lib/notes/coverage_report.html"
 $html | Set-Content $out -Encoding UTF8
 Start-Process $out
+

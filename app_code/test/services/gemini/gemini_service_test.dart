@@ -20,6 +20,19 @@ class FakeGeminiClient implements GeminiClient {
   }
 }
 
+/// Gemini client that throws exceptions for error testing
+class _ThrowingGeminiClient implements GeminiClient {
+  final Exception exception;
+
+  _ThrowingGeminiClient({Exception? exception})
+      : exception = exception ?? Exception('Test exception');
+
+  @override
+  Future<String> generateText(String prompt) async {
+    throw exception;
+  }
+}
+
 void main() {
   group('GeminiPromptBuilder', () {
     test('buildRecipePrompt includes recipe name and categories', () {
@@ -151,6 +164,230 @@ void main() {
       );
 
       expect(result, 'uncategorized');
+    });
+
+    test('categorizeProduct handles empty response', () async {
+      final service = GeminiService.withClient(
+        FakeGeminiClient(responseToReturn: ''),
+      );
+
+      final result = await service.categorizeProduct(
+        productName: 'Test',
+        categories: [Category(id: '1', name: 'Test')],
+      );
+
+      expect(result, 'uncategorized');
+    });
+
+    test('categorizeProduct handles case-insensitive category matching', () async {
+      final service = GeminiService.withClient(
+        FakeGeminiClient(responseToReturn: 'dairy'),
+      );
+
+      final result = await service.categorizeProduct(
+        productName: 'Milk',
+        categories: [
+          Category(id: '1', name: 'Dairy'),
+          Category(id: '2', name: 'Produce'),
+        ],
+      );
+
+      expect(result, 'Dairy');
+    });
+
+    test('categorizeProduct returns uncategorized on exception', () async {
+      final service = GeminiService.withClient(
+        _ThrowingGeminiClient(),
+      );
+
+      final result = await service.categorizeProduct(
+        productName: 'Test',
+        categories: [Category(id: '1', name: 'Test')],
+      );
+
+      expect(result, 'uncategorized');
+    });
+  });
+
+  group('GeminiService.extractReceiptMatches()', () {
+    test('successfully extracts receipt matches from valid response', () async {
+      final fakeResponse = '''{
+        "matches": [
+          {
+            "product_id": "prod-1",
+            "product_name": "Milk",
+            "quantity": 2,
+            "price": 3.50
+          },
+          {
+            "product_id": "prod-2",
+            "product_name": "Bread",
+            "quantity": 1,
+            "price": 2.00
+          }
+        ]
+      }''';
+
+      final service = GeminiService.withClient(
+        FakeGeminiClient(responseToReturn: fakeResponse),
+      );
+
+      final result = await service.extractReceiptMatches(
+        receiptText: r'Receipt: Milk $3.50, Bread $2.00',
+        purchasedProducts: [],
+      );
+
+      expect(result, hasLength(2));
+      expect(result[0].productId, 'prod-1');
+      expect(result[0].productName, 'Milk');
+      expect(result[0].quantity, 2);
+      expect(result[0].price, 3.50);
+    });
+
+    test('throws exception when response is empty', () async {
+      final service = GeminiService.withClient(
+        FakeGeminiClient(responseToReturn: ''),
+      );
+
+      expect(
+        () async => await service.extractReceiptMatches(
+          receiptText: 'test',
+          purchasedProducts: [],
+        ),
+        throwsException,
+      );
+    });
+
+    test('handles quota exceeded error', () async {
+      final service = GeminiService.withClient(
+        _ThrowingGeminiClient(
+          exception: GenerativeAIException('Rate limit exceeded'),
+        ),
+      );
+
+      expect(
+        () async => await service.extractReceiptMatches(
+          receiptText: 'test',
+          purchasedProducts: [],
+        ),
+        throwsA(
+          predicate((e) =>
+              e is Exception &&
+              e.toString().contains('temporarily unavailable')),
+        ),
+      );
+    });
+
+    test('handles connection error', () async {
+      final service = GeminiService.withClient(
+        _ThrowingGeminiClient(
+          exception: GenerativeAIException('Socket exception'),
+        ),
+      );
+
+      expect(
+        () async => await service.extractReceiptMatches(
+          receiptText: 'test',
+          purchasedProducts: [],
+        ),
+        throwsA(
+          predicate((e) =>
+              e is Exception &&
+              e.toString().contains('Connection error')),
+        ),
+      );
+    });
+
+    test('handles timeout error', () async {
+      final service = GeminiService.withClient(
+        _ThrowingGeminiClient(
+          exception: GenerativeAIException('timeout'),
+        ),
+      );
+
+      expect(
+        () async => await service.extractReceiptMatches(
+          receiptText: 'test',
+          purchasedProducts: [],
+        ),
+        throwsA(
+          predicate((e) =>
+              e is Exception &&
+              e.toString().contains('Connection error')),
+        ),
+      );
+    });
+
+    test('handles generic GenerativeAIException', () async {
+      final service = GeminiService.withClient(
+        _ThrowingGeminiClient(
+          exception: GenerativeAIException('Some other error'),
+        ),
+      );
+
+      expect(
+        () async => await service.extractReceiptMatches(
+          receiptText: 'test',
+          purchasedProducts: [],
+        ),
+        throwsA(
+          predicate((e) =>
+              e is Exception &&
+              e.toString().contains('Receipt service failed')),
+        ),
+      );
+    });
+
+    test('handles generic Exception', () async {
+      final service = GeminiService.withClient(
+        _ThrowingGeminiClient(
+          exception: Exception('Generic error'),
+        ),
+      );
+
+      expect(
+        () async => await service.extractReceiptMatches(
+          receiptText: 'test',
+          purchasedProducts: [],
+        ),
+        throwsA(
+          predicate((e) =>
+              e is Exception &&
+              e.toString().contains('Receipt processing failed')),
+        ),
+      );
+    });
+  });
+
+  group('GeminiService.queryRecipe() error handling', () {
+    test('handles GenerativeAIException', () async {
+      final service = GeminiService.withClient(
+        _ThrowingGeminiClient(
+          exception: GenerativeAIException('API error'),
+        ),
+      );
+
+      final result = await service.queryRecipe(
+        recipeName: 'Test',
+        categories: [Category(id: '1', name: 'Test')],
+      );
+
+      expect(result.error, isNotEmpty);
+    });
+
+    test('handles generic Exception', () async {
+      final service = GeminiService.withClient(
+        _ThrowingGeminiClient(
+          exception: Exception('Unknown error'),
+        ),
+      );
+
+      final result = await service.queryRecipe(
+        recipeName: 'Test',
+        categories: [Category(id: '1', name: 'Test')],
+      );
+
+      expect(result.error, isNotEmpty);
     });
   });
 
