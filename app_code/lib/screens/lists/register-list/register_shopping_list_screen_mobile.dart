@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
 import 'package:app_code/screens/camera/receipt_camera_screen.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/utils/screen_size_helper.dart';
 
 class RegisterShoppingListScreenMobile extends ConsumerStatefulWidget {
   final String shoppingListId;
@@ -57,7 +58,7 @@ class _RegisterShoppingListScreenMobileState
     final controller = ref.read(
       registerShoppingListControllerProvider(shoppingList),
     );
-    final source = ref.read(registerShoppingListSourceProvider);
+    //isnt used final source = ref.read(registerShoppingListSourceProvider);
 
     try {
       // Persist any quantity/price changes
@@ -66,9 +67,17 @@ class _RegisterShoppingListScreenMobileState
       if (mounted) {
         // Clear the navigation source
         ref.read(registerShoppingListSourceProvider.notifier).state = null;
+        if (Navigator.canPop(context)) {
+          // Navigate back to the previous screen
+          Navigator.pop(context);
+        } else {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/home',
+            (route) => false, // Keep the home/root route
+            arguments: HomeTab.history,
+          );
+        }
         
-        // Navigate back to the previous screen
-        Navigator.pop(context);
       }
     } catch (e) {
       if (!mounted) return;
@@ -94,15 +103,24 @@ class _RegisterShoppingListScreenMobileState
       await controller.registerList();
       
       if (mounted) {
-        // Clear the navigation source
+        final isMobile = ScreenSize.isMobile(context);
         ref.read(registerShoppingListSourceProvider.notifier).state = null;
-        
-        // Pop to get back to the source screen, then navigate to history
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/home',
-          (route) => false, // Keep the home/root route
-          arguments: HomeTab.history,
-        );
+        if (isMobile) {
+          // Mobile: Navigate to history using full screen navigation
+          
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/home',
+            (route) => false, // Keep the home/root route
+            arguments: HomeTab.history,
+          );
+        } else {
+          // Tablet: Pop back to empty detail pane in the detail navigator
+          
+          // Pop all routes in the detail pane navigator until we reach the root (empty pane)
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
+        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -156,12 +174,12 @@ class _RegisterShoppingListScreenMobileState
       if (mounted) {
         // Clear the navigation source
         ref.read(registerShoppingListSourceProvider.notifier).state = null;
-        
+
         // Navigate to lists_screen (replaces the navigation stack to avoid stacking)
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (_) => ListDetailScreenMobile(shoppingList: shoppingList),
-          ),
+              MaterialPageRoute(
+                builder: (_) => ListDetailScreenMobile(shoppingList: shoppingList),
+              ),
           (route) => route.isFirst, // Keep the home/root route
         );
       }

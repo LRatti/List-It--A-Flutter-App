@@ -1,3 +1,4 @@
+import 'package:app_code/widgets/detail_pane_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
@@ -69,6 +70,15 @@ class _HistoryScreenResponsiveState extends State<HistoryScreenResponsive> {
           );
         }
 
+        // Clear selected list if it's no longer in active lists (e.g., registered or deleted)
+        if (_selectedList != null && !registeredLists.any((l) => l.id == _selectedList!.id)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() => _selectedList = null);
+            }
+          });
+        }
+
         // Tablet/Desktop: Master-detail split view
         return Scaffold(
           body: Row(
@@ -91,8 +101,12 @@ class _HistoryScreenResponsiveState extends State<HistoryScreenResponsive> {
               Flexible(
                 flex: 60,
                 child: _selectedList != null
-                    ? RegisterShoppingListScreenMobile(
-                        shoppingListId: _selectedList!.id,
+                    ? DetailPaneNavigator(
+                        key: ValueKey(_selectedList!.id),
+                        initialChild: RegisterShoppingListScreenMobile(
+                          shoppingListId: _selectedList!.id,
+                        ),
+                        emptyBuilder: _buildEmptyDetailPane,
                       )
                     : _buildEmptyDetailPane(context),
               ),

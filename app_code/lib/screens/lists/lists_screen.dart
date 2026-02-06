@@ -4,6 +4,7 @@ import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
+import 'package:app_code/widgets/detail_pane_navigator.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
 
 /// Responsive lists screen that adapts layout based on screen size.
@@ -157,6 +158,15 @@ class _ListsScreenResponsiveState extends State<ListsScreenResponsive> {
           );
         }
 
+        // Clear selected list if it's no longer in active lists (e.g., registered or deleted)
+        if (_selectedList != null && !activeLists.any((l) => l.id == _selectedList!.id)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() => _selectedList = null);
+            }
+          });
+        }
+
         // Tablet/Desktop: Master-detail split view
         return Scaffold(
           body: Row(
@@ -180,15 +190,19 @@ class _ListsScreenResponsiveState extends State<ListsScreenResponsive> {
                   ),
                 ),
               ),
-              // Detail pane: List editor or empty state
+              // Detail pane: List editor or empty state (with nested navigator)
               Flexible(
                 flex: 60,
                 child: _selectedList != null
-                    ? ListDetailScreenMobile(
-                        shoppingList: _selectedList!,
+                    ? DetailPaneNavigator(
+                        key: ValueKey(_selectedList!.id),
+                        initialChild: ListDetailScreenMobile(
+                          shoppingList: _selectedList!,
+                        ),
+                        emptyBuilder: _buildEmptyDetailPane,
                       )
                     : _buildEmptyDetailPane(context),
-              ),
+                ),
             ],
           ),
         );

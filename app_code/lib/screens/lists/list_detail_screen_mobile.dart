@@ -1,5 +1,6 @@
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -627,9 +628,9 @@ class _ListDetailScreenMobileState
       listDetailControllerProvider(widget.shoppingList),
     );
     final supermarketsAsync = ref.watch(supermarketsProvider);
-    final shoppingListsAsync = ref.read(shoppingListsProvider.notifier);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isMobile = ScreenSize.isMobile(context);
 
     return WillPopScope(
       onWillPop: _handleBack,
@@ -658,13 +659,13 @@ class _ListDetailScreenMobileState
             onPressed: () async {
               if (await _handleBack()) {
                 if (mounted) {
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/home',
-                    (route) => false, // Keep the home/root route
-                    arguments: HomeTab.lists,
-
-                  );
-                };
+                    // Fallback for mobile: navigate to home
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/home',
+                      (route) => false, // Keep the home/root route
+                      arguments: HomeTab.lists,
+                    );
+                }
               }
             },
           ),
@@ -693,7 +694,7 @@ class _ListDetailScreenMobileState
               ),
 
               // Product search and action buttons (like WhatsApp)
-              _buildSearchAndActions(colorScheme, controller),
+              _buildSearchAndActions(colorScheme, controller, isMobile),
             ],
           ),
         ),
@@ -867,6 +868,7 @@ class _ListDetailScreenMobileState
   Widget _buildSearchAndActions(
     ColorScheme colorScheme,
     ListDetailController controller,
+    bool isMobile,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -890,17 +892,21 @@ class _ListDetailScreenMobileState
               color: colorScheme.primary,
               onPressed: () async {
                 if (await _handleBack()) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddRecipeScreen(
-                        shoppingList: widget.shoppingList,
-                        availableCategories:
-                            controller.selectedSupermarket?.getCategories() ??
-                            [],
+                  if (isMobile) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AddRecipeScreen(
+                          shoppingList: widget.shoppingList,
+                          availableCategories:
+                              controller.selectedSupermarket?.getCategories() ??
+                              [],
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  } else {
+                    _showAddRecipeSidePanel(controller, colorScheme);
+                  }
                 }
               },
             ),
@@ -945,6 +951,51 @@ class _ListDetailScreenMobileState
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _showAddRecipeSidePanel(
+    ListDetailController controller,
+    ColorScheme colorScheme,
+  ) async {
+    final width = MediaQuery.of(context).size.width;
+
+    return showGeneralDialog<void>(
+      context: context,
+      barrierLabel: 'Add Recipe',
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Align(
+          alignment: Alignment.centerRight,
+          child: SizedBox(
+            width: width * 0.5,
+            child: Material(
+              color: colorScheme.surface,
+              elevation: 8,
+              child: AddRecipeScreen(
+                shoppingList: widget.shoppingList,
+                availableCategories:
+                    controller.selectedSupermarket?.getCategories() ?? [],
+              ),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOut,
+        );
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        );
+      },
     );
   }
 
