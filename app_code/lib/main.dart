@@ -40,7 +40,8 @@ Future<void> _runStartupTasks() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  
+  //TODO: delete this
   // Seed mock data only if local database is empty
   await seedMockDataIfEmpty();
 

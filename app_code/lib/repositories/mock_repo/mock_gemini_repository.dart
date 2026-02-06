@@ -78,10 +78,15 @@ class MockGeminiRepository implements GeminiRepository {
     // Return a random recipe from the list
     final randomRecipe = testRecipes[_random.nextInt(testRecipes.length)];
 
+    final randomCategories = _assignRandomCategories(
+      categories,
+      (randomRecipe['products'] as List<Product>).length,
+    );
+
     return RecipeData(
       products: List.from(randomRecipe['products'] as List<Product>),
       quantities: List.from(randomRecipe['quantities'] as List<String>),
-      productCategories: List.from(randomRecipe['categories'] as List<String>),
+      productCategories: randomCategories,
       recipeName: randomRecipe['name'] as String,
       error: 'noError',
     );
@@ -143,5 +148,21 @@ class MockGeminiRepository implements GeminiRepository {
     } catch (e) {
       return 'uncategorized';
     }
+  }
+
+  List<String> _assignRandomCategories(
+    List<Category> categories,
+    int count,
+  ) {
+    if (count <= 0) return [];
+
+    if (categories.isEmpty) {
+      return List.generate(count, (_) => 'uncategorized');
+    }
+
+    return List.generate(count, (_) {
+      final category = categories[_random.nextInt(categories.length)];
+      return category.getName();
+    });
   }
 }

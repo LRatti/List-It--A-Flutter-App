@@ -29,8 +29,10 @@ class StatisticsCalculator {
     List<dynamic> lists,
     bool Function(DateTime date) isWithinPeriod,
   ) {
-    // Keep only registered lists first.
-    final registered = lists.where((l) => l.getIsRegistered()).toList();
+    // Keep only registered lists not in trash.
+    final registered = lists
+      .where((l) => l.getIsRegistered() && !l.getIsInTheTrash())
+      .toList();
 
     // Apply period filter.
     final filtered = registered
@@ -68,6 +70,7 @@ class StatisticsCalculator {
     final categoryProducts = <String, Map<String, dynamic>>{};
 
     for (final list in lists) {
+      if (list.getIsInTheTrash()) continue;
       for (final product in list.getProducts()) {
         if (product.category.getName() == categoryName) {
           final productName = product.product.getName();

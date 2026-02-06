@@ -347,22 +347,30 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                             ),
                                           ),
                                           Row(
+                                            mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                                decoration: BoxDecoration(
-                                                  color: colorScheme.surfaceVariant, // automatic contrast
-                                                  borderRadius: BorderRadius.circular(16),
-                                                ),
-                                                child: Text(
-                                                  categoryName,
-                                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                                    fontWeight: FontWeight.w500,
-                                                    color: colorScheme.onSurfaceVariant, // matches light/dark
+                                              ConstrainedBox(
+                                                constraints: const BoxConstraints(maxWidth: 160),
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                  decoration: BoxDecoration(
+                                                    color: colorScheme.surfaceVariant, // automatic contrast
+                                                    borderRadius: BorderRadius.circular(16),
+                                                  ),
+                                                  child: Text(
+                                                    categoryName,
+                                                    textAlign: TextAlign.center,
+                                                    softWrap: true,
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                      fontWeight: FontWeight.w500,
+                                                      color: colorScheme.onSurfaceVariant, // matches light/dark
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-
+                                              const SizedBox(width: 6),
                                               IconButton(
                                                 icon: Icon(
                                                   isDeleted ? Icons.restore : Icons.delete_outline,

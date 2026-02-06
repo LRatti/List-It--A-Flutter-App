@@ -119,7 +119,8 @@ class ShoppingListsNotifier extends AsyncNotifier<List<ShoppingList>> {
     final backgroundRecipeNotifier = ref.read(backgroundRecipeProvider.notifier);
     
     state = await AsyncValue.guard(() async {
-      final currentLists = state.value ?? [];
+      // Ensure lists are loaded even if build() hasn't completed yet
+      final currentLists = state.value ?? await repository.getAll();
       final expiredIds = <String>{};
 
       // Identify expired trash items by stable ID

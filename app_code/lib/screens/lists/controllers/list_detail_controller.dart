@@ -492,6 +492,7 @@ class ListDetailController extends ChangeNotifier {
       // 1. Update shopping list name and supermarket using provider
       _originalList.setName(_listName);
       _originalList.setSupermarket(_selectedSupermarket);
+      _originalList.setPurchasedProducts(_products);
 
       final listNotifier = _ref.read(shoppingListsProvider.notifier);
       await listNotifier.updateList(_originalList);
