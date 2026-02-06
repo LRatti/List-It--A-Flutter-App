@@ -111,54 +111,130 @@ class MyApp extends ConsumerWidget {
     final fontSizeMultiplier = ref.watch(fontSizeValueProvider);
     final themeMode = ref.watch(themeModeValueProvider);
 
+    final isTablet = ScreenSize.isTabletAtLaunch ?? false;
+
+    final theme = ThemeData(
+      useMaterial3: true,
+      colorScheme: lightColorScheme,
+      textTheme: ScaledTypography.generateScaledTextTheme(
+        fontSizeMultiplier: fontSizeMultiplier,
+        colorScheme: lightColorScheme,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: lightColorScheme.surface,
+        foregroundColor: lightColorScheme.onSurface,
+        elevation: 0,
+      ),
+    );
+
+    final darkTheme = ThemeData(
+      useMaterial3: true,
+      colorScheme: darkColorScheme,
+      textTheme: ScaledTypography.generateScaledTextTheme(
+        fontSizeMultiplier: fontSizeMultiplier,
+        colorScheme: darkColorScheme,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: darkColorScheme.surface,
+        foregroundColor: darkColorScheme.onSurface,
+        elevation: 0,
+      ),
+    );
+
     return AppScreenSizeListener(
-      child: MaterialApp(
+      child: isTablet
+          ? TabletAppShell(
+              scaffoldMessengerKey: scaffoldMessengerKey,
+              navigatorKey: navigatorKey,
+              themeMode: themeMode,
+              theme: theme,
+              darkTheme: darkTheme,
+            )
+          : MobileAppShell(
+              scaffoldMessengerKey: scaffoldMessengerKey,
+              navigatorKey: navigatorKey,
+              themeMode: themeMode,
+              theme: theme,
+              darkTheme: darkTheme,
+            ),
+    );
+  }
+}
+
+class MobileAppShell extends StatelessWidget {
+  const MobileAppShell({
+    super.key,
+    required this.scaffoldMessengerKey,
+    required this.navigatorKey,
+    required this.themeMode,
+    required this.theme,
+    required this.darkTheme,
+  });
+
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
+  final GlobalKey<NavigatorState> navigatorKey;
+  final ThemeMode themeMode;
+  final ThemeData theme;
+  final ThemeData darkTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,
-
       themeMode: themeMode,
-
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: lightColorScheme,
-        textTheme: ScaledTypography.generateScaledTextTheme(
-          fontSizeMultiplier: fontSizeMultiplier,
-          colorScheme: lightColorScheme,
-        ),
-        appBarTheme: AppBarTheme(
-          backgroundColor: lightColorScheme.surface,
-          foregroundColor: lightColorScheme.onSurface,
-          elevation: 0,
-        ),
-      ),
-
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorScheme: darkColorScheme,
-        textTheme: ScaledTypography.generateScaledTextTheme(
-          fontSizeMultiplier: fontSizeMultiplier,
-          colorScheme: darkColorScheme,
-        ),
-        appBarTheme: AppBarTheme(
-          backgroundColor: darkColorScheme.surface,
-          foregroundColor: darkColorScheme.onSurface,
-          elevation: 0,
-        ),
-      ),
-
+      theme: theme,
+      darkTheme: darkTheme,
       initialRoute: '/',
       routes: {
-        '/': (context) => const AuthGate(),
-        '/home': (context) => const ResponsiveHomePage(),
-        '/settings': (context) => const SettingsScreenResponsive(),
+        '/': (context) => AuthGate(homeScreen: const HomeScreenMobileView()),
+        '/home': (context) => const HomeScreenMobileView(),
+        '/settings': (context) => const SettingsScreenMobile(),
         '/signin': (context) => const WelcomeScreen(),
         '/verification': (context) => const VerificationScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),
       },
-      ),
+    );
+  }
+}
+
+class TabletAppShell extends StatelessWidget {
+  const TabletAppShell({
+    super.key,
+    required this.scaffoldMessengerKey,
+    required this.navigatorKey,
+    required this.themeMode,
+    required this.theme,
+    required this.darkTheme,
+  });
+
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
+  final GlobalKey<NavigatorState> navigatorKey;
+  final ThemeMode themeMode;
+  final ThemeData theme;
+  final ThemeData darkTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: scaffoldMessengerKey,
+      navigatorKey: navigatorKey,
+      themeMode: themeMode,
+      theme: theme,
+      darkTheme: darkTheme,
+      initialRoute: '/',
+      routes: {
+        '/': (context) => AuthGate(homeScreen: const HomeScreenTabletView()),
+        '/home': (context) => const HomeScreenTabletView(),
+        '/settings': (context) => const SettingsScreenTablet(),
+        '/signin': (context) => const WelcomeScreen(),
+        '/verification': (context) => const VerificationScreen(),
+        '/forgot-password': (context) => const ForgotPasswordScreen(),
+      },
     );
   }
 }

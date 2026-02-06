@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/screens/auth/initial_screen.dart';
-import 'package:app_code/screens/home/home_screen_mobile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Provider to check if this is the first time the app is opened
@@ -15,7 +14,12 @@ final firstTimeVisitProvider = FutureProvider<bool>((ref) async {
 /// Router widget that determines which screen to show based on auth state
 /// and whether it's the user's first visit
 class AuthGate extends ConsumerWidget {
-  const AuthGate({super.key});
+  const AuthGate({
+    super.key,
+    required this.homeScreen,
+  });
+
+  final Widget homeScreen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,6 +49,6 @@ class AuthGate extends ConsumerWidget {
     }
 
     // Otherwise show home screen
-    return const MobileHomePage();
+    return homeScreen;
   }
 }

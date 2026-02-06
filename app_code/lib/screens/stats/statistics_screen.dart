@@ -6,23 +6,27 @@ import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:app_code/utils/responsive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
-/// Responsive statistics screen showing spending analytics.
-/// 
-/// Mobile: Vertical stacking of period selector, pie chart, and category list
-/// Tablet: Side-by-side layout with chart on left, details on right
-/// Desktop: Larger chart with more detailed category breakdown
-class StatisticsScreenResponsive extends ConsumerStatefulWidget {
-  const StatisticsScreenResponsive({super.key});
+/// Mobile statistics screen: vertical stacking of period selector, chart, and list.
+class StatisticsScreenMobile extends ConsumerStatefulWidget {
+  const StatisticsScreenMobile({super.key});
 
   @override
-  ConsumerState<StatisticsScreenResponsive> createState() =>
-      _StatisticsScreenResponsiveState();
+  ConsumerState<StatisticsScreenMobile> createState() =>
+      _StatisticsScreenMobileViewState();
 }
 
-class _StatisticsScreenResponsiveState
-    extends ConsumerState<StatisticsScreenResponsive> {
+/// Tablet statistics screen: side-by-side chart and category list.
+class StatisticsScreenTablet extends ConsumerStatefulWidget {
+  const StatisticsScreenTablet({super.key});
+
+  @override
+  ConsumerState<StatisticsScreenTablet> createState() =>
+      _StatisticsScreenTabletViewState();
+}
+
+abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
+    extends ConsumerState<T> {
   StatsPeriodType _period = StatsPeriodType.all;
   int? _selectedYear;
   int? _selectedMonth;
@@ -120,12 +124,7 @@ class _StatisticsScreenResponsiveState
 
   @override
   Widget build(BuildContext context) {
-    
     final listsAsync = ref.watch(shoppingListsProvider);
-    final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
-
-    // Watch screen size provider to rebuild on size/orientation changes
-    ref.watch(screenSizeProvider);
 
     return Scaffold(
       body: listsAsync.when(
@@ -141,14 +140,19 @@ class _StatisticsScreenResponsiveState
           
           return SingleChildScrollView(
             padding: EdgeInsets.all(ResponsiveSpacing.getHorizontalPadding(context)),
-            child: isMobile
-                ? _buildMobileLayout(context, entries, filtered, total)
-                : _buildTabletDesktopLayout(context, entries, filtered, total),
+            child: buildLayout(context, entries, filtered, total),
           );
         },
       ),
     );
   }
+
+  Widget buildLayout(
+    BuildContext context,
+    List<MapEntry<String, double>> entries,
+    List<dynamic> filteredLists,
+    double total,
+  );
 
   Widget _buildMobileLayout(
     BuildContext context,
@@ -331,5 +335,31 @@ class _StatisticsScreenResponsiveState
         ),
       ],
     );
+  }
+}
+
+class _StatisticsScreenMobileViewState
+  extends _StatisticsScreenBaseState<StatisticsScreenMobile> {
+  @override
+  Widget buildLayout(
+    BuildContext context,
+    List<MapEntry<String, double>> entries,
+    List<dynamic> filteredLists,
+    double total,
+  ) {
+    return _buildMobileLayout(context, entries, filteredLists, total);
+  }
+}
+
+class _StatisticsScreenTabletViewState
+  extends _StatisticsScreenBaseState<StatisticsScreenTablet> {
+  @override
+  Widget buildLayout(
+    BuildContext context,
+    List<MapEntry<String, double>> entries,
+    List<dynamic> filteredLists,
+    double total,
+  ) {
+    return _buildTabletDesktopLayout(context, entries, filteredLists, total);
   }
 }

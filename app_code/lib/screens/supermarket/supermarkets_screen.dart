@@ -5,67 +5,15 @@ import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_n
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 import 'package:app_code/widgets/searchable_supermarkets_view.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
-import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:app_code/utils/responsive_layout.dart';
-import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
-/// Responsive supermarkets screen with adaptive grid layout.
-/// 
-/// Mobile: Single or 2-column grid
-/// Tablet: 2-3 column grid
-/// Desktop: 3-4 column grid
-class SupermarketsScreenResponsive extends ConsumerStatefulWidget {
-  const SupermarketsScreenResponsive({super.key});
+/// Mobile supermarkets screen: searchable list view.
+class SupermarketsScreenMobile extends ConsumerWidget {
+  const SupermarketsScreenMobile({super.key});
 
   @override
-  ConsumerState<SupermarketsScreenResponsive> createState() =>
-      _SupermarketsScreenResponsiveState();
-}
-
-class _SupermarketsScreenResponsiveState
-    extends ConsumerState<SupermarketsScreenResponsive> {
-  void _handleDeletionModeChanged(bool isDeletionMode) {
-    // Deletion mode is handled by SearchableSupermarketsView
-  }
-
-  Future<void> _navigateToCreateSupermarket(BuildContext context) async {
-    final lastSupermarket = await ref
-        .read(supermarketsProvider.notifier)
-        .getLastEditedSupermarket();
-    final uncategorized =
-        await UncategorizedCategoryInitializer.getUncategorized();
-
-    final templateCategories = lastSupermarket?.getCategories() ?? [];
-    final hasUncategorized =
-        templateCategories.any((cat) => cat.id == uncategorized.id);
-
-    final newSupermarket = Supermarket(
-      name: '',
-      categories: hasUncategorized
-          ? templateCategories
-          : [uncategorized, ...templateCategories],
-    );
-
-    if (mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => SupermarketCustomizationScreen(
-            supermarket: newSupermarket,
-            isCreationMode: true,
-          ),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final supermarketsAsync = ref.watch(supermarketsProvider);
-    final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
-
-    // Watch screen size provider to rebuild on size/orientation changes
-    ref.watch(screenSizeProvider);
 
     return supermarketsAsync.when(
       loading: () => Scaffold(
@@ -77,33 +25,48 @@ class _SupermarketsScreenResponsiveState
         body: Center(child: Text('Error: ${error.toString()}')),
       ),
       data: (supermarkets) {
-        final visibleSupermarkets = supermarkets.where((s) => s.isVisible).toList();
+        final visibleSupermarkets = _getVisibleSupermarkets(supermarkets);
 
-        // Sort: favorite first, then alphabetically
-        visibleSupermarkets.sort((a, b) {
-          if (a.isFavorite == b.isFavorite) {
-            return a.getName().compareTo(b.getName());
-          }
-          return b.isFavorite ? 1 : -1;
-        });
-
-        if (isMobile) {
-          // Mobile: Use original searchable view
-          return SearchableSupermarketsView(
-            supermarkets: visibleSupermarkets,
-            emptyMessage: 'No supermarkets yet',
-            onDeletionModeChanged: _handleDeletionModeChanged,
-            floatingActionButton: FloatingActionButton(
-              heroTag: 'addSupermarketFAB',
-              onPressed: () => _navigateToCreateSupermarket(context),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              child: const Icon(Icons.add),
+        return SearchableSupermarketsView(
+          supermarkets: visibleSupermarkets,
+          emptyMessage: 'No supermarkets yet',
+          onDeletionModeChanged: _handleDeletionModeChanged,
+          floatingActionButton: FloatingActionButton(
+            heroTag: 'addSupermarketFAB',
+            onPressed: () => _navigateToCreateSupermarket(
+              context: context,
+              ref: ref,
             ),
-          );
-        }
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
+    );
+  }
+}
 
-        // Tablet/Desktop: Responsive grid view
+/// Tablet supermarkets screen: responsive grid view.
+class SupermarketsScreenTablet extends ConsumerWidget {
+  const SupermarketsScreenTablet({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final supermarketsAsync = ref.watch(supermarketsProvider);
+
+    return supermarketsAsync.when(
+      loading: () => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Center(child: Text('Error: ${error.toString()}')),
+      ),
+      data: (supermarkets) {
+        final visibleSupermarkets = _getVisibleSupermarkets(supermarkets);
+
         return ResponsiveGridView(
           children: visibleSupermarkets
               .map((supermarket) => _SupermarketCard(
@@ -117,6 +80,54 @@ class _SupermarketsScreenResponsiveState
       },
     );
   }
+}
+
+List<Supermarket> _getVisibleSupermarkets(List<Supermarket> supermarkets) {
+  final visibleSupermarkets = supermarkets.where((s) => s.isVisible).toList();
+
+  visibleSupermarkets.sort((a, b) {
+    if (a.isFavorite == b.isFavorite) {
+      return a.getName().compareTo(b.getName());
+    }
+    return b.isFavorite ? 1 : -1;
+  });
+
+  return visibleSupermarkets;
+}
+
+void _handleDeletionModeChanged(bool isDeletionMode) {
+  // Deletion mode is handled by SearchableSupermarketsView
+}
+
+Future<void> _navigateToCreateSupermarket({
+  required BuildContext context,
+  required WidgetRef ref,
+}) async {
+  final lastSupermarket = await ref
+      .read(supermarketsProvider.notifier)
+      .getLastEditedSupermarket();
+  final uncategorized = await UncategorizedCategoryInitializer.getUncategorized();
+
+  final templateCategories = lastSupermarket?.getCategories() ?? [];
+  final hasUncategorized =
+      templateCategories.any((cat) => cat.id == uncategorized.id);
+
+  final newSupermarket = Supermarket(
+    name: '',
+    categories: hasUncategorized
+        ? templateCategories
+        : [uncategorized, ...templateCategories],
+  );
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => SupermarketCustomizationScreen(
+        supermarket: newSupermarket,
+        isCreationMode: true,
+      ),
+    ),
+  );
 }
 
 /// Supermarket card widget for grid display

@@ -2,22 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/app-style/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/font_size_provider.dart';
-import 'package:app_code/utils/screen_size_helper.dart';
-import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
-/// Responsive settings screen with adaptive layout.
-/// 
-/// Mobile: Single column vertical layout
-/// Tablet+: Two-column layout with settings on left, preview on right
-class SettingsScreenResponsive extends ConsumerStatefulWidget {
-  const SettingsScreenResponsive({super.key});
+/// Mobile settings screen: single column vertical layout.
+class SettingsScreenMobile extends ConsumerStatefulWidget {
+  const SettingsScreenMobile({super.key});
 
   @override
-  ConsumerState<SettingsScreenResponsive> createState() =>
-      _SettingsScreenResponsiveState();
+  ConsumerState<SettingsScreenMobile> createState() =>
+      _SettingsScreenMobileViewState();
 }
 
-class _SettingsScreenResponsiveState extends ConsumerState<SettingsScreenResponsive> {
+/// Tablet settings screen: two-column layout with preview panel.
+class SettingsScreenTablet extends ConsumerStatefulWidget {
+  const SettingsScreenTablet({super.key});
+
+  @override
+  ConsumerState<SettingsScreenTablet> createState() =>
+      _SettingsScreenTabletViewState();
+}
+
+abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
+    extends ConsumerState<T> {
   late double _tempFontSize;
 
   @override
@@ -42,27 +47,25 @@ class _SettingsScreenResponsiveState extends ConsumerState<SettingsScreenRespons
 
   @override
   Widget build(BuildContext context) {
-
-    
-
     final themeMode = ref.watch(themeModeValueProvider);
-    final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
-    // Watch screen size provider to rebuild on size/orientation changes
-    ref.watch(screenSizeProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
         centerTitle: true,
       ),
-      body: isMobile
-          ? _buildMobileLayout(context, themeMode, colorScheme, textTheme)
-          : _buildTabletDesktopLayout(context, themeMode, colorScheme, textTheme),
+      body: buildLayout(context, themeMode, colorScheme, textTheme),
     );
   }
+
+  Widget buildLayout(
+    BuildContext context,
+    ThemeMode themeMode,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  );
 
   Widget _buildMobileLayout(
     BuildContext context,
@@ -333,5 +336,31 @@ class _SettingsScreenResponsiveState extends ConsumerState<SettingsScreenRespons
         ),
       ],
     );
+  }
+}
+
+class _SettingsScreenMobileViewState
+  extends _SettingsScreenBaseState<SettingsScreenMobile> {
+  @override
+  Widget buildLayout(
+    BuildContext context,
+    ThemeMode themeMode,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    return _buildMobileLayout(context, themeMode, colorScheme, textTheme);
+  }
+}
+
+class _SettingsScreenTabletViewState
+  extends _SettingsScreenBaseState<SettingsScreenTablet> {
+  @override
+  Widget buildLayout(
+    BuildContext context,
+    ThemeMode themeMode,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    return _buildTabletDesktopLayout(context, themeMode, colorScheme, textTheme);
   }
 }

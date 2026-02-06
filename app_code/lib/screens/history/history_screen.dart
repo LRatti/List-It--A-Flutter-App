@@ -5,31 +5,15 @@ import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lis
 import 'package:app_code/screens/lists/register-list/register_shopping_list_screen_mobile.dart';
 import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
 import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
-import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:app_code/models/shopping_list.dart';
-import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
-/// Responsive history screen showing completed shopping lists.
-/// 
-/// Mobile: Single column list with modal registration view
-/// Tablet+: Master-detail split view
-class HistoryScreenResponsive extends ConsumerStatefulWidget {
-  const HistoryScreenResponsive({super.key});
+/// Mobile history screen: single column list with modal registration view.
+class HistoryScreenMobile extends ConsumerWidget {
+  const HistoryScreenMobile({super.key});
 
   @override
-  ConsumerState<HistoryScreenResponsive> createState() => _HistoryScreenResponsiveState();
-}
-
-class _HistoryScreenResponsiveState extends ConsumerState<HistoryScreenResponsive> {
-  ShoppingList? _selectedList;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
-    final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
-
-    // Watch screen size provider to rebuild on size/orientation changes
-    ref.watch(screenSizeProvider);
 
     return shoppingListsAsync.when(
       loading: () => Scaffold(
@@ -50,30 +34,66 @@ class _HistoryScreenResponsiveState extends ConsumerState<HistoryScreenResponsiv
             return bd.compareTo(ad); // newest first
           });
 
-        if (isMobile) {
-          // Mobile: Simple list view
-          return SearchableShoppingListsView(
-            lists: registeredLists,
-            emptyMessage: 'No registered lists yet.',
-            showRegistered: true,
-            onListTap: (context, shoppingList) {
-              ref.read(registerShoppingListSourceProvider.notifier).state =
-                  RegisterShoppingListSource.history;
+        return SearchableShoppingListsView(
+          lists: registeredLists,
+          emptyMessage: 'No registered lists yet.',
+          showRegistered: true,
+          onListTap: (context, shoppingList) {
+            ref.read(registerShoppingListSourceProvider.notifier).state =
+                RegisterShoppingListSource.history;
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => RegisterShoppingListScreenMobile(
-                    shoppingListId: shoppingList.id,
-                  ),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => RegisterShoppingListScreenMobile(
+                  shoppingListId: shoppingList.id,
                 ),
-              );
-            },
-          );
-        }
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
 
-        // Clear selected list if it's no longer in active lists (e.g., registered or deleted)
-        if (_selectedList != null && !registeredLists.any((l) => l.id == _selectedList!.id)) {
+/// Tablet history screen: master-detail split view.
+class HistoryScreenTablet extends ConsumerStatefulWidget {
+  const HistoryScreenTablet({super.key});
+
+  @override
+  ConsumerState<HistoryScreenTablet> createState() =>
+      _HistoryScreenTabletViewState();
+}
+
+class _HistoryScreenTabletViewState extends ConsumerState<HistoryScreenTablet> {
+  ShoppingList? _selectedList;
+
+  @override
+  Widget build(BuildContext context) {
+    final shoppingListsAsync = ref.watch(shoppingListsProvider);
+
+    return shoppingListsAsync.when(
+      loading: () => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Center(child: Text(error.toString())),
+      ),
+      data: (lists) {
+        final registeredLists = lists
+            .where((l) => l.getIsRegistered() && !l.getIsInTheTrash())
+            .toList()
+          ..sort((a, b) {
+            final ad = a.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final bd = b.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+            return bd.compareTo(ad); // newest first
+          });
+
+        if (_selectedList != null &&
+            !registeredLists.any((l) => l.id == _selectedList!.id)) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               setState(() => _selectedList = null);
@@ -81,11 +101,9 @@ class _HistoryScreenResponsiveState extends ConsumerState<HistoryScreenResponsiv
           });
         }
 
-        // Tablet/Desktop: Master-detail split view
         return Scaffold(
           body: Row(
             children: [
-              // Master pane: History list
               Flexible(
                 flex: 40,
                 child: SearchableShoppingListsView(
@@ -99,7 +117,6 @@ class _HistoryScreenResponsiveState extends ConsumerState<HistoryScreenResponsiv
                   },
                 ),
               ),
-              // Detail pane: Registration view or empty state
               Flexible(
                 flex: 60,
                 child: _selectedList != null
@@ -118,31 +135,31 @@ class _HistoryScreenResponsiveState extends ConsumerState<HistoryScreenResponsiv
       },
     );
   }
+}
 
-  Widget _buildEmptyDetailPane(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+Widget _buildEmptyDetailPane(BuildContext context) {
+  final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.history_outlined,
-              size: 64,
+  return Container(
+    color: Theme.of(context).scaffoldBackgroundColor,
+    child: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.history_outlined,
+            size: 64,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Select a completed list to review',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Select a completed list to review',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }

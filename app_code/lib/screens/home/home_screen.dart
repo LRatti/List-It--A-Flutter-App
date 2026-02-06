@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:app_code/widgets/top_bar_with_navbar.dart';
 import 'package:app_code/widgets/side_menu.dart';
 import 'package:app_code/screens/lists/lists_screen.dart';
@@ -8,30 +7,28 @@ import 'package:app_code/screens/supermarket/supermarkets_screen.dart';
 import 'package:app_code/screens/history/history_screen.dart';
 import 'package:app_code/screens/stats/statistics_screen.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
-import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
-/// Responsive home screen that adapts its navigation layout based on screen size.
-/// 
-/// Mobile (< 600 dp): Bottom navigation bar
-/// Tablet (600-900 dp): Persistent side navigation rail with drawer toggle
-/// Desktop (≥ 900 dp): Permanent side navigation rail with wider content area
-class ResponsiveHomePage extends ConsumerStatefulWidget {
-  const ResponsiveHomePage({super.key});
+class HomeScreenMobileView extends ConsumerStatefulWidget {
+  const HomeScreenMobileView({super.key});
 
   @override
-  ConsumerState<ResponsiveHomePage> createState() => _ResponsiveHomePageState();
+  ConsumerState<HomeScreenMobileView> createState() => _HomeScreenMobileViewState();
 }
 
-class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
+class HomeScreenTabletView extends ConsumerStatefulWidget {
+  const HomeScreenTabletView({super.key});
+
+  @override
+  ConsumerState<HomeScreenTabletView> createState() => _HomeScreenTabletViewState();
+}
+
+abstract class _HomeScreenBaseState<T extends ConsumerStatefulWidget>
+    extends ConsumerState<T> {
   bool _isMenuOpen = false;
   bool _didApplyRouteArgs = false;
 
-  final List<Widget> _tabs = const [
-    ListsScreenResponsive(key: ValueKey('lists_tab')),
-    HistoryScreenResponsive(key: ValueKey('history_tab')),
-    SupermarketsScreenResponsive(key: ValueKey('supermarkets_tab')),
-    StatisticsScreenResponsive(key: ValueKey('statistics_tab')),
-  ];
+  List<Widget> get tabs;
+  bool get shouldCloseMenuOnTabChange;
 
   void _toggleMenu() {
     ref.read(appNavigationSignalProvider.notifier).state++;
@@ -46,9 +43,7 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
   void _onTabChanged(int index) {
     ref.read(navigationIndexProvider.notifier).state = index;
     ref.read(appNavigationSignalProvider.notifier).state++;
-    // Close drawer on mobile after tab selection
-    final isPhone = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
-    if (isPhone && _isMenuOpen) {
+    if (shouldCloseMenuOnTabChange && _isMenuOpen) {
       _closeMenu();
     }
   }
@@ -87,82 +82,16 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
     }
 
     final selectedIndex = ref.watch(navigationIndexProvider);
-    final isPhone = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
-    final isTabletOrLarger = ScreenSize.isTabletAtLaunch ??
-      (ScreenSize.isTablet(context) || ScreenSize.isDesktop(context));
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Watch screen size provider to rebuild on size/orientation changes
-    ref.watch(screenSizeProvider);
-
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                TopBarWithNavBar(
-                  isMenuOpen: _isMenuOpen,
-                  onMenuToggle: _toggleMenu,
-                ),
-
-                // Main content area
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Persistent navigation rail on tablet/desktop
-                      if (isTabletOrLarger)
-                        _buildNavigationRail(colorScheme, selectedIndex),
-
-                      // Main tab content
-                      Expanded(
-                        child: IndexedStack(
-                          index: selectedIndex,
-                          children: _tabs,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            // Side menu overlay - only on mobile
-            if (isPhone && _isMenuOpen)
-              Positioned(
-                top: kToolbarHeight + 56,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Row(
-                  children: [
-                    SideMenu(
-                      key: const Key('side_menu'),
-                      onClose: _closeMenu,
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _closeMenu,
-                        child: Container(
-                          key: const Key('side_menu_scrim'),
-                          color: Colors.black.withValues(alpha: 0.3),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      ),
-
-      // Bottom navigation bar - only on mobile
-        bottomNavigationBar: isPhone
-          ? _buildBottomNavigationBar(colorScheme, selectedIndex)
-          : null,
-    );
+    return buildScaffold(context, selectedIndex, colorScheme);
   }
+
+  Widget buildScaffold(
+    BuildContext context,
+    int selectedIndex,
+    ColorScheme colorScheme,
+  );
 
   /// Build the bottom navigation bar for mobile screens
   Widget _buildBottomNavigationBar(ColorScheme colorScheme, int selectedIndex) {
@@ -202,10 +131,8 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
 
   /// Build the persistent navigation rail for tablet/desktop screens
   Widget _buildNavigationRail(ColorScheme colorScheme, int selectedIndex) {
-    final isTablet = ScreenSize.isTabletAtLaunch ?? ScreenSize.isTablet(context);
-    
     return Container(
-      width: isTablet ? 80 : 100, // Wider on desktop
+      width: 80,
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
@@ -217,8 +144,8 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
       ),
       child: NavigationRail(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        minWidth: isTablet ? 72 : 100,
-        labelType: isTablet ? NavigationRailLabelType.all : NavigationRailLabelType.all,
+        minWidth: 72,
+        labelType: NavigationRailLabelType.all,
         selectedIndex: selectedIndex,
         scrollable: true,
         onDestinationSelected: (int index) => _onTabChanged(index),
@@ -253,6 +180,123 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
             label: Text('Statistics'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HomeScreenMobileViewState
+    extends _HomeScreenBaseState<HomeScreenMobileView> {
+  @override
+  List<Widget> get tabs => const [
+        ListsScreenMobile(key: ValueKey('lists_tab')),
+        HistoryScreenMobile(key: ValueKey('history_tab')),
+        SupermarketsScreenMobile(key: ValueKey('supermarkets_tab')),
+        StatisticsScreenMobile(key: ValueKey('statistics_tab')),
+      ];
+
+  @override
+  bool get shouldCloseMenuOnTabChange => true;
+
+  @override
+  Widget buildScaffold(
+    BuildContext context,
+    int selectedIndex,
+    ColorScheme colorScheme,
+  ) {
+    return Scaffold(
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                TopBarWithNavBar(
+                  isMenuOpen: _isMenuOpen,
+                  onMenuToggle: _toggleMenu,
+                ),
+                Expanded(
+                  child: IndexedStack(
+                    index: selectedIndex,
+                    children: tabs,
+                  ),
+                ),
+              ],
+            ),
+            if (_isMenuOpen)
+              Positioned(
+                top: kToolbarHeight + 56,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Row(
+                  children: [
+                    SideMenu(
+                      key: const Key('side_menu'),
+                      onClose: _closeMenu,
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: _closeMenu,
+                        child: Container(
+                          key: const Key('side_menu_scrim'),
+                          color: Colors.black.withValues(alpha: 0.3),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: _buildBottomNavigationBar(colorScheme, selectedIndex),
+    );
+  }
+}
+
+class _HomeScreenTabletViewState
+    extends _HomeScreenBaseState<HomeScreenTabletView> {
+  @override
+  List<Widget> get tabs => const [
+        ListsScreenTablet(key: ValueKey('lists_tab')),
+        HistoryScreenTablet(key: ValueKey('history_tab')),
+        SupermarketsScreenTablet(key: ValueKey('supermarkets_tab')),
+        StatisticsScreenTablet(key: ValueKey('statistics_tab')),
+      ];
+
+  @override
+  bool get shouldCloseMenuOnTabChange => false;
+
+  @override
+  Widget buildScaffold(
+    BuildContext context,
+    int selectedIndex,
+    ColorScheme colorScheme,
+  ) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            TopBarWithNavBar(
+              isMenuOpen: _isMenuOpen,
+              onMenuToggle: _toggleMenu,
+            ),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildNavigationRail(colorScheme, selectedIndex),
+                  Expanded(
+                    child: IndexedStack(
+                      index: selectedIndex,
+                      children: tabs,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
