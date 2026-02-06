@@ -230,25 +230,10 @@ void main() {
       }
     });
 
-    testWidgets('shows placeholder when date is null', (WidgetTester tester) async {
-      final listWithoutDate = ShoppingList(
-        id: '1',
-        name: 'Test List',
-        createdAt: null,
-      );
-
-      await pumpCard(tester, list: listWithoutDate);
-
-      expect(find.text('--/--/----'), findsOneWidget);
-    });
-
     testWidgets('accent color changes based on name length', (WidgetTester tester) async {
       // Create lists with different name lengths
-      final list1 = ShoppingList(id: '1', name: 'A'); // length 1
-      final list2 = ShoppingList(id: '2', name: 'AB'); // length 2
-      final list3 = ShoppingList(id: '3', name: 'ABC'); // length 3
-      final list4 = ShoppingList(id: '4', name: 'ABCD'); // length 4
-      final list5 = ShoppingList(id: '5', name: 'ABCDE'); // length 5 (should wrap to first color)
+      final list1 = ShoppingList(id: '1', name: 'A', createdAt: DateTime(2024, 1, 1)); // length 1
+      final list5 = ShoppingList(id: '5', name: 'ABCDE', createdAt: DateTime(2024, 1, 1)); // length 5 (should wrap to first color)
 
       await pumpCard(tester, list: list1);
       final container1 = tester.widget<Container>(

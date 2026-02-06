@@ -53,6 +53,7 @@ void main() {
   Future<ProviderContainer> pumpTopBar(
     WidgetTester tester, {
     required bool isAnonymous,
+    VoidCallback? onMenuToggle,
   }) async {
     if (isAnonymous) {
       await authRepository.signInAnonymously();
@@ -75,14 +76,15 @@ void main() {
         container: container,
         child: MaterialApp(
           home: Scaffold(
-            appBar: TopBarWithNavBar(),
+            appBar: TopBarWithNavBar(
+              isMenuOpen: false,
+              onMenuToggle: onMenuToggle ?? () {},
+            ),
             body: const SizedBox.shrink(),
           ),
           routes: {
             '/signin': (context) =>
                 const Scaffold(body: Text('Sign In Screen')),
-            '/settings': (context) =>
-                const Scaffold(body: Text('Settings Screen')),
           },
         ),
       ),
@@ -125,23 +127,20 @@ void main() {
   });
 
   testWidgets(
-    'TopBar shows settings and logout buttons for authenticated users',
+    'TopBar shows logout button for authenticated users',
     (tester) async {
       await pumpTopBar(tester, isAnonymous: false);
 
-      expect(find.byKey(const Key('settings_button')), findsOneWidget);
       expect(find.byKey(const Key('logout_button')), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
       expect(find.byIcon(Icons.logout), findsOneWidget);
     },
   );
 
-  testWidgets('TopBar does not show settings and logout for anonymous users', (
+  testWidgets('TopBar does not show logout for anonymous users', (
     tester,
   ) async {
     await pumpTopBar(tester, isAnonymous: true);
 
-    expect(find.byKey(const Key('settings_button')), findsNothing);
     expect(find.byKey(const Key('logout_button')), findsNothing);
   });
 
@@ -155,13 +154,19 @@ void main() {
     expect(find.text('Sign In Screen'), findsOneWidget);
   });
 
-  testWidgets('Settings button navigates to settings route', (tester) async {
-    await pumpTopBar(tester, isAnonymous: false);
+  testWidgets('Menu button triggers callback', (tester) async {
+    var tapped = false;
 
-    await tester.tap(find.byKey(const Key('settings_button')));
+    await pumpTopBar(
+      tester,
+      isAnonymous: true,
+      onMenuToggle: () => tapped = true,
+    );
+
+    await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
-    expect(find.text('Settings Screen'), findsOneWidget);
+    expect(tapped, isTrue);
   });
 
   testWidgets('Logout button calls signOut', (tester) async {
@@ -183,7 +188,7 @@ void main() {
     final container = await pumpTopBar(tester, isAnonymous: true);
 
     expect(find.byKey(const Key('sign_in_button')), findsOneWidget);
-    expect(find.byKey(const Key('settings_button')), findsNothing);
+    expect(find.byKey(const Key('logout_button')), findsNothing);
 
     // Sign up to change state
     await container
@@ -193,8 +198,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // The ConsumerWidget should rebuild with new auth state
-    // After rebuild, settings and logout should be visible
-    expect(find.byKey(const Key('settings_button')), findsOneWidget);
+    // After rebuild, logout should be visible
     expect(find.byKey(const Key('logout_button')), findsOneWidget);
   });
 
@@ -202,7 +206,10 @@ void main() {
     await pumpTopBar(tester, isAnonymous: true);
 
     // Create a widget that uses TopBar's preferredSize
-    final appBar = TopBarWithNavBar();
+    final appBar = TopBarWithNavBar(
+      isMenuOpen: false,
+      onMenuToggle: () {},
+    );
     expect(appBar.preferredSize.height, kToolbarHeight + 56);
   });
 

@@ -8,18 +8,18 @@ void main() {
 
       expect(category.id.isNotEmpty, true);
       expect(category.getName(), 'Fruit');
-      expect(category.isDefault, false);
+      expect(category.isVisible, true);
     });
 
     test('toDatabase and fromDatabase roundtrip', () {
-      final category = Category(id: 'cat1', name: 'Dairy', isDefault: true);
+      final category = Category(id: 'cat1', name: 'Dairy', isVisible: true);
 
       final dbMap = category.toDatabase();
       final restored = Category.fromDatabase(dbMap);
 
       expect(restored.id, 'cat1');
       expect(restored.getName(), 'Dairy');
-      expect(restored.isDefault, true);
+      expect(restored.isVisible, true);
     });
 
     test('toJson and fromJson roundtrip', () {
@@ -30,7 +30,7 @@ void main() {
 
       expect(restored.id, 'cat2');
       expect(restored.getName(), 'Bakery');
-      expect(restored.isDefault, false);
+      expect(restored.isVisible, true);
     });
   });
 }

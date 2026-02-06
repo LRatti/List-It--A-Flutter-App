@@ -107,25 +107,25 @@ test('deletes a category', () async {
     expect(all.first.getName(), 'Replaced');
   });
 
-  test('handles updating category with isDefault flag', () async {
-    final category = Category(name: 'Default Cat', isDefault: true);
+  test('handles updating category with isVisible flag', () async {
+    final category = Category(name: 'Default Cat', isVisible: true);
     await ManageCategory.addCategory(category);
 
-    final updated = Category(id: category.id, name: 'Default Cat', isDefault: false);
+    final updated = Category(id: category.id, name: 'Default Cat', isVisible: false);
     await ManageCategory.updateCategory(updated);
 
     final retrieved = await ManageCategory.getCategoryById(category.id);
     expect(retrieved, isNotNull);
-    expect(retrieved!.isDefault, false);
+    expect(retrieved!.isVisible, false);
   });
 
-  test('handles adding category with isDefault flag', () async {
-    final category = Category(name: 'Special', isDefault: true);
+  test('handles adding category with isVisible flag', () async {
+    final category = Category(name: 'Special', isVisible: true);
     await ManageCategory.addCategory(category);
 
     final retrieved = await ManageCategory.getCategoryById(category.id);
     expect(retrieved, isNotNull);
-    expect(retrieved!.isDefault, true);
+    expect(retrieved!.isVisible, true);
   });
 
   test('deletes non-existent category without error', () async {
@@ -142,10 +142,10 @@ test('deletes a category', () async {
   });
 
   test('updates category name correctly', () async {
-    final category = Category(id: 'cat1', name: 'Original Name', isDefault: false);
+    final category = Category(id: 'cat1', name: 'Original Name', isVisible: true);
     await ManageCategory.addCategory(category);
 
-    final updated = Category(id: 'cat1', name: 'Updated Name', isDefault: false);
+    final updated = Category(id: 'cat1', name: 'Updated Name', isVisible: true);
     await ManageCategory.updateCategory(updated);
 
     final retrieved = await ManageCategory.getCategoryById('cat1');
@@ -181,16 +181,16 @@ test('deletes a category', () async {
   });
 
   test('handles updating to same values', () async {
-    final category = Category(name: 'Unchanged', isDefault: true);
+    final category = Category(name: 'Unchanged', isVisible: true);
     await ManageCategory.addCategory(category);
 
-    final sameCategory = Category(id: category.id, name: 'Unchanged', isDefault: true);
+    final sameCategory = Category(id: category.id, name: 'Unchanged', isVisible: true);
     await ManageCategory.updateCategory(sameCategory);
 
     final retrieved = await ManageCategory.getCategoryById(category.id);
     expect(retrieved, isNotNull);
     expect(retrieved!.getName(), 'Unchanged');
-    expect(retrieved.isDefault, true);
+    expect(retrieved.isVisible, true);
   });
 
   test('getAllCategories returns all categories in database', () async {

@@ -81,7 +81,14 @@ void main() {
       await pumpMenu(
         tester,
         onClose: () => closed = true,
-        lists: [ShoppingList(id: 't1', name: 'Trashed', isInTheTrash: true)],
+        lists: [
+          ShoppingList(
+            id: 't1',
+            name: 'Trashed',
+            createdAt: DateTime(2024, 1, 1),
+            isInTheTrash: true,
+          ),
+        ],
         observer: observer,
       );
 

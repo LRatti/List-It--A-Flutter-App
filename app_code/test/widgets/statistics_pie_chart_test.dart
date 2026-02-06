@@ -20,6 +20,7 @@ void main() {
                 child: StatisticsPieChart(
                   entries: entries,
                   total: 30,
+                  onCategoryTap: (_) => null,
                 ),
               ),
             ),

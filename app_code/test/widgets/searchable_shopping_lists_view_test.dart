@@ -17,9 +17,9 @@ void main() {
 
     setUp(() {
       testLists = [
-        ShoppingList(id: '1', name: 'Grocery Shopping'),
-        ShoppingList(id: '2', name: 'Weekly Essentials'),
-        ShoppingList(id: '3', name: 'Party Supplies'),
+        ShoppingList(id: '1', name: 'Grocery Shopping', createdAt: DateTime(2024, 1, 1)),
+        ShoppingList(id: '2', name: 'Weekly Essentials', createdAt: DateTime(2024, 1, 1)),
+        ShoppingList(id: '3', name: 'Party Supplies', createdAt: DateTime(2024, 1, 1)),
       ];
       tapCount = 0;
       capturedList = null;
@@ -233,7 +233,7 @@ void main() {
 
       // Update with new lists
       final newLists = [
-        ShoppingList(id: '4', name: 'New List'),
+        ShoppingList(id: '4', name: 'New List', createdAt: DateTime(2024, 1, 1)),
       ];
 
       await tester.pumpWidget(
@@ -269,8 +269,8 @@ void main() {
 
       // Update lists
       final updatedLists = [
-        ShoppingList(id: '1', name: 'Grocery Shopping'),
-        ShoppingList(id: '4', name: 'Grocery Store'),
+        ShoppingList(id: '1', name: 'Grocery Shopping', createdAt: DateTime(2024, 1, 1)),
+        ShoppingList(id: '4', name: 'Grocery Store', createdAt: DateTime(2024, 1, 1)),
       ];
 
       await tester.pumpWidget(

@@ -17,8 +17,8 @@ void main() {
 
     setUp(() {
       defaultLists = [
-        ShoppingList(id: '1', name: 'List 1'),
-        ShoppingList(id: '2', name: 'List 2'),
+        ShoppingList(id: '1', name: 'List 1', createdAt: DateTime(2024, 1, 1)),
+        ShoppingList(id: '2', name: 'List 2', createdAt: DateTime(2024, 1, 1)),
       ];
       mockRepository = MockShoppingListRepository();
     });
