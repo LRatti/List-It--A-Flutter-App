@@ -3,24 +3,26 @@ import 'package:app_code/utils/statistics_calculator.dart';
 import 'package:app_code/widgets/period_selector.dart';
 import 'package:app_code/widgets/statistics_pie_chart.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
+import 'package:app_code/utils/responsive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
 /// Responsive statistics screen showing spending analytics.
 /// 
 /// Mobile: Vertical stacking of period selector, pie chart, and category list
 /// Tablet: Side-by-side layout with chart on left, details on right
 /// Desktop: Larger chart with more detailed category breakdown
-class StatisticsScreenResponsive extends StatefulWidget {
+class StatisticsScreenResponsive extends ConsumerStatefulWidget {
   const StatisticsScreenResponsive({super.key});
 
   @override
-  State<StatisticsScreenResponsive> createState() =>
+  ConsumerState<StatisticsScreenResponsive> createState() =>
       _StatisticsScreenResponsiveState();
 }
 
 class _StatisticsScreenResponsiveState
-    extends State<StatisticsScreenResponsive> {
+    extends ConsumerState<StatisticsScreenResponsive> {
   StatsPeriodType _period = StatsPeriodType.all;
   int? _selectedYear;
   int? _selectedMonth;
@@ -118,34 +120,34 @@ class _StatisticsScreenResponsiveState
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final listsAsync = ref.watch(shoppingListsProvider);
-        final isMobile = ScreenSize.isMobile(context);
-        final isTablet = ScreenSize.isTablet(context);
+    
+    final listsAsync = ref.watch(shoppingListsProvider);
+    final isMobile = ScreenSize.isMobile(context);
+    final isTablet = ScreenSize.isTablet(context);
 
-        return Scaffold(
-        body: listsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(
-            child: Text("Error occurring: please reload the app.\n"),
-          ),
-          data: (lists) {
-            final computation = StatisticsCalculator.compute(lists, _isWithinPeriod);
-            final filtered = computation.filteredLists;
-            final entries = computation.categoryEntries;
-            final total = computation.total;
+    // Watch screen size provider to rebuild on size/orientation changes
+    ref.watch(screenSizeProvider);
 
-            return SingleChildScrollView(
-              padding: EdgeInsets.all(ResponsiveSpacing.getHorizontalPadding(context)),
-              child: isMobile
-                  ? _buildMobileLayout(context, entries, filtered, total)
-                  : _buildTabletDesktopLayout(context, entries, filtered, total),
-            );
-          },
-        )
-      );
-      },
+    return Scaffold(
+      body: listsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(
+          child: Text("Error occurring: please reload the app.\n"),
+        ),
+        data: (lists) {
+          final computation = StatisticsCalculator.compute(lists, _isWithinPeriod);
+          final filtered = computation.filteredLists;
+          final entries = computation.categoryEntries;
+          final total = computation.total;
+          
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(ResponsiveSpacing.getHorizontalPadding(context)),
+            child: isMobile
+                ? _buildMobileLayout(context, entries, filtered, total)
+                : _buildTabletDesktopLayout(context, entries, filtered, total),
+          );
+        },
+      ),
     );
   }
 

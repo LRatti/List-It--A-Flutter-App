@@ -8,6 +8,10 @@ class ScreenSize {
   /// Mobile breakpoint - smartphones typically < 600 dp
   static const double mobileMax = 600.0;
 
+  /// dp (density-independent pixels) is a unit of measurement used in Android and Flutter development.
+  /// It represents logical pixels that scale based on the device's screen density.
+  /// This ensures consistent UI sizing across devices with different physical screen sizes and pixel densities.
+  /// For example, a 600 dp width will appear roughly the same size on phones with different DPI values.
   /// Tablet breakpoint - tablets typically 600-900 dp
   static const double tabletMin = 600.0;
   static const double tabletMax = 900.0;
@@ -109,7 +113,8 @@ enum ScreenClassification {
   mobile,
   tablet,
   desktop,
-  largeDesktop;
+  largeDesktop,
+  unknown; // Sentinel value to force initial state update
 
   /// Get human-readable name
   String get displayName {
@@ -122,6 +127,8 @@ enum ScreenClassification {
         return 'Desktop';
       case ScreenClassification.largeDesktop:
         return 'Large Desktop';
+      case ScreenClassification.unknown:
+        return 'Unknown';
     }
   }
 }

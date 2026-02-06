@@ -8,6 +8,7 @@ import 'package:app_code/screens/supermarket/supermarkets_screen.dart';
 import 'package:app_code/screens/history/history_screen.dart';
 import 'package:app_code/screens/stats/statistics_screen.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
+import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
 /// Responsive home screen that adapts its navigation layout based on screen size.
 /// 
@@ -88,6 +89,9 @@ class _ResponsiveHomePageState extends ConsumerState<ResponsiveHomePage> {
     final isMobile = ScreenSize.isMobile(context);
     final isTabletOrLarger = ScreenSize.isTablet(context) || ScreenSize.isDesktop(context);
     final colorScheme = Theme.of(context).colorScheme;
+
+    // Watch screen size provider to rebuild on size/orientation changes
+    ref.watch(screenSizeProvider);
 
     return Scaffold(
       body: SafeArea(

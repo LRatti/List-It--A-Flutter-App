@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/app-style/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/font_size_provider.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
+import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
 /// Responsive settings screen with adaptive layout.
 /// 
@@ -41,10 +42,16 @@ class _SettingsScreenResponsiveState extends ConsumerState<SettingsScreenRespons
 
   @override
   Widget build(BuildContext context) {
+
+    
+
     final themeMode = ref.watch(themeModeValueProvider);
     final isMobile = ScreenSize.isMobile(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    // Watch screen size provider to rebuild on size/orientation changes
+    ref.watch(screenSizeProvider);
 
     return Scaffold(
       appBar: AppBar(

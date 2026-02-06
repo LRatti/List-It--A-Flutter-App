@@ -7,6 +7,7 @@ import 'package:app_code/widgets/searchable_supermarkets_view.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:app_code/utils/responsive_layout.dart';
+import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
 /// Responsive supermarkets screen with adaptive grid layout.
 /// 
@@ -62,6 +63,9 @@ class _SupermarketsScreenResponsiveState
   Widget build(BuildContext context) {
     final supermarketsAsync = ref.watch(supermarketsProvider);
     final isMobile = ScreenSize.isMobile(context);
+
+    // Watch screen size provider to rebuild on size/orientation changes
+    ref.watch(screenSizeProvider);
 
     return supermarketsAsync.when(
       loading: () => Scaffold(

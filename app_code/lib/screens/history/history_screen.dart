@@ -7,29 +7,31 @@ import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
 import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:app_code/models/shopping_list.dart';
+import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
 /// Responsive history screen showing completed shopping lists.
 /// 
 /// Mobile: Single column list with modal registration view
 /// Tablet+: Master-detail split view
-class HistoryScreenResponsive extends StatefulWidget {
+class HistoryScreenResponsive extends ConsumerStatefulWidget {
   const HistoryScreenResponsive({super.key});
 
   @override
-  State<HistoryScreenResponsive> createState() => _HistoryScreenResponsiveState();
+  ConsumerState<HistoryScreenResponsive> createState() => _HistoryScreenResponsiveState();
 }
 
-class _HistoryScreenResponsiveState extends State<HistoryScreenResponsive> {
+class _HistoryScreenResponsiveState extends ConsumerState<HistoryScreenResponsive> {
   ShoppingList? _selectedList;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final shoppingListsAsync = ref.watch(shoppingListsProvider);
-        final isMobile = ScreenSize.isMobile(context);
+    final shoppingListsAsync = ref.watch(shoppingListsProvider);
+    final isMobile = ScreenSize.isMobile(context);
 
-        return shoppingListsAsync.when(
+    // Watch screen size provider to rebuild on size/orientation changes
+    ref.watch(screenSizeProvider);
+
+    return shoppingListsAsync.when(
       loading: () => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: const Center(child: CircularProgressIndicator()),
@@ -112,8 +114,6 @@ class _HistoryScreenResponsiveState extends State<HistoryScreenResponsive> {
               ),
             ],
           ),
-        );
-      },
         );
       },
     );

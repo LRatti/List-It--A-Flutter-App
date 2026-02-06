@@ -29,6 +29,7 @@ import 'package:app_code/services/mock/mock_data_seed.dart';
 // Utils
 import 'package:app_code/utils/favorite_supermarket_initializer.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
+import 'package:app_code/widgets/app_screen_size_listener.dart';
 
 /// Performs all initialization tasks required at app startup.
 /// This includes Firebase setup, mock data seeding, cleanup operations, and sync engine initialization.
@@ -104,7 +105,8 @@ class MyApp extends ConsumerWidget {
     final fontSizeMultiplier = ref.watch(fontSizeValueProvider);
     final themeMode = ref.watch(themeModeValueProvider);
 
-    return MaterialApp(
+    return AppScreenSizeListener(
+      child: MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
 
@@ -150,6 +152,7 @@ class MyApp extends ConsumerWidget {
         '/verification': (context) => const VerificationScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),
       },
+      ),
     );
   }
 }

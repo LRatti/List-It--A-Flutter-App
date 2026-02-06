@@ -6,19 +6,20 @@ import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
 import 'package:app_code/widgets/detail_pane_navigator.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
+import 'package:app_code/providers/real_app_providers/screen_size_provider.dart';
 
 /// Responsive lists screen that adapts layout based on screen size.
 /// 
 /// Mobile (< 600 dp): Single column list with modal detail view
 /// Tablet+ (≥ 600 dp): Master-detail split view with list on left, detail on right
-class ListsScreenResponsive extends StatefulWidget {
+class ListsScreenResponsive extends ConsumerStatefulWidget {
   const ListsScreenResponsive({super.key});
 
   @override
-  State<ListsScreenResponsive> createState() => _ListsScreenResponsiveState();
+  ConsumerState<ListsScreenResponsive> createState() => _ListsScreenResponsiveState();
 }
 
-class _ListsScreenResponsiveState extends State<ListsScreenResponsive> {
+class _ListsScreenResponsiveState extends ConsumerState<ListsScreenResponsive> {
   ShoppingList? _selectedList;
 
   Future<void> _showAddShoppingListDialog(BuildContext context, WidgetRef ref) async {
@@ -112,6 +113,9 @@ class _ListsScreenResponsiveState extends State<ListsScreenResponsive> {
       builder: (context, ref, _) {
         final shoppingListsAsync = ref.watch(shoppingListsProvider);
         final isMobile = ScreenSize.isMobile(context);
+
+        // Watch screen size provider to rebuild on size/orientation changes
+        ref.watch(screenSizeProvider);
 
         return shoppingListsAsync.when(
       loading: () => Scaffold(
