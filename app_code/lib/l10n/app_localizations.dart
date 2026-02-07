@@ -776,6 +776,12 @@ abstract class AppLocalizations {
   /// **'Select a list to view details'**
   String get selectListToViewDetails;
 
+  /// No description provided for @selectSupermarketToViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a supermarket to view details'**
+  String get selectSupermarketToViewDetails;
+
   /// No description provided for @enterRecipeNameError.
   ///
   /// In en, this message translates to:

@@ -11,6 +11,7 @@ class SupermarketsGridView extends ConsumerStatefulWidget {
   final String emptyMessage;
   final Widget? floatingActionButton;
   final void Function(bool)? onDeletionModeChanged;
+  final void Function(BuildContext, Supermarket)? onSupermarketTap;
 
   const SupermarketsGridView({
     super.key,
@@ -18,6 +19,7 @@ class SupermarketsGridView extends ConsumerStatefulWidget {
     required this.emptyMessage,
     this.floatingActionButton,
     this.onDeletionModeChanged,
+    this.onSupermarketTap,
   });
 
   @override
@@ -215,14 +217,18 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                     if (_selectionActive) {
                       _toggleSelection(supermarket);
                     } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SupermarketCustomizationScreen(
-                            supermarket: supermarket,
+                      if (widget.onSupermarketTap != null) {
+                        widget.onSupermarketTap!(context, supermarket);
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SupermarketCustomizationScreen(
+                              supermarket: supermarket,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     }
                   },
                   onLongPress: () => _toggleSelection(supermarket),
@@ -307,15 +313,19 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                               IconButton(
                                 icon: const Icon(Icons.edit_outlined),
                                 onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          SupermarketCustomizationScreen(
-                                            supermarket: supermarket,
-                                          ),
-                                    ),
-                                  );
+                                  if (widget.onSupermarketTap != null) {
+                                    widget.onSupermarketTap!(context, supermarket);
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            SupermarketCustomizationScreen(
+                                              supermarket: supermarket,
+                                            ),
+                                      ),
+                                    );
+                                  }
                                 },
                                 color: Theme.of(context).colorScheme.primary,
                               ),

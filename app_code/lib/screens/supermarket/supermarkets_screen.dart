@@ -1,90 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
-import 'package:app_code/widgets/searchable_supermarkets_view.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
-import 'package:app_code/utils/responsive_layout.dart';
-import 'package:app_code/l10n/app_localizations.dart';
+import 'package:app_code/widgets/detail_pane_navigator.dart';
+import 'package:app_code/widgets/searchable_supermarkets_view.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Mobile supermarkets screen: searchable list view.
-class SupermarketsScreenMobile extends ConsumerWidget {
-  const SupermarketsScreenMobile({super.key});
+// ============================================================================
+// Common Helper Functions
+// ============================================================================
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final supermarketsAsync = ref.watch(supermarketsProvider);
-    final l10n = AppLocalizations.of(context)!;
-
-    return supermarketsAsync.when(
-      loading: () => Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) => Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
-      ),
-      data: (supermarkets) {
-        final visibleSupermarkets = _getVisibleSupermarkets(supermarkets);
-
-        return SearchableSupermarketsView(
-          supermarkets: visibleSupermarkets,
-          emptyMessage: l10n.noSupermarketsYet,
-          onDeletionModeChanged: _handleDeletionModeChanged,
-          floatingActionButton: FloatingActionButton(
-            heroTag: 'addSupermarketFAB',
-            onPressed: () => _navigateToCreateSupermarket(
-              context: context,
-              ref: ref,
-            ),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            child: const Icon(Icons.add),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Tablet supermarkets screen: responsive grid view.
-class SupermarketsScreenTablet extends ConsumerWidget {
-  const SupermarketsScreenTablet({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final supermarketsAsync = ref.watch(supermarketsProvider);
-    final l10n = AppLocalizations.of(context)!;
-
-    return supermarketsAsync.when(
-      loading: () => Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) => Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
-      ),
-      data: (supermarkets) {
-        final visibleSupermarkets = _getVisibleSupermarkets(supermarkets);
-
-        return ResponsiveGridView(
-          children: visibleSupermarkets
-              .map((supermarket) => _SupermarketCard(
-                    supermarket: supermarket,
-                  ))
-              .toList(),
-          mobileColumns: 1,
-          tabletColumns: 2,
-          desktopColumns: 3,
-        );
-      },
-    );
-  }
-}
-
+/// Filters and sorts supermarkets: visible only, favorites first, then alphabetically.
 List<Supermarket> _getVisibleSupermarkets(List<Supermarket> supermarkets) {
   final visibleSupermarkets = supermarkets.where((s) => s.isVisible).toList();
 
@@ -98,164 +26,231 @@ List<Supermarket> _getVisibleSupermarkets(List<Supermarket> supermarkets) {
   return visibleSupermarkets;
 }
 
-void _handleDeletionModeChanged(bool isDeletionMode) {
-  // Deletion mode is handled by SearchableSupermarketsView
-}
-
-Future<void> _navigateToCreateSupermarket({
-  required BuildContext context,
-  required WidgetRef ref,
-}) async {
+/// Creates a new supermarket with template categories from the last edited supermarket.
+Future<Supermarket> _createNewSupermarket(WidgetRef ref) async {
   final lastSupermarket = await ref
       .read(supermarketsProvider.notifier)
       .getLastEditedSupermarket();
-  final uncategorized = await UncategorizedCategoryInitializer.getUncategorized();
+  final uncategorized =
+      await UncategorizedCategoryInitializer.getUncategorized();
 
   final templateCategories = lastSupermarket?.getCategories() ?? [];
-  final hasUncategorized =
-      templateCategories.any((cat) => cat.id == uncategorized.id);
+  final hasUncategorized = templateCategories.any(
+    (cat) => cat.id == uncategorized.id,
+  );
 
-  final newSupermarket = Supermarket(
+  return Supermarket(
     name: '',
     categories: hasUncategorized
         ? templateCategories
         : [uncategorized, ...templateCategories],
   );
+}
 
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => SupermarketCustomizationScreen(
-        supermarket: newSupermarket,
-        isCreationMode: true,
-      ),
-    ),
+/// Builds a loading scaffold.
+Widget _buildLoadingScaffold(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    body: const Center(child: CircularProgressIndicator()),
   );
 }
 
-/// Supermarket card widget for grid display
-class _SupermarketCard extends ConsumerWidget {
-  final Supermarket supermarket;
+/// Builds an error scaffold with localized message.
+Widget _buildErrorScaffold(BuildContext context, Object error) {
+  final l10n = AppLocalizations.of(context)!;
+  return Scaffold(
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
+  );
+}
 
-  const _SupermarketCard({
-    required this.supermarket,
-  });
+// ============================================================================
+// Mobile Screen
+// ============================================================================
+
+/// Mobile supermarkets screen: searchable list view.
+class SupermarketsScreenMobile extends ConsumerWidget {
+  const SupermarketsScreenMobile({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final supermarketsAsync = ref.watch(supermarketsProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    return Card(
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SupermarketCustomizationScreen(
-                supermarket: supermarket,
-                isCreationMode: false,
-              ),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return supermarketsAsync.when(
+      loading: () => _buildLoadingScaffold(context),
+      error: (error, _) => _buildErrorScaffold(context, error),
+      data: (supermarkets) {
+        final visibleSupermarkets = _getVisibleSupermarkets(supermarkets);
+
+        return SearchableSupermarketsView(
+          supermarkets: visibleSupermarkets,
+          emptyMessage: l10n.noSupermarketsYet,
+          floatingActionButton: FloatingActionButton(
+            heroTag: 'addSupermarketFAB',
+            onPressed: () => _navigateToCreateSupermarketMobile(context, ref),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _navigateToCreateSupermarketMobile(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final newSupermarket = await _createNewSupermarket(ref);
+
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SupermarketCustomizationScreen(
+            supermarket: newSupermarket,
+            isCreationMode: true,
+          ),
+        ),
+      );
+    }
+  }
+}
+
+// ============================================================================
+// Tablet Screen
+// ============================================================================
+
+/// Tablet/Desktop supermarkets screen: master-detail split view.
+class SupermarketsScreenTablet extends ConsumerStatefulWidget {
+  const SupermarketsScreenTablet({super.key});
+
+  @override
+  ConsumerState<SupermarketsScreenTablet> createState() =>
+      _SupermarketsScreenTabletState();
+}
+
+class _SupermarketsScreenTabletState
+    extends ConsumerState<SupermarketsScreenTablet> {
+  Supermarket? _selectedSupermarket;
+
+  @override
+  Widget build(BuildContext context) {
+    final supermarketsAsync = ref.watch(supermarketsProvider);
+    final l10n = AppLocalizations.of(context)!;
+
+    return supermarketsAsync.when(
+      loading: () => _buildLoadingScaffold(context),
+      error: (error, _) => _buildErrorScaffold(context, error),
+      data: (supermarkets) {
+        final visibleSupermarkets = _getVisibleSupermarkets(supermarkets);
+
+        _clearSelectedIfNotVisible(visibleSupermarkets);
+
+        return Scaffold(
+          body: Row(
             children: [
-              // Name and favorite indicator
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      supermarket.getName(),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (supermarket.isFavorite)
-                    Icon(
-                      Icons.favorite,
-                      color: colorScheme.primary,
-                      size: 20,
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Category count
-              Row(
-                children: [
-                  Icon(
-                    Icons.category_outlined,
-                    size: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    l10n.categoriesCountLabel(supermarket.getCategories().length),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-
-              // Location if available
-              // if (supermarket.latitude != null && supermarket.longitude != null)
-              //   Row(
-              //     children: [
-              //       Icon(
-              //         Icons.location_on_outlined,
-              //         size: 16,
-              //         color: colorScheme.onSurfaceVariant,
-              //       ),
-              //       const SizedBox(width: 4),
-              //       Text(
-              //         '${supermarket.latitude!.toStringAsFixed(2)}, ${supermarket.longitude!.toStringAsFixed(2)}',
-              //         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              //           color: colorScheme.onSurfaceVariant,
-              //         ),
-              //         maxLines: 1,
-              //         overflow: TextOverflow.ellipsis,
-              //       ),
-              //     ],
-              //   ),
-
-              const Spacer(),
-
-              // Edit button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SupermarketCustomizationScreen(
-                          supermarket: supermarket,
-                          isCreationMode: false,
-                        ),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.edit, size: 18),
-                  label: Text(l10n.editLabel),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
+              _buildMasterPane(context, visibleSupermarkets, l10n),
+              _buildDetailPane(context),
+              
             ],
           ),
+        );
+      },
+    );
+  }
+
+  /// Clears selected supermarket if it's no longer visible.
+  void _clearSelectedIfNotVisible(List<Supermarket> visibleSupermarkets) {
+    if (_selectedSupermarket != null &&
+        !visibleSupermarkets.any((s) => s.id == _selectedSupermarket!.id)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _selectedSupermarket = null);
+        }
+      });
+    }
+  }
+
+  /// Builds the master pane with the list of supermarkets.
+  Widget _buildMasterPane(
+    BuildContext context,
+    List<Supermarket> visibleSupermarkets,
+    AppLocalizations l10n,
+  ) {
+    return Flexible(
+      flex: 40,
+      child: SearchableSupermarketsView(
+        supermarkets: visibleSupermarkets,
+        emptyMessage: l10n.noSupermarketsYet,
+        onSupermarketTap: (context, supermarket) {
+          setState(() => _selectedSupermarket = supermarket);
+        },
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'addSupermarketFAB',
+          onPressed: _navigateToCreateSupermarketTablet,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          child: const Icon(Icons.add),
         ),
       ),
     );
+  }
+
+  /// Builds the detail pane with supermarket customization or empty state.
+  Widget _buildDetailPane(BuildContext context) {
+    final selection = _selectedSupermarket;
+    _selectedSupermarket = null;
+    return Flexible(
+      flex: 60,
+      child: selection != null
+          ? DetailPaneNavigator(
+              key: ValueKey(selection.id),
+              initialChild: SupermarketCustomizationScreen(
+                supermarket: selection,
+                isCreationMode: selection.getName().isEmpty ),
+              emptyBuilder: _buildEmptyDetailPane,
+            )
+          : _buildEmptyDetailPane(context),
+    );
+  }
+
+  /// Builds an empty detail pane when no supermarket is selected.
+  Widget _buildEmptyDetailPane(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.store_outlined,
+              size: 64,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.selectSupermarketToViewDetails,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Navigates to create a new supermarket by selecting it in the master view.
+  Future<void> _navigateToCreateSupermarketTablet() async {
+    final newSupermarket = await _createNewSupermarket(ref);
+
+    if (mounted) {
+      setState(() => _selectedSupermarket = newSupermarket);
+    }
   }
 }

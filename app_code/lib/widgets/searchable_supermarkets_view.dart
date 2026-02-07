@@ -189,6 +189,7 @@ class _SearchableSupermarketsViewState
               ? l10n.noSupermarketsFoundMatching(_searchController.text)
               : widget.emptyMessage,
           onDeletionModeChanged: _setDeletionMode,
+          onSupermarketTap: widget.onSupermarketTap,
           floatingActionButton: widget.floatingActionButton != null
               ? GestureDetector(
                   onTap: () {

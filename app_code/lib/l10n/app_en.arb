@@ -167,6 +167,7 @@
   "enterListNamePrompt": "Please enter the name of your list:",
   "listNameHint": "List name",
   "selectListToViewDetails": "Select a list to view details",
+  "selectSupermarketToViewDetails": "Select a supermarket to view details",
   "enterRecipeNameError": "Please enter a recipe name",
   "editIngredientTitle": "Edit Ingredient",
   "addRecipeTitle": "Add Recipe",

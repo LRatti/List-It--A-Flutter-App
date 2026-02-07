@@ -282,27 +282,48 @@ class _SupermarketCustomizationScreenState
             // Categories list section
             Expanded(
               child: visibleCategories.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.category_outlined,
-                            size: 64,
-                            color: Theme.of(context).colorScheme.outline,
+                  ? LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 24,
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.noCategoriesYet,
-                            style: Theme.of(context).textTheme.titleMedium,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.category_outlined,
+                                    size: 64,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .outline,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    l10n.noCategoriesYet,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.addCategoriesToSupermarket,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.addCategoriesToSupermarket,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     )
                   : ReorderableListView(
                       onReorder: _onReorderCategory,

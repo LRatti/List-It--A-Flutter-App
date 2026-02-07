@@ -380,6 +380,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectListToViewDetails => 'Select a list to view details';
 
   @override
+  String get selectSupermarketToViewDetails =>
+      'Select a supermarket to view details';
+
+  @override
   String get enterRecipeNameError => 'Please enter a recipe name';
 
   @override

@@ -383,6 +383,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Seleziona una lista per vedere i dettagli';
 
   @override
+  String get selectSupermarketToViewDetails =>
+      'Seleziona un supermercato per vedere i dettagli';
+
+  @override
   String get enterRecipeNameError => 'Inserisci un nome ricetta';
 
   @override
