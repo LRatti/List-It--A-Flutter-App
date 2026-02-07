@@ -59,7 +59,8 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
       a.isAfter(DateTime(b.year, b.month, b.day, 23, 59, 59));
 
   String _formatCurrency(double amount) {
-    return '\$${amount.toStringAsFixed(2)}';
+    // Changed to EUR to match your screenshot
+    return 'EUR ${amount.toStringAsFixed(2)}';
   }
 
   void _showCategoryDetails(BuildContext context, String categoryName, List<dynamic> allLists) {
@@ -129,7 +130,7 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
     return Scaffold(
       body: listsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
+        error: (error, _) => const Center(
           child: Text("Error occurring: please reload the app.\n"),
         ),
         data: (lists) {
@@ -162,10 +163,18 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 16,
       children: [
         _buildPeriodSelector(),
-        _buildStatisticsChart(entries, total),
+        const SizedBox(height: 24),
+        // Center the chart and give it a fixed constraint to avoid collapsing
+        Center(
+          child: SizedBox(
+            width: 300,
+            height: 300,
+            child: _buildStatisticsChart(entries, total),
+          ),
+        ),
+        const SizedBox(height: 24),
         _buildCategoryList(context, entries, filteredLists, total),
       ],
     );
@@ -179,17 +188,23 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 16,
       children: [
         _buildPeriodSelector(),
+        const SizedBox(height: 24),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 24,
           children: [
             Expanded(
               flex: 40,
-              child: _buildStatisticsChart(entries, total),
+              child: Center(
+                child: SizedBox(
+                  width: 400,
+                  height: 400,
+                  child: _buildStatisticsChart(entries, total),
+                ),
+              ),
             ),
+            const SizedBox(width: 24),
             Expanded(
               flex: 60,
               child: _buildCategoryList(context, entries, filteredLists, total),
@@ -215,12 +230,17 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
   }
 
   Widget _buildStatisticsChart(List<MapEntry<String, double>> entries, double total) {
-    return StatisticsPieChart(
-      entries: entries,
-      total: total,
-      onCategoryTap: (categoryName) {
-        // Handle category tap if needed
-      },
+    // FIX: Wrapping with AspectRatio ensures the CustomPaint knows its dimensions
+    // and doesn't collapse, which was causing the overlapping text in your image.
+    return AspectRatio(
+      aspectRatio: 1, 
+      child: StatisticsPieChart(
+        entries: entries,
+        total: total,
+        onCategoryTap: (categoryName) {
+          // Handle category tap if needed
+        },
+      ),
     );
   }
 
@@ -271,75 +291,72 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: entries.length,
-          separatorBuilder: (_, __) => const Divider(height: 16),
+          separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (context, index) {
             final entry = entries[index];
             final categoryName = entry.key;
             final amount = entry.value;
             final percentage = total == 0 ? 0 : (amount / total) * 100;
+            final color = _colorForIndex(context, index);
 
-            return InkWell(
-              onTap: () => _showCategoryDetails(context, categoryName, filteredLists),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 4,
-                        children: [
-                          Text(
-                            categoryName,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            '${percentage.toStringAsFixed(1)}%',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      spacing: 4,
-                      children: [
-                        Text(
-                          _formatCurrency(amount),
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right,
-                          size: 18,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ],
-                    ),
-                  ],
+            return ListTile(
+              dense: true,
+              leading: CircleAvatar(
+                backgroundColor: color,
+                radius: 8,
+              ),
+              title: Text(
+                categoryName,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              subtitle: Text(
+                '${percentage.toStringAsFixed(1)}%',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _formatCurrency(amount),
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
+              onTap: () => _showCategoryDetails(context, categoryName, filteredLists),
             );
           },
         ),
       ],
     );
   }
+
+  Color _colorForIndex(BuildContext context, int index) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final themeColors = [
+      colorScheme.primary,
+      colorScheme.secondary,
+      colorScheme.tertiary ?? colorScheme.primaryContainer,
+      colorScheme.error,
+      colorScheme.primaryContainer,
+      colorScheme.secondaryContainer,
+      colorScheme.tertiaryContainer ?? colorScheme.secondaryContainer,
+    ];
+
+    return themeColors[index % themeColors.length];
+  }
 }
 
 class _StatisticsScreenMobileViewState
-  extends _StatisticsScreenBaseState<StatisticsScreenMobile> {
+    extends _StatisticsScreenBaseState<StatisticsScreenMobile> {
   @override
   Widget buildLayout(
     BuildContext context,
@@ -352,7 +369,7 @@ class _StatisticsScreenMobileViewState
 }
 
 class _StatisticsScreenTabletViewState
-  extends _StatisticsScreenBaseState<StatisticsScreenTablet> {
+    extends _StatisticsScreenBaseState<StatisticsScreenTablet> {
   @override
   Widget buildLayout(
     BuildContext context,
