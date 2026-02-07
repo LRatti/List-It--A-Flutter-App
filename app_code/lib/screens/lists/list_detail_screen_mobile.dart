@@ -81,7 +81,7 @@ class _ListDetailScreenMobileState
         .getFavoriteSupermarket();
 
     if (favorite != null) {
-      controller.updateSupermarket(favorite);
+      await controller.updateSupermarket(favorite);
     }
   }
 
@@ -112,7 +112,7 @@ class _ListDetailScreenMobileState
     final l10n = AppLocalizations.of(context)!;
 
     // Update list name from text field
-    controller.updateListName(_nameController.text.trim());
+    await controller.updateListName(_nameController.text.trim());
 
     // If no changes, just go back
     if (!controller.hasChanges) {
@@ -189,7 +189,7 @@ class _ListDetailScreenMobileState
           await UncategorizedCategoryInitializer.getUncategorized();
       final existing = await controller.searchExistingProduct(productName);
       final product = existing ?? Product(name: productName);
-      controller.addProduct(product, uncategorized);
+      await controller.addProduct(product, uncategorized);
       return;
     }
 
@@ -212,7 +212,7 @@ class _ListDetailScreenMobileState
       controller.removeFromBuffer(productName);
 
       // Add to list
-      controller.addProduct(result.product, result.category);
+      await controller.addProduct(result.product, result.category);
     } catch (e) {
       // Update buffer with error
       controller.updateBufferProduct(
@@ -295,7 +295,7 @@ class _ListDetailScreenMobileState
     final l10n = AppLocalizations.of(context)!;
 
     // Update list name from text field before saving
-    controller.updateListName(_nameController.text.trim());
+    await controller.updateListName(_nameController.text.trim());
 
     try {
       // Save all current changes before navigating to register screen
@@ -546,8 +546,9 @@ class _ListDetailScreenMobileState
             ),
           ],
         ),
-        onTap: () {
-          controller.updateSupermarket(supermarket);
+        onTap: () async {
+          await controller.updateSupermarket(supermarket);
+          if (!mounted) return;
           Navigator.pop(context);
         },
       ),
@@ -627,7 +628,7 @@ class _ListDetailScreenMobileState
         final controller = ref.read(
           listDetailControllerProvider(widget.shoppingList),
         );
-        controller.updateSupermarket(updatedSupermarket);
+        await controller.updateSupermarket(updatedSupermarket);
       }
     }
   }
@@ -660,8 +661,8 @@ class _ListDetailScreenMobileState
               border: InputBorder.none,
               hintText: l10n.listNameHint,
             ),
-            onSubmitted: (value) {
-              controller.updateListName(value.trim());
+            onSubmitted: (value) async {
+              await controller.updateListName(value.trim());
               _nameFieldFocusNode.unfocus();
             },
           ),
@@ -1085,11 +1086,11 @@ class _ListDetailScreenMobileState
         DraggableProductList(
           productsByCategory: productsByCategory,
           scrollController: _listScrollController,
-          onProductMoved: (product, newCategory) {
-            controller.moveProductToCategory(product, newCategory);
+          onProductMoved: (product, newCategory) async {
+            await controller.moveProductToCategory(product, newCategory);
           },
-          onProductRemoved: (product) {
-            controller.removeProduct(product);
+          onProductRemoved: (product) async {
+            await controller.removeProduct(product);
           },
           onProductRenamed: (product, newName) async {
             // Use the controller's method to properly handle product name updates
@@ -1097,9 +1098,9 @@ class _ListDetailScreenMobileState
             // purchased products in other lists, even if they originally had the same name
             await controller.updatePurchasedProductName(product, newName);
           },
-          onProductBoughtToggled: (product, isBought) {
+          onProductBoughtToggled: (product, isBought) async {
             // Update the bought status of the product
-            controller.toggleProductBought(product, isBought);
+            await controller.toggleProductBought(product, isBought);
           },
         ),
       ],

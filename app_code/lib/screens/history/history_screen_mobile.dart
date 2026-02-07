@@ -48,6 +48,7 @@ class HistoryScreenMobile extends ConsumerWidget {
               MaterialPageRoute(
                 builder: (_) => RegisterShoppingListScreenMobile(
                   shoppingListId: shoppingList.id,
+                  initialShoppingList: shoppingList,
                 ),
               ),
             );

@@ -20,10 +20,12 @@ import 'package:app_code/utils/category_localizer.dart';
 
 class RegisterShoppingListScreenMobile extends ConsumerStatefulWidget {
   final String shoppingListId;
+  final ShoppingList? initialShoppingList;
 
   const RegisterShoppingListScreenMobile({
     super.key,
     required this.shoppingListId,
+    this.initialShoppingList,
   });
 
   @override
@@ -272,79 +274,96 @@ class _RegisterShoppingListScreenMobileState
   @override
   Widget build(BuildContext context) {
     // Fetch fresh shopping list data from the database
-    final shoppingListAsync = ref.watch(shoppingListProvider(widget.shoppingListId));
+    final shoppingListAsync = ref.watch(
+      shoppingListProvider(widget.shoppingListId),
+    );
     final l10n = AppLocalizations.of(context)!;
-    
-    return shoppingListAsync.when(
-      loading: () => const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
-      error: (error, stackTrace) => Scaffold(
-        body: Center(
-          child: Text(l10n.errorLoadingShoppingList(error.toString())),
-        ),
-      ),
-      data: (shoppingList) {
-        // Initialize text controllers only once when we have the shopping list
-        if (_quantityControllers.isEmpty && _priceControllers.isEmpty) {
-          final controller = ref.read(
-            registerShoppingListControllerProvider(shoppingList),
-          );
-          final boughtProducts = controller.getBoughtProducts();
-          
-          for (final product in boughtProducts) {
-            _quantityControllers[product.id] = TextEditingController(
-              text: controller.getQuantity(product.id).toString(),
-            );
-            _priceControllers[product.id] = TextEditingController(
-              text: controller.getPrice(product.id).toStringAsFixed(2),
-            );
-          }
-        }
+    final shoppingList = shoppingListAsync.value ?? widget.initialShoppingList;
 
-        final controller = ref.watch(
-          registerShoppingListControllerProvider(shoppingList),
+    if (shoppingList == null) {
+      return shoppingListAsync.when(
+        loading: () => const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        error: (error, stackTrace) => Scaffold(
+          body: Center(
+            child: Text(l10n.errorLoadingShoppingList(error.toString())),
+          ),
+        ),
+        data: _buildScreen,
+      );
+    }
+
+    return _buildScreen(shoppingList);
+  }
+
+  Widget _buildScreen(ShoppingList shoppingList) {
+    // Initialize text controllers only once when we have the shopping list
+    if (_quantityControllers.isEmpty && _priceControllers.isEmpty) {
+      final controller = ref.read(
+        registerShoppingListControllerProvider(shoppingList),
+      );
+      final boughtProducts = controller.getBoughtProducts();
+
+      for (final product in boughtProducts) {
+        _quantityControllers[product.id] = TextEditingController(
+          text: controller.getQuantity(product.id).toString(),
         );
-        final colorScheme = Theme.of(context).colorScheme;
-        final textTheme = Theme.of(context).textTheme;
-        final boughtProducts = controller.getBoughtProducts();
+        _priceControllers[product.id] = TextEditingController(
+          text: controller.getPrice(product.id).toStringAsFixed(2),
+        );
+      }
+    }
 
-        return WillPopScope(
-          onWillPop: () async {
-            await _handleBack(shoppingList);
-            return false;
-          },
-          child: Scaffold(
-            resizeToAvoidBottomInset: true,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            appBar: AppBar(
-              title: Text(
-                controller.listName,
-                style: textTheme.titleLarge?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => _handleBack(shoppingList),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.check),
-                  tooltip: l10n.registerListTooltip,
-                  onPressed: () => _handleRegister(shoppingList),
-                ),
-              ],
-              elevation: 0,
+    final controller = ref.watch(
+      registerShoppingListControllerProvider(shoppingList),
+    );
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final boughtProducts = controller.getBoughtProducts();
+    final l10n = AppLocalizations.of(context)!;
+
+    return WillPopScope(
+      onWillPop: () async {
+        await _handleBack(shoppingList);
+        return false;
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          title: Text(
+            controller.listName,
+            style: textTheme.titleLarge?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
             ),
-            body: SafeArea(
-              child: Column(
-                children: [
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => _handleBack(shoppingList),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.check),
+              tooltip: l10n.registerListTooltip,
+              onPressed: () => _handleRegister(shoppingList),
+            ),
+          ],
+          elevation: 0,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
               // Supermarket display (fixed, non-interactive)
-              _buildSupermarketDisplay(shoppingList, controller, colorScheme, textTheme),
+              _buildSupermarketDisplay(
+                shoppingList,
+                controller,
+                colorScheme,
+                textTheme,
+              ),
 
               // Bought products list
               Expanded(
@@ -385,9 +404,7 @@ class _RegisterShoppingListScreenMobileState
           ],
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-          ),
-        );
-      },
+      ),
     );
   }
 

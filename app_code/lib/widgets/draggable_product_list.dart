@@ -6,10 +6,12 @@ import 'package:app_code/utils/category_localizer.dart';
 /// Widget that allows dragging products across categories
 class DraggableProductList extends StatefulWidget {
   final Map<Category, List<PurchasedProduct>> productsByCategory;
-  final Function(PurchasedProduct product, Category newCategory) onProductMoved;
-  final Function(PurchasedProduct product) onProductRemoved;
-  final Function(PurchasedProduct product, String newName) onProductRenamed;
-  final Function(PurchasedProduct product, bool isBought)?
+  final Future<void> Function(PurchasedProduct product, Category newCategory)
+  onProductMoved;
+  final Future<void> Function(PurchasedProduct product) onProductRemoved;
+  final Future<void> Function(PurchasedProduct product, String newName)
+  onProductRenamed;
+  final Future<void> Function(PurchasedProduct product, bool isBought)?
   onProductBoughtToggled;
   final ScrollController? scrollController;
 
@@ -248,10 +250,10 @@ class _DraggableProductListState extends State<DraggableProductList> {
                     );
                   },
                   onWillAccept: (data) => data != null,
-                  onAccept: (product) {
+                  onAccept: (product) async {
                     // Only move if different category
                     if (product.category.id != category.id) {
-                      widget.onProductMoved(product, category);
+                      await widget.onProductMoved(product, category);
                     }
                   },
                 ),
@@ -273,10 +275,10 @@ class _DraggableProductListState extends State<DraggableProductList> {
                       onWillAccept: (draggedProduct) =>
                           draggedProduct != null &&
                           draggedProduct.id != product.id,
-                      onAccept: (draggedProduct) {
+                      onAccept: (draggedProduct) async {
                         // Move the dragged product to this product's category
                         if (draggedProduct.category.id != product.category.id) {
-                          widget.onProductMoved(
+                          await widget.onProductMoved(
                             draggedProduct,
                             product.category,
                           );
@@ -383,9 +385,9 @@ class _DraggableProductListState extends State<DraggableProductList> {
         // Checkbox on the left to mark products as bought
         leading: Checkbox(
           value: isChecked,
-          onChanged: (value) {
+          onChanged: (value) async {
             if (widget.onProductBoughtToggled != null) {
-              widget.onProductBoughtToggled!(product, value ?? false);
+              await widget.onProductBoughtToggled!(product, value ?? false);
             }
           },
         ),
@@ -398,21 +400,21 @@ class _DraggableProductListState extends State<DraggableProductList> {
             contentPadding: EdgeInsets.zero,
           ),
           style: textTheme.bodyLarge,
-          onSubmitted: (value) {
+          onSubmitted: (value) async {
             if (value.trim().isEmpty) {
               // Remove product if name is cleared
-              widget.onProductRemoved(product);
+              await widget.onProductRemoved(product);
             } else if (value.trim() != product.product.getName()) {
               // Rename product if name changed
-              widget.onProductRenamed(product, value.trim());
+              await widget.onProductRenamed(product, value.trim());
             }
             focusNode.unfocus();
           },
-          onTapOutside: (event) {
+          onTapOutside: (event) async {
             final value = controller.text.trim();
             if (value.isEmpty) {
               // Remove product if name is cleared
-              widget.onProductRemoved(product);
+              await widget.onProductRemoved(product);
             }
             focusNode.unfocus();
           },
@@ -428,8 +430,8 @@ class _DraggableProductListState extends State<DraggableProductList> {
                 size: 20,
                 color: colorScheme.error,
               ),
-              onPressed: () {
-                widget.onProductRemoved(product);
+              onPressed: () async {
+                await widget.onProductRemoved(product);
               },
               tooltip: 'Remove product',
               visualDensity: VisualDensity.compact,

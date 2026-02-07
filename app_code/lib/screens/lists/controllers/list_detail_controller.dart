@@ -76,17 +76,19 @@ class ListDetailController extends ChangeNotifier {
   bool get hasChanges => _hasChanges;
   String get listId => _originalList.id;
 
-  /// Update list name
-  void updateListName(String newName) {
+  /// Update list name and persist immediately
+  Future<void> updateListName(String newName) async {
     if (_listName != newName) {
       _listName = newName;
       _hasChanges = true;
       notifyListeners();
+      await _persistListMetadata();
+      _hasChanges = false;
     }
   }
 
-  /// Update selected supermarket and recategorize products
-  void updateSupermarket(Supermarket newSupermarket) {
+  /// Update selected supermarket and recategorize products (persist immediately)
+  Future<void> updateSupermarket(Supermarket newSupermarket) async {
     final isNew = _selectedSupermarket?.id != newSupermarket.id;
     final isUpdated =
         _selectedSupermarket?.id == newSupermarket.id &&
@@ -96,14 +98,19 @@ class ListDetailController extends ChangeNotifier {
       _selectedSupermarket = newSupermarket;
       _uncategorizedFallback = null;
       _recategorizeProductsForSupermarket();
-      if (isNew) {
+      if (isNew || isUpdated) {
         _hasChanges = true;
       }
       notifyListeners();
+      await _persistAllProducts();
+      await _persistListMetadata();
+      await _flushPendingAssociations();
+      _hasChanges = false;
     }
   }
 
   /// Clear selected supermarket and move all products to uncategorized
+  /// Persists changes immediately
   Future<void> clearSupermarket({Category? uncategorized}) async {
     final fallback =
         uncategorized ??
@@ -127,6 +134,10 @@ class ListDetailController extends ChangeNotifier {
     if (selectionChanged || categoryChanged) {
       _hasChanges = true;
       notifyListeners();
+      await _persistAllProducts();
+      await _persistListMetadata();
+      await _flushPendingAssociations();
+      _hasChanges = false;
     }
   }
 
@@ -141,17 +152,22 @@ class ListDetailController extends ChangeNotifier {
     for (var purchasedProduct in _products) {
       final product = purchasedProduct.product;
 
+      Category targetCategory;
       // Check if product has association with this supermarket
       if (product.associations.containsKey(supermarketId)) {
         final categoryId = product.associations[supermarketId]!;
-        final category = categories.firstWhere(
+        targetCategory = categories.firstWhere(
           (cat) => cat.id == categoryId,
           orElse: () => uncategorized,
         );
-        purchasedProduct.category = category;
       } else {
         // No association, place in uncategorized
-        purchasedProduct.category = uncategorized;
+        targetCategory = uncategorized;
+      }
+
+      if (purchasedProduct.category.id != targetCategory.id) {
+        purchasedProduct.category = targetCategory;
+        purchasedProduct.lastModified = DateTime.now();
       }
     }
   }
@@ -189,8 +205,8 @@ class ListDetailController extends ChangeNotifier {
   }
 
   /// Add a product to the list with the specified category
-  /// Returns the added PurchasedProduct
-  PurchasedProduct addProduct(Product product, Category category) {
+  /// Returns the added PurchasedProduct and persists immediately
+  Future<PurchasedProduct> addProduct(Product product, Category category) async {
     final purchasedProduct = PurchasedProduct(
       listId: _originalList.id,
       product: product,
@@ -225,30 +241,42 @@ class ListDetailController extends ChangeNotifier {
 
     _hasChanges = true;
     notifyListeners();
+    await _persistPurchasedProduct(purchasedProduct);
+    await _persistListMetadata();
+    await _flushPendingAssociations();
+    _hasChanges = false;
 
     return purchasedProduct;
   }
 
-  /// Remove a product from the list
-  void removeProduct(PurchasedProduct product) {
+  /// Remove a product from the list and persist immediately
+  Future<void> removeProduct(PurchasedProduct product) async {
     _products.removeWhere((p) => p.id == product.id);
     _hasChanges = true;
     notifyListeners();
+    await _persistListMetadata();
+    await _deletePurchasedProduct(product.id);
+    _hasChanges = false;
   }
 
-  /// Update a product in the list
-  void updateProduct(PurchasedProduct updatedProduct) {
+  /// Update a product in the list and persist immediately
+  Future<void> updateProduct(PurchasedProduct updatedProduct) async {
     final index = _products.indexWhere((p) => p.id == updatedProduct.id);
     if (index != -1) {
       _products[index] = updatedProduct;
       _hasChanges = true;
       notifyListeners();
+      await _persistPurchasedProduct(updatedProduct);
+      await _persistListMetadata();
+      await _flushPendingAssociations();
+      _hasChanges = false;
     }
   }
 
   /// Toggle the bought status of a purchased product
   /// This updates the isBought flag and marks the product as modified
-  void toggleProductBought(PurchasedProduct product, bool isBought) {
+  /// Persists immediately
+  Future<void> toggleProductBought(PurchasedProduct product, bool isBought) async {
     final index = _products.indexWhere((p) => p.id == product.id);
     if (index != -1) {
       // Update the isBought flag
@@ -257,6 +285,9 @@ class ListDetailController extends ChangeNotifier {
       _products[index].lastModified = DateTime.now();
       _hasChanges = true;
       notifyListeners();
+      await _persistPurchasedProduct(_products[index]);
+      await _persistListMetadata();
+      _hasChanges = false;
     }
   }
 
@@ -360,11 +391,15 @@ class ListDetailController extends ChangeNotifier {
     final updatedProduct = await updateProductName(purchasedProduct, newName);
 
     // Update the in-memory state with the new product reference
-    updateProduct(updatedProduct);
+    await updateProduct(updatedProduct);
   }
 
   /// Move product to a different category (drag and drop)
-  void moveProductToCategory(PurchasedProduct product, Category newCategory) {
+  /// Persists immediately
+  Future<void> moveProductToCategory(
+    PurchasedProduct product,
+    Category newCategory,
+  ) async {
     final index = _products.indexWhere((p) => p.id == product.id);
     if (index != -1) {
       // Update the purchased product's category
@@ -397,6 +432,10 @@ class ListDetailController extends ChangeNotifier {
 
       _hasChanges = true;
       notifyListeners();
+      await _persistPurchasedProduct(_products[index]);
+      await _persistListMetadata();
+      await _flushPendingAssociations();
+      _hasChanges = false;
     }
   }
 
@@ -481,6 +520,62 @@ class ListDetailController extends ChangeNotifier {
       supermarketId,
       categoryId,
     );
+  }
+
+  Future<void> _persistListMetadata() async {
+    _originalList.setName(_listName);
+    _originalList.setSupermarket(_selectedSupermarket);
+    _originalList.setPurchasedProducts(_products);
+
+    final listNotifier = _ref.read(shoppingListsProvider.notifier);
+    await listNotifier.updateList(_originalList);
+  }
+
+  Future<void> _persistAllProducts() async {
+    for (final purchasedProduct in _products) {
+      await _persistPurchasedProduct(purchasedProduct);
+    }
+  }
+
+  Future<void> _persistPurchasedProduct(PurchasedProduct purchasedProduct) async {
+    final productsNotifier = _ref.read(productsProvider.notifier);
+    final purchasedProductsNotifier = _ref.read(
+      purchasedProductsProvider.notifier,
+    );
+
+    final existingProduct = await ManageProduct.getProductByName(
+      purchasedProduct.product.getName(),
+    );
+
+    if (existingProduct != null) {
+      purchasedProduct.product = existingProduct;
+    } else {
+      await productsNotifier.addProduct(purchasedProduct.product);
+    }
+
+    purchasedProduct.lastModified ??= DateTime.now();
+
+    final existingPurchased = await purchasedProductsNotifier
+        .getPurchasedProductById(purchasedProduct.id);
+    if (existingPurchased == null) {
+      await purchasedProductsNotifier.addPurchasedProduct(purchasedProduct);
+    } else {
+      await purchasedProductsNotifier.updatePurchasedProduct(purchasedProduct);
+    }
+  }
+
+  Future<void> _deletePurchasedProduct(String productId) async {
+    final purchasedProductsNotifier = _ref.read(
+      purchasedProductsProvider.notifier,
+    );
+    await purchasedProductsNotifier.deletePurchasedProductById(productId);
+  }
+
+  Future<void> _flushPendingAssociations() async {
+    final associationsNotifier = _ref.read(associationsProvider.notifier);
+    if (associationsNotifier.hasPendingAssociations()) {
+      await associationsNotifier.flushAssociations();
+    }
   }
 
   /// Save all changes to database (called on screen exit)
