@@ -41,9 +41,9 @@ class TrashScreenMobile extends ConsumerWidget {
     );
     if (confirmed == true) {
       final notifier = ref.read(shoppingListsProvider.notifier);
-      for (final l in trashedLists) {
-        await notifier.updateList(l..setIsInTheTrash(false));
-      }
+      await Future.wait(
+        trashedLists.map((l) => notifier.updateList(l..setIsInTheTrash(false))),
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(message: l10n.allListsRestoredMessage, context: context),
       );
@@ -83,9 +83,7 @@ class TrashScreenMobile extends ConsumerWidget {
     );
     if (confirmed == true) {
       final notifier = ref.read(shoppingListsProvider.notifier);
-      for (final l in trashedLists) {
-        await notifier.deleteList(l);
-      }
+      await Future.wait(trashedLists.map((l) => notifier.deleteList(l)));
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(message: l10n.trashEmptiedMessage, context: context),
       );

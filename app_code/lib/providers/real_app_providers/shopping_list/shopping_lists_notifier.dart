@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/repositories/sync/shopping_list_repository_sync.dart';
@@ -73,15 +75,17 @@ class ShoppingListsNotifier extends AsyncNotifier<List<ShoppingList>> {
     final backgroundRecipeNotifier = 
         ref.read(backgroundRecipeProvider.notifier);
 
-    state = await AsyncValue.guard(() async {
+    // Update in-memory immediately for responsive UI
+    final currentLists = state.value ?? [];
+    state = AsyncValue.data(
+      currentLists.where((l) => l.id != list.id).toList(),
+    );
+
+    // Persist deletion in background
+    unawaited(() async {
       await repository.delete(list);
-      // Cancel ongoing recipe search for this list
       await backgroundRecipeNotifier.cancelSearchForList(list.id);
-      
-      // Update in-memory: filter out deleted list by stable ID
-      final currentLists = state.value ?? [];
-      return currentLists.where((l) => l.id != list.id).toList();
-    });
+    }());
   }
 
   /// Updates a list in persistence and updates state in-memory.
@@ -89,23 +93,23 @@ class ShoppingListsNotifier extends AsyncNotifier<List<ShoppingList>> {
   Future<void> updateList(ShoppingList list) async {
     final repository = ref.watch(shoppingListRepositoryProvider);
 
-    state = await AsyncValue.guard(() async {
+    // Update in-memory immediately for responsive UI
+    final currentLists = state.value ?? [];
+    state = AsyncValue.data([
+      for (final l in currentLists)
+        if (l.id == list.id) list else l,
+    ]);
+
+    // Persist update in background
+    unawaited(() async {
       await repository.update(list);
 
-      // If moved to trash, cancel recipe searches
       if (list.getIsInTheTrash()) {
         final backgroundRecipeNotifier =
             ref.read(backgroundRecipeProvider.notifier);
         await backgroundRecipeNotifier.cancelSearchForList(list.id);
       }
-
-      // Update in-memory: replace updated list by stable ID
-      final currentLists = state.value ?? [];
-      return [
-        for (final l in currentLists)
-          if (l.id == list.id) list else l,
-      ];
-    });
+    }());
   }
 
   /// Explicitly clean up lists that have been in trash for more than 30 days.
