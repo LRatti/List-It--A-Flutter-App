@@ -87,7 +87,7 @@ class SupermarketsScreenMobile extends ConsumerWidget {
           supermarkets: visibleSupermarkets,
           emptyMessage: l10n.noSupermarketsYet,
           floatingActionButton: FloatingActionButton(
-            heroTag: 'addSupermarketFAB',
+            heroTag: 'addSupermarketFAB_mobile_view',
             onPressed: () => _navigateToCreateSupermarketMobile(context, ref),
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -188,7 +188,7 @@ class _SupermarketsScreenTabletState
           setState(() => _selectedSupermarket = supermarket);
         },
         floatingActionButton: FloatingActionButton(
-          heroTag: 'addSupermarketFAB',
+          heroTag: 'addSupermarketFAB_tablet_master',
           onPressed: _navigateToCreateSupermarketTablet,
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,

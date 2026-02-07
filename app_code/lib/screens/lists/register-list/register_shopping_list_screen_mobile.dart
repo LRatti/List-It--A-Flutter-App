@@ -382,7 +382,7 @@ class _RegisterShoppingListScreenMobileState
           children: [
             // Camera button
             FloatingActionButton(
-              heroTag: 'camera_btn',
+              heroTag: 'camera_btn_${widget.shoppingListId}',
               mini: true,
               backgroundColor: colorScheme.primaryContainer,
               foregroundColor: colorScheme.onPrimaryContainer,
@@ -393,7 +393,7 @@ class _RegisterShoppingListScreenMobileState
             const SizedBox(height: 12),
             // Pencil button (open for editing)
             FloatingActionButton(
-              heroTag: 'pencil_btn',
+              heroTag: 'pencil_btn_${widget.shoppingListId}',
               mini: true,
               backgroundColor: colorScheme.secondaryContainer,
               foregroundColor: colorScheme.onSecondaryContainer,
@@ -632,7 +632,7 @@ class _RegisterShoppingListScreenMobileState
                       controller: priceController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                         LengthLimitingTextInputFormatter(10),
                       ],
                       decoration: InputDecoration(

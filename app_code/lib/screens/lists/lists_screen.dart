@@ -50,7 +50,7 @@ class ListsScreenMobile extends ConsumerWidget {
             );
           },
           floatingActionButton: FloatingActionButton(
-            heroTag: 'addShoppingListFAB',
+            heroTag: 'addShoppingListFAB_mobile_view',
             onPressed: () => _showAddShoppingListDialog(
               context: context,
               ref: ref,
@@ -134,7 +134,7 @@ class _ListsScreenTabletViewState extends ConsumerState<ListsScreenTablet> {
                     setState(() => _selectedList = list);
                   },
                   floatingActionButton: FloatingActionButton(
-                    heroTag: 'addShoppingListFAB',
+                    heroTag: 'addShoppingListFAB_tablet_master',
                     onPressed: () => _showAddShoppingListDialog(
                       context: context,
                       ref: ref,

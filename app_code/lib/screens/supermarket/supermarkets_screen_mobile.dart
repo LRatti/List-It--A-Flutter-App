@@ -86,7 +86,7 @@ class _SupermarketsScreenMobileState
           emptyMessage: l10n.noSupermarketsYet,
           onDeletionModeChanged: _handleDeletionModeChanged,
           floatingActionButton: FloatingActionButton(
-            heroTag: 'addSupermarketFAB',
+            heroTag: 'addSupermarketFAB_mobile',
             onPressed: () => _navigateToCreateSupermarket(context),
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,

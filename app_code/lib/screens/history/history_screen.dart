@@ -121,51 +121,59 @@ class _HistoryScreenTabletViewState extends ConsumerState<HistoryScreenTablet> {
                   },
                 ),
               ),
-              Flexible(
-                flex: 60,
-                child: _selectedList != null
-                    ? DetailPaneNavigator(
-                        key: ValueKey(_selectedList!.id),
-                        initialChild: RegisterShoppingListScreenMobile(
-                          shoppingListId: _selectedList!.id,
-                          initialShoppingList: _selectedList,
-                        ),
-                        emptyBuilder: _buildEmptyDetailPane,
-                      )
-                    : _buildEmptyDetailPane(context),
-              ),
+              _buildDetailPane(context),
             ],
           ),
         );
       },
     );
   }
-}
 
-Widget _buildEmptyDetailPane(BuildContext context) {
-  final colorScheme = Theme.of(context).colorScheme;
-  final l10n = AppLocalizations.of(context)!;
+  Widget _buildDetailPane(BuildContext context) {
+    final selection = _selectedList;
+    _selectedList = null; 
+    return Flexible(
+      flex: 60,
+      child: selection != null
+          ? DetailPaneNavigator(
+              key: ValueKey(selection.id),
+              initialChild: RegisterShoppingListScreenMobile(
+                shoppingListId: selection.id,
+                initialShoppingList: selection,
+              ),
+              emptyBuilder: _buildEmptyDetailPane,
+            )
+          : _buildEmptyDetailPane(context),
+    );
+  }
 
-  return Container(
-    color: Theme.of(context).scaffoldBackgroundColor,
-    child: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.history_outlined,
-            size: 64,
-            color: colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.selectCompletedListToReview,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+  Widget _buildEmptyDetailPane(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.history_outlined,
+              size: 64,
               color: colorScheme.onSurfaceVariant,
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(
+              l10n.selectCompletedListToReview,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
+
+

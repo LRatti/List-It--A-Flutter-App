@@ -339,7 +339,7 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
         ),
         floatingActionButton: _selectionActive
             ? FloatingActionButton(
-                heroTag: 'deleteSupermarketsFAB',
+                heroTag: 'deleteSupermarketsFAB_${DateTime.now().millisecondsSinceEpoch}',
                 onPressed: () => _deleteSelectedWithCallback(context),
                 backgroundColor: Theme.of(context).colorScheme.error,
                 foregroundColor: Theme.of(context).colorScheme.onError,
