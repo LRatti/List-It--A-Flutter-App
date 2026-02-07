@@ -158,7 +158,7 @@ class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
+      builder: (dialogContext) => WillPopScope(
         onWillPop: () async => false,
         child: AlertDialog(
           content: Column(
@@ -193,23 +193,26 @@ class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
 
       if (!mounted) return;
 
-      // Close the dialog
-      Navigator.pop(context);
+      // Close the dialog using rootNavigator to ensure proper dismissal
+      Navigator.of(context, rootNavigator: true).pop();
 
       // Return to register screen with matches (if any)
       Navigator.pop(context, matches);
     } catch (e) {
       if (!mounted) return;
 
-      // Close the dialog
-      Navigator.pop(context);
+      // Close the dialog using rootNavigator to ensure proper dismissal
+      Navigator.of(context, rootNavigator: true).pop();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      // Show snackbar after dialog is dismissed
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
