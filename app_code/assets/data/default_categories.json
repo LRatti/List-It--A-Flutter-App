@@ -2,75 +2,130 @@
   "categories": [
     {
       "name": "Uncategorized",
+      "labels": {
+        "en": "Uncategorized",
+        "it": "Senza categoria"
+      },
       "isVisible": false
     },
     {
-      "name": "🥩 Meat"
-      
+      "name": "🥩 Meat",
+      "labels": {
+        "en": "🥩 Meat",
+        "it": "🥩 Carne"
+      }
     },
     {
-      "name": "🍷 Wine Shop"
-      
+      "name": "🍷 Wine Shop",
+      "labels": {
+        "en": "🍷 Wine Shop",
+        "it": "🍷 Enoteca"
+      }
     },
     {
-      "name": "🌸 Flowers and Plants"
-      
+      "name": "🌸 Flowers and Plants",
+      "labels": {
+        "en": "🌸 Flowers and Plants",
+        "it": "🌸 Fiori e piante"
+      }
     },
     {
-      "name": "🍎 Fruit and Vegetables"
-      
+      "name": "🍎 Fruit and Vegetables",
+      "labels": {
+        "en": "🍎 Fruit and Vegetables",
+        "it": "🍎 Frutta e verdura"
+      }
     },
     {
-      "name": "🥕 Loose Fruit and Vegetables"
-      
+      "name": "🥕 Loose Fruit and Vegetables",
+      "labels": {
+        "en": "🥕 Loose Fruit and Vegetables",
+        "it": "🥕 Frutta e verdura sfuse"
+      }
     },
     {
-      "name": "🧀 Deli"
-      
+      "name": "🧀 Deli",
+      "labels": {
+        "en": "🧀 Deli",
+        "it": "🧀 Gastronomia"
+      }
     },
     {
-      "name": "🥪 Deli with service counter"
-      
+      "name": "🥪 Deli with service counter",
+      "labels": {
+        "en": "🥪 Deli with service counter",
+        "it": "🥪 Gastronomia con banco"
+      }
     },
     {
-      "name": "🥛 Dairy and Cured Meats"
-      
+      "name": "🥛 Dairy and Cured Meats",
+      "labels": {
+        "en": "🥛 Dairy and Cured Meats",
+        "it": "🥛 Latticini e salumi"
+      }
     },
     {
-      "name": "🔪 Butcher with service counter"
-      
+      "name": "🔪 Butcher with service counter",
+      "labels": {
+        "en": "🔪 Butcher with service counter",
+        "it": "🔪 Macelleria con banco"
+      }
     },
     {
-      "name": "🧴 Non-Food"
-      
+      "name": "🧴 Non-Food",
+      "labels": {
+        "en": "🧴 Non-Food",
+        "it": "🧴 Non-cibo"
+      }
     },
     {
-      "name": "🍞 Bread and Desserts"
-      
+      "name": "🍞 Bread and Desserts",
+      "labels": {
+        "en": "🍞 Bread and Desserts",
+        "it": "🍞 Pane e dolci"
+      }
     },
     {
-      "name": "🥖 Bread and Desserts with service counter"
-      
+      "name": "🥖 Bread and Desserts with service counter",
+      "labels": {
+        "en": "🥖 Bread and Desserts with service counter",
+        "it": "🥖 Pane e dolci con banco"
+      }
     },
     {
-      "name": "🥐 Bakery"
-      
+      "name": "🥐 Bakery",
+      "labels": {
+        "en": "🥐 Bakery",
+        "it": "🥐 Panetteria"
+      }
     },
     {
-      "name": "🧁 Pastry"
-      
+      "name": "🧁 Pastry",
+      "labels": {
+        "en": "🧁 Pastry",
+        "it": "🧁 Pasticceria"
+      }
     },
     {
-      "name": "🐟 Fish"
-      
+      "name": "🐟 Fish",
+      "labels": {
+        "en": "🐟 Fish",
+        "it": "🐟 Pesce"
+      }
     },
     {
-      "name": "🦞 Fishmonger with service counter"
-      
+      "name": "🦞 Fishmonger with service counter",
+      "labels": {
+        "en": "🦞 Fishmonger with service counter",
+        "it": "🦞 Pescheria con banco"
+      }
     },
     {
-      "name": "🍣 Sushi"
-      
+      "name": "🍣 Sushi",
+      "labels": {
+        "en": "🍣 Sushi",
+        "it": "🍣 Sushi"
+      }
     }
   ]
 }

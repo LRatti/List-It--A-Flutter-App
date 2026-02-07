@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/widgets/shopping_list_widget.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
@@ -36,20 +37,21 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
     ShoppingList list,
   ) async {
     final ref = this.ref;
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete list'),
-        content: Text("Are you sure you want to delete '${list.getName()}'?"),
+        title: Text(l10n.deleteListTitle),
+        content: Text(l10n.deleteListConfirm(list.getName())),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            child: const Text('Delete'),
+            child: Text(l10n.deleteLabel),
           ),
         ],
       ),
@@ -115,20 +117,21 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
     final ref = this.ref;
     if (_selectedIds.isEmpty) return;
     final count = _selectedIds.length;
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete selected lists'),
-        content: Text('Are you sure you want to delete $count selected list(s)?'),
+        title: Text(l10n.deleteSelectedListsTitle),
+        content: Text(l10n.deleteSelectedListsConfirm(count)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            child: const Text('Delete'),
+            child: Text(l10n.deleteLabel),
           ),
         ],
       ),
@@ -155,6 +158,8 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     // Listen for global navigation signals to clear selection and hide delete FAB
     ref.listen(appNavigationSignalProvider, (prev, next) {
       if (prev != next) {
@@ -189,7 +194,7 @@ class _ShoppingListsGridViewState extends ConsumerState<ShoppingListsGridView> {
                   onPressed: _cancelSelection,
                 ),
                 title: Text(
-                  '${_selectedIds.length} selected',
+                  l10n.selectedItemsCount(_selectedIds.length),
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               )

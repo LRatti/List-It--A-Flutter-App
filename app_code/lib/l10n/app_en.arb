@@ -1,0 +1,447 @@
+{
+  "appTitle": "DIMA",
+  "settingsTitle": "Settings",
+  "notificationsLabel": "Notifications",
+  "darkModeLabel": "Dark Mode",
+  "fontSizeLabel": "Font Size",
+  "fontSizeSmallLabel": "Small",
+  "fontSizeLargeLabel": "Large",
+  "textPreviewTitle": "Text Preview",
+  "textPreviewDisplayLarge": "Display Large",
+  "textPreviewHeadlineMedium": "Headline Medium",
+  "textPreviewTitleMedium": "Title Medium - This is how your body text will look with the selected font size.",
+  "textPreviewBodyMedium": "Body Medium - This is standard body text for reading content and descriptions.",
+  "textPreviewBodySmall": "Body Small - Smaller text for less important information.",
+  "textPreviewBodyExample": "This is how your text will look",
+  "textPreviewBodySmallExample": "Smaller body text example",
+  "colorPaletteTitle": "Color Palette",
+  "colorSwatchPrimary": "Primary",
+  "colorSwatchSecondary": "Secondary",
+  "colorSwatchTertiary": "Tertiary",
+  "colorSwatchError": "Error",
+  "colorSwatchSurface": "Surface",
+  "aboutSectionTitle": "About",
+  "appVersionLabel": "App Version",
+  "privacyPolicyLabel": "Privacy Policy",
+  "termsOfServiceLabel": "Terms of Service",
+  "languageLabel": "Language",
+  "languageEnglishLabel": "English",
+  "languageItalianLabel": "Italian",
+  "listsTabLabel": "Lists",
+  "historyTabLabel": "History",
+  "supermarketsTabLabel": "Supermarkets",
+  "statisticsTabLabel": "Statistics",
+  "signInLabel": "Sign In",
+  "signUpLabel": "Sign Up",
+  "authTitle": "Authentication",
+  "welcomeMessage": "Welcome.",
+  "alreadyHaveAccount": "Already have an account?",
+  "signInInstead": "Sign in instead",
+  "needAccount": "Need an account?",
+  "signUpInstead": "Sign up instead",
+  "signInWithGoogle": "Sign in with Google",
+  "signInIntro": "Sign in to your account.",
+  "signUpIntro": "Sign up for a new account.",
+  "emailLabel": "Email",
+  "confirmEmailLabel": "Confirm Email",
+  "enterEmailError": "Please enter your email",
+  "confirmEmailError": "Please confirm your email",
+  "emailsDoNotMatch": "Emails do not match",
+  "enterPasswordError": "Please enter your password",
+  "enterPasswordCreateError": "Please make a password",
+  "incorrectLoginCredentials": "Incorrect login credentials.",
+  "forgotPasswordLabel": "Forgot password?",
+  "usernamePrompt": "How would you like to be called?",
+  "enterUsernameError": "Please enter a username",
+  "signUpFailed": "Could not sign up with those details.",
+  "recoverPasswordTitle": "Recover Password",
+  "resetPasswordInstructions": "Enter your account email to receive a password reset link.",
+  "resetCooldownMessage": "You can request another reset in {seconds} seconds",
+  "@resetCooldownMessage": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "pleaseWaitSeconds": "Please wait ({seconds} s)",
+  "@pleaseWaitSeconds": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "sendRecoveryEmailLabel": "Send recovery email",
+  "resetLinkSentIfAccountExists": "If an account exists, a reset link has been sent.",
+  "recoveryEmailSentCheckInbox": "Recovery email sent. Check your inbox.",
+  "unableToOpenMap": "Unable to open map",
+  "menuLabel": "Menu",
+  "profileLabel": "Profile",
+  "trashLabel": "Trash",
+  "closeLabel": "Close",
+  "trashEmptyMessage": "Trash is empty",
+  "deletingNowMessage": "Deleting now...",
+  "deleteInOneDayMessage": "Delete in 1 day",
+  "deleteInDaysMessage": "Delete in {days} days",
+  "@deleteInDaysMessage": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "restoreLabel": "Restore",
+  "deletePermanentlyTitle": "Delete permanently",
+  "deleteListPermanentlyConfirm": "Are you sure you want to permanently delete '{listName}'?",
+  "@deleteListPermanentlyConfirm": {
+    "placeholders": {
+      "listName": {}
+    }
+  },
+  "cancelLabel": "Cancel",
+  "deleteLabel": "Delete",
+  "deleteListTitle": "Delete list",
+  "deleteListConfirm": "Are you sure you want to delete '{listName}'?",
+  "@deleteListConfirm": {
+    "placeholders": {
+      "listName": {}
+    }
+  },
+  "deleteSelectedListsTitle": "Delete selected lists",
+  "deleteSelectedListsConfirm": "Are you sure you want to delete {count} selected list(s)?",
+  "@deleteSelectedListsConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deleteSelectedSupermarketsConfirm": "Want to delete {count} supermarket(s)?",
+  "@deleteSelectedSupermarketsConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "createFirstSupermarketMessage": "Create your first supermarket to get started",
+  "cannotRemoveFavoriteSupermarket": "Cannot remove favorite: You must have at least one favorite supermarket. Select a different one first.",
+  "errorUpdatingFavorite": "Error updating favorite: {error}",
+  "@errorUpdatingFavorite": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "searchSupermarketsHint": "Search supermarkets...",
+  "supermarketsTitle": "Supermarkets",
+  "noSupermarketsFoundMatching": "No supermarkets found matching \"{query}\"",
+  "@noSupermarketsFoundMatching": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "searchListsHint": "Search lists...",
+  "noListsFoundMatching": "No lists found matching \"{query}\"",
+  "@noListsFoundMatching": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "noItemsLabel": "No items",
+  "dateNotAvailable": "--/--/----",
+  "passwordLabel": "Password",
+  "showPasswordTooltip": "Show password",
+  "hidePasswordTooltip": "Hide password",
+  "restoreAllTitle": "Restore all",
+  "restoreAllConfirm": "Are you sure you want to restore all lists from trash?",
+  "allListsRestoredMessage": "All lists restored",
+  "emptyTrashTitle": "Empty trash",
+  "emptyTrashConfirm": "This will permanently delete all lists in trash. Continue?",
+  "deleteAllLabel": "Delete all",
+  "trashEmptiedMessage": "Trash emptied",
+  "noSupermarketsYet": "No supermarkets yet",
+  "noRegisteredListsYet": "No registered lists yet.",
+  "noDataForSelectedPeriod": "No data for the selected period.",
+  "byCategoryTitle": "By category",
+  "categoryBreakdownTitle": "Category Breakdown",
+  "selectCompletedListToReview": "Select a completed list to review",
+  "errorLoadingShoppingList": "Error loading shopping list: {error}",
+  "@errorLoadingShoppingList": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noListsYet": "No lists yet.",
+  "addNewListTitle": "Add new list",
+  "enterListNamePrompt": "Please enter the name of your list:",
+  "listNameHint": "List name",
+  "selectListToViewDetails": "Select a list to view details",
+  "enterRecipeNameError": "Please enter a recipe name",
+  "editIngredientTitle": "Edit Ingredient",
+  "addRecipeTitle": "Add Recipe",
+  "enterRecipeNameHint": "Enter recipe name...",
+  "searchRecipeLabel": "Search Recipe",
+  "enterRecipeAndSearch": "Enter a recipe name and press \"Search Recipe\"",
+  "recipeLabel": "Recipe",
+  "ingredientsCount": "Ingredients ({selected}/{total})",
+  "@ingredientsCount": {
+    "placeholders": {
+      "selected": {},
+      "total": {}
+    }
+  },
+  "addToListLabel": "Add to List",
+  "errorRegisteringList": "Error registering list: {error}",
+  "@errorRegisteringList": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "continueEditingTitle": "Continue Editing?",
+  "continueEditingMessage": "You can add more products or check additional items.",
+  "yesContinueLabel": "Yes, Continue",
+  "errorOpeningForEditing": "Error opening for editing: {error}",
+  "@errorOpeningForEditing": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "scanReceiptTooltip": "Scan receipt",
+  "continueEditingTooltip": "Continue editing",
+  "supermarketLabel": "Supermarket",
+  "notSelectedLabel": "Not selected",
+  "noCheckedItems": "No checked items",
+  "checkItemsToRegister": "Check items in the shopping list\nto register them here",
+  "quantityLabelTitle": "Quantity",
+  "priceLabel": "Price",
+  "errorSavingTitle": "Error Saving",
+  "failedToSaveChanges": "Failed to save changes:",
+  "whatWouldYouLikeToDo": "What would you like to do?",
+  "stayAndRetry": "Stay and retry",
+  "discardChanges": "Discard changes",
+  "errorAddingProduct": "Error adding product: {error}",
+  "@errorAddingProduct": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorDeletingList": "Error deleting list: {error}",
+  "@errorDeletingList": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "selectSupermarketTitle": "Select Supermarket",
+  "noSupermarketsCreateFirst": "No supermarkets yet. Create one to get started.",
+  "supermarketsAvailable": "{count} supermarket(s) available",
+  "@supermarketsAvailable": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "createNewLabel": "Create New",
+  "clearLabel": "Clear",
+  "editSupermarketTooltip": "Edit supermarket",
+  "createSupermarketToOrganize": "Create a supermarket to organize\nyour shopping categories",
+  "registerListTooltip": "Register list",
+  "errorLoadingSupermarkets": "Error loading supermarkets",
+  "createSupermarketPrompt": "Create a supermarket",
+  "selectSupermarketPrompt": "Select supermarket",
+  "addProductHint": "Add product...",
+  "addProductTooltip": "Add product",
+  "deleteListTooltip": "Delete list",
+  "defaultCategoryUncategorized": "Uncategorized",
+  "defaultCategoryMeat": "🥩 Meat",
+  "defaultCategoryWineShop": "🍷 Wine Shop",
+  "defaultCategoryFlowersAndPlants": "🌸 Flowers and Plants",
+  "defaultCategoryFruitAndVegetables": "🍎 Fruit and Vegetables",
+  "defaultCategoryLooseFruitAndVegetables": "🥕 Loose Fruit and Vegetables",
+  "defaultCategoryDeli": "🧀 Deli",
+  "defaultCategoryDeliServiceCounter": "🥪 Deli with service counter",
+  "defaultCategoryDairyAndCuredMeats": "🥛 Dairy and Cured Meats",
+  "defaultCategoryButcherServiceCounter": "🔪 Butcher with service counter",
+  "defaultCategoryNonFood": "🧴 Non-Food",
+  "defaultCategoryBreadAndDesserts": "🍞 Bread and Desserts",
+  "defaultCategoryBreadAndDessertsServiceCounter": "🥖 Bread and Desserts with service counter",
+  "defaultCategoryBakery": "🥐 Bakery",
+  "defaultCategoryPastry": "🧁 Pastry",
+  "defaultCategoryFish": "🐟 Fish",
+  "defaultCategoryFishmongerServiceCounter": "🦞 Fishmonger with service counter",
+  "defaultCategorySushi": "🍣 Sushi",
+  "categoriesCountLabel": "{count} categories",
+  "@categoriesCountLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "editLabel": "Edit",
+  "supermarketNameEmpty": "Supermarket name cannot be empty",
+  "errorSavingSupermarket": "Error saving supermarket: {error}",
+  "@errorSavingSupermarket": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "deleteSupermarketConfirm": "Want to delete '{name}'?",
+  "@deleteSupermarketConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "errorDeletingSupermarket": "Error deleting supermarket: {error}",
+  "@errorDeletingSupermarket": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "createSupermarketTitle": "Create Supermarket",
+  "customizeSupermarketTitle": "Customize Supermarket",
+  "saveSupermarketTooltip": "Save supermarket",
+  "enterSupermarketNameLabel": "Enter Supermarket Name",
+  "noCategoriesYet": "No categories yet",
+  "addCategoriesToSupermarket": "Add categories to this supermarket",
+  "cancelSupermarketCreationTooltip": "Cancel supermarket creation",
+  "deleteSupermarketTooltip": "Delete supermarket",
+  "addCategoriesLabel": "Add Categories",
+  "removeFromFavoritesTooltip": "Remove from favorites",
+  "setAsFavoriteTooltip": "Set as favorite",
+  "removeCategoryTooltip": "Remove category",
+  "editCategoryTooltip": "Edit category",
+  "selectAtLeastOneCategory": "Please select at least one category",
+  "selectAtLeastOneCategoryToDelete": "Please select at least one category to delete",
+  "deleteCategoryConfirmSingle": "Want to delete '{name}'?",
+  "@deleteCategoryConfirmSingle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "deleteCategoriesConfirm": "Want to delete {count} categories?",
+  "@deleteCategoriesConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "failedToDeleteCategories": "Failed to delete categories: {error}",
+  "@failedToDeleteCategories": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "addCategoriesTitle": "Add Categories",
+  "createNewCategoryTooltip": "Create new category",
+  "allCategoriesAdded": "All categories added",
+  "createNewCategoryToContinue": "Create a new category to continue",
+  "addLabel": "Add",
+  "categoryNameEmpty": "Category name cannot be empty",
+  "uncategorizedNameReserved": "The name \"uncategorized\" is reserved",
+  "errorSavingCategory": "Error saving category: {error}",
+  "@errorSavingCategory": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "editCategoryTitle": "Edit Category",
+  "createCategoryTitle": "Create Category",
+  "categoryNameLabel": "Category Name",
+  "saveLabel": "Save",
+  "selectedItemsCount": "{count} selected",
+  "@selectedItemsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "quantityLabel": "Quantity: {quantity}",
+  "@quantityLabel": {
+    "placeholders": {
+      "quantity": {}
+    }
+  },
+  "statsLoadError": "Error occurring: please reload the app.",
+  "periodAll": "All",
+  "periodWeek": "Week",
+  "periodMonth": "Month",
+  "periodYear": "Year",
+  "periodCustom": "Custom",
+  "monthJanuary": "January",
+  "monthFebruary": "February",
+  "monthMarch": "March",
+  "monthApril": "April",
+  "monthMay": "May",
+  "monthJune": "June",
+  "monthJuly": "July",
+  "monthAugust": "August",
+  "monthSeptember": "September",
+  "monthOctober": "October",
+  "monthNovember": "November",
+  "monthDecember": "December",
+  "yearHint": "Year",
+  "selectYearTooltip": "Select year",
+  "previousWeekTooltip": "Previous week",
+  "nextWeekTooltip": "Next week",
+  "selectRangeLabel": "Select range",
+  "selectDayInWeekHelpText": "Select any day in the week",
+  "noUserDataFound": "No user data found.",
+  "errorWithDetails": "Error: {error}",
+  "@errorWithDetails": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "profileInformationTitle": "Profile Information",
+  "usernameLabel": "Username",
+  "currentEmailLabel": "Current Email",
+  "saveProfileChanges": "Save Profile Changes",
+  "securitySettingsTitle": "Security Settings",
+  "googleAccountManagedCredentials": "Email and password are managed via your Google account. Changes are disabled.",
+  "updateEmailTitle": "Update Email",
+  "newEmailLabel": "New Email",
+  "confirmNewEmailLabel": "Confirm New Email",
+  "updatePasswordTitle": "Update Password",
+  "newPasswordLabel": "New Password",
+  "confirmNewPasswordLabel": "Confirm New Password",
+  "verificationTitle": "Verification",
+  "enterCurrentPasswordToConfirm": "Enter Current Password to Confirm Changes",
+  "forgotPasswordWait": "Forgot Password? (Wait {seconds}s)",
+  "@forgotPasswordWait": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "forgotPassword": "Forgot Password?",
+  "cooldownSeconds": "Cooldown: {seconds}s",
+  "@cooldownSeconds": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "updateSecuritySettings": "Update Security Settings",
+  "changesSavedSuccessfully": "Changes saved successfully!",
+  "errorSavingChanges": "Error saving changes: {error}",
+  "@errorSavingChanges": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "googleAccountManagedCredentialsShort": "Email and password managed via Google. Changes disabled.",
+  "enterNewEmailOrPassword": "Enter new email and/or new password.",
+  "enterCurrentPasswordToProceed": "Enter current password to proceed.",
+  "fillBothEmailFields": "Fill both email fields.",
+  "emailAddressesDoNotMatch": "Email addresses do not match.",
+  "fillAllPasswordFields": "Fill all password fields.",
+  "newPasswordsDoNotMatch": "New passwords do not match.",
+  "passwordMinLength": "Password must be at least {minLength} characters.",
+  "@passwordMinLength": {
+    "placeholders": {
+      "minLength": {}
+    }
+  },
+  "updateEmailAndPasswordSeparately": "Please update email and password separately.",
+  "verificationEmailSent": "Verification email sent to new address!",
+  "passwordUpdatedSignInAgain": "Password updated. Please sign in again.",
+  "failedToUpdateCredentials": "Failed to update credentials: {error}",
+  "@failedToUpdateCredentials": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noEmailAssociated": "No email associated with this account.",
+  "waitBeforeRequestingReset": "Please wait {seconds} seconds before requesting another reset email.",
+  "@waitBeforeRequestingReset": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "recoveryEmailSentSignedOut": "Recovery email sent. You will be signed out.",
+  "couldNotSendResetEmail": "Could not send reset email. Try again later."
+}

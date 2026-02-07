@@ -5,6 +5,7 @@ import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lis
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
 import 'package:app_code/widgets/detail_pane_navigator.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 /// Mobile lists screen: single column list with modal detail view.
 class ListsScreenMobile extends ConsumerWidget {
@@ -13,6 +14,7 @@ class ListsScreenMobile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return shoppingListsAsync.when(
       loading: () => Scaffold(
@@ -21,7 +23,7 @@ class ListsScreenMobile extends ConsumerWidget {
       ),
       error: (error, _) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text(error.toString())),
+        body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
       ),
       data: (lists) {
         final activeLists = lists
@@ -35,7 +37,7 @@ class ListsScreenMobile extends ConsumerWidget {
 
         return SearchableShoppingListsView(
           lists: activeLists,
-          emptyMessage: 'No lists yet.',
+          emptyMessage: l10n.noListsYet,
           showRegistered: false,
           onListTap: (context, list) {
             Navigator.push(
@@ -89,6 +91,7 @@ class _ListsScreenTabletViewState extends ConsumerState<ListsScreenTablet> {
   @override
   Widget build(BuildContext context) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return shoppingListsAsync.when(
       loading: () => Scaffold(
@@ -97,7 +100,7 @@ class _ListsScreenTabletViewState extends ConsumerState<ListsScreenTablet> {
       ),
       error: (error, _) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text(error.toString())),
+        body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
       ),
       data: (lists) {
         final activeLists = lists
@@ -125,7 +128,7 @@ class _ListsScreenTabletViewState extends ConsumerState<ListsScreenTablet> {
                 flex: 40,
                 child: SearchableShoppingListsView(
                   lists: activeLists,
-                  emptyMessage: 'No lists yet.',
+                  emptyMessage: l10n.noListsYet,
                   showRegistered: false,
                   onListTap: (context, list) {
                     setState(() => _selectedList = list);
@@ -171,6 +174,7 @@ Future<void> _showAddShoppingListDialog({
   required void Function(ShoppingList newList) onListCreated,
 }) async {
   final controller = TextEditingController();
+  final l10n = AppLocalizations.of(context)!;
 
   await showDialog(
     context: context,
@@ -180,7 +184,7 @@ Future<void> _showAddShoppingListDialog({
       return MediaQuery(
         data: MediaQuery.of(context).copyWith(viewInsets: EdgeInsets.zero),
         child: AlertDialog(
-          title: const Text("Add new list"),
+          title: Text(l10n.addNewListTitle),
           content: Container(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -188,13 +192,13 @@ Future<void> _showAddShoppingListDialog({
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Please enter the name of your list:"),
+                  Text(l10n.enterListNamePrompt),
                   const SizedBox(height: 12),
                   TextField(
                     controller: controller,
-                    decoration: const InputDecoration(
-                      hintText: "List name",
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      hintText: l10n.listNameHint,
+                      border: const OutlineInputBorder(),
                     ),
                     autofocus: true,
                   ),
@@ -208,7 +212,7 @@ Future<void> _showAddShoppingListDialog({
               style: TextButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.onSurface,
               ),
-              child: const Text("Cancel"),
+              child: Text(l10n.cancelLabel),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -232,7 +236,7 @@ Future<void> _showAddShoppingListDialog({
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
               ),
-              child: const Text("Add"),
+              child: Text(l10n.addLabel),
             ),
           ],
         ),
@@ -243,6 +247,7 @@ Future<void> _showAddShoppingListDialog({
 
 Widget _buildEmptyDetailPane(BuildContext context) {
   final colorScheme = Theme.of(context).colorScheme;
+  final l10n = AppLocalizations.of(context)!;
 
   return Container(
     color: Theme.of(context).scaffoldBackgroundColor,
@@ -257,7 +262,7 @@ Widget _buildEmptyDetailPane(BuildContext context) {
           ),
           const SizedBox(height: 16),
           Text(
-            'Select a list to view details',
+            l10n.selectListToViewDetails,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),

@@ -6,6 +6,7 @@ import 'package:app_code/providers/real_app_providers/auth/password_reset_cooldo
 import 'package:app_code/providers/real_app_providers/auth/user_details_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/widgets/password_text_field.dart';
 
 part 'settings_controller.dart';
@@ -25,10 +26,11 @@ class _SettingsScreenState extends SettingsController {
     final userDetailsAsync = ref.watch(userDetailsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settingsTitle),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -38,7 +40,7 @@ class _SettingsScreenState extends SettingsController {
           child: userDetailsAsync.when(
             data: (user) {
               if (user == null) {
-                return const Center(child: Text('No user data found.'));
+                return Center(child: Text(l10n.noUserDataFound));
               }
 
               if (!_isInitialized || _lastUserId != user.uid) {
@@ -51,7 +53,7 @@ class _SettingsScreenState extends SettingsController {
               return _buildEditForm(user, colorScheme, textTheme);
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('Error: $error')),
+            error: (error, _) => Center(child: Text(l10n.errorWithDetails(error.toString()))),
           ),
         ),
       ),
@@ -59,17 +61,19 @@ class _SettingsScreenState extends SettingsController {
   }
 
   Widget _buildEditForm(User user, ColorScheme colorScheme, TextTheme textTheme) {
+    final l10n = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Profile Section
-          _buildSectionHeader('Profile Information', colorScheme, textTheme),
+          _buildSectionHeader(l10n.profileInformationTitle, colorScheme, textTheme),
           const SizedBox(height: 16),
           TextFormField(
             controller: usernameController,
             decoration: InputDecoration(
-              labelText: 'Username',
+              labelText: l10n.usernameLabel,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -89,7 +93,7 @@ class _SettingsScreenState extends SettingsController {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Current Email',
+                  l10n.currentEmailLabel,
                   style: textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 4),
@@ -111,12 +115,12 @@ class _SettingsScreenState extends SettingsController {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Save Profile Changes'),
+                  : Text(l10n.saveProfileChanges),
             ),
           ),
           const SizedBox(height: 32),
           // Credentials Section
-          _buildSectionHeader('Security Settings', colorScheme, textTheme),
+          _buildSectionHeader(l10n.securitySettingsTitle, colorScheme, textTheme),
           const SizedBox(height: 16),
           if (!canEditCredentials)
             Container(
@@ -128,19 +132,19 @@ class _SettingsScreenState extends SettingsController {
                 border: Border.all(color: colorScheme.primaryContainer.withOpacity(0.4)),
               ),
               child: Text(
-                'Email and password are managed via your Google account. Changes are disabled.',
+                l10n.googleAccountManagedCredentials,
                 textAlign: TextAlign.center,
                 style: textTheme.bodySmall?.copyWith(color: colorScheme.primary),
               ),
             )
           else ...[
             // Email Update Section
-            Text('Update Email', style: textTheme.labelLarge),
+            Text(l10n.updateEmailTitle, style: textTheme.labelLarge),
             const SizedBox(height: 12),
             TextFormField(
               controller: emailController,
               decoration: InputDecoration(
-                labelText: 'New Email',
+                labelText: l10n.newEmailLabel,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -151,7 +155,7 @@ class _SettingsScreenState extends SettingsController {
             TextFormField(
               controller: confirmEmailController,
               decoration: InputDecoration(
-                labelText: 'Confirm New Email',
+                labelText: l10n.confirmNewEmailLabel,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -160,11 +164,11 @@ class _SettingsScreenState extends SettingsController {
             ),
             const SizedBox(height: 24),
             // Password Update Section
-            Text('Update Password', style: textTheme.labelLarge),
+            Text(l10n.updatePasswordTitle, style: textTheme.labelLarge),
             const SizedBox(height: 12),
             PasswordTextField(
               controller: newPasswordController,
-              labelText: 'New Password',
+              labelText: l10n.newPasswordLabel,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -174,7 +178,7 @@ class _SettingsScreenState extends SettingsController {
             const SizedBox(height: 12),
             PasswordTextField(
               controller: confirmPasswordController,
-              labelText: 'Confirm New Password',
+              labelText: l10n.confirmNewPasswordLabel,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -183,11 +187,11 @@ class _SettingsScreenState extends SettingsController {
             ),
             const SizedBox(height: 24),
             // Current Password Verification
-            Text('Verification', style: textTheme.labelLarge),
+            Text(l10n.verificationTitle, style: textTheme.labelLarge),
             const SizedBox(height: 12),
             PasswordTextField(
               controller: currentPasswordController,
-              labelText: 'Enter Current Password to Confirm Changes',
+              labelText: l10n.enterCurrentPasswordToConfirm,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -210,15 +214,15 @@ class _SettingsScreenState extends SettingsController {
                             : () => sendPasswordResetFromSettings(user.email),
                         child: Text(
                           isOnCooldown
-                              ? 'Forgot Password? (Wait ${cooldownRemaining}s)'
-                              : 'Forgot Password?',
+                              ? l10n.forgotPasswordWait(cooldownRemaining)
+                              : l10n.forgotPassword,
                         ),
                       ),
                       if (isOnCooldown)
                         Padding(
                           padding: const EdgeInsets.only(right: 12.0),
                           child: Text(
-                            'Cooldown: ${cooldownRemaining}s',
+                            l10n.cooldownSeconds(cooldownRemaining),
                             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                             ),
@@ -242,7 +246,7 @@ class _SettingsScreenState extends SettingsController {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Update Security Settings'),
+                      : Text(l10n.updateSecuritySettings),
                 ),
               ),
             ),

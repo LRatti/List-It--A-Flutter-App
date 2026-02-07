@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/purchased_product.dart';
+import 'package:app_code/utils/category_localizer.dart';
 
 /// Widget that allows dragging products across categories
 class DraggableProductList extends StatefulWidget {
@@ -199,7 +200,10 @@ class _DraggableProductListState extends State<DraggableProductList> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  category.getName(),
+                                  CategoryLocalizer.localize(
+                                    context,
+                                    category.getName(),
+                                  ),
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: colorScheme.onSurface,

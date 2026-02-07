@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/font_size_provider.dart';
+import 'package:app_code/providers/locale_provider.dart';
 
 /// Mobile settings screen: single column vertical layout.
 class SettingsScreenMobile extends ConsumerStatefulWidget {
@@ -50,13 +53,14 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     final themeMode = ref.watch(themeModeValueProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settingsTitle),
         centerTitle: true,
       ),
-      body: buildLayout(context, themeMode, colorScheme, textTheme),
+      body: buildLayout(context, themeMode, colorScheme, textTheme, l10n),
     );
   }
 
@@ -65,6 +69,7 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     ThemeMode themeMode,
     ColorScheme colorScheme,
     TextTheme textTheme,
+    AppLocalizations l10n,
   );
 
   Widget _buildMobileLayout(
@@ -72,17 +77,20 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     ThemeMode themeMode,
     ColorScheme colorScheme,
     TextTheme textTheme,
+    AppLocalizations l10n,
   ) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildNotificationsSection(),
+        _buildNotificationsSection(l10n),
         const Divider(),
-        _buildThemeSection(themeMode, colorScheme),
+        _buildThemeSection(themeMode, colorScheme, l10n),
         const Divider(),
-        _buildFontSizeSection(colorScheme, textTheme),
+        _buildFontSizeSection(colorScheme, textTheme, l10n),
         const Divider(),
-        _buildAboutSection(),
+        _buildLanguageSection(l10n),
+        const Divider(),
+        _buildAboutSection(l10n),
       ],
     );
   }
@@ -92,6 +100,7 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     ThemeMode themeMode,
     ColorScheme colorScheme,
     TextTheme textTheme,
+    AppLocalizations l10n,
   ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,13 +111,15 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
           child: ListView(
             padding: const EdgeInsets.all(24),
             children: [
-              _buildNotificationsSection(),
+              _buildNotificationsSection(l10n),
               const Divider(height: 32),
-              _buildThemeSection(themeMode, colorScheme),
+              _buildThemeSection(themeMode, colorScheme, l10n),
               const Divider(height: 32),
-              _buildFontSizeSection(colorScheme, textTheme, compact: true),
+              _buildFontSizeSection(colorScheme, textTheme, l10n, compact: true),
               const Divider(height: 32),
-              _buildAboutSection(),
+              _buildLanguageSection(l10n),
+              const Divider(height: 32),
+              _buildAboutSection(l10n),
             ],
           ),
         ),
@@ -123,9 +134,9 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 24,
                 children: [
-                  _buildPreviewSection(colorScheme, textTheme),
+                  _buildPreviewSection(colorScheme, textTheme, l10n),
                   const Divider(),
-                  _buildColorPreviewSection(colorScheme),
+                  _buildColorPreviewSection(colorScheme, l10n),
                 ],
               ),
             ),
@@ -135,9 +146,9 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     );
   }
 
-  Widget _buildNotificationsSection() {
+  Widget _buildNotificationsSection(AppLocalizations l10n) {
     return ListTile(
-      title: const Text('Notifications'),
+      title: Text(l10n.notificationsLabel),
       trailing: Switch(
         value: true,
         onChanged: (value) {},
@@ -145,9 +156,13 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     );
   }
 
-  Widget _buildThemeSection(ThemeMode themeMode, ColorScheme colorScheme) {
+  Widget _buildThemeSection(
+    ThemeMode themeMode,
+    ColorScheme colorScheme,
+    AppLocalizations l10n,
+  ) {
     return ListTile(
-      title: const Text('Dark Mode'),
+      title: Text(l10n.darkModeLabel),
       trailing: Switch(
         value: themeMode == ThemeMode.dark,
         onChanged: (value) {
@@ -161,7 +176,8 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
 
   Widget _buildFontSizeSection(
     ColorScheme colorScheme,
-    TextTheme textTheme, {
+    TextTheme textTheme,
+    AppLocalizations l10n, {
     bool compact = false,
   }) {
     return Padding(
@@ -175,7 +191,7 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Font Size',
+                  l10n.fontSizeLabel,
                   style: textTheme.titleMedium,
                 ),
                 Text(
@@ -209,8 +225,8 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Small', style: textTheme.labelSmall),
-                Text('Large', style: textTheme.labelSmall),
+                Text(l10n.fontSizeSmallLabel, style: textTheme.labelSmall),
+                Text(l10n.fontSizeLargeLabel, style: textTheme.labelSmall),
               ],
             ),
           ),
@@ -219,13 +235,17 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     );
   }
 
-  Widget _buildPreviewSection(ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildPreviewSection(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    AppLocalizations l10n,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 12,
       children: [
         Text(
-          'Text Preview',
+          l10n.textPreviewTitle,
           style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         Container(
@@ -240,23 +260,23 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
             spacing: 12,
             children: [
               Text(
-                'Display Large',
+                l10n.textPreviewDisplayLarge,
                 style: textTheme.displayLarge,
               ),
               Text(
-                'Headline Medium',
+                l10n.textPreviewHeadlineMedium,
                 style: textTheme.headlineMedium,
               ),
               Text(
-                'Title Medium - This is how your body text will look with the selected font size.',
+                l10n.textPreviewTitleMedium,
                 style: textTheme.titleMedium,
               ),
               Text(
-                'Body Medium - This is standard body text for reading content and descriptions.',
+                l10n.textPreviewBodyMedium,
                 style: textTheme.bodyMedium,
               ),
               Text(
-                'Body Small - Smaller text for less important information.',
+                l10n.textPreviewBodySmall,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -268,22 +288,25 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     );
   }
 
-  Widget _buildColorPreviewSection(ColorScheme colorScheme) {
+  Widget _buildColorPreviewSection(
+    ColorScheme colorScheme,
+    AppLocalizations l10n,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 12,
       children: [
         Text(
-          'Color Palette',
+          l10n.colorPaletteTitle,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
-        _buildColorSwatch('Primary', colorScheme.primary),
-        _buildColorSwatch('Secondary', colorScheme.secondary),
-        _buildColorSwatch('Tertiary', colorScheme.tertiary),
-        _buildColorSwatch('Error', colorScheme.error),
-        _buildColorSwatch('Surface', colorScheme.surface),
+        _buildColorSwatch(l10n.colorSwatchPrimary, colorScheme.primary),
+        _buildColorSwatch(l10n.colorSwatchSecondary, colorScheme.secondary),
+        _buildColorSwatch(l10n.colorSwatchTertiary, colorScheme.tertiary),
+        _buildColorSwatch(l10n.colorSwatchError, colorScheme.error),
+        _buildColorSwatch(l10n.colorSwatchSurface, colorScheme.surface),
       ],
     );
   }
@@ -308,33 +331,60 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     );
   }
 
-  Widget _buildAboutSection() {
+  Widget _buildAboutSection(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'About',
+          l10n.aboutSectionTitle,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
         ListTile(
-          title: const Text('App Version'),
+          title: Text(l10n.appVersionLabel),
           subtitle: const Text('1.0.0'),
           trailing: const Icon(Icons.info_outline),
         ),
         ListTile(
-          title: const Text('Privacy Policy'),
+          title: Text(l10n.privacyPolicyLabel),
           trailing: const Icon(Icons.open_in_new),
           onTap: () {},
         ),
         ListTile(
-          title: const Text('Terms of Service'),
+          title: Text(l10n.termsOfServiceLabel),
           trailing: const Icon(Icons.open_in_new),
           onTap: () {},
         ),
       ],
+    );
+  }
+
+  Widget _buildLanguageSection(AppLocalizations l10n) {
+    final localeProvider = context.watch<LocaleProvider>();
+
+    return ListTile(
+      title: Text(l10n.languageLabel),
+      trailing: DropdownButton<Locale>(
+        value: localeProvider.locale,
+        onChanged: (locale) {
+          if (locale == null) {
+            return;
+          }
+          localeProvider.setLocale(locale);
+        },
+        items: [
+          DropdownMenuItem(
+            value: const Locale('en'),
+            child: Text(l10n.languageEnglishLabel),
+          ),
+          DropdownMenuItem(
+            value: const Locale('it'),
+            child: Text(l10n.languageItalianLabel),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -347,8 +397,9 @@ class _SettingsScreenMobileViewState
     ThemeMode themeMode,
     ColorScheme colorScheme,
     TextTheme textTheme,
+    AppLocalizations l10n,
   ) {
-    return _buildMobileLayout(context, themeMode, colorScheme, textTheme);
+    return _buildMobileLayout(context, themeMode, colorScheme, textTheme, l10n);
   }
 }
 
@@ -360,7 +411,8 @@ class _SettingsScreenTabletViewState
     ThemeMode themeMode,
     ColorScheme colorScheme,
     TextTheme textTheme,
+    AppLocalizations l10n,
   ) {
-    return _buildTabletDesktopLayout(context, themeMode, colorScheme, textTheme);
+    return _buildTabletDesktopLayout(context, themeMode, colorScheme, textTheme, l10n);
   }
 }

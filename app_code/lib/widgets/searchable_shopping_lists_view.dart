@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/widgets/shopping_lists_grid_view.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
@@ -112,6 +113,7 @@ class _SearchableShoppingListsViewState
 
   PreferredSizeWidget _buildSearchAppBar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return AppBar(
       backgroundColor: colorScheme.surface,
@@ -124,7 +126,7 @@ class _SearchableShoppingListsViewState
         controller: _searchController,
         autofocus: true,
         decoration: InputDecoration(
-          hintText: 'Search lists...',
+          hintText: l10n.searchListsHint,
           hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           border: InputBorder.none,
         ),
@@ -161,6 +163,7 @@ class _SearchableShoppingListsViewState
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     // Listen to global navigation signals to reset local UI state
     ref.listen(appNavigationSignalProvider, (previous, next) {
@@ -181,7 +184,7 @@ class _SearchableShoppingListsViewState
         child: ShoppingListsGridView(
           lists: _filteredLists,
           emptyMessage: _searchController.text.isNotEmpty
-              ? 'No lists found matching "${_searchController.text}"'
+              ? l10n.noListsFoundMatching(_searchController.text)
               : widget.emptyMessage,
           onListTap: (context, list) {
             if (_isSearching) _stopSearch();

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/auth/email_verification_provider.dart';
 import 'package:app_code/widgets/password_text_field.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {
   final dynamic authNotifier; // keep for backward compatibility
@@ -26,6 +27,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   Widget build(BuildContext context) {
     final authNotifier = ref.read(authProvider.notifier);
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -37,7 +39,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             // Intro text
             Center(
               child: Text(
-                'Sign up for a new account.',
+                l10n.signUpIntro,
                 style: TextStyle(color: colorScheme.onBackground),
               ),
             ),
@@ -47,11 +49,13 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             TextFormField(
               controller: _usernameController,
               key: const Key('username_field'),
-              decoration: const InputDecoration(
-                labelText: 'How would you like to be called?',
+              decoration: InputDecoration(
+                labelText: l10n.usernamePrompt,
               ),
               validator: (value) =>
-                  (value == null || value.isEmpty) ? 'Please enter a username' : null,
+                  (value == null || value.isEmpty)
+                      ? l10n.enterUsernameError
+                      : null,
             ),
             const SizedBox(height: 16.0),
 
@@ -60,9 +64,11 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
               controller: _emailController,
               key: const Key('email_field'),
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(labelText: l10n.emailLabel),
               validator: (value) =>
-                  (value == null || value.isEmpty) ? 'Please enter your email' : null,
+                (value == null || value.isEmpty)
+                  ? l10n.enterEmailError
+                  : null,
             ),
             const SizedBox(height: 16.0),
 
@@ -70,10 +76,14 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             PasswordTextField(
               controller: _passwordController,
               fieldKey: const Key('password_field'),
-              labelText: 'Password',
+              labelText: l10n.passwordLabel,
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Please make a password';
-                if (value.length < 8) return 'Password must be at least 8 chars long';
+                if (value == null || value.isEmpty) {
+                  return l10n.enterPasswordCreateError;
+                }
+                if (value.length < 8) {
+                  return l10n.passwordMinLength(8);
+                }
                 return null;
               },
             ),
@@ -119,7 +129,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                     }
                   } catch (e) {
                     setState(() {
-                      _errorFeedback = 'Could not sign up with those details.';
+                      _errorFeedback = l10n.signUpFailed;
                     });
                   }
                 }
@@ -128,7 +138,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
               ),
-              child: const Text('Sign Up'),
+              child: Text(l10n.signUpLabel),
             ),
           ],
         ),

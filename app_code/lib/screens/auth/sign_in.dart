@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/widgets/password_text_field.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 class SignInForm extends ConsumerStatefulWidget {
   final dynamic authNotifier; // keep for backward compatibility
@@ -24,6 +25,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   Widget build(BuildContext context) {
     final authNotifier = ref.read(authProvider.notifier);
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -35,7 +37,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
             // Intro text
             Center(
               child: Text(
-                'Sign in to your account.',
+                l10n.signInIntro,
                 style: TextStyle(color: colorScheme.onBackground),
               ),
             ),
@@ -46,9 +48,11 @@ class _SignInFormState extends ConsumerState<SignInForm> {
               controller: _emailController,
               key: const Key('email_field'),
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(labelText: l10n.emailLabel),
               validator: (value) =>
-                  (value == null || value.isEmpty) ? 'Please enter your email' : null,
+                (value == null || value.isEmpty)
+                  ? l10n.enterEmailError
+                  : null,
             ),
             const SizedBox(height: 16.0),
 
@@ -56,9 +60,11 @@ class _SignInFormState extends ConsumerState<SignInForm> {
             PasswordTextField(
               controller: _passwordController,
               fieldKey: const Key('password_field'),
-              labelText: 'Password',
+              labelText: l10n.passwordLabel,
               validator: (value) =>
-                  (value == null || value.isEmpty) ? 'Please enter your password' : null,
+                (value == null || value.isEmpty)
+                  ? l10n.enterPasswordError
+                  : null,
             ),
             const SizedBox(height: 16.0),
 
@@ -89,12 +95,12 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                     }
                   } catch (e) {
                     setState(() {
-                      _errorFeedback = 'Incorrect login credentials.';
+                      _errorFeedback = l10n.incorrectLoginCredentials;
                     });
                   }
                 }
               },
-              child: const Text('Sign In'),
+              child: Text(l10n.signInLabel),
             ),
             const SizedBox(height: 8.0),
 
@@ -106,7 +112,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 onPressed: () {
                   Navigator.of(context).pushNamed('/forgot-password');
                 },
-                child: const Text('Forgot password?'),
+                child: Text(l10n.forgotPasswordLabel),
               ),
             ),
           ],

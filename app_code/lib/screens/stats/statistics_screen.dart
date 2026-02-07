@@ -6,6 +6,8 @@ import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:app_code/utils/responsive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:app_code/utils/category_localizer.dart';
 
 /// Mobile statistics screen: vertical stacking of period selector, chart, and list.
 class StatisticsScreenMobile extends ConsumerStatefulWidget {
@@ -65,6 +67,7 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
 
   void _showCategoryDetails(BuildContext context, String categoryName, List<dynamic> allLists) {
     final products = StatisticsCalculator.aggregateCategoryProducts(categoryName, allLists);
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -85,7 +88,7 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    categoryName,
+                    CategoryLocalizer.localize(context, categoryName),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   IconButton(
@@ -106,7 +109,7 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
 
                   return ListTile(
                     title: Text(product.name),
-                    subtitle: Text('Quantity: ${product.quantity}'),
+                    subtitle: Text(l10n.quantityLabel(product.quantity)),
                     trailing: Text(
                       _formatCurrency(product.price),
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -126,12 +129,13 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
   @override
   Widget build(BuildContext context) {
     final listsAsync = ref.watch(shoppingListsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: listsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => const Center(
-          child: Text("Error occurring: please reload the app.\n"),
+        error: (error, _) => Center(
+          child: Text(l10n.statsLoadError),
         ),
         data: (lists) {
           final computation = StatisticsCalculator.compute(lists, _isWithinPeriod);
@@ -251,6 +255,7 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
     double total,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     if (entries.isEmpty) {
       return Center(
@@ -266,7 +271,7 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
               ),
               const SizedBox(height: 16),
               Text(
-                'No data available for this period',
+                l10n.noDataForSelectedPeriod,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -281,7 +286,7 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Category Breakdown',
+          l10n.categoryBreakdownTitle,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -306,7 +311,7 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
                 radius: 8,
               ),
               title: Text(
-                categoryName,
+                CategoryLocalizer.localize(context, categoryName),
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               subtitle: Text(

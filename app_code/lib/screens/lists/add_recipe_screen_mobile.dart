@@ -8,6 +8,8 @@ import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lis
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/models/product.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:app_code/utils/category_localizer.dart';
 
 class AddRecipeScreen extends ConsumerStatefulWidget {
   final ShoppingList shoppingList;
@@ -47,10 +49,11 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
   }
 
   void _queryRecipe() async {
+    final l10n = AppLocalizations.of(context)!;
     final recipeName = _recipeNameController.text.trim();
     if (recipeName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a recipe name')),
+        SnackBar(content: Text(l10n.enterRecipeNameError)),
       );
       return;
     }
@@ -71,12 +74,13 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
 
   void _showEditIngredientDialog(int index, String currentName) {
     final editController = TextEditingController(text: currentName);
+    final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
       builder: (dialogContext) { // Use a specific context for the dialog
         return AlertDialog(
-          title: const Text('Edit Ingredient'),
+          title: Text(l10n.editIngredientTitle),
           content: TextField(
             controller: editController,
             autofocus: true,
@@ -85,11 +89,11 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancelLabel),
             ),
             ElevatedButton(
               onPressed: () => _handleSave(dialogContext, index, editController.text, currentName),
-              child: const Text('Save'),
+              child: Text(l10n.saveLabel),
             ),
           ],
         );
@@ -165,12 +169,13 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final backgroundSearches = ref.watch(backgroundRecipeProvider);
     final currentSearch = backgroundSearches[widget.shoppingList.id];
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
-        title: const Text('Add Recipe')
+        title: Text(l10n.addRecipeTitle),
       ),
       body: SafeArea(
         child: Column(
@@ -188,7 +193,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                           TextField(
                             controller: _recipeNameController,
                             decoration: InputDecoration(
-                              hintText: 'Enter recipe name...',
+                              hintText: l10n.enterRecipeNameHint,
                               filled: true,
                               fillColor: colorScheme.surface,
                               border: OutlineInputBorder(
@@ -212,7 +217,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                       width: 20,
                                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                     )
-                                  : const Text('Search Recipe'),
+                                  : Text(l10n.searchRecipeLabel),
                             ),
                           ),
                         ],
@@ -224,7 +229,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                         padding: const EdgeInsets.all(32),
                         child: Center(
                           child: Text(
-                            'Enter a recipe name and press "Search Recipe"',
+                            l10n.enterRecipeAndSearch,
                             textAlign: TextAlign.center,
                             style: TextStyle(color: colorScheme.onSurfaceVariant),
                           ),
@@ -240,7 +245,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                           padding: const EdgeInsets.all(32),
                           child: Center(
                             child: Text(
-                              'Error: $error',
+                              l10n.errorWithDetails(error.toString()),
                               style: const TextStyle(color: Colors.red),
                               textAlign: TextAlign.center,
                             ),
@@ -284,7 +289,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Recipe',
+                                        l10n.recipeLabel,
                                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                           fontWeight: FontWeight.w500,
                                           color: colorScheme.onSurfaceVariant,
@@ -298,7 +303,10 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                 const SizedBox(height: 16),
                                 // Ingredients
                                 Text(
-                                  'Ingredients (${recipe.products.length - _deletedIndices.length}/${recipe.products.length})',
+                                  l10n.ingredientsCount(
+                                    recipe.products.length - _deletedIndices.length,
+                                    recipe.products.length,
+                                  ),
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 12),
@@ -358,7 +366,10 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                                     borderRadius: BorderRadius.circular(16),
                                                   ),
                                                   child: Text(
-                                                    categoryName,
+                                                    CategoryLocalizer.localize(
+                                                      context,
+                                                      categoryName,
+                                                    ),
                                                     textAlign: TextAlign.center,
                                                     softWrap: true,
                                                     maxLines: 2,
@@ -417,7 +428,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                         child: ElevatedButton.icon(
                           onPressed: _addProductsToList,
                           icon: const Icon(Icons.add_shopping_cart),
-                          label: const Text('Add to List'),
+                          label: Text(l10n.addToListLabel),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             backgroundColor: colorScheme.primary,

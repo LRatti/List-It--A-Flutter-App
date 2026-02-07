@@ -1,8 +1,9 @@
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/utils/helper.dart';
-import 'package:app_code/models/category.dart';
 
 class ShoppingList {
  
@@ -256,24 +257,19 @@ class ShoppingList {
   }
 
   /// Get a user-friendly message about when the list will be deleted
-  String getDeletionMessage() {
+  String getDeletionMessage(AppLocalizations l10n) {
     final daysRemaining = getDaysUntilDeletion();
     if (daysRemaining == null) {
       return '';
     }
     
     if (daysRemaining == 0) {
-      return 'Deleting now...';
+      return l10n.deletingNowMessage;
     } else if (daysRemaining == 1) {
-      return 'Delete in 1 day';
+      return l10n.deleteInOneDayMessage;
     } else {
-      return 'Delete in $daysRemaining days';
+      return l10n.deleteInDaysMessage(daysRemaining);
     }
   }
-
-
-
-
-
 
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/widgets/top_bar_with_navbar.dart';
 import 'package:app_code/widgets/side_menu.dart';
 import 'package:app_code/screens/lists/lists_screen.dart';
@@ -94,7 +95,11 @@ abstract class _HomeScreenBaseState<T extends ConsumerStatefulWidget>
   );
 
   /// Build the bottom navigation bar for mobile screens
-  Widget _buildBottomNavigationBar(ColorScheme colorScheme, int selectedIndex) {
+  Widget _buildBottomNavigationBar(
+    ColorScheme colorScheme,
+    int selectedIndex,
+    AppLocalizations l10n,
+  ) {
     return BottomNavigationBar(
       currentIndex: selectedIndex,
       onTap: (int index) => _onTabChanged(index),
@@ -104,33 +109,37 @@ abstract class _HomeScreenBaseState<T extends ConsumerStatefulWidget>
       unselectedItemColor: colorScheme.onSurfaceVariant,
       selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
       showUnselectedLabels: true,
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.list_outlined),
-          activeIcon: Icon(Icons.list),
-          label: 'Lists',
+          icon: const Icon(Icons.list_outlined),
+          activeIcon: const Icon(Icons.list),
+          label: l10n.listsTabLabel,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.history_outlined),
-          activeIcon: Icon(Icons.history),
-          label: 'History',
+          icon: const Icon(Icons.history_outlined),
+          activeIcon: const Icon(Icons.history),
+          label: l10n.historyTabLabel,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.store_outlined),
-          activeIcon: Icon(Icons.store),
-          label: 'Supermarkets',
+          icon: const Icon(Icons.store_outlined),
+          activeIcon: const Icon(Icons.store),
+          label: l10n.supermarketsTabLabel,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.bar_chart_outlined),
-          activeIcon: Icon(Icons.bar_chart),
-          label: 'Statistics',
+          icon: const Icon(Icons.bar_chart_outlined),
+          activeIcon: const Icon(Icons.bar_chart),
+          label: l10n.statisticsTabLabel,
         ),
       ],
     );
   }
 
   /// Build the persistent navigation rail for tablet/desktop screens
-  Widget _buildNavigationRail(ColorScheme colorScheme, int selectedIndex) {
+  Widget _buildNavigationRail(
+    ColorScheme colorScheme,
+    int selectedIndex,
+    AppLocalizations l10n,
+  ) {
     return Container(
       width: 80,
       decoration: BoxDecoration(
@@ -158,26 +167,26 @@ abstract class _HomeScreenBaseState<T extends ConsumerStatefulWidget>
         unselectedLabelTextStyle: TextStyle(color: colorScheme.onSurfaceVariant),
         useIndicator: true,
         indicatorColor: colorScheme.primaryContainer,
-        destinations: const [
+        destinations: [
           NavigationRailDestination(
-            icon: Icon(Icons.list_outlined),
-            selectedIcon: Icon(Icons.list),
-            label: Text('Lists'),
+            icon: const Icon(Icons.list_outlined),
+            selectedIcon: const Icon(Icons.list),
+            label: Text(l10n.listsTabLabel),
           ),
           NavigationRailDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: Text('History'),
+            icon: const Icon(Icons.history_outlined),
+            selectedIcon: const Icon(Icons.history),
+            label: Text(l10n.historyTabLabel),
           ),
           NavigationRailDestination(
-            icon: Icon(Icons.store_outlined),
-            selectedIcon: Icon(Icons.store),
-            label: Text('Supermarkets'),
+            icon: const Icon(Icons.store_outlined),
+            selectedIcon: const Icon(Icons.store),
+            label: Text(l10n.supermarketsTabLabel),
           ),
           NavigationRailDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: Text('Statistics'),
+            icon: const Icon(Icons.bar_chart_outlined),
+            selectedIcon: const Icon(Icons.bar_chart),
+            label: Text(l10n.statisticsTabLabel),
           ),
         ],
       ),
@@ -204,6 +213,8 @@ class _HomeScreenMobileViewState
     int selectedIndex,
     ColorScheme colorScheme,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -249,7 +260,11 @@ class _HomeScreenMobileViewState
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(colorScheme, selectedIndex),
+      bottomNavigationBar: _buildBottomNavigationBar(
+        colorScheme,
+        selectedIndex,
+        l10n,
+      ),
     );
   }
 }
@@ -273,6 +288,8 @@ class _HomeScreenTabletViewState
     int selectedIndex,
     ColorScheme colorScheme,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -287,7 +304,7 @@ class _HomeScreenTabletViewState
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _buildNavigationRail(colorScheme, selectedIndex),
+                      _buildNavigationRail(colorScheme, selectedIndex, l10n),
                       Expanded(
                         child: IndexedStack(
                           index: selectedIndex,

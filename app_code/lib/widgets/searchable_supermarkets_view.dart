@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/widgets/supermarkets_grid_view.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
@@ -113,6 +114,7 @@ class _SearchableSupermarketsViewState
 
   PreferredSizeWidget _buildSearchAppBar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return AppBar(
       backgroundColor: colorScheme.surface,
@@ -125,7 +127,7 @@ class _SearchableSupermarketsViewState
         controller: _searchController,
         autofocus: true,
         decoration: InputDecoration(
-          hintText: 'Search supermarkets...',
+          hintText: l10n.searchSupermarketsHint,
           hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           border: InputBorder.none,
         ),
@@ -145,9 +147,10 @@ class _SearchableSupermarketsViewState
 
   PreferredSizeWidget _buildNormalAppBar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return AppBar(
-      title: const Text('Supermarkets'),
+      title: Text(l10n.supermarketsTitle),
       backgroundColor: colorScheme.surface,
       elevation: 0,
       actions: [
@@ -162,6 +165,7 @@ class _SearchableSupermarketsViewState
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     // Listen to global navigation signals to reset local UI state
     ref.listen(appNavigationSignalProvider, (previous, next) {
@@ -182,7 +186,7 @@ class _SearchableSupermarketsViewState
         child: SupermarketsGridView(
           supermarkets: _filteredSupermarkets,
           emptyMessage: _searchController.text.isNotEmpty
-              ? 'No supermarkets found matching "${_searchController.text}"'
+              ? l10n.noSupermarketsFoundMatching(_searchController.text)
               : widget.emptyMessage,
           onDeletionModeChanged: _setDeletionMode,
           floatingActionButton: widget.floatingActionButton != null

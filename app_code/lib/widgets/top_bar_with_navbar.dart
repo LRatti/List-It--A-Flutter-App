@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/nearest-supermarket/nearest_supermarket_provider.dart';
 import 'package:app_code/providers/real_app_providers/nearest-supermarket/map_launcher_service_provider.dart';
@@ -23,12 +24,13 @@ class TopBarWithNavBar extends ConsumerWidget {
     final nearestSupermarketState = ref.watch(nearestSupermarketProvider);
     final mapLauncherService = ref.read(mapLauncherServiceProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         AppBar(
-          title: const Text('My Shopping App'),
+          title: Text(l10n.appTitle),
           backgroundColor: colorScheme.surface, // AppBar background matches theme
           foregroundColor: colorScheme.onSurface, // Text and icons
           actions: [
@@ -47,7 +49,7 @@ class TopBarWithNavBar extends ConsumerWidget {
                         backgroundColor: colorScheme.primary,
                         foregroundColor: colorScheme.onPrimary,
                       ),
-                      child: const Text('Sign In'),
+                      child: Text(l10n.signInLabel),
                     ),
                   );
                 } else {
@@ -87,7 +89,7 @@ class TopBarWithNavBar extends ConsumerWidget {
                     if (!success && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         buildAppSnackBar(
-                          message: 'Unable to open map',
+                          message: l10n.unableToOpenMap,
                           context: context,
                         ),
                       );

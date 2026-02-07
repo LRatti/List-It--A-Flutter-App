@@ -7,6 +7,7 @@ import 'package:app_code/screens/supermarket/supermarkets_screen_mobile.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
 import 'package:app_code/screens/stats/statistics_screen_mobile.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 class MobileHomePage extends ConsumerStatefulWidget {
   const MobileHomePage({super.key});
@@ -77,6 +78,7 @@ class _MobileHomePageState extends ConsumerState<MobileHomePage> {
     final bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -124,26 +126,26 @@ class _MobileHomePageState extends ConsumerState<MobileHomePage> {
                                 TextStyle(color: colorScheme.onSurfaceVariant),
                             useIndicator: true,
                             indicatorColor: colorScheme.primaryContainer, // subtle indicator
-                            destinations: const [
+                            destinations: [
                               NavigationRailDestination(
                                 icon: Icon(Icons.list_outlined),
                                 selectedIcon: Icon(Icons.list),
-                                label: Text('Lists'),
+                                label: Text(l10n.listsTabLabel),
                               ),
                               NavigationRailDestination(
                                 icon: Icon(Icons.history_outlined),
                                 selectedIcon: Icon(Icons.history),
-                                label: Text('History'),
+                                label: Text(l10n.historyTabLabel),
                               ),
                               NavigationRailDestination(
                                 icon: Icon(Icons.store_outlined),
                                 selectedIcon: Icon(Icons.store),
-                                label: Text('Supermarkets'),
+                                label: Text(l10n.supermarketsTabLabel),
                               ),
                               NavigationRailDestination(
                                 icon: Icon(Icons.bar_chart_outlined),
                                 selectedIcon: Icon(Icons.bar_chart),
-                                label: Text('Statistics'),
+                                label: Text(l10n.statisticsTabLabel),
                               ),
                             ],
                           ),
@@ -202,26 +204,26 @@ class _MobileHomePageState extends ConsumerState<MobileHomePage> {
         unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold), // make selected label bold
         showUnselectedLabels: true,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.list_outlined),
             activeIcon: Icon(Icons.list),
-            label: 'Lists',
+            label: l10n.listsTabLabel,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.history_outlined),
             activeIcon: Icon(Icons.history),
-            label: 'History',
+            label: l10n.historyTabLabel,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.store_outlined),
             activeIcon: Icon(Icons.store),
-            label: 'Supermarkets',
+            label: l10n.supermarketsTabLabel,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart_outlined),
             activeIcon: Icon(Icons.bar_chart),
-            label: 'Statistics',
+            label: l10n.statisticsTabLabel,
           ),
         ],
       ),

@@ -4,12 +4,14 @@ import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 class ListsScreenMobile extends ConsumerWidget {
   const ListsScreenMobile({super.key});
 
   Future<void> _showAddShoppingListDialog(BuildContext context, WidgetRef ref) async {
     final controller = TextEditingController();
+    final l10n = AppLocalizations.of(context)!;
 
     await showDialog(
       context: context,
@@ -22,7 +24,7 @@ class ListsScreenMobile extends ConsumerWidget {
           // This keeps the Dialog frame fixed in the center of the screen
           data: MediaQuery.of(context).copyWith(viewInsets: EdgeInsets.zero),
           child: AlertDialog(
-            title: const Text("Add new list"),
+            title: Text(l10n.addNewListTitle),
             content: Container(
               width: double.maxFinite,
               // Only this scrollable area will shift to accommodate the keyboard
@@ -31,13 +33,13 @@ class ListsScreenMobile extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text("Please enter the name of your list:"),
+                    Text(l10n.enterListNamePrompt),
                     const SizedBox(height: 12),
                     TextField(
                       controller: controller,
-                      decoration: const InputDecoration(
-                        hintText: "List name",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: l10n.listNameHint,
+                        border: const OutlineInputBorder(),
                       ),
                       autofocus: true,
                     ),
@@ -51,7 +53,7 @@ class ListsScreenMobile extends ConsumerWidget {
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.onSurface, // adapts to light/dark
                 ),
-                child: const Text("Cancel"),
+                child: Text(l10n.cancelLabel),
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -83,7 +85,7 @@ class ListsScreenMobile extends ConsumerWidget {
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
-                child: const Text("Add"),
+                child: Text(l10n.addLabel),
               ),
             ],
           ),
@@ -95,6 +97,7 @@ class ListsScreenMobile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return shoppingListsAsync.when(
       loading: () => Scaffold(
@@ -103,7 +106,7 @@ class ListsScreenMobile extends ConsumerWidget {
       ),
       error: (error, _) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text(error.toString())),
+        body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
       ),
       data: (lists) {
         final activeLists = lists
@@ -116,7 +119,7 @@ class ListsScreenMobile extends ConsumerWidget {
           });
         return SearchableShoppingListsView(
           lists: activeLists,
-          emptyMessage: 'No lists yet.',
+          emptyMessage: l10n.noListsYet,
           showRegistered: false,
           onListTap: (context, list) {
             Navigator.push(

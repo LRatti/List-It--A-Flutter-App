@@ -5,6 +5,7 @@ import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_n
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 import 'package:app_code/widgets/searchable_supermarkets_view.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 class SupermarketsScreenMobile extends ConsumerStatefulWidget {
   const SupermarketsScreenMobile({super.key});
@@ -55,6 +56,7 @@ class _SupermarketsScreenMobileState
   @override
   Widget build(BuildContext context) {
     final supermarketsAsync = ref.watch(supermarketsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return supermarketsAsync.when(
       loading: () => Scaffold(
@@ -63,7 +65,7 @@ class _SupermarketsScreenMobileState
       ),
       error: (error, stack) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text('Error: ${error.toString()}')),
+        body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
       ),
       data: (supermarkets) {
         // Filter only visible supermarkets
@@ -81,7 +83,7 @@ class _SupermarketsScreenMobileState
 
         return SearchableSupermarketsView(
           supermarkets: visibleSupermarkets,
-          emptyMessage: 'No supermarkets yet',
+          emptyMessage: l10n.noSupermarketsYet,
           onDeletionModeChanged: _handleDeletionModeChanged,
           floatingActionButton: FloatingActionButton(
             heroTag: 'addSupermarketFAB',

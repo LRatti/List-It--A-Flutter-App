@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/auth/password_reset_cooldown_provider.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 part 'forgot_password_controller.dart';
 
@@ -19,6 +20,7 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     // Watch the cooldown state
     final cooldownRemaining = ref.watch(passwordResetCooldownNotifierProvider);
@@ -26,7 +28,7 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recover Password'),
+        title: Text(l10n.recoverPasswordTitle),
         centerTitle: true,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
@@ -43,7 +45,7 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
               children: [
                 const SizedBox(height: 8),
                 Text(
-                  'Enter your account email to receive a password reset link.',
+                  l10n.resetPasswordInstructions,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
@@ -52,7 +54,7 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    labelText: l10n.emailLabel,
                     labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                   validator: validateEmail,
@@ -62,7 +64,7 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
                   controller: confirmEmailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Confirm Email',
+                    labelText: l10n.confirmEmailLabel,
                     labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                   validator: (value) => validateConfirmEmail(value, emailController.text),
@@ -87,7 +89,7 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
                         Icon(Icons.timer, size: 16, color: colorScheme.tertiary),
                         const SizedBox(width: 8),
                         Text(
-                          'You can request another reset in $cooldownRemaining seconds',
+                          l10n.resetCooldownMessage(cooldownRemaining),
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: colorScheme.tertiary,
                           ),
@@ -117,9 +119,11 @@ class _ForgotPasswordScreenState extends ForgotPasswordController {
                               valueColor: AlwaysStoppedAnimation(colorScheme.onPrimary),
                             ),
                           )
-                        : Text(isOnCooldown 
-                            ? 'Please wait ($cooldownRemaining s)' 
-                            : 'Send recovery email'),
+                        : Text(
+                            isOnCooldown
+                                ? l10n.pleaseWaitSeconds(cooldownRemaining)
+                                : l10n.sendRecoveryEmailLabel,
+                          ),
                   ),
                 ),
               ],

@@ -40,18 +40,20 @@ abstract class ForgotPasswordController extends ConsumerState<ForgotPasswordScre
   }
 
   String? validateEmail(String? value) {
+    final l10n = AppLocalizations.of(context)!;
     if (value == null || value.trim().isEmpty) {
-      return 'Please enter your email';
+      return l10n.enterEmailError;
     }
     return null;
   }
 
   String? validateConfirmEmail(String? value, String email) {
+    final l10n = AppLocalizations.of(context)!;
     if (value == null || value.trim().isEmpty) {
-      return 'Please confirm your email';
+      return l10n.confirmEmailError;
     }
     if (value.trim() != email.trim()) {
-      return 'Emails do not match';
+      return l10n.emailsDoNotMatch;
     }
     return null;
   }
@@ -67,7 +69,8 @@ abstract class ForgotPasswordController extends ConsumerState<ForgotPasswordScre
     if (!canSend) {
       final remaining = await cooldownService.getRemainingCooldownSeconds();
       setState(() {
-        _errorText = 'Please wait $remaining seconds before requesting another reset email.';
+        _errorText = AppLocalizations.of(context)!
+            .waitBeforeRequestingReset(remaining);
       });
       return;
     }
@@ -89,13 +92,15 @@ abstract class ForgotPasswordController extends ConsumerState<ForgotPasswordScre
 
       // Feedback and cooldown
       setState(() {
-        _successText = 'If an account exists, a reset link has been sent.';
+        _successText = AppLocalizations.of(context)!
+            .resetLinkSentIfAccountExists;
       });
 
       // Navigate back to sign in
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'Recovery email sent. Check your inbox.',
+          message: AppLocalizations.of(context)!
+              .recoveryEmailSentCheckInbox,
           context: context,
         ),
       );
@@ -103,7 +108,8 @@ abstract class ForgotPasswordController extends ConsumerState<ForgotPasswordScre
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorText = 'Could not send reset email. Please try again later.';
+        _errorText = AppLocalizations.of(context)!
+            .couldNotSendResetEmail;
       });
     } finally {
       if (mounted) {

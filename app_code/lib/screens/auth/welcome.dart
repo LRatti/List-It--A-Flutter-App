@@ -3,6 +3,7 @@ import 'package:app_code/screens/auth/sign_up.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 class WelcomeScreen extends ConsumerStatefulWidget {
   final dynamic authNotifier; // Keep for backward compatibility with tests
@@ -19,10 +20,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     final authNotifier = ref.read(authProvider.notifier);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Auth'),
+        title: Text(l10n.authTitle),
         centerTitle: true,
         // Show back button to allow users to abort signup/signin
         leading: IconButton(
@@ -39,7 +41,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text('Welcome.'),
+                Text(l10n.welcomeMessage),
 
               // sign up screen
               if (isSignUpForm)
@@ -47,7 +49,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   key: const Key('sign_up_section'),
                   children: [
                     SignUpForm(authNotifier: authNotifier),
-                    const Text('Already have an account?'),
+                    Text(l10n.alreadyHaveAccount),
                     TextButton(
                       key: const Key('switch_to_sign_in'),
                       onPressed: () {
@@ -55,7 +57,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           isSignUpForm = false;
                         });
                       },
-                      child: const Text('Sign in instead'),
+                      child: Text(l10n.signInInstead),
                     ),
                   ],
                 ),
@@ -66,7 +68,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   key: const Key('sign_in_section'),
                   children: [
                     SignInForm(authNotifier: authNotifier),
-                    const Text('Need an account?'),
+                    Text(l10n.needAccount),
                     TextButton(
                       key: const Key('switch_to_sign_up'),
                       onPressed: () {
@@ -74,7 +76,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           isSignUpForm = true;
                         });
                       },
-                      child: const Text('Sign up instead'),
+                      child: Text(l10n.signUpInstead),
                     ),
                   ],
                 ),
@@ -92,7 +94,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     ).pushNamedAndRemoveUntil('/home', (route) => false);
                   }
                 },
-                child: const Text("Sign in with Google"),
+                child: Text(l10n.signInWithGoogle),
               ),
             ],
           ),

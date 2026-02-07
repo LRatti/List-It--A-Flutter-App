@@ -1,0 +1,447 @@
+{
+  "appTitle": "DIMA",
+  "settingsTitle": "Impostazioni",
+  "notificationsLabel": "Notifiche",
+  "darkModeLabel": "Modalita scura",
+  "fontSizeLabel": "Dimensione testo",
+  "fontSizeSmallLabel": "Piccolo",
+  "fontSizeLargeLabel": "Grande",
+  "textPreviewTitle": "Anteprima testo",
+  "textPreviewDisplayLarge": "Display grande",
+  "textPreviewHeadlineMedium": "Titolo medio",
+  "textPreviewTitleMedium": "Titolo medio - Questo e come apparira il testo con la dimensione selezionata.",
+  "textPreviewBodyMedium": "Corpo medio - Testo standard per leggere contenuti e descrizioni.",
+  "textPreviewBodySmall": "Corpo piccolo - Testo piu piccolo per informazioni meno importanti.",
+  "textPreviewBodyExample": "Questo e come apparira il testo",
+  "textPreviewBodySmallExample": "Esempio di testo piu piccolo",
+  "colorPaletteTitle": "Tavolozza colori",
+  "colorSwatchPrimary": "Primario",
+  "colorSwatchSecondary": "Secondario",
+  "colorSwatchTertiary": "Terziario",
+  "colorSwatchError": "Errore",
+  "colorSwatchSurface": "Superficie",
+  "aboutSectionTitle": "Informazioni",
+  "appVersionLabel": "Versione app",
+  "privacyPolicyLabel": "Informativa sulla privacy",
+  "termsOfServiceLabel": "Termini di servizio",
+  "languageLabel": "Lingua",
+  "languageEnglishLabel": "Inglese",
+  "languageItalianLabel": "Italiano",
+  "listsTabLabel": "Liste",
+  "historyTabLabel": "Cronologia",
+  "supermarketsTabLabel": "Supermercati",
+  "statisticsTabLabel": "Statistiche",
+  "signInLabel": "Accedi",
+  "signUpLabel": "Registrati",
+  "authTitle": "Autenticazione",
+  "welcomeMessage": "Benvenuto.",
+  "alreadyHaveAccount": "Hai gia un account?",
+  "signInInstead": "Accedi invece",
+  "needAccount": "Non hai un account?",
+  "signUpInstead": "Registrati invece",
+  "signInWithGoogle": "Accedi con Google",
+  "signInIntro": "Accedi al tuo account.",
+  "signUpIntro": "Crea un nuovo account.",
+  "emailLabel": "Email",
+  "confirmEmailLabel": "Conferma Email",
+  "enterEmailError": "Inserisci la tua email",
+  "confirmEmailError": "Conferma la tua email",
+  "emailsDoNotMatch": "Le email non coincidono",
+  "enterPasswordError": "Inserisci la tua password",
+  "enterPasswordCreateError": "Inserisci una password",
+  "incorrectLoginCredentials": "Credenziali di accesso errate.",
+  "forgotPasswordLabel": "Password dimenticata?",
+  "usernamePrompt": "Come vuoi essere chiamato?",
+  "enterUsernameError": "Inserisci un nome utente",
+  "signUpFailed": "Impossibile registrarsi con questi dati.",
+  "recoverPasswordTitle": "Recupera Password",
+  "resetPasswordInstructions": "Inserisci la tua email per ricevere il link di reset.",
+  "resetCooldownMessage": "Puoi richiedere un altro reset tra {seconds} secondi",
+  "@resetCooldownMessage": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "pleaseWaitSeconds": "Attendi ({seconds} s)",
+  "@pleaseWaitSeconds": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "sendRecoveryEmailLabel": "Invia email di recupero",
+  "resetLinkSentIfAccountExists": "Se esiste un account, e stato inviato un link di reset.",
+  "recoveryEmailSentCheckInbox": "Email di recupero inviata. Controlla la posta.",
+  "unableToOpenMap": "Impossibile aprire la mappa",
+  "menuLabel": "Menu",
+  "profileLabel": "Profilo",
+  "trashLabel": "Cestino",
+  "closeLabel": "Chiudi",
+  "trashEmptyMessage": "Il cestino e vuoto",
+  "deletingNowMessage": "Eliminazione in corso...",
+  "deleteInOneDayMessage": "Elimina tra 1 giorno",
+  "deleteInDaysMessage": "Elimina tra {days} giorni",
+  "@deleteInDaysMessage": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "restoreLabel": "Ripristina",
+  "deletePermanentlyTitle": "Elimina definitivamente",
+  "deleteListPermanentlyConfirm": "Sei sicuro di voler eliminare definitivamente '{listName}'?",
+  "@deleteListPermanentlyConfirm": {
+    "placeholders": {
+      "listName": {}
+    }
+  },
+  "cancelLabel": "Annulla",
+  "deleteLabel": "Elimina",
+  "deleteListTitle": "Elimina lista",
+  "deleteListConfirm": "Sei sicuro di voler eliminare '{listName}'?",
+  "@deleteListConfirm": {
+    "placeholders": {
+      "listName": {}
+    }
+  },
+  "deleteSelectedListsTitle": "Elimina liste selezionate",
+  "deleteSelectedListsConfirm": "Sei sicuro di voler eliminare {count} lista(e) selezionata(e)?",
+  "@deleteSelectedListsConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deleteSelectedSupermarketsConfirm": "Vuoi eliminare {count} supermercato(i)?",
+  "@deleteSelectedSupermarketsConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "createFirstSupermarketMessage": "Crea il tuo primo supermercato per iniziare",
+  "cannotRemoveFavoriteSupermarket": "Impossibile rimuovere il preferito: devi avere almeno un supermercato preferito. Selezionane un altro.",
+  "errorUpdatingFavorite": "Errore durante l'aggiornamento del preferito: {error}",
+  "@errorUpdatingFavorite": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "searchSupermarketsHint": "Cerca supermercati...",
+  "supermarketsTitle": "Supermercati",
+  "noSupermarketsFoundMatching": "Nessun supermercato trovato per \"{query}\"",
+  "@noSupermarketsFoundMatching": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "searchListsHint": "Cerca liste...",
+  "noListsFoundMatching": "Nessuna lista trovata per \"{query}\"",
+  "@noListsFoundMatching": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "noItemsLabel": "Nessun elemento",
+  "dateNotAvailable": "N/D",
+  "passwordLabel": "Password",
+  "showPasswordTooltip": "Mostra password",
+  "hidePasswordTooltip": "Nascondi password",
+  "restoreAllTitle": "Ripristina tutto",
+  "restoreAllConfirm": "Sei sicuro di voler ripristinare tutte le liste dal cestino?",
+  "allListsRestoredMessage": "Tutte le liste ripristinate",
+  "emptyTrashTitle": "Svuota cestino",
+  "emptyTrashConfirm": "Questo eliminera definitivamente tutte le liste nel cestino. Continuare?",
+  "deleteAllLabel": "Elimina tutto",
+  "trashEmptiedMessage": "Cestino svuotato",
+  "noSupermarketsYet": "Nessun supermercato",
+  "noRegisteredListsYet": "Nessuna lista registrata.",
+  "noDataForSelectedPeriod": "Nessun dato per il periodo selezionato.",
+  "byCategoryTitle": "Per categoria",
+  "categoryBreakdownTitle": "Dettaglio categorie",
+  "selectCompletedListToReview": "Seleziona una lista completata da rivedere",
+  "errorLoadingShoppingList": "Errore nel caricamento della lista: {error}",
+  "@errorLoadingShoppingList": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noListsYet": "Nessuna lista.",
+  "addNewListTitle": "Aggiungi nuova lista",
+  "enterListNamePrompt": "Inserisci il nome della lista:",
+  "listNameHint": "Nome lista",
+  "selectListToViewDetails": "Seleziona una lista per vedere i dettagli",
+  "enterRecipeNameError": "Inserisci un nome ricetta",
+  "editIngredientTitle": "Modifica ingrediente",
+  "addRecipeTitle": "Aggiungi Ricetta",
+  "enterRecipeNameHint": "Inserisci nome ricetta...",
+  "searchRecipeLabel": "Cerca Ricetta",
+  "enterRecipeAndSearch": "Inserisci un nome ricetta e premi \"Cerca Ricetta\"",
+  "recipeLabel": "Ricetta",
+  "ingredientsCount": "Ingredienti ({selected}/{total})",
+  "@ingredientsCount": {
+    "placeholders": {
+      "selected": {},
+      "total": {}
+    }
+  },
+  "addToListLabel": "Aggiungi alla Lista",
+  "errorRegisteringList": "Errore durante la registrazione della lista: {error}",
+  "@errorRegisteringList": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "continueEditingTitle": "Continuare a modificare?",
+  "continueEditingMessage": "Puoi aggiungere altri prodotti o spuntare altri elementi.",
+  "yesContinueLabel": "Si, continua",
+  "errorOpeningForEditing": "Errore aprendo per modificare: {error}",
+  "@errorOpeningForEditing": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "scanReceiptTooltip": "Scansiona scontrino",
+  "continueEditingTooltip": "Continua modifica",
+  "supermarketLabel": "Supermercato",
+  "notSelectedLabel": "Non selezionato",
+  "noCheckedItems": "Nessun elemento spuntato",
+  "checkItemsToRegister": "Spunta gli elementi nella lista\nper registrarli qui",
+  "quantityLabelTitle": "Quantita",
+  "priceLabel": "Prezzo",
+  "errorSavingTitle": "Errore nel salvataggio",
+  "failedToSaveChanges": "Impossibile salvare le modifiche:",
+  "whatWouldYouLikeToDo": "Cosa vuoi fare?",
+  "stayAndRetry": "Resta e riprova",
+  "discardChanges": "Scarta modifiche",
+  "errorAddingProduct": "Errore aggiungendo il prodotto: {error}",
+  "@errorAddingProduct": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorDeletingList": "Errore eliminando la lista: {error}",
+  "@errorDeletingList": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "selectSupermarketTitle": "Seleziona Supermercato",
+  "noSupermarketsCreateFirst": "Nessun supermercato. Creane uno per iniziare.",
+  "supermarketsAvailable": "{count} supermercato(i) disponibili",
+  "@supermarketsAvailable": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "createNewLabel": "Crea Nuovo",
+  "clearLabel": "Cancella",
+  "editSupermarketTooltip": "Modifica supermercato",
+  "createSupermarketToOrganize": "Crea un supermercato per organizzare\nle tue categorie di acquisto",
+  "registerListTooltip": "Registra lista",
+  "errorLoadingSupermarkets": "Errore nel caricamento dei supermercati",
+  "createSupermarketPrompt": "Crea un supermercato",
+  "selectSupermarketPrompt": "Seleziona supermercato",
+  "addProductHint": "Aggiungi prodotto...",
+  "addProductTooltip": "Aggiungi prodotto",
+  "deleteListTooltip": "Elimina lista",
+  "defaultCategoryUncategorized": "Senza categoria",
+  "defaultCategoryMeat": "🥩 Carne",
+  "defaultCategoryWineShop": "🍷 Enoteca",
+  "defaultCategoryFlowersAndPlants": "🌸 Fiori e piante",
+  "defaultCategoryFruitAndVegetables": "🍎 Frutta e verdura",
+  "defaultCategoryLooseFruitAndVegetables": "🥕 Frutta e verdura sfuse",
+  "defaultCategoryDeli": "🧀 Gastronomia",
+  "defaultCategoryDeliServiceCounter": "🥪 Gastronomia con banco",
+  "defaultCategoryDairyAndCuredMeats": "🥛 Latticini e salumi",
+  "defaultCategoryButcherServiceCounter": "🔪 Macelleria con banco",
+  "defaultCategoryNonFood": "🧴 Non-Food",
+  "defaultCategoryBreadAndDesserts": "🍞 Pane e dolci",
+  "defaultCategoryBreadAndDessertsServiceCounter": "🥖 Pane e dolci con banco",
+  "defaultCategoryBakery": "🥐 Panetteria",
+  "defaultCategoryPastry": "🧁 Pasticceria",
+  "defaultCategoryFish": "🐟 Pesce",
+  "defaultCategoryFishmongerServiceCounter": "🦞 Pescheria con banco",
+  "defaultCategorySushi": "🍣 Sushi",
+  "categoriesCountLabel": "{count} categorie",
+  "@categoriesCountLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "editLabel": "Modifica",
+  "supermarketNameEmpty": "Il nome del supermercato non puo essere vuoto",
+  "errorSavingSupermarket": "Errore durante il salvataggio del supermercato: {error}",
+  "@errorSavingSupermarket": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "deleteSupermarketConfirm": "Vuoi eliminare '{name}'?",
+  "@deleteSupermarketConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "errorDeletingSupermarket": "Errore durante l'eliminazione del supermercato: {error}",
+  "@errorDeletingSupermarket": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "createSupermarketTitle": "Crea supermercato",
+  "customizeSupermarketTitle": "Personalizza supermercato",
+  "saveSupermarketTooltip": "Salva supermercato",
+  "enterSupermarketNameLabel": "Inserisci nome supermercato",
+  "noCategoriesYet": "Nessuna categoria",
+  "addCategoriesToSupermarket": "Aggiungi categorie a questo supermercato",
+  "cancelSupermarketCreationTooltip": "Annulla creazione supermercato",
+  "deleteSupermarketTooltip": "Elimina supermercato",
+  "addCategoriesLabel": "Aggiungi categorie",
+  "removeFromFavoritesTooltip": "Rimuovi dai preferiti",
+  "setAsFavoriteTooltip": "Imposta come preferito",
+  "removeCategoryTooltip": "Rimuovi categoria",
+  "editCategoryTooltip": "Modifica categoria",
+  "selectAtLeastOneCategory": "Seleziona almeno una categoria",
+  "selectAtLeastOneCategoryToDelete": "Seleziona almeno una categoria da eliminare",
+  "deleteCategoryConfirmSingle": "Vuoi eliminare '{name}'?",
+  "@deleteCategoryConfirmSingle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "deleteCategoriesConfirm": "Vuoi eliminare {count} categorie?",
+  "@deleteCategoriesConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "failedToDeleteCategories": "Impossibile eliminare le categorie: {error}",
+  "@failedToDeleteCategories": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "addCategoriesTitle": "Aggiungi Categorie",
+  "createNewCategoryTooltip": "Crea nuova categoria",
+  "allCategoriesAdded": "Tutte le categorie aggiunte",
+  "createNewCategoryToContinue": "Crea una nuova categoria per continuare",
+  "addLabel": "Aggiungi",
+  "categoryNameEmpty": "Il nome categoria non puo essere vuoto",
+  "uncategorizedNameReserved": "Il nome \"uncategorized\" e riservato",
+  "errorSavingCategory": "Errore nel salvataggio della categoria: {error}",
+  "@errorSavingCategory": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "editCategoryTitle": "Modifica Categoria",
+  "createCategoryTitle": "Crea Categoria",
+  "categoryNameLabel": "Nome Categoria",
+  "saveLabel": "Salva",
+  "selectedItemsCount": "{count} selezionate",
+  "@selectedItemsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "quantityLabel": "Quantita: {quantity}",
+  "@quantityLabel": {
+    "placeholders": {
+      "quantity": {}
+    }
+  },
+  "statsLoadError": "Errore: ricarica l'app.",
+  "periodAll": "Tutto",
+  "periodWeek": "Settimana",
+  "periodMonth": "Mese",
+  "periodYear": "Anno",
+  "periodCustom": "Personalizzato",
+  "monthJanuary": "Gennaio",
+  "monthFebruary": "Febbraio",
+  "monthMarch": "Marzo",
+  "monthApril": "Aprile",
+  "monthMay": "Maggio",
+  "monthJune": "Giugno",
+  "monthJuly": "Luglio",
+  "monthAugust": "Agosto",
+  "monthSeptember": "Settembre",
+  "monthOctober": "Ottobre",
+  "monthNovember": "Novembre",
+  "monthDecember": "Dicembre",
+  "yearHint": "Anno",
+  "selectYearTooltip": "Seleziona anno",
+  "previousWeekTooltip": "Settimana precedente",
+  "nextWeekTooltip": "Settimana successiva",
+  "selectRangeLabel": "Seleziona intervallo",
+  "selectDayInWeekHelpText": "Seleziona un giorno della settimana",
+  "noUserDataFound": "Nessun dato utente trovato.",
+  "errorWithDetails": "Errore: {error}",
+  "@errorWithDetails": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "profileInformationTitle": "Informazioni profilo",
+  "usernameLabel": "Nome utente",
+  "currentEmailLabel": "Email corrente",
+  "saveProfileChanges": "Salva modifiche profilo",
+  "securitySettingsTitle": "Impostazioni sicurezza",
+  "googleAccountManagedCredentials": "Email e password sono gestite dal tuo account Google. Modifiche disabilitate.",
+  "updateEmailTitle": "Aggiorna email",
+  "newEmailLabel": "Nuova email",
+  "confirmNewEmailLabel": "Conferma nuova email",
+  "updatePasswordTitle": "Aggiorna password",
+  "newPasswordLabel": "Nuova password",
+  "confirmNewPasswordLabel": "Conferma nuova password",
+  "verificationTitle": "Verifica",
+  "enterCurrentPasswordToConfirm": "Inserisci la password attuale per confermare le modifiche",
+  "forgotPasswordWait": "Password dimenticata? (Attendi {seconds}s)",
+  "@forgotPasswordWait": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "forgotPassword": "Password dimenticata?",
+  "cooldownSeconds": "Attesa: {seconds}s",
+  "@cooldownSeconds": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "updateSecuritySettings": "Aggiorna impostazioni sicurezza",
+  "changesSavedSuccessfully": "Modifiche salvate con successo!",
+  "errorSavingChanges": "Errore durante il salvataggio: {error}",
+  "@errorSavingChanges": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "googleAccountManagedCredentialsShort": "Email e password gestite da Google. Modifiche disabilitate.",
+  "enterNewEmailOrPassword": "Inserisci nuova email e/o nuova password.",
+  "enterCurrentPasswordToProceed": "Inserisci la password attuale per continuare.",
+  "fillBothEmailFields": "Compila entrambi i campi email.",
+  "emailAddressesDoNotMatch": "Gli indirizzi email non coincidono.",
+  "fillAllPasswordFields": "Compila tutti i campi password.",
+  "newPasswordsDoNotMatch": "Le nuove password non coincidono.",
+  "passwordMinLength": "La password deve avere almeno {minLength} caratteri.",
+  "@passwordMinLength": {
+    "placeholders": {
+      "minLength": {}
+    }
+  },
+  "updateEmailAndPasswordSeparately": "Aggiorna email e password separatamente.",
+  "verificationEmailSent": "Email di verifica inviata al nuovo indirizzo!",
+  "passwordUpdatedSignInAgain": "Password aggiornata. Accedi di nuovo.",
+  "failedToUpdateCredentials": "Aggiornamento credenziali non riuscito: {error}",
+  "@failedToUpdateCredentials": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "noEmailAssociated": "Nessuna email associata a questo account.",
+  "waitBeforeRequestingReset": "Attendi {seconds} secondi prima di richiedere un altro reset.",
+  "@waitBeforeRequestingReset": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "recoveryEmailSentSignedOut": "Email di recupero inviata. Verrai disconnesso.",
+  "couldNotSendResetEmail": "Impossibile inviare l'email di reset. Riprova piu tardi."
+}

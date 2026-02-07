@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/app-style/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/font_size_provider.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 class SettingsScreenMobile extends ConsumerStatefulWidget {
   const SettingsScreenMobile({super.key});
@@ -43,10 +44,11 @@ class _SettingsScreenMobileState extends ConsumerState<SettingsScreenMobile> {
     final themeMode = ref.watch(themeModeValueProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settingsTitle),
         centerTitle: true,
       ),
       body: ListView(
@@ -54,7 +56,7 @@ class _SettingsScreenMobileState extends ConsumerState<SettingsScreenMobile> {
         children: [
           // Notifications Setting
           ListTile(
-            title: const Text('Notifications'),
+            title: Text(l10n.notificationsLabel),
             trailing: Switch(
               value: true,
               onChanged: (value) {},
@@ -64,7 +66,7 @@ class _SettingsScreenMobileState extends ConsumerState<SettingsScreenMobile> {
 
           // Dark Mode Setting
           ListTile(
-            title: const Text('Dark Mode'),
+            title: Text(l10n.darkModeLabel),
             trailing: Switch(
               value: themeMode == ThemeMode.dark,
               onChanged: (value) {
@@ -88,7 +90,7 @@ class _SettingsScreenMobileState extends ConsumerState<SettingsScreenMobile> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Font Size',
+                        l10n.fontSizeLabel,
                         style: textTheme.titleMedium,
                       ),
                       Text(
@@ -125,11 +127,11 @@ class _SettingsScreenMobileState extends ConsumerState<SettingsScreenMobile> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Small',
+                        l10n.fontSizeSmallLabel,
                         style: textTheme.labelSmall,
                       ),
                       Text(
-                        'Large',
+                        l10n.fontSizeLargeLabel,
                         style: textTheme.labelSmall,
                       ),
                     ],
@@ -147,17 +149,17 @@ class _SettingsScreenMobileState extends ConsumerState<SettingsScreenMobile> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Preview',
+                        l10n.textPreviewTitle,
                         style: textTheme.labelMedium,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'This is how your text will look',
+                        l10n.textPreviewBodyExample,
                         style: textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Smaller body text example',
+                        l10n.textPreviewBodySmallExample,
                         style: textTheme.bodySmall,
                       ),
                     ],
@@ -170,7 +172,7 @@ class _SettingsScreenMobileState extends ConsumerState<SettingsScreenMobile> {
 
           // About Setting
           ListTile(
-            title: const Text('About'),
+            title: Text(l10n.aboutSectionTitle),
             onTap: () {},
           ),
         ],

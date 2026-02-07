@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
@@ -81,11 +82,12 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
     final ref = this.ref;
     if (_selectedIds.isEmpty) return;
     final count = _selectedIds.length;
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         content: Text(
-          'Want to delete $count supermarket(s)?'
+          l10n.deleteSelectedSupermarketsConfirm(count)
         ),
         actions: [
           TextButton(
@@ -93,7 +95,7 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.onSurface,
             ),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -101,7 +103,7 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n.deleteLabel),
           ),
         ],
       ),
@@ -124,6 +126,8 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     // Listen for global navigation signals to clear selection and hide delete FAB
     ref.listen(appNavigationSignalProvider, (prev, next) {
       if (prev != next) {
@@ -151,7 +155,7 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Create your first supermarket to get started',
+                l10n.createFirstSupermarketMessage,
                 style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.center,
               ),
@@ -182,7 +186,7 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                   onPressed: _cancelSelection,
                 ),
                 title: Text(
-                  '${_selectedIds.length} selected',
+                  l10n.selectedItemsCount(_selectedIds.length),
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               )
@@ -266,8 +270,8 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                                         // Show message explaining why favorite couldn't be cleared
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: const Text(
-                                              'Cannot remove favorite: You must have at least one favorite supermarket. Select a different one first.',
+                                            content: Text(
+                                              l10n.cannotRemoveFavoriteSupermarket,
                                             ),
                                             backgroundColor: Theme.of(context).colorScheme.primary,
                                             behavior: SnackBarBehavior.floating,
@@ -285,7 +289,7 @@ class _SupermarketsGridViewState extends ConsumerState<SupermarketsGridView> {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            'Error updating favorite: ${e.toString()}',
+                                            l10n.errorUpdatingFavorite(e.toString()),
                                           ),
                                           backgroundColor:
                                               Theme.of(context).colorScheme.error,

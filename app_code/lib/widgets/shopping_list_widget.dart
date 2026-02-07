@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app_code/models/shopping_list.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 class ShoppingListCard extends StatefulWidget {
   final ShoppingList shoppingList;
@@ -59,6 +61,7 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
   Widget build(BuildContext context) {
     final products = widget.shoppingList.getProducts();
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return GestureDetector(
       onLongPress: widget.onLongPress,
@@ -95,7 +98,7 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
                           child: products.isEmpty
                               ? Center(
                                   child: Text(
-                                    'No items',
+                                    l10n.noItemsLabel,
                                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                       color: colorScheme.onSurfaceVariant,
                                     ),
@@ -177,9 +180,11 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
 
   Widget _buildFooter(ColorScheme colorScheme) {
     final date = widget.shoppingList.createdAt;
+    final l10n = AppLocalizations.of(context)!;
     final formatted = date != null
-        ? '${date.day} ${monthAbbreviation(date.month)} ${date.year}'
-        : '--/--/----';
+      ? DateFormat('d MMM yyyy', Localizations.localeOf(context).toString())
+        .format(date)
+      : l10n.dateNotAvailable;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -217,11 +222,4 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
     );
   }
 
-  String monthAbbreviation(int month) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return months[month - 1];
-  }
 }

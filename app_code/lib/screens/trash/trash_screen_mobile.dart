@@ -3,6 +3,7 @@ import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 class TrashScreenMobile extends ConsumerWidget {
   const TrashScreenMobile({super.key});
@@ -13,20 +14,19 @@ class TrashScreenMobile extends ConsumerWidget {
     List<ShoppingList> trashedLists,
   ) async {
     if (trashedLists.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Restore all'),
-        content: const Text(
-          'Are you sure you want to restore all lists from trash?',
-        ),
+        title: Text(l10n.restoreAllTitle),
+        content: Text(l10n.restoreAllConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.onSurface, // adapt to light/dark
             ),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -34,7 +34,7 @@ class TrashScreenMobile extends ConsumerWidget {
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
-            child: const Text('Restore'),
+            child: Text(l10n.restoreLabel),
           ),
         ],
       ),
@@ -45,7 +45,7 @@ class TrashScreenMobile extends ConsumerWidget {
         await notifier.updateList(l..setIsInTheTrash(false));
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        buildAppSnackBar(message: 'All lists restored', context: context),
+        buildAppSnackBar(message: l10n.allListsRestoredMessage, context: context),
       );
     }
   }
@@ -56,20 +56,19 @@ class TrashScreenMobile extends ConsumerWidget {
     List<ShoppingList> trashedLists,
   ) async {
     if (trashedLists.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Empty trash'),
-        content: const Text(
-          'This will permanently delete all lists in trash. Continue?',
-        ),
+        title: Text(l10n.emptyTrashTitle),
+        content: Text(l10n.emptyTrashConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.onSurface,
             ),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -77,7 +76,7 @@ class TrashScreenMobile extends ConsumerWidget {
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Delete all'),
+            child: Text(l10n.deleteAllLabel),
           ),
         ],
       ),
@@ -88,7 +87,7 @@ class TrashScreenMobile extends ConsumerWidget {
         await notifier.deleteList(l);
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        buildAppSnackBar(message: 'Trash emptied', context: context),
+        buildAppSnackBar(message: l10n.trashEmptiedMessage, context: context),
       );
     }
   }
@@ -96,12 +95,13 @@ class TrashScreenMobile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return shoppingListsAsync.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (error, _) =>
-          Scaffold(body: Center(child: Text('Error: $error'))),
+          Scaffold(body: Center(child: Text(l10n.errorWithDetails(error.toString())))),
       data: (lists) {
         final trashedLists = lists.where((l) => l.getIsInTheTrash()).toList()
           ..sort((a, b) {
@@ -114,7 +114,7 @@ class TrashScreenMobile extends ConsumerWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Trash'),
+            title: Text(l10n.trashLabel),
             centerTitle: false,
             actions: [
               TextButton(
@@ -122,23 +122,23 @@ class TrashScreenMobile extends ConsumerWidget {
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.onSurface,
                 ),
-                child: const Text('Restore all'),
+                child: Text(l10n.restoreAllTitle),
               ),
               TextButton(
                 onPressed: () => _confirmEmptyTrash(context, ref, trashedLists),
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error,
                 ),
-                child: const Text('Empty trash'),
+                child: Text(l10n.emptyTrashTitle),
               ),
             ],
           ),
           body: SafeArea(
             child: trashedLists.isEmpty
-                ? const Center(
+                ? Center(
                     child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('Trash is empty'),
+                      padding: const EdgeInsets.all(16),
+                      child: Text(l10n.trashEmptyMessage),
                     ),
                   )
                 : ListView.builder(
@@ -168,7 +168,7 @@ class TrashScreenMobile extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    list.getDeletionMessage(),
+                                    list.getDeletionMessage(l10n),
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium
@@ -194,7 +194,7 @@ class TrashScreenMobile extends ConsumerWidget {
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.restore),
-                                      tooltip: 'Restore',
+                                      tooltip: l10n.restoreLabel,
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurface, // adapt to light/dark
@@ -215,11 +215,9 @@ class TrashScreenMobile extends ConsumerWidget {
                                         showDialog(
                                           context: context,
                                           builder: (_) => AlertDialog(
-                                            title: const Text(
-                                              'Delete permanently',
-                                            ),
+                                            title: Text(l10n.deletePermanentlyTitle),
                                             content: Text(
-                                              "Are you sure you want to permanently delete '${list.getName()}'?",
+                                              l10n.deleteListPermanentlyConfirm(list.getName()),
                                             ),
                                             actions: [
                                               TextButton(
@@ -230,7 +228,7 @@ class TrashScreenMobile extends ConsumerWidget {
                                                       .colorScheme
                                                       .onSurface,
                                                 ),
-                                                child: const Text('Cancel'),
+                                                child: Text(l10n.cancelLabel),
                                               ),
                                               ElevatedButton(
                                                 onPressed: () async {
@@ -249,7 +247,7 @@ class TrashScreenMobile extends ConsumerWidget {
                                                       .error,
                                                   foregroundColor: Colors.white,
                                                 ),
-                                                child: const Text('Delete'),
+                                                child: Text(l10n.deleteLabel),
                                               ),
                                             ],
                                           ),

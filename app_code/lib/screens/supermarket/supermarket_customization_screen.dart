@@ -8,6 +8,8 @@ import 'package:app_code/screens/supermarket/category_editing_screen.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:app_code/utils/category_localizer.dart';
 
 class SupermarketCustomizationScreen extends ConsumerStatefulWidget {
   final Supermarket supermarket;
@@ -58,10 +60,11 @@ class _SupermarketCustomizationScreenState
   /// Save the supermarket with updated name and categories
   Future<void> _saveSupermarket() async {
     final name = _nameController.text.trim();
+    final l10n = AppLocalizations.of(context)!;
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'Supermarket name cannot be empty',
+          message: l10n.supermarketNameEmpty,
           isError: true,
           context: context,
         ),
@@ -105,7 +108,7 @@ class _SupermarketCustomizationScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           buildAppSnackBar(
-            message: 'Error saving supermarket: ${e.toString()}',
+            message: l10n.errorSavingSupermarket(e.toString()),
             isError: true,
             context: context,
           ),
@@ -170,6 +173,7 @@ class _SupermarketCustomizationScreenState
   /// In creation mode, simply cancel without saving
   /// In edit mode, mark as non-visible after confirmation
   Future<void> _deleteOrCancel() async {
+    final l10n = AppLocalizations.of(context)!;
     if (widget.isCreationMode) {
       if (mounted) {
         Navigator.pop(context);
@@ -181,7 +185,7 @@ class _SupermarketCustomizationScreenState
       context: context,
       builder: (_) => AlertDialog(
         content: Text(
-          "Want to delete '${widget.supermarket.getName()}'?",
+          l10n.deleteSupermarketConfirm(widget.supermarket.getName()),
         ),
         actions: [
           TextButton(
@@ -189,7 +193,7 @@ class _SupermarketCustomizationScreenState
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.onSurface,
             ),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -197,7 +201,7 @@ class _SupermarketCustomizationScreenState
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n.deleteLabel),
           ),
         ],
       ),
@@ -216,7 +220,7 @@ class _SupermarketCustomizationScreenState
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             buildAppSnackBar(
-              message: 'Error deleting supermarket: ${e.toString()}',
+              message: l10n.errorDeletingSupermarket(e.toString()),
               isError: true,
               context: context,
             ),
@@ -229,6 +233,7 @@ class _SupermarketCustomizationScreenState
   @override
   Widget build(BuildContext context) {
     final visibleCategories = _visibleCategories();
+    final l10n = AppLocalizations.of(context)!;
 
     return WillPopScope(
       onWillPop: () async {
@@ -239,8 +244,8 @@ class _SupermarketCustomizationScreenState
         appBar: AppBar(
           title: Text(
             widget.isCreationMode
-                ? 'Create Supermarket'
-                : 'Customize Supermarket',
+                ? l10n.createSupermarketTitle
+                : l10n.customizeSupermarketTitle,
           ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
@@ -252,7 +257,7 @@ class _SupermarketCustomizationScreenState
             IconButton(
               icon: const Icon(Icons.check),
               onPressed: _saveSupermarket,
-              tooltip: 'Save supermarket',
+              tooltip: l10n.saveSupermarketTooltip,
             ),
           ],
           elevation: 0,
@@ -266,7 +271,7 @@ class _SupermarketCustomizationScreenState
               child: TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Enter Supermarket Name',
+                  labelText: l10n.enterSupermarketNameLabel,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -288,12 +293,12 @@ class _SupermarketCustomizationScreenState
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No categories yet',
+                            l10n.noCategoriesYet,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Add categories to this supermarket',
+                            l10n.addCategoriesToSupermarket,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -318,8 +323,8 @@ class _SupermarketCustomizationScreenState
                     color: Theme.of(context).colorScheme.error,
                     iconSize: 28,
                     tooltip: widget.isCreationMode
-                        ? 'Cancel supermarket creation'
-                        : 'Delete supermarket',
+                      ? l10n.cancelSupermarketCreationTooltip
+                      : l10n.deleteSupermarketTooltip,
                   ),
                   const SizedBox(width: 8),
                   // Add categories button
@@ -332,7 +337,7 @@ class _SupermarketCustomizationScreenState
                           context,
                         ).colorScheme.onPrimary,
                       ),
-                      child: const Text('Add Categories'),
+                      child: Text(l10n.addCategoriesLabel),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -354,8 +359,8 @@ class _SupermarketCustomizationScreenState
                         : Theme.of(context).colorScheme.outline,
                     iconSize: 28,
                     tooltip: _isFavorite
-                        ? 'Remove from favorites'
-                        : 'Set as favorite',
+                        ? l10n.removeFromFavoritesTooltip
+                        : l10n.setAsFavoriteTooltip,
                   ),
                 ],
               ),
@@ -368,6 +373,7 @@ class _SupermarketCustomizationScreenState
 
   /// Build individual category tile with delete, edit, and drag handles
   Widget _buildCategoryTile(int index, Category category) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       key: ValueKey(category.id),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -379,11 +385,11 @@ class _SupermarketCustomizationScreenState
           icon: const Icon(Icons.remove_circle_outline),
           onPressed: () => _deleteCategory(category),
           color: Theme.of(context).colorScheme.error,
-          tooltip: 'Remove category',
+          tooltip: l10n.removeCategoryTooltip,
         ),
         // Category name in the center
         title: Text(
-          category.getName(),
+          CategoryLocalizer.localize(context, category.getName()),
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         // Drag handle and edit button on the right
@@ -397,7 +403,7 @@ class _SupermarketCustomizationScreenState
                 _navigateToCategoryEditing(category);
               },
               color: Theme.of(context).colorScheme.primary,
-              tooltip: 'Edit category',
+              tooltip: l10n.editCategoryTooltip,
             ),
             // Drag handle
             ReorderableDragStartListener(

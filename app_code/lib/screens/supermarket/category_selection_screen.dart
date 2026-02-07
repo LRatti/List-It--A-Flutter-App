@@ -5,6 +5,8 @@ import 'package:app_code/providers/real_app_providers/category/categories_notifi
 import 'package:app_code/screens/supermarket/category_editing_screen.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:app_code/utils/category_localizer.dart';
 
 class CategorySelectionScreen extends ConsumerStatefulWidget {
   final String supermarketId;
@@ -64,6 +66,7 @@ class _CategorySelectionScreenState
 
   /// Add selected categories to the supermarket
   void _addSelectedCategories() {
+    final l10n = AppLocalizations.of(context)!;
     final selected = _availableCategories
         .where((cat) => _selectedCategoryIds.contains(cat.id))
         .toList();
@@ -71,7 +74,7 @@ class _CategorySelectionScreenState
     if (selected.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'Please select at least one category',
+          message: l10n.selectAtLeastOneCategory,
           isError: true,
           context: context,
         ),
@@ -107,6 +110,7 @@ class _CategorySelectionScreenState
 
   /// Delete selected categories after confirmation
   Future<void> _deleteSelectedCategories() async {
+    final l10n = AppLocalizations.of(context)!;
     final selected = _availableCategories
         .where((cat) => _selectedCategoryIds.contains(cat.id))
         .toList();
@@ -114,7 +118,7 @@ class _CategorySelectionScreenState
     if (selected.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'Please select at least one category to delete',
+          message: l10n.selectAtLeastOneCategoryToDelete,
           isError: true,
           context: context,
         ),
@@ -128,13 +132,13 @@ class _CategorySelectionScreenState
       builder: (_) => AlertDialog(
         content: Text(
           selected.length == 1
-              ? "Want to delete '${selected.first.getName()}'?"
-              : 'Want to delete ${selected.length} categories?',
+              ? l10n.deleteCategoryConfirmSingle(selected.first.getName())
+              : l10n.deleteCategoriesConfirm(selected.length),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -142,7 +146,7 @@ class _CategorySelectionScreenState
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n.deleteLabel),
           ),
         ],
       ),
@@ -151,9 +155,9 @@ class _CategorySelectionScreenState
     if (confirmed == true) {
       try {
         // Delete categories using the notifier
-        final deletedCount = await ref
-            .read(categoriesProvider.notifier)
-            .deleteCategories(selected.map((c) => c.id).toList());
+        await ref
+          .read(categoriesProvider.notifier)
+          .deleteCategories(selected.map((c) => c.id).toList());
 
         if (mounted) {
 
@@ -167,7 +171,7 @@ class _CategorySelectionScreenState
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             buildAppSnackBar(
-              message: 'Failed to delete categories: $e',
+              message: l10n.failedToDeleteCategories(e.toString()),
               isError: true,
               context: context,
             ),
@@ -180,11 +184,12 @@ class _CategorySelectionScreenState
   @override
   Widget build(BuildContext context) {
     final hasSelection = _selectedCategoryIds.isNotEmpty;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Add Categories'),
+        title: Text(l10n.addCategoriesTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -193,7 +198,7 @@ class _CategorySelectionScreenState
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _navigateToCategoryEditing,
-            tooltip: 'Create new category',
+            tooltip: l10n.createNewCategoryTooltip,
           ),
         ],
         elevation: 0,
@@ -211,12 +216,12 @@ class _CategorySelectionScreenState
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'All categories added',
+                    l10n.allCategoriesAdded,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Create a new category to continue',
+                    l10n.createNewCategoryToContinue,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -237,7 +242,10 @@ class _CategorySelectionScreenState
                   child: Card(
                     child: CheckboxListTile(
                       title: Text(
-                        category.getName(),
+                        CategoryLocalizer.localize(
+                          context,
+                          category.getName(),
+                        ),
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       value: isSelected,
@@ -271,7 +279,7 @@ class _CategorySelectionScreenState
                           color: Theme.of(context).colorScheme.error,
                         ),
                       ),
-                      child: const Text('Delete'),
+                      child: Text(l10n.deleteLabel),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -284,7 +292,7 @@ class _CategorySelectionScreenState
                         foregroundColor:
                             Theme.of(context).colorScheme.onPrimary,
                       ),
-                      child: const Text('Add'),
+                      child: Text(l10n.addLabel),
                     ),
                   ),
                 ],

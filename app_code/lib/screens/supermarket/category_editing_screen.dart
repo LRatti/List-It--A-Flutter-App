@@ -4,6 +4,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/providers/real_app_providers/category/categories_notifier.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 class CategoryEditingScreen extends ConsumerStatefulWidget {
   final Category? categoryToEdit;
@@ -41,11 +42,12 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
   /// Save the category (create or update)
   Future<void> _saveCategory() async {
     final name = _nameController.text.trim();
+    final l10n = AppLocalizations.of(context)!;
     
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'Category name cannot be empty',
+          message: l10n.categoryNameEmpty,
           isError: true,
           context: context,
         ),
@@ -56,7 +58,7 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
     if (name.trim().toLowerCase() == UncategorizedCategoryUtils.name) {
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'The name "uncategorized" is reserved',
+          message: l10n.uncategorizedNameReserved,
           isError: true,
           context: context,
         ),
@@ -97,7 +99,7 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           buildAppSnackBar(
-            message: 'Error saving category: ${e.toString()}',
+            message: l10n.errorSavingCategory(e.toString()),
             isError: true,
             context: context,
           ),
@@ -113,12 +115,13 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.categoryToEdit != null;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          isEditing ? 'Edit Category' : 'Create Category',
+          isEditing ? l10n.editCategoryTitle : l10n.createCategoryTitle,
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -137,7 +140,7 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
               controller: _nameController,
               enabled: !_isLoading,
               decoration: InputDecoration(
-                labelText: 'Category Name',
+                labelText: l10n.categoryNameLabel,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -169,7 +172,7 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
                         ),
                       )
                     : Text(
-                        'Save',
+                        l10n.saveLabel,
                       ),
               ),
             ),

@@ -69,17 +69,18 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
   /// Saves user changes to Firebase
   Future<void> saveChanges(User user) async {
     setState(() => _isSaving = true);
+    final l10n = AppLocalizations.of(context)!;
     try {
       // Only update username here. Email changes must be done via the dedicated button.
       final modifiedUser = _createModifiedUser(user);
       await ref.read(userDetailsProvider.notifier).updateUser(modifiedUser);
 
       if (mounted) {
-        showSnackBar('Changes saved successfully!');
+        showSnackBar(l10n.changesSavedSuccessfully);
       }
     } catch (e) {
       if (mounted) {
-        showSnackBar('Error saving changes: $e', isError: true);
+        showSnackBar(l10n.errorSavingChanges(e.toString()), isError: true);
       }
     } finally {
       if (mounted) {
@@ -100,9 +101,11 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
 
   /// Update authentication email and/or password based on filled inputs.
   Future<void> updateAuthCredentials(User user) async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (!canEditCredentials) {
       showSnackBar(
-        'Email and password managed via Google. Changes disabled.',
+        l10n.googleAccountManagedCredentialsShort,
         isError: true,
       );
       return;
@@ -118,37 +121,37 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
     final wantsPasswordUpdate = newPassword.isNotEmpty || confirm.isNotEmpty;
 
     if (!wantsEmailUpdate && !wantsPasswordUpdate) {
-      showSnackBar('Enter new email and/or new password.', isError: true);
+      showSnackBar(l10n.enterNewEmailOrPassword, isError: true);
       return;
     }
 
     if (currentPassword.isEmpty) {
-      showSnackBar('Enter current password to proceed.', isError: true);
+      showSnackBar(l10n.enterCurrentPasswordToProceed, isError: true);
       return;
     }
 
     if (wantsEmailUpdate) {
       if (newEmail.isEmpty || confirmEmail.isEmpty) {
-        showSnackBar('Fill both email fields.', isError: true);
+        showSnackBar(l10n.fillBothEmailFields, isError: true);
         return;
       }
       if (newEmail != confirmEmail) {
-        showSnackBar('Email addresses do not match.', isError: true);
+        showSnackBar(l10n.emailAddressesDoNotMatch, isError: true);
         return;
       }
     }
 
     if (wantsPasswordUpdate) {
       if (newPassword.isEmpty || confirm.isEmpty) {
-        showSnackBar('Fill all password fields.', isError: true);
+        showSnackBar(l10n.fillAllPasswordFields, isError: true);
         return;
       }
       if (newPassword != confirm) {
-        showSnackBar('New passwords do not match.', isError: true);
+        showSnackBar(l10n.newPasswordsDoNotMatch, isError: true);
         return;
       }
       if (newPassword.length < 6) {
-        showSnackBar('Password must be at least 6 characters.', isError: true);
+        showSnackBar(l10n.passwordMinLength(6), isError: true);
         return;
       }
     }
@@ -156,7 +159,7 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
     // If both email and password are being updated, handle separately
     if (wantsEmailUpdate && wantsPasswordUpdate) {
       showSnackBar(
-        'Please update email and password separately.',
+        l10n.updateEmailAndPasswordSeparately,
         isError: true,
       );
       return;
@@ -176,7 +179,7 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
           ref.read(emailVerificationSessionProvider.notifier).state =
               EmailVerificationSession(isNewSignup: false, email: newEmail);
 
-          showSnackBar('Verification email sent to new address!');
+          showSnackBar(l10n.verificationEmailSent);
           // Navigate to verification screen
           Navigator.pushReplacementNamed(context, '/verification');
         }
@@ -186,7 +189,7 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
           currentPassword: currentPassword,
         );
         if (mounted) {
-          showSnackBar('Password updated. Please sign in again.');
+          showSnackBar(l10n.passwordUpdatedSignInAgain);
           Navigator.of(
             context,
           ).pushNamedAndRemoveUntil('/signin', (route) => false);
@@ -194,7 +197,7 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        showSnackBar('Failed to update credentials: $e', isError: true);
+        showSnackBar(l10n.failedToUpdateCredentials(e.toString()), isError: true);
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -202,8 +205,9 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> sendPasswordResetFromSettings(String? email) async {
+    final l10n = AppLocalizations.of(context)!;
     if (email == null || email.isEmpty) {
-      showSnackBar('No email associated with this account.', isError: true);
+      showSnackBar(l10n.noEmailAssociated, isError: true);
       return;
     }
 
@@ -214,7 +218,7 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
     if (!canSend) {
       final remaining = await cooldownService.getRemainingCooldownSeconds();
       showSnackBar(
-        'Please wait $remaining seconds before requesting another reset email.',
+        l10n.waitBeforeRequestingReset(remaining),
         isError: true,
       );
       return;
@@ -229,7 +233,7 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
       await cooldownNotifier.recordEmailSent();
       
       if (!mounted) return;
-      showSnackBar('Recovery email sent. You will be signed out.');
+      showSnackBar(l10n.recoveryEmailSentSignedOut);
       
       // Navigate BEFORE signing out to avoid showing "No user data found" message
       if (mounted) {
@@ -243,7 +247,7 @@ abstract class SettingsController extends ConsumerState<SettingsScreen> {
     } catch (e) {
       if (mounted) {
         showSnackBar(
-          'Could not send reset email. Try again later.',
+          l10n.couldNotSendResetEmail,
           isError: true,
         );
       }

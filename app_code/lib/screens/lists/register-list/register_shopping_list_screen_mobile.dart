@@ -15,6 +15,8 @@ import 'package:app_code/providers/real_app_providers/register_shopping_list_nav
 import 'package:app_code/screens/camera/receipt_camera_screen.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:app_code/utils/category_localizer.dart';
 
 class RegisterShoppingListScreenMobile extends ConsumerStatefulWidget {
   final String shoppingListId;
@@ -58,6 +60,7 @@ class _RegisterShoppingListScreenMobileState
     final controller = ref.read(
       registerShoppingListControllerProvider(shoppingList),
     );
+    final l10n = AppLocalizations.of(context)!;
     //isnt used final source = ref.read(registerShoppingListSourceProvider);
 
     try {
@@ -84,7 +87,7 @@ class _RegisterShoppingListScreenMobileState
       
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'Error saving changes: ${e.toString()}',
+          message: l10n.errorSavingChanges(e.toString()),
           isError: true,
           context: context,
         ),
@@ -97,6 +100,7 @@ class _RegisterShoppingListScreenMobileState
     final controller = ref.read(
       registerShoppingListControllerProvider(shoppingList),
     );
+    final l10n = AppLocalizations.of(context)!;
 
     try {
       // Register the list (sets is_registered=true, auto-fills quantities)
@@ -128,7 +132,7 @@ class _RegisterShoppingListScreenMobileState
       
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'Error registering list: ${e.toString()}',
+          message: l10n.errorRegisteringList(e.toString()),
           isError: true,
           context: context,
         ),
@@ -141,22 +145,21 @@ class _RegisterShoppingListScreenMobileState
   /// - Go back to lists_screen
   /// - Edit or navigate to other screens from there
   Future<void> _handleOpenForEditing(ShoppingList shoppingList) async {
+    final l10n = AppLocalizations.of(context)!;
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Continue Editing?'),
-        content: const Text(
-          'You can add more products or check additional items.',
-        ),
+        title: Text(l10n.continueEditingTitle),
+        content: Text(l10n.continueEditingMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yes, Continue'),
+            child: Text(l10n.yesContinueLabel),
           ),
         ],
       ),
@@ -189,7 +192,7 @@ class _RegisterShoppingListScreenMobileState
       
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'Error opening for editing: ${e.toString()}',
+          message: l10n.errorOpeningForEditing(e.toString()),
           isError: true,
           context: context,
         ),
@@ -202,6 +205,7 @@ class _RegisterShoppingListScreenMobileState
     final controller = ref.read(
       registerShoppingListControllerProvider(shoppingList),
     );
+    final l10n = AppLocalizations.of(context)!;
 
     try {
       // Persist any quantity/price changes before navigating to camera
@@ -225,7 +229,7 @@ class _RegisterShoppingListScreenMobileState
       
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'Error saving changes: ${e.toString()}',
+          message: l10n.errorSavingChanges(e.toString()),
           isError: true,
           context: context,
         ),
@@ -269,6 +273,7 @@ class _RegisterShoppingListScreenMobileState
   Widget build(BuildContext context) {
     // Fetch fresh shopping list data from the database
     final shoppingListAsync = ref.watch(shoppingListProvider(widget.shoppingListId));
+    final l10n = AppLocalizations.of(context)!;
     
     return shoppingListAsync.when(
       loading: () => const Scaffold(
@@ -278,7 +283,7 @@ class _RegisterShoppingListScreenMobileState
       ),
       error: (error, stackTrace) => Scaffold(
         body: Center(
-          child: Text('Error loading shopping list: $error'),
+          child: Text(l10n.errorLoadingShoppingList(error.toString())),
         ),
       ),
       data: (shoppingList) {
@@ -329,7 +334,7 @@ class _RegisterShoppingListScreenMobileState
               actions: [
                 IconButton(
                   icon: const Icon(Icons.check),
-                  tooltip: 'Register list',
+                  tooltip: l10n.registerListTooltip,
                   onPressed: () => _handleRegister(shoppingList),
                 ),
               ],
@@ -363,7 +368,7 @@ class _RegisterShoppingListScreenMobileState
               backgroundColor: colorScheme.primaryContainer,
               foregroundColor: colorScheme.onPrimaryContainer,
               onPressed: () => _handleCamera(shoppingList),
-              tooltip: 'Scan receipt',
+              tooltip: l10n.scanReceiptTooltip,
               child: const Icon(Icons.camera_alt),
             ),
             const SizedBox(height: 12),
@@ -374,7 +379,7 @@ class _RegisterShoppingListScreenMobileState
               backgroundColor: colorScheme.secondaryContainer,
               foregroundColor: colorScheme.onSecondaryContainer,
               onPressed: () => _handleOpenForEditing(shoppingList),
-              tooltip: 'Continue editing',
+              tooltip: l10n.continueEditingTooltip,
               child: const Icon(Icons.edit),
             ),
           ],
@@ -394,6 +399,7 @@ class _RegisterShoppingListScreenMobileState
     TextTheme textTheme,
   ) {
     final supermarket = shoppingList.getSupermarket();
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -416,13 +422,13 @@ class _RegisterShoppingListScreenMobileState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Supermarket',
+                  l10n.supermarketLabel,
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Text(
-                  supermarket?.getName() ?? 'Not selected',
+                  supermarket?.getName() ?? l10n.notSelectedLabel,
                   style: textTheme.titleMedium?.copyWith(
                     color: colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
@@ -444,6 +450,7 @@ class _RegisterShoppingListScreenMobileState
     TextTheme textTheme,
   ) {
     if (boughtProducts.isEmpty) {
+      final l10n = AppLocalizations.of(context)!;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -455,7 +462,7 @@ class _RegisterShoppingListScreenMobileState
             ),
             const SizedBox(height: 16),
             Text(
-              'No checked items',
+              l10n.noCheckedItems,
               style: textTheme.titleMedium?.copyWith(
                 color: colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
@@ -463,7 +470,7 @@ class _RegisterShoppingListScreenMobileState
             ),
             const SizedBox(height: 8),
             Text(
-              'Check items in the shopping list\nto register them here',
+              l10n.checkItemsToRegister,
               textAlign: TextAlign.center,
               style: textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
@@ -492,7 +499,10 @@ class _RegisterShoppingListScreenMobileState
             Padding(
               padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
               child: Text(
-                products.first.category.getName(),
+                CategoryLocalizer.localize(
+                  context,
+                  products.first.category.getName(),
+                ),
                 style: textTheme.labelLarge?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
@@ -522,6 +532,7 @@ class _RegisterShoppingListScreenMobileState
   ) {
     final quantityController = _quantityControllers[product.id]!;
     final priceController = _priceControllers[product.id];
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -552,7 +563,7 @@ class _RegisterShoppingListScreenMobileState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Quantity',
+                      l10n.quantityLabelTitle,
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -594,7 +605,7 @@ class _RegisterShoppingListScreenMobileState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Price',
+                      l10n.priceLabel,
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),

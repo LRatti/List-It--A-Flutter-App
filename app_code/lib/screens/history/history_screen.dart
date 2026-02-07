@@ -6,6 +6,7 @@ import 'package:app_code/screens/lists/register-list/register_shopping_list_scre
 import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
 import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
 import 'package:app_code/models/shopping_list.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 /// Mobile history screen: single column list with modal registration view.
 class HistoryScreenMobile extends ConsumerWidget {
@@ -14,6 +15,7 @@ class HistoryScreenMobile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return shoppingListsAsync.when(
       loading: () => Scaffold(
@@ -22,7 +24,7 @@ class HistoryScreenMobile extends ConsumerWidget {
       ),
       error: (error, _) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text(error.toString())),
+        body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
       ),
       data: (lists) {
         final registeredLists = lists
@@ -36,7 +38,7 @@ class HistoryScreenMobile extends ConsumerWidget {
 
         return SearchableShoppingListsView(
           lists: registeredLists,
-          emptyMessage: 'No registered lists yet.',
+          emptyMessage: l10n.noRegisteredListsYet,
           showRegistered: true,
           onListTap: (context, shoppingList) {
             ref.read(registerShoppingListSourceProvider.notifier).state =
@@ -72,6 +74,7 @@ class _HistoryScreenTabletViewState extends ConsumerState<HistoryScreenTablet> {
   @override
   Widget build(BuildContext context) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return shoppingListsAsync.when(
       loading: () => Scaffold(
@@ -80,7 +83,7 @@ class _HistoryScreenTabletViewState extends ConsumerState<HistoryScreenTablet> {
       ),
       error: (error, _) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text(error.toString())),
+        body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
       ),
       data: (lists) {
         final registeredLists = lists
@@ -108,7 +111,7 @@ class _HistoryScreenTabletViewState extends ConsumerState<HistoryScreenTablet> {
                 flex: 40,
                 child: SearchableShoppingListsView(
                   lists: registeredLists,
-                  emptyMessage: 'No registered lists yet.',
+                  emptyMessage: l10n.noRegisteredListsYet,
                   showRegistered: true,
                   onListTap: (context, shoppingList) {
                     setState(() => _selectedList = shoppingList);
@@ -139,6 +142,7 @@ class _HistoryScreenTabletViewState extends ConsumerState<HistoryScreenTablet> {
 
 Widget _buildEmptyDetailPane(BuildContext context) {
   final colorScheme = Theme.of(context).colorScheme;
+  final l10n = AppLocalizations.of(context)!;
 
   return Container(
     color: Theme.of(context).scaffoldBackgroundColor,
@@ -153,7 +157,7 @@ Widget _buildEmptyDetailPane(BuildContext context) {
           ),
           const SizedBox(height: 16),
           Text(
-            'Select a completed list to review',
+            l10n.selectCompletedListToReview,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),

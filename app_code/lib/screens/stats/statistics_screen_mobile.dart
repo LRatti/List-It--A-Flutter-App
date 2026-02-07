@@ -4,6 +4,8 @@ import 'package:app_code/widgets/period_selector.dart';
 import 'package:app_code/widgets/statistics_pie_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:app_code/utils/category_localizer.dart';
 
 /// Statistics screen that displays spending data grouped by category
 /// Shows a pie chart and list of categories with percentages and amounts
@@ -59,6 +61,7 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
   /// Shows a bottom sheet with products for the selected category
   void _showCategoryDetails(BuildContext context, String categoryName, List<dynamic> allLists) {
     final products = StatisticsCalculator.aggregateCategoryProducts(categoryName, allLists);
+    final l10n = AppLocalizations.of(context)!;
     
     showModalBottomSheet(
       context: context,
@@ -80,7 +83,7 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    categoryName,
+                    CategoryLocalizer.localize(context, categoryName),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   IconButton(
@@ -102,7 +105,7 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                   
                   return ListTile(
                     title: Text(product.name),
-                    subtitle: Text('Quantity: ${product.quantity}'),
+                    subtitle: Text(l10n.quantityLabel(product.quantity)),
                     trailing: Text(
                       _formatCurrency(product.price),
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -120,11 +123,12 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
   @override
   Widget build(BuildContext context) {
     final listsAsync = ref.watch(shoppingListsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: listsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text("Error occurring: please reload the app.\n")),
+        error: (error, _) => Center(child: Text(l10n.statsLoadError)),
         data: (lists) {
           final computation = StatisticsCalculator.compute(lists, _isWithinPeriod);
           final filtered = computation.filteredLists;
@@ -149,9 +153,9 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                     },
                   ),
                   if (total == 0)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Center(child: Text('No data for the selected period.')),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Center(child: Text(l10n.noDataForSelectedPeriod)),
                     )
                   else ...[
                     const SizedBox(height: 12),
@@ -178,7 +182,7 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                     const SizedBox(height: 12),
                     // "By category" title
                     Text(
-                      'By category',
+                      l10n.byCategoryTitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
@@ -195,7 +199,10 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                         return ListTile(
                           dense: true,
                           leading: CircleAvatar(backgroundColor: color, radius: 8),
-                          title: Text(e.key, style: Theme.of(context).textTheme.titleSmall),
+                          title: Text(
+                            CategoryLocalizer.localize(context, e.key),
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
                           subtitle: Text('${percent.toStringAsFixed(1)}%', style: Theme.of(context).textTheme.labelSmall),
                           trailing: Text(_formatCurrency(e.value), style: Theme.of(context).textTheme.labelSmall),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),

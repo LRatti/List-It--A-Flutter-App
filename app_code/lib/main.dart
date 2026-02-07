@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 
@@ -30,7 +32,9 @@ import 'package:app_code/services/mock/mock_data_seed.dart';
 import 'package:app_code/utils/favorite_supermarket_initializer.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
+import 'package:app_code/utils/category_localizer.dart';
 import 'package:app_code/widgets/app_screen_size_listener.dart';
+import 'package:app_code/providers/locale_provider.dart';
 
 /// Performs all initialization tasks required at app startup.
 /// This includes Firebase setup, mock data seeding, cleanup operations, and sync engine initialization.
@@ -45,6 +49,9 @@ Future<void> _runStartupTasks() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Load default category localizations from assets.
+  await CategoryLocalizer.preload();
   
   //TODO: delete this
   // Seed mock data only if local database is empty
@@ -73,8 +80,11 @@ void main() async {
   await _runStartupTasks();
 
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    ChangeNotifierProvider(
+      create: (_) => LocaleProvider(),
+      child: const ProviderScope(
+        child: MyApp(),
+      ),
     ),
   );
 }
@@ -179,14 +189,19 @@ class MobileAppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = context.watch<LocaleProvider>();
+
     return MaterialApp(
-      title: 'Flutter Demo',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,
       themeMode: themeMode,
       theme: theme,
       darkTheme: darkTheme,
+      locale: localeProvider.locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       initialRoute: '/',
       routes: {
         '/': (context) => AuthGate(homeScreen: const HomeScreenMobileView()),
@@ -218,14 +233,19 @@ class TabletAppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = context.watch<LocaleProvider>();
+
     return MaterialApp(
-      title: 'Flutter Demo',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,
       themeMode: themeMode,
       theme: theme,
       darkTheme: darkTheme,
+      locale: localeProvider.locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       initialRoute: '/',
       routes: {
         '/': (context) => AuthGate(homeScreen: const HomeScreenTabletView()),

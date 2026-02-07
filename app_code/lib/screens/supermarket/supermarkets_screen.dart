@@ -6,6 +6,7 @@ import 'package:app_code/screens/supermarket/supermarket_customization_screen.da
 import 'package:app_code/widgets/searchable_supermarkets_view.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
 import 'package:app_code/utils/responsive_layout.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 /// Mobile supermarkets screen: searchable list view.
 class SupermarketsScreenMobile extends ConsumerWidget {
@@ -14,6 +15,7 @@ class SupermarketsScreenMobile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final supermarketsAsync = ref.watch(supermarketsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return supermarketsAsync.when(
       loading: () => Scaffold(
@@ -22,14 +24,14 @@ class SupermarketsScreenMobile extends ConsumerWidget {
       ),
       error: (error, stack) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text('Error: ${error.toString()}')),
+        body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
       ),
       data: (supermarkets) {
         final visibleSupermarkets = _getVisibleSupermarkets(supermarkets);
 
         return SearchableSupermarketsView(
           supermarkets: visibleSupermarkets,
-          emptyMessage: 'No supermarkets yet',
+          emptyMessage: l10n.noSupermarketsYet,
           onDeletionModeChanged: _handleDeletionModeChanged,
           floatingActionButton: FloatingActionButton(
             heroTag: 'addSupermarketFAB',
@@ -54,6 +56,7 @@ class SupermarketsScreenTablet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final supermarketsAsync = ref.watch(supermarketsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return supermarketsAsync.when(
       loading: () => Scaffold(
@@ -62,7 +65,7 @@ class SupermarketsScreenTablet extends ConsumerWidget {
       ),
       error: (error, stack) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: Text('Error: ${error.toString()}')),
+        body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
       ),
       data: (supermarkets) {
         final visibleSupermarkets = _getVisibleSupermarkets(supermarkets);
@@ -141,6 +144,7 @@ class _SupermarketCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       child: InkWell(
@@ -194,7 +198,7 @@ class _SupermarketCard extends ConsumerWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${supermarket.getCategories().length} categories',
+                    l10n.categoriesCountLabel(supermarket.getCategories().length),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -242,7 +246,7 @@ class _SupermarketCard extends ConsumerWidget {
                     );
                   },
                   icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Edit'),
+                  label: Text(l10n.editLabel),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),

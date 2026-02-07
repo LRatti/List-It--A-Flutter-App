@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:app_code/screens/settings/settings_screen_mobile.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/screens/trash/trash_screen_mobile.dart';
 import 'package:app_code/screens/profile/settings_screen.dart';
 
@@ -14,6 +15,7 @@ class SideMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       width: 280,
@@ -27,7 +29,7 @@ class SideMenu extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Menu',
+                  l10n.menuLabel,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
@@ -47,7 +49,7 @@ class SideMenu extends StatelessWidget {
                 ListTile(
                   leading: Icon(Icons.person, color: colorScheme.primary),
                   title: Text(
-                    'Profile',
+                    l10n.profileLabel,
                     style: TextStyle(color: colorScheme.onSurface),
                   ),
                   onTap: () {
@@ -63,7 +65,7 @@ class SideMenu extends StatelessWidget {
                 ListTile(
                   leading: Icon(Icons.settings, color: colorScheme.primary),
                   title: Text(
-                    'Settings',
+                    l10n.settingsTitle,
                     style: TextStyle(color: colorScheme.onSurface),
                   ),
                   onTap: () {
@@ -80,7 +82,7 @@ class SideMenu extends StatelessWidget {
                 ListTile(
                   leading: Icon(Icons.delete_outlined, color: colorScheme.error),
                   title: Text(
-                    'Trash',
+                    l10n.trashLabel,
                     style: TextStyle(color: colorScheme.error),
                   ),
                   onTap: () {

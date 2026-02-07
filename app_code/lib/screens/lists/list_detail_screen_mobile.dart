@@ -18,6 +18,7 @@ import 'package:app_code/widgets/draggable_product_list.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
 import 'package:riverpod/src/framework.dart';
 import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 /// Provider for the list detail controller
 final listDetailControllerProvider =
@@ -108,6 +109,7 @@ class _ListDetailScreenMobileState
     final controller = ref.read(
       listDetailControllerProvider(widget.shoppingList),
     );
+    final l10n = AppLocalizations.of(context)!;
 
     // Update list name from text field
     controller.updateListName(_nameController.text.trim());
@@ -128,12 +130,12 @@ class _ListDetailScreenMobileState
       final shouldDiscard = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Error Saving'),
+          title: Text(l10n.errorSavingTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Failed to save changes:'),
+              Text(l10n.failedToSaveChanges),
               const SizedBox(height: 8),
               Text(
                 e.toString(),
@@ -142,13 +144,13 @@ class _ListDetailScreenMobileState
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('What would you like to do?'),
+              Text(l10n.whatWouldYouLikeToDo),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Stay and retry'),
+              child: Text(l10n.stayAndRetry),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
@@ -156,7 +158,7 @@ class _ListDetailScreenMobileState
                 backgroundColor: Theme.of(context).colorScheme.error,
                 foregroundColor: Theme.of(context).colorScheme.onError,
               ),
-              child: const Text('Discard changes'),
+              child: Text(l10n.discardChanges),
             ),
           ],
         ),
@@ -169,6 +171,7 @@ class _ListDetailScreenMobileState
 
   /// Add product to the list
   Future<void> _addProduct() async {
+    final l10n = AppLocalizations.of(context)!;
     final productName = _productSearchController.text.trim();
     if (productName.isEmpty) {
       return;
@@ -221,7 +224,7 @@ class _ListDetailScreenMobileState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           buildAppSnackBar(
-            message: 'Error adding product: ${e.toString()}',
+            message: l10n.errorAddingProduct(e.toString()),
             isError: true,
             context: context,
           ),
@@ -232,17 +235,18 @@ class _ListDetailScreenMobileState
 
   /// Delete shopping list
   Future<void> _deleteList() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        content: Text("Delete '${widget.shoppingList.getName()}'?"),
+        content: Text(l10n.deleteListConfirm(widget.shoppingList.getName())),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.onSurface,
             ),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -250,7 +254,7 @@ class _ListDetailScreenMobileState
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n.deleteLabel),
           ),
         ],
       ),
@@ -269,7 +273,7 @@ class _ListDetailScreenMobileState
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             buildAppSnackBar(
-              message: 'Error deleting list: ${e.toString()}',
+              message: l10n.errorDeletingList(e.toString()),
               isError: true,
               context: context,
             ),
@@ -288,6 +292,7 @@ class _ListDetailScreenMobileState
     final controller = ref.read(
       listDetailControllerProvider(widget.shoppingList),
     );
+    final l10n = AppLocalizations.of(context)!;
 
     // Update list name from text field before saving
     controller.updateListName(_nameController.text.trim());
@@ -318,7 +323,7 @@ class _ListDetailScreenMobileState
       
       ScaffoldMessenger.of(context).showSnackBar(
         buildAppSnackBar(
-          message: 'Error: ${e.toString()}',
+          message: l10n.errorWithDetails(e.toString()),
           isError: true,
           context: context,
         ),
@@ -336,6 +341,7 @@ class _ListDetailScreenMobileState
     final hasSelected =
         selectedId != null &&
         visibleSupermarkets.any((s) => s.id == selectedId);
+    final l10n = AppLocalizations.of(context)!;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -367,7 +373,7 @@ class _ListDetailScreenMobileState
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Select Supermarket',
+                            l10n.selectSupermarketTitle,
                             style: Theme.of(context).textTheme.headlineSmall
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
@@ -385,8 +391,10 @@ class _ListDetailScreenMobileState
                       const SizedBox(height: 4),
                       Text(
                         visibleSupermarkets.isEmpty
-                            ? 'No supermarkets yet. Create one to get started.'
-                            : '${visibleSupermarkets.length} supermarket${visibleSupermarkets.length != 1 ? 's' : ''} available',
+                            ? l10n.noSupermarketsCreateFirst
+                            : l10n.supermarketsAvailable(
+                                visibleSupermarkets.length,
+                              ),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -446,7 +454,7 @@ class _ListDetailScreenMobileState
                               );
                             },
                             icon: const Icon(Icons.add),
-                            label: const Text('Create New'),
+                            label: Text(l10n.createNewLabel),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: colorScheme.primary,
                               foregroundColor: colorScheme.onPrimary,
@@ -466,7 +474,7 @@ class _ListDetailScreenMobileState
                                 Navigator.pop(context);
                               },
                               icon: const Icon(Icons.clear),
-                              label: const Text('Clear'),
+                              label: Text(l10n.clearLabel),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: colorScheme.primary,
                                 side: BorderSide(color: colorScheme.primary),
@@ -493,6 +501,7 @@ class _ListDetailScreenMobileState
     ListDetailController controller,
     ColorScheme colorScheme,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: isSelected ? colorScheme.primaryContainer.withOpacity(0.4) : null,
       child: ListTile(
@@ -532,7 +541,7 @@ class _ListDetailScreenMobileState
                   Navigator.pop(context);
                   _navigateToSupermarketCustomization(supermarket);
                 },
-                tooltip: 'Edit supermarket',
+                tooltip: l10n.editSupermarketTooltip,
               ),
             ),
           ],
@@ -547,6 +556,7 @@ class _ListDetailScreenMobileState
 
   /// Build empty state widget for supermarket selection menu
   Widget _buildEmptyState(ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -558,7 +568,7 @@ class _ListDetailScreenMobileState
           ),
           const SizedBox(height: 16),
           Text(
-            'No Supermarkets Yet',
+            l10n.noSupermarketsYet,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: colorScheme.onSurface,
               fontWeight: FontWeight.w600,
@@ -566,7 +576,7 @@ class _ListDetailScreenMobileState
           ),
           const SizedBox(height: 8),
           Text(
-            'Create a supermarket to organize\nyour shopping categories',
+            l10n.createSupermarketToOrganize,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
@@ -631,6 +641,7 @@ class _ListDetailScreenMobileState
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return WillPopScope(
       onWillPop: _handleBack,
@@ -645,9 +656,9 @@ class _ListDetailScreenMobileState
               color: colorScheme.onSurface,
               fontWeight: FontWeight.bold,
             ),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               border: InputBorder.none,
-              hintText: 'List name',
+              hintText: l10n.listNameHint,
             ),
             onSubmitted: (value) {
               controller.updateListName(value.trim());
@@ -672,7 +683,7 @@ class _ListDetailScreenMobileState
           actions: [
             IconButton(
               icon: const Icon(Icons.shopping_cart),
-              tooltip: 'Register list',
+              tooltip: l10n.registerListTooltip,
               onPressed: _handleCartButton,
             ),
           ],
@@ -708,6 +719,7 @@ class _ListDetailScreenMobileState
     ListDetailController controller,
     ColorScheme colorScheme,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return supermarketsAsync.when(
       loading: () => Container(
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -727,7 +739,7 @@ class _ListDetailScreenMobileState
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Error loading supermarkets',
+                l10n.errorLoadingSupermarkets,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onErrorContainer,
                 ),
@@ -817,8 +829,8 @@ class _ListDetailScreenMobileState
                           Text(
                             selectedSupermarket?.getName() ??
                                 (visibleSupermarkets.isEmpty
-                                    ? 'Create a supermarket'
-                                    : 'Select supermarket'),
+                                    ? l10n.createSupermarketPrompt
+                                    : l10n.selectSupermarketPrompt),
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
@@ -835,7 +847,9 @@ class _ListDetailScreenMobileState
                             Padding(
                               padding: const EdgeInsets.only(top: 2.0),
                               child: Text(
-                                '${selectedSupermarket.getCategories().length} categories',
+                                l10n.categoriesCountLabel(
+                                  selectedSupermarket.getCategories().length,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(
@@ -870,6 +884,7 @@ class _ListDetailScreenMobileState
     ListDetailController controller,
     bool isMobile,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -888,7 +903,7 @@ class _ListDetailScreenMobileState
             // Add Recipe button
             IconButton(
               icon: const Icon(Icons.restaurant_menu),
-              tooltip: 'Add Recipe',
+              tooltip: l10n.addRecipeTitle,
               color: colorScheme.primary,
               onPressed: () async {
                 if (await _handleBack()) {
@@ -917,7 +932,7 @@ class _ListDetailScreenMobileState
                 focusNode: _productSearchFocusNode,
                 textInputAction: TextInputAction.send,
                 decoration: InputDecoration(
-                  hintText: 'Add product...',
+                  hintText: l10n.addProductHint,
                   filled: true,
                   fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
@@ -937,14 +952,14 @@ class _ListDetailScreenMobileState
             // Send/Add button
             IconButton(
               icon: const Icon(Icons.send),
-              tooltip: 'Add product',
+              tooltip: l10n.addProductTooltip,
               color: colorScheme.primary,
               onPressed: _addProduct,
             ),
             // Delete list button
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              tooltip: 'Delete list',
+              tooltip: l10n.deleteListTooltip,
               color: colorScheme.error,
               onPressed: _deleteList,
             ),
@@ -959,10 +974,11 @@ class _ListDetailScreenMobileState
     ColorScheme colorScheme,
   ) async {
     final width = MediaQuery.of(context).size.width;
+    final l10n = AppLocalizations.of(context)!;
 
     return showGeneralDialog<void>(
       context: context,
-      barrierLabel: 'Add Recipe',
+      barrierLabel: l10n.addRecipeTitle,
       barrierDismissible: true,
       barrierColor: Colors.black.withOpacity(0.25),
       transitionDuration: const Duration(milliseconds: 200),

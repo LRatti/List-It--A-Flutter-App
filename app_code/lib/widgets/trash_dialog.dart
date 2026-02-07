@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 
 class TrashDialog extends ConsumerWidget {
@@ -9,10 +10,11 @@ class TrashDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return shoppingListsAsync.when(
       loading: () => AlertDialog(
-        title: const Text('Trash'),
+        title: Text(l10n.trashLabel),
         content: const SizedBox(
           height: 100,
           child: Center(child: CircularProgressIndicator()),
@@ -20,17 +22,17 @@ class TrashDialog extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.closeLabel),
           ),
         ],
       ),
       error: (error, _) => AlertDialog(
-        title: const Text('Trash'),
-        content: Text('Error: $error'),
+        title: Text(l10n.trashLabel),
+        content: Text(l10n.errorWithDetails(error.toString())),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.closeLabel),
           ),
         ],
       ),
@@ -38,14 +40,14 @@ class TrashDialog extends ConsumerWidget {
         final trashedLists = lists.where((l) => l.getIsInTheTrash()).toList();
 
         return AlertDialog(
-          title: const Text('Trash'),
+          title: Text(l10n.trashLabel),
           content: SizedBox(
             width: double.maxFinite,
             child: trashedLists.isEmpty
-                ? const Center(
+                ? Center(
                     child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('Trash is empty'),
+                      padding: const EdgeInsets.all(16),
+                      child: Text(l10n.trashEmptyMessage),
                     ),
                   )
                 : ListView.builder(
@@ -55,7 +57,7 @@ class TrashDialog extends ConsumerWidget {
                       return ListTile(
                         title: Text(list.getName()),
                         subtitle: Text(
-                          list.getDeletionMessage(),
+                          list.getDeletionMessage(l10n),
                           style: TextStyle(color: colorScheme.onSurfaceVariant),
                         ),
                         trailing: Wrap(
@@ -68,7 +70,7 @@ class TrashDialog extends ConsumerWidget {
                                     .read(shoppingListsProvider.notifier)
                                     .updateList(list..setIsInTheTrash(false));
                               },
-                              child: const Text('Restore'),
+                              child: Text(l10n.restoreLabel),
                             ),
                             IconButton(
                               icon: Icon(
@@ -79,14 +81,14 @@ class TrashDialog extends ConsumerWidget {
                                 showDialog(
                                   context: context,
                                   builder: (_) => AlertDialog(
-                                    title: const Text('Delete permanently'),
+                                    title: Text(l10n.deletePermanentlyTitle),
                                     content: Text(
-                                      "Are you sure you want to permanently delete '${list.getName()}'?",
+                                      l10n.deleteListPermanentlyConfirm(list.getName()),
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),
-                                        child: const Text('Cancel'),
+                                        child: Text(l10n.cancelLabel),
                                       ),
                                       ElevatedButton(
                                         onPressed: () async {
@@ -101,7 +103,7 @@ class TrashDialog extends ConsumerWidget {
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: colorScheme.error,
                                         ),
-                                        child: const Text('Delete'),
+                                        child: Text(l10n.deleteLabel),
                                       ),
                                     ],
                                   ),
@@ -117,7 +119,7 @@ class TrashDialog extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
+              child: Text(l10n.closeLabel),
             ),
           ],
         );

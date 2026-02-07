@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 /// Enum defining the available time period filter types
 enum StatsPeriodType { all, week, month, year, custom }
@@ -39,19 +40,19 @@ class _PeriodSelectorState extends State<PeriodSelector> {
   /// Controller for year text input
   final TextEditingController _yearController = TextEditingController();
 
-  static const _monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+  List<String> _monthNames(AppLocalizations l10n) => [
+    l10n.monthJanuary,
+    l10n.monthFebruary,
+    l10n.monthMarch,
+    l10n.monthApril,
+    l10n.monthMay,
+    l10n.monthJune,
+    l10n.monthJuly,
+    l10n.monthAugust,
+    l10n.monthSeptember,
+    l10n.monthOctober,
+    l10n.monthNovember,
+    l10n.monthDecember,
   ];
 
   @override
@@ -176,12 +177,13 @@ class _PeriodSelectorState extends State<PeriodSelector> {
   Future<void> _pickWeek() async {
     final now = DateTime.now();
     final initial = _weekRange?.start ?? now;
+    final l10n = AppLocalizations.of(context)!;
     final picked = await showDatePicker(
       context: context,
       initialDate: initial,
       firstDate: DateTime(2020),
       lastDate: DateTime(now.year + 5),
-      helpText: 'Select any day in the week',
+      helpText: l10n.selectDayInWeekHelpText,
     );
     if (picked != null) {
       // Calculate the Monday-Sunday week containing the picked date
@@ -196,6 +198,8 @@ class _PeriodSelectorState extends State<PeriodSelector> {
   Widget build(BuildContext context) {
     // Generate list of years (current year and 5 previous years)
     final years = List<int>.generate(6, (i) => DateTime.now().year - i);
+    final l10n = AppLocalizations.of(context)!;
+    final monthNames = _monthNames(l10n);
 
     // Use SingleChildScrollView to allow horizontal scrolling if content is too wide
     return SingleChildScrollView(
@@ -212,12 +216,27 @@ class _PeriodSelectorState extends State<PeriodSelector> {
                 _notifyChange();
               }
             },
-            items: const [
-              DropdownMenuItem(value: StatsPeriodType.all, child: Text('All')),
-              DropdownMenuItem(value: StatsPeriodType.week, child: Text('Week')),
-              DropdownMenuItem(value: StatsPeriodType.month, child: Text('Month')),
-              DropdownMenuItem(value: StatsPeriodType.year, child: Text('Year')),
-              DropdownMenuItem(value: StatsPeriodType.custom, child: Text('Custom')),
+            items: [
+              DropdownMenuItem(
+                value: StatsPeriodType.all,
+                child: Text(l10n.periodAll),
+              ),
+              DropdownMenuItem(
+                value: StatsPeriodType.week,
+                child: Text(l10n.periodWeek),
+              ),
+              DropdownMenuItem(
+                value: StatsPeriodType.month,
+                child: Text(l10n.periodMonth),
+              ),
+              DropdownMenuItem(
+                value: StatsPeriodType.year,
+                child: Text(l10n.periodYear),
+              ),
+              DropdownMenuItem(
+                value: StatsPeriodType.custom,
+                child: Text(l10n.periodCustom),
+              ),
             ],
           ),
           const SizedBox(width: 12),
@@ -231,7 +250,7 @@ class _PeriodSelectorState extends State<PeriodSelector> {
                 }
               },
               items: List.generate(12, (i) => i + 1)
-                  .map((m) => DropdownMenuItem(value: m, child: Text(_monthNames[m - 1])))
+                  .map((m) => DropdownMenuItem(value: m, child: Text(monthNames[m - 1])))
                   .toList(),
             ),
             const SizedBox(width: 12),
@@ -244,10 +263,13 @@ class _PeriodSelectorState extends State<PeriodSelector> {
                     controller: _yearController,
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                      border: OutlineInputBorder(),
-                      hintText: 'Year',
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 12,
+                      ),
+                      border: const OutlineInputBorder(),
+                      hintText: l10n.yearHint,
                     ),
                     onSubmitted: _updateYearFromInput,
                     onTapOutside: (_) => _updateYearFromInput(_yearController.text),
@@ -256,7 +278,7 @@ class _PeriodSelectorState extends State<PeriodSelector> {
                 const SizedBox(width: 4),
                 PopupMenuButton<int>(
                   icon: const Icon(Icons.arrow_drop_down, size: 20),
-                  tooltip: 'Select year',
+                  tooltip: l10n.selectYearTooltip,
                   onSelected: (year) {
                     setState(() => _selectedYear = year);
                     _yearController.text = year.toString();
@@ -279,10 +301,13 @@ class _PeriodSelectorState extends State<PeriodSelector> {
                     controller: _yearController,
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                      border: OutlineInputBorder(),
-                      hintText: 'Year',
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 12,
+                      ),
+                      border: const OutlineInputBorder(),
+                      hintText: l10n.yearHint,
                     ),
                     onSubmitted: _updateYearFromInput,
                     onTapOutside: (_) => _updateYearFromInput(_yearController.text),
@@ -291,7 +316,7 @@ class _PeriodSelectorState extends State<PeriodSelector> {
                 const SizedBox(width: 4),
                 PopupMenuButton<int>(
                   icon: const Icon(Icons.arrow_drop_down, size: 20),
-                  tooltip: 'Select year',
+                  tooltip: l10n.selectYearTooltip,
                   onSelected: (year) {
                     setState(() => _selectedYear = year);
                     _yearController.text = year.toString();
@@ -308,7 +333,7 @@ class _PeriodSelectorState extends State<PeriodSelector> {
             IconButton(
               onPressed: _goToPreviousWeek,
               icon: const Icon(Icons.arrow_back_ios, size: 16),
-              tooltip: 'Previous week',
+              tooltip: l10n.previousWeekTooltip,
             ),
             // Week range display (clickable to open date picker)
             GestureDetector(
@@ -333,7 +358,7 @@ class _PeriodSelectorState extends State<PeriodSelector> {
             IconButton(
               onPressed: _goToNextWeek,
               icon: const Icon(Icons.arrow_forward_ios, size: 16),
-              tooltip: 'Next week',
+              tooltip: l10n.nextWeekTooltip,
             ),
           ],
           if (_period == StatsPeriodType.custom)
@@ -350,7 +375,8 @@ class _PeriodSelectorState extends State<PeriodSelector> {
   /// Formats a date range for display
   /// Shows "Select range" if range is null
   String _formatRange(DateTimeRange? range) {
-    if (range == null) return 'Select range';
+    final l10n = AppLocalizations.of(context)!;
+    if (range == null) return l10n.selectRangeLabel;
     return '${_fmt(range.start)} - ${_fmt(range.end)}';
   }
 

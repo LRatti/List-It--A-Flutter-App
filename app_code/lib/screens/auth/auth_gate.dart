@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/screens/auth/initial_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 /// Provider to check if this is the first time the app is opened
 final firstTimeVisitProvider = FutureProvider<bool>((ref) async {
@@ -25,6 +26,7 @@ class AuthGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final firstTimeVisit = ref.watch(firstTimeVisitProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     // Show loading while checking auth state and first visit
     if (authState.isLoading || firstTimeVisit.isLoading) {
@@ -35,7 +37,11 @@ class AuthGate extends ConsumerWidget {
     if (authState.hasError || firstTimeVisit.hasError) {
       return Scaffold(
         body: Center(
-          child: Text('Error: ${authState.error ?? firstTimeVisit.error}'),
+          child: Text(
+            l10n.errorWithDetails(
+              (authState.error ?? firstTimeVisit.error).toString(),
+            ),
+          ),
         ),
       );
     }
