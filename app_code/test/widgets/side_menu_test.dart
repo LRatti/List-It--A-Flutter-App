@@ -6,6 +6,7 @@ import 'package:app_code/screens/trash/trash_screen_mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 class _TestNavigatorObserver extends NavigatorObserver {
   int pushCount = 0;
@@ -44,6 +45,9 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             navigatorObservers: observer != null ? [observer] : const [],
             home: Scaffold(
               body: SideMenu(onClose: onClose),
@@ -56,11 +60,12 @@ void main() {
 
     testWidgets('renders all menu entries', (tester) async {
       await pumpMenu(tester, onClose: () {});
+      final l10n = AppLocalizations.of(tester.element(find.byType(SideMenu)))!;
 
-      expect(find.text('Menu'), findsOneWidget);
-      expect(find.text('Profile'), findsOneWidget);
-      expect(find.text('Settings'), findsOneWidget);
-      expect(find.text('Trash'), findsOneWidget);
+      expect(find.text(l10n.menuLabel), findsOneWidget);
+      expect(find.text(l10n.profileLabel), findsOneWidget);
+      expect(find.text(l10n.settingsTitle), findsOneWidget);
+      expect(find.text(l10n.trashLabel), findsOneWidget);
     });
 
     testWidgets('close button triggers onClose', (tester) async {
@@ -92,7 +97,8 @@ void main() {
         observer: observer,
       );
 
-      await tester.tap(find.text('Trash'));
+      final l10n = AppLocalizations.of(tester.element(find.byType(SideMenu)))!;
+      await tester.tap(find.text(l10n.trashLabel));
       await tester.pumpAndSettle();
 
       expect(closed, isTrue);

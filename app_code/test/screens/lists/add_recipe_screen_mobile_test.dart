@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:app_code/screens/lists/add_recipe_screen_mobile.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/product.dart';
@@ -81,6 +82,9 @@ Widget createTestWidget({
       }),
     ],
     child: MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en'),
       home: AddRecipeScreen(
         shoppingList: list,
         availableCategories: categories,
@@ -106,14 +110,15 @@ void main() {
 
       // Wait for the background cache loading and animations to finish
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(AddRecipeScreen)))!;
 
-      expect(find.text('Add Recipe'), findsOneWidget);
+      expect(find.text(l10n.addRecipeTitle), findsOneWidget);
       expect(
-        find.text('Enter a recipe name and press "Search Recipe"'),
+        find.text(l10n.enterRecipeAndSearch),
         findsOneWidget,
       );
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('Search Recipe'), findsOneWidget);
+      expect(find.text(l10n.searchRecipeLabel), findsOneWidget);
     },
   );
 
@@ -126,13 +131,14 @@ void main() {
           categories: createCategories(),
         ),
       );
+      final l10n = AppLocalizations.of(tester.element(find.byType(AddRecipeScreen)))!;
 
-      await tester.tap(find.text('Search Recipe'));
+      await tester.tap(find.text(l10n.searchRecipeLabel));
       await tester.pump();
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Please enter a recipe name'),
+        find.text(l10n.enterRecipeNameError),
         findsOneWidget,
       );
     },
@@ -163,12 +169,13 @@ void main() {
       );
 
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(AddRecipeScreen)))!;
 
       expect(find.text('Pasta'), findsOneWidget);
       expect(find.text('Tomato'), findsOneWidget);
       expect(find.text('2'), findsOneWidget);
       expect(find.text('Vegetables'), findsOneWidget);
-      expect(find.text('Add to List'), findsOneWidget);
+      expect(find.text(l10n.addToListLabel), findsOneWidget);
     },
   );
 
@@ -198,13 +205,14 @@ void main() {
       );
 
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(AddRecipeScreen)))!;
 
       // Act: open edit dialog by tapping the ingredient
       await tester.tap(find.text('Lettuce'));
       await tester.pumpAndSettle();
 
       // Assert: dialog is shown
-      expect(find.text('Edit Ingredient'), findsOneWidget);
+      expect(find.text(l10n.editIngredientTitle), findsOneWidget);
 
       // Enter new text in the TextField inside the dialog
       final dialogField = find.descendant(
@@ -213,7 +221,7 @@ void main() {
       );
       await tester.enterText(dialogField, 'Iceberg');
 
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.text(l10n.saveLabel));
       await tester.pump(); // trigger Navigator.pop
       await tester.pumpAndSettle(); // wait for overlay animation and rebuild
 
@@ -250,13 +258,14 @@ void main() {
       );
 
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(AddRecipeScreen)))!;
 
-      expect(find.textContaining('Ingredients (1/1)'), findsOneWidget);
+      expect(find.textContaining(l10n.ingredientsCount(1, 1)), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.delete_outline));
       await tester.pump();
 
-      expect(find.textContaining('Ingredients (0/1)'), findsOneWidget);
+      expect(find.textContaining(l10n.ingredientsCount(0, 1)), findsOneWidget);
     },
   );
 

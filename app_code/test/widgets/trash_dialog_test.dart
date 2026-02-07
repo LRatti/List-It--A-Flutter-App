@@ -5,6 +5,7 @@ import 'package:app_code/widgets/trash_dialog.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 void main() {
   group('TrashDialog', () {
@@ -40,6 +41,9 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: Scaffold(
               body: Builder(
                 builder: (context) => ElevatedButton(
@@ -66,8 +70,9 @@ void main() {
 
     testWidgets('shows empty trash message', (tester) async {
       await pumpTrashDialog(tester, lists: const []);
+      final l10n = AppLocalizations.of(tester.element(find.byType(TrashDialog)))!;
 
-      expect(find.text('Trash is empty'), findsOneWidget);
+      expect(find.text(l10n.trashEmptyMessage), findsOneWidget);
     });
 
     testWidgets('displays only trashed lists', (tester) async {
@@ -89,13 +94,14 @@ void main() {
         ..setIsInTheTrash(true);
 
       await pumpTrashDialog(tester, lists: [list]);
+      final l10n = AppLocalizations.of(tester.element(find.byType(TrashDialog)))!;
 
       await tester.tap(find.byIcon(Icons.delete));
       await tester.pumpAndSettle();
 
-      expect(find.text('Delete permanently'), findsOneWidget);
+      expect(find.text(l10n.deletePermanentlyTitle), findsOneWidget);
       expect(
-        find.text("Are you sure you want to permanently delete 'Test List'?"),
+        find.text(l10n.deleteListPermanentlyConfirm('Test List')),
         findsOneWidget,
       );
     });
@@ -105,25 +111,27 @@ void main() {
         ..setIsInTheTrash(true);
 
       await pumpTrashDialog(tester, lists: [list]);
+      final l10n = AppLocalizations.of(tester.element(find.byType(TrashDialog)))!;
 
       // Open confirm
       await tester.tap(find.byIcon(Icons.delete));
       await tester.pumpAndSettle();
 
       // Cancel
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.text(l10n.cancelLabel));
       await tester.pumpAndSettle();
 
       // Should be back to Trash title
-      expect(find.text('Trash'), findsOneWidget);
+      expect(find.text(l10n.trashLabel), findsOneWidget);
     });
 
     testWidgets('close button dismisses dialog', (tester) async {
       await pumpTrashDialog(tester);
+      final l10n = AppLocalizations.of(tester.element(find.byType(TrashDialog)))!;
 
       expect(find.byType(TrashDialog), findsOneWidget);
 
-      await tester.tap(find.text('Close'));
+      await tester.tap(find.text(l10n.closeLabel));
       await tester.pumpAndSettle();
 
       expect(find.byType(TrashDialog), findsNothing);

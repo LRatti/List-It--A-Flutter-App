@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/screens/settings/settings_screen_mobile.dart';
 import 'package:app_code/providers/real_app_providers/app-style/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/font_size_provider.dart';
@@ -57,6 +58,9 @@ Future<ProviderContainer> _pumpSettings(
     UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         home: const SettingsScreenMobile(),
         themeMode: theme,
       ),
@@ -69,12 +73,17 @@ Future<ProviderContainer> _pumpSettings(
 void main() {
   testWidgets('shows switches and slider with initial values', (tester) async {
     await _pumpSettings(tester, theme: ThemeMode.dark, fontSize: 1.2);
+    final l10n = AppLocalizations.of(tester.element(find.byType(SettingsScreenMobile)))!;
 
-    expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Dark Mode'), findsOneWidget);
+    expect(find.text(l10n.settingsTitle), findsOneWidget);
+    expect(find.text(l10n.darkModeLabel), findsOneWidget);
 
-    final switchFinder = find.byType(Switch).at(1); // second switch is Dark Mode
-    final darkSwitch = tester.widget<Switch>(switchFinder);
+    final darkTile = find.widgetWithText(ListTile, l10n.darkModeLabel);
+    final darkSwitchFinder = find.descendant(
+      of: darkTile,
+      matching: find.byType(Switch),
+    );
+    final darkSwitch = tester.widget<Switch>(darkSwitchFinder);
     expect(darkSwitch.value, isTrue);
 
     final slider = tester.widget<Slider>(find.byType(Slider));
@@ -85,9 +94,14 @@ void main() {
   testWidgets('toggling dark mode calls notifier', (tester) async {
     final container = await _pumpSettings(tester, theme: ThemeMode.light);
     final notifier = container.read(themeProvider.notifier) as _FakeThemeNotifier;
+    final l10n = AppLocalizations.of(tester.element(find.byType(SettingsScreenMobile)))!;
 
-    final switchFinder = find.byType(Switch).at(1);
-    await tester.tap(switchFinder);
+    final darkTile = find.widgetWithText(ListTile, l10n.darkModeLabel);
+    final darkSwitchFinder = find.descendant(
+      of: darkTile,
+      matching: find.byType(Switch),
+    );
+    await tester.tap(darkSwitchFinder);
     await tester.pumpAndSettle();
 
     expect(notifier.lastSet, ThemeMode.dark);

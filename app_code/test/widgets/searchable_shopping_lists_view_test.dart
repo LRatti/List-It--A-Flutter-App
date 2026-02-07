@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/widgets/searchable_shopping_lists_view.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
@@ -42,6 +43,9 @@ void main() {
             recipeCacheRepositoryProvider.overrideWithValue(MockRecipeCacheRepository()),
           ],
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: SearchableShoppingListsView(
               lists: lists ?? testLists,
               emptyMessage: emptyMessage ?? 'No lists available',
@@ -87,6 +91,7 @@ void main() {
 
     testWidgets('starts search mode when search icon is tapped', (WidgetTester tester) async {
       await pumpSearchableView(tester);
+      final l10n = AppLocalizations.of(tester.element(find.byType(SearchableShoppingListsView)))!;
 
       // Tap search icon
       await tester.tap(find.byIcon(Icons.search));
@@ -95,7 +100,7 @@ void main() {
       // Should show search TextField
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byIcon(Icons.arrow_back), findsOneWidget);
-      expect(find.text('Search lists...'), findsOneWidget);
+      expect(find.text(l10n.searchListsHint), findsOneWidget);
     });
 
     testWidgets('filters lists based on search query', (WidgetTester tester) async {
@@ -130,6 +135,7 @@ void main() {
 
     testWidgets('shows custom empty message when no search results', (WidgetTester tester) async {
       await pumpSearchableView(tester);
+      final l10n = AppLocalizations.of(tester.element(find.byType(SearchableShoppingListsView)))!;
 
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
@@ -137,7 +143,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'nonexistent');
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('No lists found matching "nonexistent"'), findsOneWidget);
+      expect(find.text(l10n.noListsFoundMatching('nonexistent')), findsOneWidget);
     });
 
     testWidgets('clears search when clear icon is tapped', (WidgetTester tester) async {
@@ -243,6 +249,9 @@ void main() {
             recipeCacheRepositoryProvider.overrideWithValue(MockRecipeCacheRepository()),
           ],
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: SearchableShoppingListsView(
               lists: newLists,
               emptyMessage: 'No lists available',
@@ -280,6 +289,9 @@ void main() {
             recipeCacheRepositoryProvider.overrideWithValue(MockRecipeCacheRepository()),
           ],
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: SearchableShoppingListsView(
               lists: updatedLists,
               emptyMessage: 'No lists available',
@@ -297,6 +309,7 @@ void main() {
 
     testWidgets('hides AppBar in deletion mode', (WidgetTester tester) async {
       await pumpSearchableView(tester);
+      final l10n = AppLocalizations.of(tester.element(find.byType(SearchableShoppingListsView)))!;
 
       // Initial AppBar should exist
       expect(find.byType(AppBar), findsOneWidget);
@@ -309,7 +322,7 @@ void main() {
       // AppBar should be hidden in deletion mode (SearchableShoppingListsView AppBar)
       // But ShoppingListsGridView creates its own AppBar in deletion mode
       // So we check for the selection mode AppBar
-      expect(find.text('1 selected'), findsOneWidget);
+      expect(find.text(l10n.selectedItemsCount(1)), findsOneWidget);
     });
 
     testWidgets('stops search when entering deletion mode', (WidgetTester tester) async {
@@ -346,6 +359,9 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: SearchableShoppingListsView(
               lists: testLists,
               emptyMessage: 'No lists available',
