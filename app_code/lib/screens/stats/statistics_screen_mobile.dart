@@ -156,9 +156,24 @@ class _StatisticsScreenMobileState extends ConsumerState<StatisticsScreenMobile>
                   else ...[
                     const SizedBox(height: 12),
                     // Pie chart
-                    SizedBox(
-                      height: 200,
-                      child: StatisticsPieChart(entries: entries, total: total, onCategoryTap: (categoryName) {},),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final maxWidth = constraints.maxWidth;
+                        final chartSize =
+                            maxWidth.clamp(260.0, 360.0).toDouble();
+
+                        return Center(
+                          child: SizedBox(
+                            width: chartSize,
+                            height: chartSize,
+                            child: StatisticsPieChart(
+                              entries: entries,
+                              total: total,
+                              onCategoryTap: (categoryName) {},
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 12),
                     // "By category" title

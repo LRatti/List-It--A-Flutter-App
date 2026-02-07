@@ -275,26 +275,54 @@ class _HomeScreenTabletViewState
   ) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            TopBarWithNavBar(
-              isMenuOpen: _isMenuOpen,
-              onMenuToggle: _toggleMenu,
-            ),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildNavigationRail(colorScheme, selectedIndex),
-                  Expanded(
-                    child: IndexedStack(
-                      index: selectedIndex,
-                      children: tabs,
-                    ),
+            Column(
+              children: [
+                TopBarWithNavBar(
+                  isMenuOpen: _isMenuOpen,
+                  onMenuToggle: _toggleMenu,
+                ),
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildNavigationRail(colorScheme, selectedIndex),
+                      Expanded(
+                        child: IndexedStack(
+                          index: selectedIndex,
+                          children: tabs,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+            if (_isMenuOpen)
+              Positioned(
+                top: kToolbarHeight + 56,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Row(
+                  children: [
+                    SideMenu(
+                      key: const Key('side_menu'),
+                      onClose: _closeMenu,
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: _closeMenu,
+                        child: Container(
+                          key: const Key('side_menu_scrim'),
+                          color: Colors.black.withValues(alpha: 0.3),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
