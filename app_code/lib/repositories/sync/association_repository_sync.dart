@@ -1,5 +1,6 @@
 import 'package:app_code/repositories/sync/sync_repository.dart';
 import 'package:app_code/repositories/sync/sync_repository_mixin.dart';
+import 'package:app_code/repositories/abstract/association_repository.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
 import 'package:app_code/utils/monotonic_timestamp.dart';
 import 'package:sqflite/sqflite.dart';
@@ -15,7 +16,7 @@ import 'package:sqflite/sqflite.dart';
 /// its associations are synced as part of the product's data.
 class AssociationRepositoryWithSync 
   with SyncRepositoryMixin
-  implements SyncRepository {
+  implements SyncRepository, AssociationRepository {
 
   @override
   String getEntityType() => ENTITY_TYPE_ASSOCIATION;

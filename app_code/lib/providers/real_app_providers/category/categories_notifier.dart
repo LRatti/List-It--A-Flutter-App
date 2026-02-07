@@ -1,39 +1,46 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/category.dart';
+import 'package:app_code/repositories/abstract/category_repository.dart';
 import 'package:app_code/repositories/sync/category_repository_sync.dart';
 import 'package:app_code/services/database/sqlite/manage_category.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
 
+/// Provides the category repository implementation (injectable for testing).
+final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
+  return CategoryRepositoryWithSync();
+});
+
 /// State notifier for managing categories
 /// Uses sync-aware repository for automatic Firestore synchronization
 class CategoriesNotifier extends AsyncNotifier<List<Category>> {
-  late final CategoryRepositoryWithSync _syncRepo =
-      CategoryRepositoryWithSync();
-
   @override
   Future<List<Category>> build() async {
-    return await _syncRepo.getAll();
+    final repository = ref.watch(categoryRepositoryProvider);
+    return await repository.getAll();
   }
 
   /// Add a new category (will be synced to Firestore)
   Future<void> addCategory(Category category) async {
-    await _syncRepo.add(category);
+    final repository = ref.watch(categoryRepositoryProvider);
+    await repository.add(category);
     ref.invalidateSelf();
   }
 
   /// Update an existing category (will be synced to Firestore)
   Future<void> updateCategory(Category category) async {
-    await _syncRepo.update(category);
+    final repository = ref.watch(categoryRepositoryProvider);
+    await repository.update(category);
     ref.invalidateSelf();
   }
 
   /// Delete a category (mark as invisible instead of actually deleting)
   Future<void> deleteCategory(String id) async {
-    final category = await _syncRepo.getById(id);
+    final repository = ref.watch(categoryRepositoryProvider);
+    final category = await repository.getById(id);
     if (category != null &&
         !UncategorizedCategoryUtils.isUncategorized(category)) {
       category.setVisibility(false);
-      await _syncRepo.update(category);
+      await repository.update(category);
       ref.invalidateSelf();
     }
   }
@@ -41,14 +48,15 @@ class CategoriesNotifier extends AsyncNotifier<List<Category>> {
   /// Delete multiple categories (mark as invisible instead of actually deleting)
   /// Returns the number of categories successfully deleted
   Future<int> deleteCategories(List<String> ids) async {
+    final repository = ref.watch(categoryRepositoryProvider);
     int deletedCount = 0;
 
     for (final id in ids) {
-      final category = await _syncRepo.getById(id);
+      final category = await repository.getById(id);
       if (category != null &&
           !UncategorizedCategoryUtils.isUncategorized(category)) {
         category.setVisibility(false);
-        await _syncRepo.update(category);
+        await repository.update(category);
         deletedCount++;
       }
     }
@@ -59,7 +67,8 @@ class CategoriesNotifier extends AsyncNotifier<List<Category>> {
 
   /// Get a category by ID
   Future<Category?> getCategoryById(String id) async {
-    return await _syncRepo.getById(id);
+    final repository = ref.watch(categoryRepositoryProvider);
+    return await repository.getById(id);
   }
 
   /// Get a category by name
@@ -69,7 +78,8 @@ class CategoriesNotifier extends AsyncNotifier<List<Category>> {
 
   /// Get all visible categories
   Future<List<Category>> getVisibleCategories() async {
-    final all = await _syncRepo.getAll();
+    final repository = ref.watch(categoryRepositoryProvider);
+    final all = await repository.getAll();
     return all.where((cat) => cat.isVisible).toList();
   }
 }

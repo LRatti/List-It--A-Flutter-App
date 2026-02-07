@@ -1,4 +1,5 @@
 import 'package:app_code/models/product.dart';
+import 'package:app_code/repositories/abstract/product_repository.dart';
 import 'package:app_code/repositories/sync/sync_repository.dart';
 import 'package:app_code/repositories/sync/sync_repository_mixin.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
@@ -10,7 +11,7 @@ import 'package:sqflite/sqflite.dart';
 /// User writes append to sync_box; remote updates are silent
 class ProductRepositoryWithSync 
   with SyncRepositoryMixin
-  implements SyncRepository {
+  implements SyncRepository, ProductRepository {
   @override
   String getEntityType() => ENTITY_TYPE_PRODUCT;
 

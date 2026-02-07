@@ -1,4 +1,5 @@
 import 'package:app_code/models/category.dart';
+import 'package:app_code/repositories/abstract/category_repository.dart';
 import 'package:app_code/repositories/sync/sync_repository.dart';
 import 'package:app_code/repositories/sync/sync_repository_mixin.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
@@ -9,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 /// Category repository with sync support
 class CategoryRepositoryWithSync 
   with SyncRepositoryMixin
-  implements SyncRepository {
+  implements SyncRepository, CategoryRepository {
   @override
   String getEntityType() => ENTITY_TYPE_CATEGORY;
 

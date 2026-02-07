@@ -1,11 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/repositories/abstract/product_repository.dart';
+import 'package:app_code/repositories/abstract/association_repository.dart';
 import 'package:app_code/repositories/sync/product_repository_sync.dart';
 import 'package:app_code/repositories/sync/purchased_product_repository_sync.dart';
 import 'package:app_code/repositories/sync/association_repository_sync.dart';
 
 /// Provides the product repository implementation.
 final productRepositoryProvider =
-    Provider<ProductRepositoryWithSync>((ref) {
+    Provider<ProductRepository>((ref) {
   return ProductRepositoryWithSync();
 });
 
@@ -17,6 +19,6 @@ final purchasedProductRepositoryProvider =
 
 /// Provides the association repository implementation.
 final associationRepositoryProvider =
-    Provider<AssociationRepositoryWithSync>((ref) {
+    Provider<AssociationRepository>((ref) {
   return AssociationRepositoryWithSync();
 });
