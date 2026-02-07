@@ -5,26 +5,80 @@ import 'package:app_code/repositories/sync/supermarket_repository_sync.dart';
 import 'package:app_code/services/database/sqlite/manage_supermarket.dart'
     as sqlite_supermarket;
 
+/// Provides the supermarket repository implementation (injectable for testing).
+final supermarketRepositoryProvider =
+    Provider<SupermarketRepositoryWithSync>((ref) {
+  return SupermarketRepositoryWithSync();
+});
+
+/// Interface for database operations (allows mocking in tests).
+/// This wraps the static ManageSupermarket class for dependency injection.
+abstract class SupermarketDatabaseManager {
+  Future<Supermarket?> getFavoriteSupermarket();
+  Future<void> setFavoriteSupermarket(String supermarketId);
+  Future<void> clearFavoriteSupermarket(String supermarketId);
+  Future<List<Category>> getSupermarketCategories(String supermarketId);
+  Future<void> replaceCategoriesOrder(
+    String supermarketId,
+    List<Category> categories,
+  );
+}
+
+/// Real implementation that delegates to ManageSupermarket static methods
+class RealSupermarketDatabaseManager implements SupermarketDatabaseManager {
+  @override
+  Future<Supermarket?> getFavoriteSupermarket() =>
+      sqlite_supermarket.ManageSupermarket.getFavoriteSupermarket();
+
+  @override
+  Future<void> setFavoriteSupermarket(String supermarketId) =>
+      sqlite_supermarket.ManageSupermarket.setFavoriteSupermarket(supermarketId);
+
+  @override
+  Future<void> clearFavoriteSupermarket(String supermarketId) =>
+      sqlite_supermarket.ManageSupermarket.clearFavoriteSupermarket(supermarketId);
+
+  @override
+  Future<List<Category>> getSupermarketCategories(String supermarketId) =>
+      sqlite_supermarket.ManageSupermarket.getSupermarketCategories(supermarketId);
+
+  @override
+  Future<void> replaceCategoriesOrder(
+    String supermarketId,
+    List<Category> categories,
+  ) =>
+      sqlite_supermarket.ManageSupermarket.replaceCategoriesOrder(
+        supermarketId,
+        categories,
+      );
+}
+
+/// Provides the database manager implementation (injectable for testing).
+final supermarketDatabaseManagerProvider =
+    Provider<SupermarketDatabaseManager>((ref) {
+  return RealSupermarketDatabaseManager();
+});
+
 /// State notifier for managing supermarkets list
 /// Uses sync-aware repository for automatic Firestore synchronization
 class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
-  late final SupermarketRepositoryWithSync _syncRepo =
-      SupermarketRepositoryWithSync();
-
   @override
   Future<List<Supermarket>> build() async {
-    return await _syncRepo.getAll();
+    final repository = ref.watch(supermarketRepositoryProvider);
+    return await repository.getAll();
   }
 
   /// Add a new supermarket (will be synced to Firestore)
   Future<void> addSupermarket(Supermarket supermarket) async {
-    await _syncRepo.add(supermarket);
+    final repository = ref.watch(supermarketRepositoryProvider);
+    await repository.add(supermarket);
     ref.invalidateSelf();
   }
 
   /// Update an existing supermarket (will be synced to Firestore)
   Future<void> updateSupermarket(Supermarket supermarket) async {
-    await _syncRepo.update(supermarket);
+    final repository = ref.watch(supermarketRepositoryProvider);
+    await repository.update(supermarket);
     ref.invalidateSelf();
   }
 
@@ -34,14 +88,16 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
   /// selects another visible supermarket as the new favorite to maintain
   /// the single-favorite constraint.
   Future<void> deleteSupermarket(String id) async {
+    final repository = ref.watch(supermarketRepositoryProvider);
+    final dbManager = ref.watch(supermarketDatabaseManagerProvider);
     // Check if this is the favorite supermarket
-    final currentFavorite = await sqlite_supermarket.ManageSupermarket.getFavoriteSupermarket();
+    final currentFavorite = await dbManager.getFavoriteSupermarket();
     final isFavorite = currentFavorite?.id == id;
 
-    final supermarket = await _syncRepo.getById(id);
+    final supermarket = await repository.getById(id);
     if (supermarket != null) {
       supermarket.setVisibility(false);
-      await _syncRepo.update(supermarket);
+      await repository.update(supermarket);
       
       // If the deleted supermarket was favorite, find a new favorite
       if (isFavorite) {
@@ -58,17 +114,19 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
   /// If one of the deleted supermarkets was marked as favorite, automatically
   /// selects another visible supermarket as the new favorite.
   Future<int> deleteSupermarkets(List<String> ids) async {
+    final repository = ref.watch(supermarketRepositoryProvider);
+    final dbManager = ref.watch(supermarketDatabaseManagerProvider);
     int deletedCount = 0;
 
     // Check if the favorite is being deleted
-    final currentFavorite = await sqlite_supermarket.ManageSupermarket.getFavoriteSupermarket();
+    final currentFavorite = await dbManager.getFavoriteSupermarket();
     bool favoriteBeinDeleted = currentFavorite != null && ids.contains(currentFavorite.id);
 
     for (final id in ids) {
-      final supermarket = await _syncRepo.getById(id);
+      final supermarket = await repository.getById(id);
       if (supermarket != null) {
         supermarket.setVisibility(false);
-        await _syncRepo.update(supermarket);
+        await repository.update(supermarket);
         deletedCount++;
       }
     }
@@ -86,8 +144,9 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
   /// 
   /// This maintains the invariant that exactly one supermarket is always favorite.
   Future<void> _ensureNewFavoriteAfterDeletion(String deletedSupermarketId) async {
+    final repository = ref.watch(supermarketRepositoryProvider);
     // Get all remaining visible supermarkets
-    final allSupermarkets = await _syncRepo.getAll();
+    final allSupermarkets = await repository.getAll();
     final remainingVisible = allSupermarkets
         .where((s) => s.isVisible && s.id != deletedSupermarketId)
         .toList();
@@ -107,15 +166,14 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
     String supermarketId,
     List<Category> categories,
   ) async {
-    await sqlite_supermarket.ManageSupermarket.replaceCategoriesOrder(
-      supermarketId,
-      categories,
-    );
+    final repository = ref.watch(supermarketRepositoryProvider);
+    final dbManager = ref.watch(supermarketDatabaseManagerProvider);
+    await dbManager.replaceCategoriesOrder(supermarketId, categories);
 
     // Mark the supermarket as updated for sync
-    final supermarket = await _syncRepo.getById(supermarketId);
+    final supermarket = await repository.getById(supermarketId);
     if (supermarket != null) {
-      await _syncRepo.update(supermarket);
+      await repository.update(supermarket);
     }
 
     ref.invalidateSelf();
@@ -126,12 +184,13 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
     String supermarketId,
     Category category,
   ) async {
-    final supermarket = await _syncRepo.getById(supermarketId);
+    final repository = ref.watch(supermarketRepositoryProvider);
+    final supermarket = await repository.getById(supermarketId);
     if (supermarket != null) {
       final categories = supermarket.getCategories();
       categories.add(category);
       supermarket.setCategories(categories);
-      await _syncRepo.update(supermarket);
+      await repository.update(supermarket);
       ref.invalidateSelf();
     }
   }
@@ -141,24 +200,27 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
     String supermarketId,
     String categoryId,
   ) async {
-    final supermarket = await _syncRepo.getById(supermarketId);
+    final repository = ref.watch(supermarketRepositoryProvider);
+    final supermarket = await repository.getById(supermarketId);
     if (supermarket != null) {
       final categories = supermarket.getCategories();
       categories.removeWhere((cat) => cat.id == categoryId);
       supermarket.setCategories(categories);
-      await _syncRepo.update(supermarket);
+      await repository.update(supermarket);
       ref.invalidateSelf();
     }
   }
 
   /// Get a single supermarket by ID
   Future<Supermarket?> getSupermarketById(String id) async {
-    return await _syncRepo.getById(id);
+    final repository = ref.watch(supermarketRepositoryProvider);
+    return await repository.getById(id);
   }
 
   /// Get the last created supermarket (for initializing new ones)
   Future<Supermarket?> getLastCreatedSupermarket() async {
-    final supermarkets = await _syncRepo.getAll();
+    final repository = ref.watch(supermarketRepositoryProvider);
+    final supermarkets = await repository.getAll();
     if (supermarkets.isEmpty) return null;
     // Sort by creation date, newest first
     supermarkets.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -167,7 +229,9 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
 
   /// Get the last edited supermarket (for initializing new ones)
   Future<Supermarket?> getLastEditedSupermarket() async {
-    final supermarkets = await _syncRepo.getAll();
+    final repository = ref.watch(supermarketRepositoryProvider);
+    final dbManager = ref.watch(supermarketDatabaseManagerProvider);
+    final supermarkets = await repository.getAll();
     final visible = supermarkets.where((s) => s.isVisible).toList();
     if (visible.isEmpty) return null;
 
@@ -181,8 +245,7 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
 
     // Ensure categories are hydrated from SQLite (avoids empty template after cold start)
     if (lastEdited.getCategories().isEmpty) {
-      final categories = await sqlite_supermarket
-          .ManageSupermarket.getSupermarketCategories(lastEdited.id);
+      final categories = await dbManager.getSupermarketCategories(lastEdited.id);
       if (categories.isNotEmpty) {
         lastEdited.setCategories(categories);
       }
@@ -193,29 +256,28 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
 
   /// Set a supermarket as favorite (will unset any previous favorite)
   Future<void> setFavoriteSupermarket(String supermarketId) async {
+    final repository = ref.watch(supermarketRepositoryProvider);
+    final dbManager = ref.watch(supermarketDatabaseManagerProvider);
     // Capture the previous favorite before updating local DB
-    final previousFavorite =
-        await sqlite_supermarket.ManageSupermarket.getFavoriteSupermarket();
+    final previousFavorite = await dbManager.getFavoriteSupermarket();
 
     // Update in database (clears previous favorite and sets new one)
-    await sqlite_supermarket.ManageSupermarket.setFavoriteSupermarket(
-      supermarketId,
-    );
+    await dbManager.setFavoriteSupermarket(supermarketId);
 
     // Update previous favorite in sync (if different)
     if (previousFavorite != null && previousFavorite.id != supermarketId) {
-      final previous = await _syncRepo.getById(previousFavorite.id);
+      final previous = await repository.getById(previousFavorite.id);
       if (previous != null) {
         previous.isFavorite = false;
-        await _syncRepo.update(previous);
+        await repository.update(previous);
       }
     }
 
     // Update new favorite in sync
-    final supermarket = await _syncRepo.getById(supermarketId);
+    final supermarket = await repository.getById(supermarketId);
     if (supermarket != null) {
       supermarket.isFavorite = true;
-      await _syncRepo.update(supermarket);
+      await repository.update(supermarket);
     }
 
     ref.invalidateSelf();
@@ -230,11 +292,13 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
   /// Returns false if the clear operation was prevented due to the single-favorite constraint.
   /// Returns true if the clear operation was successful.
   Future<bool> clearFavoriteSupermarket(String supermarketId) async {
+    final repository = ref.watch(supermarketRepositoryProvider);
+    final dbManager = ref.watch(supermarketDatabaseManagerProvider);
     // Check if this is the only favorite
-    final currentFavorite = await sqlite_supermarket.ManageSupermarket.getFavoriteSupermarket();
+    final currentFavorite = await dbManager.getFavoriteSupermarket();
     if (currentFavorite != null && currentFavorite.id == supermarketId) {
       // This is the current favorite, check if there are other supermarkets to become favorite
-      final allVisible = (await _syncRepo.getAll()).where((s) => s.isVisible).toList();
+      final allVisible = (await repository.getAll()).where((s) => s.isVisible).toList();
       
       if (allVisible.length <= 1) {
         // This is the only supermarket, can't clear favorite
@@ -249,13 +313,13 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
     }
 
     // Not the current favorite, just clear it
-    await sqlite_supermarket.ManageSupermarket.clearFavoriteSupermarket(supermarketId);
+    await dbManager.clearFavoriteSupermarket(supermarketId);
 
     // Get the supermarket and mark it as updated for sync
-    final supermarket = await _syncRepo.getById(supermarketId);
+    final supermarket = await repository.getById(supermarketId);
     if (supermarket != null) {
       supermarket.isFavorite = false;
-      await _syncRepo.update(supermarket);
+      await repository.update(supermarket);
     }
 
     ref.invalidateSelf();
@@ -264,7 +328,8 @@ class SupermarketsNotifier extends AsyncNotifier<List<Supermarket>> {
 
   /// Get the current favorite supermarket
   Future<Supermarket?> getFavoriteSupermarket() async {
-    return await sqlite_supermarket.ManageSupermarket.getFavoriteSupermarket();
+    final dbManager = ref.watch(supermarketDatabaseManagerProvider);
+    return await dbManager.getFavoriteSupermarket();
   }
 }
 

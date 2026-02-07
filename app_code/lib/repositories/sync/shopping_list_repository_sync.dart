@@ -349,6 +349,9 @@ class ShoppingListRepositoryWithSync
       final parsed = _parseTimestamp(cleaned['lastModified']);
       cleaned['last_modified'] = parsed?.toIso8601String() ?? DateTime.now().toIso8601String();
       cleaned.remove('lastModified');
+    } else {
+      // Remove null lastModified to avoid SQL error
+      cleaned.remove('lastModified');
     }
 
     if (cleaned['createdAt'] != null) {
@@ -399,6 +402,15 @@ class ShoppingListRepositoryWithSync
     }
     if (!cleaned.containsKey('last_modified') || cleaned['last_modified'] == null) {
       cleaned['last_modified'] = DateTime.now().toIso8601String();
+    }
+    if (!cleaned.containsKey('is_registered')) {
+      cleaned['is_registered'] = 0;
+    }
+    if (!cleaned.containsKey('is_in_the_trash')) {
+      cleaned['is_in_the_trash'] = 0;
+    }
+    if (!cleaned.containsKey('is_deleted')) {
+      cleaned['is_deleted'] = 0;
     }
 
     return cleaned;
