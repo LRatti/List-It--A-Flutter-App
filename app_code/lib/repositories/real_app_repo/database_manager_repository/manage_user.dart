@@ -10,8 +10,14 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 ///
 /// This class implements a simplified pattern since SQLite is not involved.
 class UserDatabaseManager {
-  final FirebaseUserManager _firebaseManager = FirebaseUserManager();
-  final firebase_auth.FirebaseAuth _firebaseAuth = firebase_auth.FirebaseAuth.instance;
+  final FirebaseUserManager _firebaseManager;
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+
+  UserDatabaseManager({
+    FirebaseUserManager? firebaseManager,
+    firebase_auth.FirebaseAuth? firebaseAuth,
+  })  : _firebaseManager = firebaseManager ?? FirebaseUserManager(),
+        _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance;
 
   /// Get user data from Firebase
   Future<User?> getUserData() async {

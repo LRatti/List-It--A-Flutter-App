@@ -1,15 +1,20 @@
 import 'package:app_code/repositories/abstract/location_repository.dart';
+import 'package:app_code/services/geolocator_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:logger/logger.dart';
 
 /// Geolocator implementation of LocationRepository
 class GeolocatorLocationRepository implements LocationRepository {
   final Logger _logger = Logger();
+  final GeolocatorService _geolocatorService;
+
+  GeolocatorLocationRepository({GeolocatorService? geolocatorService})
+      : _geolocatorService = geolocatorService ?? RealGeolocatorService();
 
   @override
   Future<bool> isLocationServiceEnabled() async {
     try {
-      return await Geolocator.isLocationServiceEnabled();
+      return await _geolocatorService.isLocationServiceEnabled();
     } catch (e) {
       _logger.e('Error checking location service: $e');
       return false;
@@ -19,7 +24,7 @@ class GeolocatorLocationRepository implements LocationRepository {
   @override
   Future<LocationPermission> checkPermission() async {
     try {
-      return await Geolocator.checkPermission();
+      return await _geolocatorService.checkPermission();
     } catch (e) {
       _logger.e('Error checking permission: $e');
       return LocationPermission.denied;
@@ -29,7 +34,7 @@ class GeolocatorLocationRepository implements LocationRepository {
   @override
   Future<LocationPermission> requestPermission() async {
     try {
-      return await Geolocator.requestPermission();
+      return await _geolocatorService.requestPermission();
     } catch (e) {
       _logger.e('Error requesting permission: $e');
       return LocationPermission.denied;
@@ -61,7 +66,7 @@ class GeolocatorLocationRepository implements LocationRepository {
       }
 
       // Get position with timeout and accuracy settings
-      final position = await Geolocator.getCurrentPosition(
+      final position = await _geolocatorService.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
           distanceFilter: 10, // Minimum distance change in meters
@@ -90,6 +95,6 @@ class GeolocatorLocationRepository implements LocationRepository {
       timeLimit: Duration(seconds: 10),
     );
 
-    return Geolocator.getPositionStream(locationSettings: locationSettings);
+    return _geolocatorService.getPositionStream(locationSettings: locationSettings);
   }
 }

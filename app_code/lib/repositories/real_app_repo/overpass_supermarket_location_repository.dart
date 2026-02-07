@@ -7,9 +7,16 @@ import 'package:logger/logger.dart';
 /// Overpass API implementation for fetching nearby supermarkets
 class OverpassSupermarketLocationRepository
     implements SupermarketLocationRepository {
-  final Logger _logger = Logger();
+  final Logger _logger;
+  final http.Client _httpClient;
   static const String _overpassUrl = 'https://overpass-api.de/api/interpreter';
   static const Duration _timeout = Duration(seconds: 15);
+
+  OverpassSupermarketLocationRepository({
+    http.Client? httpClient,
+    Logger? logger,
+  })  : _httpClient = httpClient ?? http.Client(),
+        _logger = logger ?? Logger();
 
   @override
   Future<List<NearbySupermarket>> fetchNearbySupermarkets({
@@ -32,7 +39,7 @@ out center;
       _logger.d('Fetching supermarkets near ($latitude, $longitude)');
 
       // Make HTTP request
-      final response = await http
+      final response = await _httpClient
           .post(
             Uri.parse(_overpassUrl),
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},

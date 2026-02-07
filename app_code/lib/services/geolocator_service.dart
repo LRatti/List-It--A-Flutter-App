@@ -1,0 +1,38 @@
+import 'package:geolocator/geolocator.dart';
+
+/// Interface for location service operations to enable testing
+abstract class GeolocatorService {
+  Future<bool> isLocationServiceEnabled();
+  Future<LocationPermission> checkPermission();
+  Future<LocationPermission> requestPermission();
+  Future<Position> getCurrentPosition({required LocationSettings locationSettings});
+  Stream<Position> getPositionStream({required LocationSettings locationSettings});
+}
+
+/// Real implementation of GeolocatorService using the geolocator package
+class RealGeolocatorService implements GeolocatorService {
+  @override
+  Future<bool> isLocationServiceEnabled() {
+    return Geolocator.isLocationServiceEnabled();
+  }
+
+  @override
+  Future<LocationPermission> checkPermission() {
+    return Geolocator.checkPermission();
+  }
+
+  @override
+  Future<LocationPermission> requestPermission() {
+    return Geolocator.requestPermission();
+  }
+
+  @override
+  Future<Position> getCurrentPosition({required LocationSettings locationSettings}) {
+    return Geolocator.getCurrentPosition(locationSettings: locationSettings);
+  }
+
+  @override
+  Stream<Position> getPositionStream({required LocationSettings locationSettings}) {
+    return Geolocator.getPositionStream(locationSettings: locationSettings);
+  }
+}
