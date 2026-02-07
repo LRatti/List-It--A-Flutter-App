@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/widgets/shopping_list_widget.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
@@ -39,6 +40,9 @@ void main() {
     }) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           theme: theme,
           home: Scaffold(
             body: ShoppingListCard(
@@ -80,8 +84,9 @@ void main() {
 
     testWidgets('shows "No items" when list is empty', (WidgetTester tester) async {
       await pumpCard(tester);
+      final l10n = AppLocalizations.of(tester.element(find.byType(ShoppingListCard)))!;
 
-      expect(find.text('No items'), findsOneWidget);
+      expect(find.text(l10n.noItemsLabel), findsOneWidget);
     });
 
     testWidgets('displays products when list has items', (WidgetTester tester) async {
@@ -115,7 +120,8 @@ void main() {
 
       expect(find.text('Apple'), findsOneWidget);
       expect(find.text('Banana'), findsOneWidget);
-      expect(find.text('No items'), findsNothing);
+      final l10n = AppLocalizations.of(tester.element(find.byType(ShoppingListCard)))!;
+      expect(find.text(l10n.noItemsLabel), findsNothing);
     });
 
     testWidgets('calls onTap when card is tapped', (WidgetTester tester) async {

@@ -5,6 +5,7 @@ import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lis
 import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
 import 'package:app_code/widgets/shopping_lists_grid_view.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -55,6 +56,9 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: ShoppingListsGridView(
               lists: activeLists,
               emptyMessage: emptyMessage,
@@ -114,6 +118,7 @@ void main() {
         tester,
         onDeletionModeChanged: (active) => deletionMode = active,
       );
+      final l10n = AppLocalizations.of(tester.element(find.byType(ShoppingListsGridView)))!;
 
       final firstCardInkWell = find.descendant(
         of: find.byType(ShoppingListCard).first,
@@ -123,14 +128,14 @@ void main() {
       await tester.longPress(firstCardInkWell.first);
       await tester.pumpAndSettle();
 
-      expect(find.text('1 selected'), findsOneWidget);
+      expect(find.text(l10n.selectedItemsCount(1)), findsOneWidget);
       expect(find.byIcon(Icons.delete), findsOneWidget);
       expect(deletionMode, isTrue);
 
       await tester.tap(firstCardInkWell.first);
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('selected'), findsNothing);
+      expect(find.text(l10n.selectedItemsCount(1)), findsNothing);
       expect(find.byIcon(Icons.delete), findsNothing);
       expect(deletionMode, isFalse);
     });
@@ -151,11 +156,12 @@ void main() {
 
       await tester.longPress(firstCardInkWell.first);
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(ShoppingListsGridView)))!;
 
       await tester.tap(find.byIcon(Icons.delete));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Delete'));
+      await tester.tap(find.text(l10n.deleteLabel));
       await tester.pumpAndSettle();
 
       final updatedLists = container.read(shoppingListsProvider).value ?? [];
@@ -173,6 +179,7 @@ void main() {
 
     testWidgets('navigation signal clears selection', (tester) async {
       final container = await pumpGrid(tester);
+      final l10n = AppLocalizations.of(tester.element(find.byType(ShoppingListsGridView)))!;
 
       final firstCardInkWell = find.descendant(
         of: find.byType(ShoppingListCard).first,
@@ -181,12 +188,12 @@ void main() {
 
       await tester.longPress(firstCardInkWell.first);
       await tester.pumpAndSettle();
-      expect(find.text('1 selected'), findsOneWidget);
+      expect(find.text(l10n.selectedItemsCount(1)), findsOneWidget);
 
       container.read(appNavigationSignalProvider.notifier).state++;
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('selected'), findsNothing);
+      expect(find.text(l10n.selectedItemsCount(1)), findsNothing);
       expect(find.byIcon(Icons.delete), findsNothing);
     });
   });

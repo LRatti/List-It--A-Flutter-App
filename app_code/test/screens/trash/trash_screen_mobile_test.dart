@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/screens/trash/trash_screen_mobile.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
@@ -57,7 +58,12 @@ Future<(ProviderContainer, MockShoppingListRepository)> _pumpTrash(
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: const MaterialApp(home: TrashScreenMobile()),
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('en'),
+        home: TrashScreenMobile(),
+      ),
     ),
   );
 
@@ -82,7 +88,8 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    expect(find.text('Trash is empty'), findsOneWidget);
+    final l10n = AppLocalizations.of(tester.element(find.byType(TrashScreenMobile)))!;
+    expect(find.text(l10n.trashEmptyMessage), findsOneWidget);
   });
 
   testWidgets('Restore all clears trash flags on all lists', (tester) async {
@@ -97,9 +104,10 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Restore all'));
+    final l10n = AppLocalizations.of(tester.element(find.byType(TrashScreenMobile)))!;
+    await tester.tap(find.text(l10n.restoreAllTitle));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Restore'));
+    await tester.tap(find.text(l10n.restoreLabel));
     await tester.pumpAndSettle();
 
     final stored = await repo.getAll();
@@ -119,9 +127,10 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Empty trash'));
+    final l10n = AppLocalizations.of(tester.element(find.byType(TrashScreenMobile)))!;
+    await tester.tap(find.text(l10n.emptyTrashTitle));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Delete all'));
+    await tester.tap(find.text(l10n.deleteAllLabel));
     await tester.pumpAndSettle();
 
     final remaining = await repo.getAll();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app_code/widgets/period_selector.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 void main() {
   group('PeriodSelector', () {
@@ -14,6 +15,9 @@ void main() {
     Future<void> pumpSelector(WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: PeriodSelector(
               onPeriodChanged: (period, month, year, weekRange, customRange) {
@@ -40,9 +44,10 @@ void main() {
 
     testWidgets('renders dropdown and defaults to All', (WidgetTester tester) async {
       await pumpSelector(tester);
+      final l10n = AppLocalizations.of(tester.element(find.byType(PeriodSelector)))!;
 
       expect(find.byType(DropdownButton<StatsPeriodType>), findsOneWidget);
-      expect(find.text('All'), findsWidgets);
+      expect(find.text(l10n.periodAll), findsWidgets);
 
       // Check default captured values
       expect(capturedPeriod, StatsPeriodType.all);
@@ -52,36 +57,38 @@ void main() {
       expect(capturedCustomRange, isNull);
     });
 
-    final periodTests = [
-      {'label': 'Week', 'type': StatsPeriodType.week},
-      {'label': 'Month', 'type': StatsPeriodType.month},
-      {'label': 'Year', 'type': StatsPeriodType.year},
-      {'label': 'Custom', 'type': StatsPeriodType.custom},
-    ];
-
-    for (var testCase in periodTests) {
-      testWidgets('changes period to ${testCase['label']}', (WidgetTester tester) async {
+    for (final period in StatsPeriodType.values.where((p) => p != StatsPeriodType.all)) {
+      testWidgets('changes period to $period', (WidgetTester tester) async {
         await pumpSelector(tester);
-        await selectPeriod(tester, testCase['label'] as String);
+        final l10n = AppLocalizations.of(tester.element(find.byType(PeriodSelector)))!;
+        final label = switch (period) {
+          StatsPeriodType.week => l10n.periodWeek,
+          StatsPeriodType.month => l10n.periodMonth,
+          StatsPeriodType.year => l10n.periodYear,
+          StatsPeriodType.custom => l10n.periodCustom,
+          StatsPeriodType.all => l10n.periodAll,
+        };
 
-        expect(capturedPeriod, testCase['type']);
+        await selectPeriod(tester, label);
+
+        expect(capturedPeriod, period);
 
         // Additional checks for Month and Year
-        if (testCase['type'] == StatsPeriodType.month) {
+        if (period == StatsPeriodType.month) {
           expect(capturedMonth, isNotNull);
           expect(capturedYear, isNotNull);
           expect(find.byType(DropdownButton<int>), findsWidgets);
           expect(find.byType(TextField), findsWidgets);
-        } else if (testCase['type'] == StatsPeriodType.year) {
+        } else if (period == StatsPeriodType.year) {
           expect(capturedMonth, isNull);
           expect(capturedYear, isNotNull);
           expect(find.byType(TextField), findsWidgets);
-        } else if (testCase['type'] == StatsPeriodType.week) {
+        } else if (period == StatsPeriodType.week) {
           expect(capturedWeekRange, isNotNull);
           expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
           expect(find.byIcon(Icons.arrow_forward_ios), findsOneWidget);
           expect(find.byType(GestureDetector), findsWidgets);
-        } else if (testCase['type'] == StatsPeriodType.custom) {
+        } else if (period == StatsPeriodType.custom) {
           expect(find.byIcon(Icons.date_range), findsOneWidget);
         }
       });
@@ -92,7 +99,8 @@ void main() {
       DateTimeRange? secondRange;
 
       await pumpSelector(tester);
-      await selectPeriod(tester, 'Week');
+      final l10n = AppLocalizations.of(tester.element(find.byType(PeriodSelector)))!;
+      await selectPeriod(tester, l10n.periodWeek);
 
       // First range
       firstRange = capturedWeekRange;
@@ -113,7 +121,8 @@ void main() {
 
     testWidgets('clamps year input to valid range', (WidgetTester tester) async {
       await pumpSelector(tester);
-      await selectPeriod(tester, 'Year');
+      final l10n = AppLocalizations.of(tester.element(find.byType(PeriodSelector)))!;
+      await selectPeriod(tester, l10n.periodYear);
 
       final textField = find.byType(TextField);
 

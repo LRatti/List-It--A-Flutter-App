@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/screens/home/home_screen_mobile.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
@@ -86,6 +87,9 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: const MobileHomePage(),
           routes: {
             '/signin': (context) => const Scaffold(body: Text('Sign In Screen')),
@@ -100,27 +104,28 @@ void main() {
 
   testWidgets('HomePage switches tabs correctly', (tester) async {
     await pumpHomeScreen(tester);
+    final l10n = AppLocalizations.of(tester.element(find.byType(MobileHomePage)))!;
 
     // Starts on Lists tab
     expect(find.byKey(const Key('lists_tab')), findsOneWidget);
 
     // Go to History
-    await tester.tap(find.text('History'));
+    await tester.tap(find.text(l10n.historyTabLabel));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('history_tab')), findsOneWidget);
 
     // Go to Supermarkets
-    await tester.tap(find.text('Supermarkets'));
+    await tester.tap(find.text(l10n.supermarketsTabLabel));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('supermarkets_tab')), findsOneWidget);
 
     // Go to Statistics
-    await tester.tap(find.text('Statistics'));
+    await tester.tap(find.text(l10n.statisticsTabLabel));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('statistics_tab')), findsOneWidget);
 
     // Back to Lists
-    await tester.tap(find.text('Lists'));
+    await tester.tap(find.text(l10n.listsTabLabel));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('lists_tab')), findsOneWidget);
   });
@@ -129,14 +134,15 @@ void main() {
     tester,
   ) async {
     await pumpHomeScreen(tester);
+    final l10n = AppLocalizations.of(tester.element(find.byType(MobileHomePage)))!;
 
     // Verify app bar is present
     expect(find.byType(AppBar), findsWidgets);
-    expect(find.text('My Shopping App'), findsOneWidget);
+    expect(find.text(l10n.appTitle), findsOneWidget);
 
     // For anonymous user, should show Sign In button
     expect(find.byKey(const Key('sign_in_button')), findsOneWidget);
-    expect(find.text('Sign In'), findsOneWidget);
+    expect(find.text(l10n.signInLabel), findsOneWidget);
   });
 
   testWidgets('HomePage displays auth buttons in TopBar for anonymous user', (
@@ -164,29 +170,31 @@ void main() {
 
   testWidgets('HomePage shows bottom navigation bar', (tester) async {
     await pumpHomeScreen(tester);
+    final l10n = AppLocalizations.of(tester.element(find.byType(MobileHomePage)))!;
 
     expect(find.byType(BottomNavigationBar), findsOneWidget);
-    expect(find.text('Lists'), findsOneWidget);
-    expect(find.text('History'), findsOneWidget);
-    expect(find.text('Supermarkets'), findsOneWidget);
-    expect(find.text('Statistics'), findsOneWidget);
+    expect(find.text(l10n.listsTabLabel), findsOneWidget);
+    expect(find.text(l10n.historyTabLabel), findsOneWidget);
+    expect(find.text(l10n.supermarketsTabLabel), findsOneWidget);
+    expect(find.text(l10n.statisticsTabLabel), findsOneWidget);
   });
 
   testWidgets('HomePage maintains tab state during navigation', (tester) async {
     await pumpHomeScreen(tester);
+    final l10n = AppLocalizations.of(tester.element(find.byType(MobileHomePage)))!;
 
     // Navigate to a tab
-    await tester.tap(find.text('Supermarkets'));
+    await tester.tap(find.text(l10n.supermarketsTabLabel));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('supermarkets_tab')), findsOneWidget);
 
     // Navigate to another tab
-    await tester.tap(find.text('Statistics'));
+    await tester.tap(find.text(l10n.statisticsTabLabel));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('statistics_tab')), findsOneWidget);
 
     // Go back to previous tab
-    await tester.tap(find.text('Supermarkets'));
+    await tester.tap(find.text(l10n.supermarketsTabLabel));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('supermarkets_tab')), findsOneWidget);
   });
@@ -213,12 +221,13 @@ void main() {
       tester,
       viewport: const Size(1000, 600),
     );
+    final l10n = AppLocalizations.of(tester.element(find.byType(MobileHomePage)))!;
 
     expect(find.byType(NavigationRail), findsOneWidget);
     expect(find.byType(BottomNavigationBar), findsNothing);
     expect(find.byKey(const Key('lists_tab')), findsOneWidget);
 
-    await tester.tap(find.text('Supermarkets'));
+    await tester.tap(find.text(l10n.supermarketsTabLabel));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('supermarkets_tab')), findsOneWidget);

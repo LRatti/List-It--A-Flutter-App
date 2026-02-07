@@ -3,6 +3,7 @@ import 'package:app_code/models/product.dart';
 import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
+import 'package:app_code/l10n/app_localizations_en.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -10,6 +11,7 @@ void main() {
     final supermarket = Supermarket(id: 'sup1', name: 'Market');
     final category = Category(id: 'cat1', name: 'Fruit');
     final product = Product(id: 'prod1', name: 'Apple');
+    final l10n = AppLocalizationsEn();
 
     ShoppingList buildList() {
       return ShoppingList(
@@ -139,12 +141,12 @@ void main() {
       list.setIsInTheTrash(true);
       expect(list.getIsInTheTrash(), true);
       expect(list.getDeletionTimestamp(), isNotNull);
-      expect(list.getDeletionMessage().isNotEmpty, true);
+      expect(list.getDeletionMessage(l10n).isNotEmpty, true);
 
       list.setIsInTheTrash(false);
       expect(list.getIsInTheTrash(), false);
       expect(list.getDeletionTimestamp(), isNull);
-      expect(list.getDeletionMessage(), '');
+      expect(list.getDeletionMessage(l10n), '');
     });
 
     test('days until deletion clamps at zero', () {
@@ -205,14 +207,14 @@ void main() {
       list.setIsInTheTrash(true);
 
       list.setDeletionTimestamp(DateTime.now().subtract(const Duration(days: 29)));
-      expect(list.getDeletionMessage(), 'Delete in 1 day');
+      expect(list.getDeletionMessage(l10n), l10n.deleteInOneDayMessage);
 
       list.setDeletionTimestamp(DateTime.now().subtract(const Duration(days: 25)));
-      expect(list.getDeletionMessage(), contains('Delete in'));
-      expect(list.getDeletionMessage(), contains('days'));
+      expect(list.getDeletionMessage(l10n), contains('Delete in'));
+      expect(list.getDeletionMessage(l10n), contains('days'));
 
       list.setDeletionTimestamp(DateTime.now().subtract(const Duration(days: 35)));
-      expect(list.getDeletionMessage(), 'Deleting now...');
+      expect(list.getDeletionMessage(l10n), l10n.deletingNowMessage);
     });
 
     test('getProductByName returns null when product not found', () {
@@ -330,7 +332,7 @@ void main() {
     test('getDeletionMessage returns empty string when not in trash', () {
       final list = buildList();
 
-      expect(list.getDeletionMessage(), '');
+      expect(list.getDeletionMessage(l10n), '');
     });
   });
 }

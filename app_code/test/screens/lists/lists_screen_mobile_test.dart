@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/shopping_list.dart';
+import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/screens/lists/lists_screen_mobile.dart';
+import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
+import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
+
+/// Fake supermarkets notifier to avoid DB access in ListDetailScreenMobile
+class _TestSupermarketsNotifier extends SupermarketsNotifier {
+  @override
+  Future<List<Supermarket>> build() async => [];
+
+  @override
+  Future<Supermarket?> getFavoriteSupermarket() async => null;
+}
 
 void main() {
   group('ListsScreenMobile', () {
@@ -31,8 +44,12 @@ void main() {
         overrides: [
           shoppingListRepositoryProvider.overrideWithValue(mockRepo),
           recipeCacheRepositoryProvider.overrideWithValue(mockRecipeCache),
+          supermarketsProvider.overrideWith(() => _TestSupermarketsNotifier()),
         ],
         child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('en'),
           home: ListsScreenMobile(),
         ),
       );
@@ -58,8 +75,9 @@ void main() {
     testWidgets('shows empty state message when no lists exist', (tester) async {
       await tester.pumpWidget(createTestWidget(initialLists: []));
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(ListsScreenMobile)))!;
 
-      expect(find.text('No lists yet.'), findsOneWidget);
+      expect(find.text(l10n.noListsYet), findsOneWidget);
       expect(find.byType(FloatingActionButton), findsOneWidget);
     });
 
@@ -84,36 +102,39 @@ void main() {
     testWidgets('floating action button opens add list dialog', (tester) async {
       await tester.pumpWidget(createTestWidget(initialLists: []));
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(ListsScreenMobile)))!;
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      expect(find.text('Add new list'), findsOneWidget);
-      expect(find.text('Please enter the name of your list:'), findsOneWidget);
+      expect(find.text(l10n.addNewListTitle), findsOneWidget);
+      expect(find.text(l10n.enterListNamePrompt), findsOneWidget);
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('Cancel'), findsOneWidget);
-      expect(find.text('Add'), findsOneWidget);
+      expect(find.text(l10n.cancelLabel), findsOneWidget);
+      expect(find.text(l10n.addLabel), findsOneWidget);
     });
 
     testWidgets('add list dialog can be cancelled without adding a list', (tester) async {
       await tester.pumpWidget(createTestWidget(initialLists: []));
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(ListsScreenMobile)))!;
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.text(l10n.cancelLabel));
       await tester.pumpAndSettle();
 
-      expect(find.text('Add new list'), findsNothing);
-      expect(find.text('No lists yet.'), findsOneWidget);
+      expect(find.text(l10n.addNewListTitle), findsNothing);
+      expect(find.text(l10n.noListsYet), findsOneWidget);
     });
 
     testWidgets('adding a list through dialog makes it visible in the list', (tester) async {
       await tester.pumpWidget(createTestWidget(initialLists: []));
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(ListsScreenMobile)))!;
 
-      expect(find.text('No lists yet.'), findsOneWidget);
+      expect(find.text(l10n.noListsYet), findsOneWidget);
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
@@ -121,32 +142,36 @@ void main() {
       await tester.enterText(find.byType(TextField), 'My New List');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Add'));
+      await tester.tap(find.text(l10n.addLabel));
       await tester.pumpAndSettle();
 
-      expect(find.text('Add new list'), findsNothing);
-      expect(find.text('My New List'), findsOneWidget);
-      expect(find.text('No lists yet.'), findsNothing);
+      expect(find.text(l10n.addNewListTitle), findsNothing);
+      expect(find.byType(ListDetailScreenMobile), findsOneWidget);
+      final stored = await mockRepo.getAll();
+      expect(stored.any((l) => l.getName() == 'My New List'), isTrue);
     });
 
     testWidgets('submitting dialog with empty name does not add a list', (tester) async {
       await tester.pumpWidget(createTestWidget(initialLists: []));
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(ListsScreenMobile)))!;
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
       // Submit without entering text
-      await tester.tap(find.text('Add'));
+      await tester.tap(find.text(l10n.addLabel));
       await tester.pumpAndSettle();
 
-      expect(find.text('Add new list'), findsNothing);
-      expect(find.text('No lists yet.'), findsOneWidget);
+      expect(find.text(l10n.addNewListTitle), findsOneWidget);
+      final stored = await mockRepo.getAll();
+      expect(stored, isEmpty);
     });
 
     testWidgets('whitespace-only list name is treated as empty and not added', (tester) async {
       await tester.pumpWidget(createTestWidget(initialLists: []));
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(ListsScreenMobile)))!;
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
@@ -154,16 +179,18 @@ void main() {
       await tester.enterText(find.byType(TextField), '   ');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Add'));
+      await tester.tap(find.text(l10n.addLabel));
       await tester.pumpAndSettle();
 
-      expect(find.text('Add new list'), findsNothing);
-      expect(find.text('No lists yet.'), findsOneWidget);
+      expect(find.text(l10n.addNewListTitle), findsOneWidget);
+      final stored = await mockRepo.getAll();
+      expect(stored, isEmpty);
     });
 
     testWidgets('list name with surrounding whitespace is trimmed and displayed correctly', (tester) async {
       await tester.pumpWidget(createTestWidget(initialLists: []));
       await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(tester.element(find.byType(ListsScreenMobile)))!;
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
@@ -171,11 +198,12 @@ void main() {
       await tester.enterText(find.byType(TextField), '  Trimmed List  ');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Add'));
+      await tester.tap(find.text(l10n.addLabel));
       await tester.pumpAndSettle();
 
-      // Verify the trimmed name is visible in the UI
-      expect(find.text('Trimmed List'), findsOneWidget);
+      final stored = await mockRepo.getAll();
+      expect(stored.any((l) => l.getName() == 'Trimmed List'), isTrue);
+      expect(find.byType(ListDetailScreenMobile), findsOneWidget);
     });
 
     testWidgets('displays multiple active lists correctly', (tester) async {
@@ -200,8 +228,12 @@ void main() {
         overrides: [
           shoppingListRepositoryProvider.overrideWithValue(failingRepo),
           recipeCacheRepositoryProvider.overrideWithValue(mockRecipeCache),
+          supermarketsProvider.overrideWith(() => _TestSupermarketsNotifier()),
         ],
         child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('en'),
           home: ListsScreenMobile(),
         ),
       );
@@ -209,7 +241,9 @@ void main() {
       await tester.pumpWidget(widget);
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Exception'), findsOneWidget);
+      final l10n = AppLocalizations.of(tester.element(find.byType(ListsScreenMobile)))!;
+      expect(find.text(l10n.errorWithDetails('Exception: Failed to load lists')),
+          findsOneWidget);
     });
 
     testWidgets('floating action button is always visible', (tester) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
@@ -53,6 +54,9 @@ Future<ProviderContainer> _pumpHistory(
     UncontrolledProviderScope(
       container: container,
       child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('en'),
         home: HistoryScreenMobile(),
       ),
     ),

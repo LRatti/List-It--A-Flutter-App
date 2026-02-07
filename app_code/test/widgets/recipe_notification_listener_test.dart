@@ -9,6 +9,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/screens/lists/add_recipe_screen_mobile.dart';
 import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 void main() {
   group('RecipeNotificationListener', () {
@@ -40,6 +41,9 @@ void main() {
         child: MaterialApp(
           scaffoldMessengerKey: scaffoldKey,
           navigatorKey: navigatorKey,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: RecipeNotificationListener(
               scaffoldMessengerKey: scaffoldKey,
@@ -70,6 +74,9 @@ void main() {
           child: MaterialApp(
             scaffoldMessengerKey: scaffoldKey,
             navigatorKey: navigatorKey,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: Scaffold(
               body: Builder(
                 builder: (context) {
