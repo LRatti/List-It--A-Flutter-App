@@ -80,6 +80,10 @@ class FirebaseShoppingListManager {
                 .get()
                 .then((supermarketDoc) => Supermarket.fromDatabase(supermarketDoc.data()!));
             shoppingList.setSupermarket(supermarket);
+          } else {
+            // Shopping list without a supermarket is invalid
+            print("Shopping list $listId is missing supermarket_id.");
+            return null;
           }
           // Fetch and set purchased products
           purchasedProducts = await _purchasedProductManager.getPurchasedProductByList(listId);

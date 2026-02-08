@@ -6,21 +6,21 @@ import 'package:flutter/material.dart';
 /// layout helpers across the entire app, ensuring a unified responsive behavior.
 class ScreenSize {
   /// Mobile breakpoint - smartphones typically < 600 dp
-  static const double mobileMax = 1200.0;
+  static const double mobileMax = 600.0;
 
   /// dp (density-independent pixels) is a unit of measurement used in Android and Flutter development.
   /// It represents logical pixels that scale based on the device's screen density.
   /// This ensures consistent UI sizing across devices with different physical screen sizes and pixel densities.
   /// For example, a 600 dp width will appear roughly the same size on phones with different DPI values.
   /// Tablet breakpoint - tablets typically 600-900 dp
-  static const double tabletMin = 1200.0;
-  static const double tabletMax = 1600.0;
+  static const double tabletMin = 600.0;
+  static const double tabletMax = 900.0;
 
   /// Desktop breakpoint - large screens >= 900 dp
-  static const double desktopMin = 1600.0;
+  static const double desktopMin = 900.0;
 
   /// Large desktop - very large screens >= 1200 dp
-  static const double largeDesktopMin = 1800.0;
+  static const double largeDesktopMin = 1200.0;
 
   // Immutable at-launch classification (phone vs tablet+)
   static bool? _isTabletAtLaunch;

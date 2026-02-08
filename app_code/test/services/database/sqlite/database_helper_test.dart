@@ -60,8 +60,9 @@ void main() {
 
     expect(columnNames, contains('id'));
     expect(columnNames, contains('name'));
-    expect(columnNames, contains('associations'));
     expect(columnNames, contains('is_visible'));
+    expect(columnNames, contains('created_at'));
+    expect(columnNames, contains('last_modified'));
   });
 
   test('category table exists with correct schema', () async {
@@ -77,7 +78,9 @@ void main() {
 
     expect(columnNames, contains('id'));
     expect(columnNames, contains('name'));
-    expect(columnNames, contains('is_default'));
+    expect(columnNames, contains('is_visible'));
+    expect(columnNames, contains('created_at'));
+    expect(columnNames, contains('last_modified'));
   });
 
   test('associations table exists with correct schema', () async {
@@ -125,6 +128,7 @@ void main() {
 
     expect(columnNames, contains('supermarket_id'));
     expect(columnNames, contains('category_id'));
+    expect(columnNames, contains('order_index'));
   });
 
   test('purchased_product table exists with correct schema', () async {
@@ -144,6 +148,10 @@ void main() {
     expect(columnNames, contains('category_id'));
     expect(columnNames, contains('price'));
     expect(columnNames, contains('quantity'));
+    expect(columnNames, contains('created_at'));
+    expect(columnNames, contains('last_modified'));
+    expect(columnNames, contains('is_deleted'));
+    expect(columnNames, contains('is_bought'));
   });
 
   test('recipe_cache table exists with correct schema', () async {
@@ -252,6 +260,7 @@ void main() {
       'id': 'test-list',
       'name': 'Test',
       'created_at': DateTime.now().toIso8601String(),
+      'last_modified': DateTime.now().toIso8601String(),
       'is_registered': 0,
     });
 
@@ -269,6 +278,7 @@ void main() {
       'id': 'test-list',
       'name': 'Test',
       'created_at': DateTime.now().toIso8601String(),
+      'last_modified': DateTime.now().toIso8601String(),
       'is_registered': 0,
     });
 
@@ -287,10 +297,10 @@ void main() {
     await db.delete('shopping_list', where: 'id = ?', whereArgs: ['test-list']);
   });
 
-  test('database version is 1', () async {
+  test('database version is 5', () async {
     final db = await DatabaseHelper.database;
     final version = await db.getVersion();
-    expect(version, 1);
+    expect(version, 5);
   });
 
   test('can insert and query data from shopping_list', () async {
@@ -300,6 +310,7 @@ void main() {
       'id': 'test-id',
       'name': 'Test List',
       'created_at': DateTime.now().toIso8601String(),
+      'last_modified': DateTime.now().toIso8601String(),
       'is_registered': 1,
       'is_in_the_trash': 0,
     });
@@ -318,6 +329,8 @@ void main() {
       'id': 'prod-id',
       'name': 'Test Product',
       'is_visible': 1,
+      'created_at': DateTime.now().toIso8601String(),
+      'last_modified': DateTime.now().toIso8601String(),
     });
 
     final result = await db.query('product', where: 'id = ?', whereArgs: ['prod-id']);
@@ -333,13 +346,15 @@ void main() {
     await db.insert('category', {
       'id': 'cat-id',
       'name': 'Test Category',
-      'is_default': 1,
+      'is_visible': 1,
+      'created_at': DateTime.now().toIso8601String(),
+      'last_modified': DateTime.now().toIso8601String(),
     });
 
     final result = await db.query('category', where: 'id = ?', whereArgs: ['cat-id']);
     expect(result.length, 1);
     expect(result.first['name'], 'Test Category');
-    expect(result.first['is_default'], 1);
+    expect(result.first['is_visible'], 1);
 
     await db.delete('category', where: 'id = ?', whereArgs: ['cat-id']);
   });

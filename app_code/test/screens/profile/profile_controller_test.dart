@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 import 'package:app_code/models/user.dart';
 import 'package:app_code/screens/profile/profile_screen.dart';
@@ -10,9 +11,21 @@ import 'package:app_code/providers/real_app_providers/auth/email_verification_pr
 import 'package:app_code/providers/real_app_providers/auth/user_details_provider.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
+import 'package:app_code/services/database/firebase/manage_user.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+
+// Mock FirebaseAuth
+class _MockFirebaseAuth extends Mock implements firebase_auth.FirebaseAuth {}
+
+// Mock FirebaseUserManager
+class _MockFirebaseUserManager extends Mock implements FirebaseUserManager {}
 
 class _FakeUserManager extends UserDatabaseManager {
-  _FakeUserManager(this.user);
+  _FakeUserManager(this.user)
+      : super(
+          firebaseManager: _MockFirebaseUserManager(),
+          firebaseAuth: _MockFirebaseAuth(),
+        );
   final User user;
   User? _currentUser;
 
@@ -140,6 +153,9 @@ void main() {
         authProvider.overrideWith(() => _FakeAuthNotifier(user, repo)),
       ],
       child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         routes: {
           '/verification': (context) =>
               const Scaffold(body: Text('Verification')),

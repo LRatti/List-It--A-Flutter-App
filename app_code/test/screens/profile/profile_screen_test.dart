@@ -4,9 +4,13 @@ import 'package:app_code/providers/real_app_providers/auth/user_details_provider
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/screens/profile/profile_screen.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
+import 'package:app_code/services/database/firebase/manage_user.dart';
+import 'package:app_code/l10n/app_localizations.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 class _FakeAuthNotifier extends AuthNotifier {
 	_FakeAuthNotifier(this.user, this.repository);
@@ -37,8 +41,11 @@ void main() {
 				if (user != null)
 					authProvider.overrideWith(() => _FakeAuthNotifier(user, repo)),
 			],
-			child: const MaterialApp(
-				home: ProfileScreen(),
+			child: MaterialApp(
+				localizationsDelegates: AppLocalizations.localizationsDelegates,
+				supportedLocales: AppLocalizations.supportedLocales,
+				locale: const Locale('en'),
+				home: const ProfileScreen(),
 			),
 		);
 	}
@@ -76,7 +83,10 @@ void main() {
 }
 
 class _FakeUserManager extends UserDatabaseManager {
-	_FakeUserManager(this.user);
+	_FakeUserManager(this.user) : super(
+		firebaseManager: _MockFirebaseUserManager(),
+		firebaseAuth: _MockFirebaseAuth(),
+	);
 
 	final User? user;
 
@@ -86,6 +96,10 @@ class _FakeUserManager extends UserDatabaseManager {
 	@override
 	Future<void> setUserData(User user) async {}
 }
+
+class _MockFirebaseUserManager extends Mock implements FirebaseUserManager {}
+
+class _MockFirebaseAuth extends Mock implements firebase_auth.FirebaseAuth {}
 
 class _FakeAuthRepository implements AuthRepository {
 	@override

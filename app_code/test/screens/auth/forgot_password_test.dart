@@ -2,6 +2,7 @@ import 'package:app_code/models/user.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/screens/auth/forgot_password.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -73,6 +74,9 @@ Future<void> _pumpForgotPassword(
     ProviderScope(
       overrides: [authRepositoryProvider.overrideWithValue(repo)],
       child: MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: const ForgotPasswordScreen(),
         routes: {
           '/signin': (_) => const Scaffold(body: Text('Sign In Screen')),
@@ -83,55 +87,62 @@ Future<void> _pumpForgotPassword(
   await tester.pumpAndSettle();
 }
 
+AppLocalizations _l10n(WidgetTester tester) {
+  final context = tester.element(find.byType(ForgotPasswordScreen));
+  return AppLocalizations.of(context)!;
+}
+
 void main() {
   testWidgets('shows validation errors for empty and mismatched emails', (
     tester,
   ) async {
     final repo = _RecordingAuthRepository();
     await _pumpForgotPassword(tester, repo);
+    final l10n = _l10n(tester);
 
     // Submit empty form
-    await tester.tap(find.text('Send recovery email'));
+    await tester.tap(find.text(l10n.sendRecoveryEmailLabel));
     await tester.pumpAndSettle();
 
-    expect(find.text('Please enter your email'), findsOneWidget);
-    expect(find.text('Please confirm your email'), findsOneWidget);
+    expect(find.text(l10n.enterEmailError), findsOneWidget);
+    expect(find.text(l10n.confirmEmailError), findsOneWidget);
 
     // Enter mismatched emails
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Email'),
+      find.widgetWithText(TextFormField, l10n.emailLabel),
       'a@b.com',
     );
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Confirm Email'),
+      find.widgetWithText(TextFormField, l10n.confirmEmailLabel),
       'c@d.com',
     );
-    await tester.tap(find.text('Send recovery email'));
+    await tester.tap(find.text(l10n.sendRecoveryEmailLabel));
     await tester.pumpAndSettle();
 
-    expect(find.text('Emails do not match'), findsOneWidget);
+    expect(find.text(l10n.emailsDoNotMatch), findsOneWidget);
     expect(repo.resetCount, 0);
   });
 
   testWidgets('sends reset email and shows success message', (tester) async {
     final repo = _RecordingAuthRepository();
     await _pumpForgotPassword(tester, repo);
+    final l10n = _l10n(tester);
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Email'),
+      find.widgetWithText(TextFormField, l10n.emailLabel),
       'me@example.com',
     );
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Confirm Email'),
+      find.widgetWithText(TextFormField, l10n.confirmEmailLabel),
       'me@example.com',
     );
 
-    await tester.tap(find.text('Send recovery email'));
+    await tester.tap(find.text(l10n.sendRecoveryEmailLabel));
     await tester.pumpAndSettle();
 
     expect(repo.resetCount, 1);
     expect(
-      find.text('If an account exists, a reset link has been sent.'),
+      find.text(l10n.resetLinkSentIfAccountExists),
       findsOneWidget,
     );
   });
@@ -139,21 +150,22 @@ void main() {
   testWidgets('shows error message when sending fails', (tester) async {
     final repo = _ThrowingAuthRepository();
     await _pumpForgotPassword(tester, repo);
+    final l10n = _l10n(tester);
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Email'),
+      find.widgetWithText(TextFormField, l10n.emailLabel),
       'me@example.com',
     );
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Confirm Email'),
+      find.widgetWithText(TextFormField, l10n.confirmEmailLabel),
       'me@example.com',
     );
 
-    await tester.tap(find.text('Send recovery email'));
+    await tester.tap(find.text(l10n.sendRecoveryEmailLabel));
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Could not send reset email. Please try again later.'),
+      find.text(l10n.couldNotSendResetEmail),
       findsOneWidget,
     );
     expect(repo.resetCount, 1);
@@ -162,13 +174,14 @@ void main() {
   testWidgets('disables button and shows loader when submitting', (tester) async {
     final repo = _RecordingAuthRepository();
     await _pumpForgotPassword(tester, repo);
+    final l10n = _l10n(tester);
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Email'),
+      find.widgetWithText(TextFormField, l10n.emailLabel),
       'me@example.com',
     );
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Confirm Email'),
+      find.widgetWithText(TextFormField, l10n.confirmEmailLabel),
       'me@example.com',
     );
 
@@ -176,7 +189,7 @@ void main() {
     expect(find.byType(ElevatedButton), findsOneWidget);
 
     // Tap the button
-    await tester.tap(find.text('Send recovery email'));
+    await tester.tap(find.text(l10n.sendRecoveryEmailLabel));
     // Pump a small duration to catch the loading state
     await tester.pump(const Duration(milliseconds: 50));
 
@@ -192,23 +205,24 @@ void main() {
   testWidgets('allows retry after successful submission', (tester) async {
     final repo = _RecordingAuthRepository();
     await _pumpForgotPassword(tester, repo);
+    final l10n = _l10n(tester);
 
     // First submission
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Email'),
+      find.widgetWithText(TextFormField, l10n.emailLabel),
       'me@example.com',
     );
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Confirm Email'),
+      find.widgetWithText(TextFormField, l10n.confirmEmailLabel),
       'me@example.com',
     );
 
-    await tester.tap(find.text('Send recovery email'));
+    await tester.tap(find.text(l10n.sendRecoveryEmailLabel));
     await tester.pumpAndSettle();
 
     expect(repo.resetCount, 1);
     expect(
-      find.text('If an account exists, a reset link has been sent.'),
+      find.text(l10n.resetLinkSentIfAccountExists),
       findsOneWidget,
     );
 

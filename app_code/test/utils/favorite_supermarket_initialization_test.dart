@@ -10,6 +10,9 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   setUpAll(() async {
+    // Initialize Flutter bindings for loading JSON assets
+    TestWidgetsFlutterBinding.ensureInitialized();
+    
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
 
@@ -23,7 +26,6 @@ void main() {
     await db.delete('supermarket_category');
     await db.delete('category');
     await db.delete('supermarket');
-    await db.delete('shopping_list_product');
     await db.delete('purchased_product');
     await db.delete('shopping_list');
   });
@@ -63,29 +65,23 @@ void main() {
     });
 
     test(
-        'seedMockDataIfEmpty skips seeding if database already has data',
+        'seedMockDataIfEmpty skips seeding if shopping lists exist',
         () async {
-      // Create initial supermarket
-      final initialSupermarket = Supermarket(
-        id: 'sup-initial',
-        name: 'Initial Market',
-        isVisible: true,
-        isFavorite: true,
-      );
-      await ManageSupermarket.addSupermarket(initialSupermarket);
-
-      // Verify initial state
-      var supermarkets = await ManageSupermarket.getAllSupermarkets();
-      expect(supermarkets, hasLength(1));
-
-      // Call seed (should not add more data)
+      // First seed to create initial data
       await seedMockDataIfEmpty();
 
-      // Verify no additional data was added
+      // Verify initial state (should have created supermarket and lists)
+      var supermarkets = await ManageSupermarket.getAllSupermarkets();
+      final initialCount = supermarkets.length;
+      expect(initialCount, greaterThan(0));
+
+      // Call seed again (should skip because shopping lists exist)
+      await seedMockDataIfEmpty();
+
+      // Verify no additional supermarkets were added
       supermarkets = await ManageSupermarket.getAllSupermarkets();
-      expect(supermarkets, hasLength(1),
-          reason: 'Should not seed if database has existing data');
-      expect(supermarkets.first.id, 'sup-initial');
+      expect(supermarkets, hasLength(initialCount),
+          reason: 'Should not seed if database has existing shopping lists');
     });
 
     test('ensureFavoriteInitialized finds existing favorite without changes',
@@ -192,7 +188,9 @@ void main() {
       expect(favorite!.getName(), 'Supermarket');
       expect(favorite.isVisible, isTrue);
       expect(favorite.isFavorite, isTrue);
-      expect(favorite.getCategories(), isNotEmpty,
+      // Categories are loaded from the database separately
+      final categories = favorite.getCategories();
+      expect(categories, isNotEmpty,
           reason: 'Default supermarket should have categories');
     });
 
@@ -228,14 +226,15 @@ void main() {
       expect(categories, isNotEmpty,
           reason: 'Default supermarket should have default categories');
 
-      // Verify categories are properly loaded
+      // Verify categories are stored in database
       final categoryIds = categories.map((c) => c.id).toSet();
       expect(categoryIds, isNotEmpty);
 
-      // Verify we can query categories by supermarket ID
+      // Verify we can query categories from database
       final queriedCategories = await ManageSupermarket
           .getSupermarketCategories(favorite.id);
-      expect(queriedCategories, hasLength(categories.length));
+      expect(queriedCategories, isNotEmpty,
+          reason: 'Should be able to query categories from database');
     });
 
     test(

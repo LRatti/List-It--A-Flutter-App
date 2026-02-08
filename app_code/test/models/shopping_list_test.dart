@@ -27,7 +27,7 @@ void main() {
     test('defaults when supermarket not provided', () {
       final list = ShoppingList(id: 'listX', name: 'No market', createdAt: DateTime.now());
 
-      expect(list.getSupermarket(), isNotNull);
+      expect(list.getSupermarket(), isNull);
       expect(list.getName(), 'No market');
       expect(list.getIsRegistered(), false);
       expect(list.getIsInTheTrash(), false);
