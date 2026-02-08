@@ -4,6 +4,7 @@ import 'package:app_code/screens/auth/sign_up.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 void main() {
   late MockAuthRepository repository;
@@ -24,8 +25,14 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(repository),
         ],
-        child: const MaterialApp(
-          home: Scaffold(
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routes: {
+            '/verification': (context) =>
+                const Scaffold(body: Text('Verification')),
+          },
+          home: const Scaffold(
             body: SignUpForm(),
           ),
         ),
@@ -68,7 +75,7 @@ void main() {
     await tester.tap(find.byKey(const Key('sign_up_button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Password must be at least 8 chars long'), findsOneWidget);
+    expect(find.text('Password must be at least 8 characters.'), findsOneWidget);
   });
 
   testWidgets('successfully signs up with valid information', (tester) async {
@@ -116,21 +123,7 @@ void main() {
     // Configure repository to fail on first attempt
     repository.setSignUpFailure(true);
 
-    // Use an app with the verification route to allow navigation after success
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(repository),
-        ],
-        child: MaterialApp(
-          routes: {
-            '/verification': (context) => const Scaffold(body: Text('Verification')),
-          },
-          home: const Scaffold(body: SignUpForm()),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await pumpSignUpForm(tester);
 
     // First attempt
     await tester.enterText(find.byKey(const Key('username_field')), 'testuser');
@@ -170,6 +163,19 @@ void main() {
     expect(find.text('myemail@example.com'), findsOneWidget);
   });
 
+  testWidgets('email field is configured for email input', (tester) async {
+    await pumpSignUpForm(tester);
+
+    // Verify email field exists and can be interacted with
+    final emailField = find.byKey(const Key('email_field'));
+    expect(emailField, findsOneWidget);
+
+    // Test that email input works correctly
+    await tester.enterText(emailField, 'test@example.com');
+    await tester.pumpAndSettle();
+    expect(find.text('test@example.com'), findsOneWidget);
+  });
+
   testWidgets('password field is configured for password input', (tester) async {
     await pumpSignUpForm(tester);
 
@@ -201,30 +207,68 @@ void main() {
     expect(linkedUser.getUserName(), 'linkeduser');
   });
 
-  testWidgets('sets verification session and navigates to verification screen', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(repository),
-        ],
-        child: MaterialApp(
-          routes: {
-            '/verification': (context) => const Scaffold(body: Text('Verification')),
-          },
-          home: const Scaffold(body: SignUpForm()),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets('sets verification session and navigates to verification screen',
+      (tester) async {
+    await pumpSignUpForm(tester);
 
     await tester.enterText(find.byKey(const Key('username_field')), 'tester');
-    await tester.enterText(find.byKey(const Key('email_field')), 'verify@example.com');
-    await tester.enterText(find.byKey(const Key('password_field')), 'password123');
+    await tester.enterText(
+        find.byKey(const Key('email_field')), 'verify@example.com');
+    await tester.enterText(
+        find.byKey(const Key('password_field')), 'password123');
 
     await tester.tap(find.byKey(const Key('sign_up_button')));
     await tester.pumpAndSettle();
 
     // Navigates to verification screen
     expect(find.text('Verification'), findsOneWidget);
+  });
+
+  testWidgets('trims whitespace from inputs before submission',
+      (tester) async {
+    await pumpSignUpForm(tester);
+
+    // Enter inputs with leading and trailing whitespace
+    await tester.enterText(
+        find.byKey(const Key('username_field')), '  testuser  ');
+    await tester.enterText(
+        find.byKey(const Key('email_field')), '  test@example.com  ');
+    await tester.enterText(
+        find.byKey(const Key('password_field')), '  password123  ');
+    await tester.pumpAndSettle();
+
+    // Tap sign up button
+    await tester.tap(find.byKey(const Key('sign_up_button')));
+    await tester.pumpAndSettle();
+
+    // Verify that whitespace was trimmed and sign up succeeded
+    final user = repository.getCurrentUser();
+    expect(user, isNotNull);
+    expect(user!.email, 'test@example.com');
+    expect(user.getUserName(), 'testuser');
+  });
+
+  testWidgets('displays error text widget with correct styling',
+      (tester) async {
+    repository.setSignUpFailure(true);
+
+    await pumpSignUpForm(tester);
+
+    // Enter valid information
+    await tester.enterText(find.byKey(const Key('username_field')), 'testuser');
+    await tester.enterText(
+        find.byKey(const Key('email_field')), 'test@example.com');
+    await tester.enterText(
+        find.byKey(const Key('password_field')), 'password123');
+    await tester.pumpAndSettle();
+
+    // Tap sign up button
+    await tester.tap(find.byKey(const Key('sign_up_button')));
+    await tester.pumpAndSettle();
+
+    // Verify error is displayed
+    expect(find.byKey(const Key('error_text')), findsOneWidget);
+    expect(find.text('Could not sign up with those details.'),
+        findsOneWidget);
   });
 }

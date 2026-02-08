@@ -88,6 +88,90 @@ $files | Sort-Object Coverage -Descending | Format-Table -AutoSize
 
 
 ------------------------------------------
+Run all tests with coverage and highlight failing tests:
+------------------------------------------
+cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"
+$output = flutter test --coverage --concurrency=1 2>&1
+$allLines = $output -split "`n"
+
+Write-Host "`n========== TEST EXECUTION SUMMARY ==========" -ForegroundColor Cyan
+Write-Host ""
+
+# Track results
+$failing = @()
+$passing = @()
+$currentTest = ""
+$testStarted = $false
+
+foreach ($line in $allLines) {
+    # Detect test file start
+    if ($line -match "^(Loading|Running|.*\.dart)") {
+        if ($line -match "✗ FAILED: (.*)" ) {
+            $failingTest = $matches[1]
+            $failing += $failingTest
+            Write-Host "❌ FAILED: $failingTest" -ForegroundColor Red
+        }
+        elseif ($line -match "✓.*" -and $line -notmatch "✗") {
+            # Passing test
+            if ($line -match "✓\s+(.*)") {
+                $passingTest = $matches[1]
+                $passing += $passingTest
+            }
+        }
+    }
+    
+    # Alternative pattern: look for test results in output
+    if ($line -match "FAILED") {
+        $failing += $line
+        Write-Host "❌ $line" -ForegroundColor Red
+    }
+    elseif ($line -match "PASSED|expected|actual" -and $line -match "Error") {
+        Write-Host "⚠️  $line" -ForegroundColor Yellow
+    }
+}
+
+Write-Host "`n============ SUMMARY ============" -ForegroundColor Cyan
+if ($failing.Count -eq 0) {
+    Write-Host "✓ All tests passed!" -ForegroundColor Green
+} else {
+    Write-Host "Total Failing Tests: $($failing.Count)" -ForegroundColor Red
+    Write-Host "`nFailing Tests:" -ForegroundColor Red
+    $failing | ForEach-Object {
+        Write-Host "  ❌ $_" -ForegroundColor Red
+    }
+}
+
+Write-Host "Total Passing Tests: $($passing.Count)" -ForegroundColor Green
+Write-Host "================================`n" -ForegroundColor Cyan
+
+
+------------------------------------------
+Alternative: Parse test output directly and save to file:
+------------------------------------------
+cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"
+$output = flutter test --coverage --concurrency=1 2>&1 | Tee-Object -FilePath lib/notes/test_run_output.txt
+
+# Extract failing tests
+$failingTests = $output | Where-Object { $_ -match "FAILED" -or $_ -match "Error:" -or $_ -match "✗" }
+
+Write-Host "`n" -ForegroundColor Cyan
+Write-Host "============= FAILED TESTS =============" -ForegroundColor Red
+if ($failingTests.Count -eq 0) {
+    Write-Host "✓ No failing tests found!" -ForegroundColor Green
+} else {
+    Write-Host "Found $($failingTests.Count) failing test(s):" -ForegroundColor Red
+    $failingTests | ForEach-Object {
+        Write-Host "  ❌ $_" -ForegroundColor Red
+    }
+    
+    # Save to file for later reference
+    $failingTests | Out-File lib/notes/failing_tests.txt -Encoding UTF8
+    Write-Host "`nFailing tests saved to: lib/notes/failing_tests.txt" -ForegroundColor Yellow
+}
+Write-Host "========================================`n" -ForegroundColor Cyan
+
+
+------------------------------------------
 Open summary HTML:
 ------------------------------------------
 cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"

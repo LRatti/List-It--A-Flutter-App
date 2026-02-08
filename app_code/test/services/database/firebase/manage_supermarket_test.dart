@@ -119,7 +119,7 @@ void main() {
 
       // setAllSupermarkets builds batch before try: should throw
       await expectLater(
-        manager.setAllSupermarkets([Supermarket(id: 'a'), Supermarket(id: 'b')]),
+        manager.setAllSupermarkets([Supermarket(id: 'a', name: 'A'), Supermarket(id: 'b', name: 'B')]),
         throwsA(isA<Exception>()),
       );
 

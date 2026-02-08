@@ -1,0 +1,68 @@
+﻿[38;5;196mÔöé Ôøö Error checking location service: Exception: Service check failed[0m
+[38;5;196mÔöé Ôøö Error checking permission: Exception: Permission check failed[0m
+[38;5;196mÔöé Ôøö Error requesting permission: Exception: Permission request failed[0m
+[38;5;196mÔöé Ôøö Error getting current position: Exception: Position retrieval failed[0m
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+[38;5;196mÔöé Ôøö [auth] Sign-in failed[0m
+[38;5;196mÔöé Ôøö [auth] Sign-in failed[0m
+[38;5;196mÔöé Ôøö [auth] Sign-in failed[0m
+[38;5;196mÔöé Exception: Failed to link anonymous user[0m
+[38;5;196mÔöé Ôøö [auth] Anonymous user linking failed[0m
+[38;5;196mÔöé Exception: Failed to link anonymous user[0m
+[38;5;196mÔöé Ôøö [auth] Anonymous user linking failed[0m
+[38;5;196mÔöé Exception: Failed to link anonymous user[0m
+[38;5;196mÔöé Ôøö [auth] Anonymous user linking failed[0m
+[38;5;196mÔöé Exception: Google sign-in failed or was cancelled[0m
+[38;5;196mÔöé Ôøö [auth] Google sign-in failed[0m
+[38;5;208mÔöé ÔÜá´©Å [auth] Google sign-in cancelled or failed on welcome screen[0m
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+Failed to delete product associations: Exception: User not authenticated
+[38;5;196mÔöé Ôøö [app] Failed to add supermarket | data={id: nope}[0m
+  SqfliteFfiException(sqlite_error: 1299, , SqliteException(1299): while executing statement, NOT NULL constraint failed: shopping_list.last_modified, constraint failed (code 1299)
+    Causing statement: INSERT INTO shopping_list (id, name, created_at, is_registered) VALUES (?, ?, ?, ?), parameters: test-list, Test, 2026-02-08T20:11:43.076192, 0}) DatabaseException(SqliteException(1299): while executing statement, NOT NULL constraint failed: shopping_list.last_modified, constraint failed (code 1299)
+  SqfliteFfiException(sqlite_error: 1299, , SqliteException(1299): while executing statement, NOT NULL constraint failed: shopping_list.last_modified, constraint failed (code 1299)
+    Causing statement: INSERT INTO shopping_list (id, name, created_at, is_registered) VALUES (?, ?, ?, ?), parameters: test-list, Test, 2026-02-08T20:11:43.103, 0}) DatabaseException(SqliteException(1299): while executing statement, NOT NULL constraint failed: shopping_list.last_modified, constraint failed (code 1299)
+  SqfliteFfiException(sqlite_error: 1299, , SqliteException(1299): while executing statement, NOT NULL constraint failed: shopping_list.last_modified, constraint failed (code 1299)
+    Causing statement: INSERT INTO shopping_list (id, name, created_at, is_registered, is_in_the_trash) VALUES (?, ?, ?, ?, ?), parameters: test-id, Test List, 2026-02-08T20:11:43.121120, 1, 0}) DatabaseException(SqliteException(1299): while executing statement, NOT NULL constraint failed: shopping_list.last_modified, constraint failed (code 1299)
+  SqfliteFfiException(sqlite_error: 1299, , SqliteException(1299): while executing statement, NOT NULL constraint failed: product.created_at, constraint failed (code 1299)
+    Causing statement: INSERT INTO product (id, name, is_visible) VALUES (?, ?, ?), parameters: prod-id, Test Product, 1}) DatabaseException(SqliteException(1299): while executing statement, NOT NULL constraint failed: product.created_at, constraint failed (code 1299)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while preparing statement, table category has no column named is_default, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while preparing statement, table category has no column named is_default, SQL logic error (code 1)
+[38;5;208mÔöé ÔÜá´©Å Failed to open map[0m
+[38;5;208mÔöé ÔÜá´©Å Failed to open map[0m
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: shopping_list_product, SQL logic error (code 1)
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+  Test failed. See exception logs above.
+07:56 +1848 -50: Some tests failed.

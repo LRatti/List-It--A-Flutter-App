@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/widgets/top_bar_with_navbar.dart';
 import 'package:app_code/widgets/side_menu.dart';
 import 'package:app_code/screens/lists/lists_screen_mobile.dart';
-import 'package:app_code/screens/supermarket/supermarkets_screen_mobile.dart';
+import 'package:app_code/screens/supermarket/supermarkets_screen.dart';
 import 'package:app_code/screens/history/history_screen_mobile.dart';
 import 'package:app_code/screens/stats/statistics_screen_mobile.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';

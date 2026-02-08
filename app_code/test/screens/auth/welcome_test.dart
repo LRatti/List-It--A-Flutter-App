@@ -4,6 +4,7 @@ import 'package:app_code/screens/auth/welcome.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 void main() {
   late MockAuthRepository repository;
@@ -23,11 +24,16 @@ void main() {
       ProviderScope(
         overrides: [authRepositoryProvider.overrideWithValue(repository)],
         child: MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: const WelcomeScreen(),
           routes: {
             '/home': (context) => const Scaffold(body: Text('Home Screen')),
             '/signin': (context) =>
                 const Scaffold(body: Text('Welcome Screen')),
+            '/verification': (context) =>
+                const Scaffold(body: Text('Verification Screen')),
           },
         ),
       ),
@@ -40,7 +46,7 @@ void main() {
   ) async {
     await pumpWelcomeScreen(tester);
 
-    expect(find.text('Flutter Auth'), findsOneWidget);
+    expect(find.text('Authentication'), findsOneWidget);
     expect(find.text('Welcome.'), findsOneWidget);
     expect(find.byKey(const Key('sign_up_section')), findsOneWidget);
     expect(find.text('Sign up for a new account.'), findsOneWidget);
@@ -223,7 +229,7 @@ void main() {
     await pumpWelcomeScreen(tester);
 
     expect(find.byType(AppBar), findsOneWidget);
-    expect(find.text('Flutter Auth'), findsOneWidget);
+    expect(find.text('Authentication'), findsOneWidget);
   });
 
   testWidgets('app bar has back button', (tester) async {
@@ -242,9 +248,23 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
 
-    // Should navigate back (in real app, would go back to InitialScreen)
-    // Test verifies the back button is present and tappable
-    expect(find.byIcon(Icons.arrow_back), findsNothing);
+    // Should navigate back to home screen
+    expect(find.text('Home Screen'), findsOneWidget);
+    expect(find.text('Welcome.'), findsNothing);
+  });
+
+  testWidgets('Google sign in failure keeps user on welcome screen', (
+    tester,
+  ) async {
+    repository.setGoogleSignInFailure(true);
+
+    await pumpWelcomeScreen(tester);
+
+    await tester.tap(find.byKey(const Key('google_sign_in_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Home Screen'), findsNothing);
+    expect(find.text('Welcome.'), findsOneWidget);
   });
 
   testWidgets('screen is scrollable', (tester) async {
