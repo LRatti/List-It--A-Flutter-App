@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:app_code/l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 
@@ -80,11 +79,9 @@ void main() async {
   await _runStartupTasks();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => LocaleProvider(),
-      child: const ProviderScope(
-        child: MyApp(),
-      ),
+    // ProviderScope is the only wrapper you need for Riverpod
+    const ProviderScope(
+      child: MyApp(),
     ),
   );
 }
@@ -96,6 +93,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scaffoldMessengerKey = ref.watch(scaffoldMessengerKeyProvider);
     final navigatorKey = ref.watch(navigatorKeyProvider);
+    final currentLocale = ref.watch(localeProvider);
 
     // Initialize notification service (side effect, no rebuild needed)
     ref.read(recipeNotificationServiceProvider);
@@ -159,6 +157,7 @@ class MyApp extends ConsumerWidget {
               themeMode: themeMode,
               theme: theme,
               darkTheme: darkTheme,
+              locale: currentLocale,
             )
           : MobileAppShell(
               scaffoldMessengerKey: scaffoldMessengerKey,
@@ -166,6 +165,7 @@ class MyApp extends ConsumerWidget {
               themeMode: themeMode,
               theme: theme,
               darkTheme: darkTheme,
+              locale: currentLocale,
             ),
     );
   }
@@ -179,6 +179,7 @@ class MobileAppShell extends StatelessWidget {
     required this.themeMode,
     required this.theme,
     required this.darkTheme,
+    required this.locale,
   });
 
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
@@ -186,11 +187,10 @@ class MobileAppShell extends StatelessWidget {
   final ThemeMode themeMode;
   final ThemeData theme;
   final ThemeData darkTheme;
+  final Locale locale;
 
   @override
   Widget build(BuildContext context) {
-    final localeProvider = context.watch<LocaleProvider>();
-
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
@@ -199,7 +199,7 @@ class MobileAppShell extends StatelessWidget {
       themeMode: themeMode,
       theme: theme,
       darkTheme: darkTheme,
-      locale: localeProvider.locale,
+      locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       initialRoute: '/',
@@ -223,6 +223,7 @@ class TabletAppShell extends StatelessWidget {
     required this.themeMode,
     required this.theme,
     required this.darkTheme,
+    required this.locale,
   });
 
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
@@ -230,11 +231,9 @@ class TabletAppShell extends StatelessWidget {
   final ThemeMode themeMode;
   final ThemeData theme;
   final ThemeData darkTheme;
-
+  final Locale locale;
   @override
   Widget build(BuildContext context) {
-    final localeProvider = context.watch<LocaleProvider>();
-
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
@@ -243,7 +242,7 @@ class TabletAppShell extends StatelessWidget {
       themeMode: themeMode,
       theme: theme,
       darkTheme: darkTheme,
-      locale: localeProvider.locale,
+      locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       initialRoute: '/',

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/font_size_provider.dart';
 import 'package:app_code/providers/locale_provider.dart';
@@ -167,8 +166,8 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
         value: themeMode == ThemeMode.dark,
         onChanged: (value) {
           ref.read(themeProvider.notifier).setThemeMode(
-            value ? ThemeMode.dark : ThemeMode.light,
-          );
+                value ? ThemeMode.dark : ThemeMode.light,
+              );
         },
       ),
     );
@@ -362,17 +361,17 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
   }
 
   Widget _buildLanguageSection(AppLocalizations l10n) {
-    final localeProvider = context.watch<LocaleProvider>();
+    // Watch the state directly through Riverpod
+    final currentLocale = ref.watch(localeProvider);
 
     return ListTile(
       title: Text(l10n.languageLabel),
       trailing: DropdownButton<Locale>(
-        value: localeProvider.locale,
+        value: currentLocale,
         onChanged: (locale) {
-          if (locale == null) {
-            return;
-          }
-          localeProvider.setLocale(locale);
+          if (locale == null) return;
+          // Update state through the notifier
+          ref.read(localeProvider.notifier).setLocale(locale);
         },
         items: [
           DropdownMenuItem(
