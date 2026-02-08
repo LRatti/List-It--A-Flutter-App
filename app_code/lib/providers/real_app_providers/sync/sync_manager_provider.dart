@@ -10,9 +10,9 @@ import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/providers/real_app_providers/category/categories_notifier.dart';
+import 'package:app_code/utils/logging_config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Tracks the current authenticated user ID to detect auth state changes
@@ -67,13 +67,14 @@ final syncManagerProvider = FutureProvider<SyncManager>((ref) async {
   
   final registry = await ref.watch(syncRepositoryRegistryProvider.future);
   final prefs = await SharedPreferences.getInstance();
+  final syncLogger = createSyncLogger();
 
   final syncManager = SyncManager(
     syncRepositoryRegistry: registry,
     prefs: prefs,
     firestore: FirebaseFirestore.instance,
     firebaseAuth: FirebaseAuth.instance,
-    logger: Logger(),
+    logger: syncLogger,
   );
 
   // Initialize the sync manager
@@ -115,13 +116,13 @@ final syncManagerProvider = FutureProvider<SyncManager>((ref) async {
     try {
       // Trigger a manual sync to push any pending local changes to Firestore
       await syncManager.triggerManualSync();
-      Logger().i('SyncManager: Post-login sync triggered to push queued changes');
+      syncLogger.i('SyncManager: Post-login sync triggered to push queued changes');
       // Refresh UI after post-login sync
       ref.invalidate(shoppingListsProvider);
       ref.invalidate(categoriesProvider);
       ref.invalidate(supermarketsProvider);
     } catch (e) {
-      Logger().w('SyncManager: Post-login sync error (non-fatal)', error: e);
+      syncLogger.w('SyncManager: Post-login sync error (non-fatal)', error: e);
       // Don't rethrow - this is informational
     }
   }

@@ -1,6 +1,7 @@
 import 'package:app_code/screens/auth/sign_in.dart';
 import 'package:app_code/screens/auth/sign_up.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
+import 'package:app_code/utils/auth_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/l10n/app_localizations.dart';
@@ -85,13 +86,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 onPressed: () async {
                   // Always defer to repository logic for Google sign-in.
                   // It will upgrade anonymous accounts or sign in existing ones.
-                  await authNotifier.signInWithGoogle();
+                  try {
+                    AuthLogger.info('Google sign-in button pressed');
+                    await authNotifier.signInWithGoogle();
 
-                  if (context.mounted) {
-                    // Navigate back to home screen after successful sign-in
-                    Navigator.of(
-                      context,
-                    ).pushNamedAndRemoveUntil('/home', (route) => false);
+                    if (context.mounted) {
+                      // Navigate back to home screen after successful sign-in
+                      AuthLogger.info('Google sign-in succeeded, navigating home');
+                      Navigator.of(
+                        context,
+                      ).pushNamedAndRemoveUntil('/home', (route) => false);
+                    }
+                  } catch (e) {
+                    // User cancelled or sign-in failed - stay on welcome screen
+                    // No need to show error message as user intentionally cancelled
+                    AuthLogger.warning(
+                      'Google sign-in cancelled or failed on welcome screen',
+                    );
                   }
                 },
                 child: Text(l10n.signInWithGoogle),

@@ -13,25 +13,52 @@ class AppLogger {
     ),
   );
 
-  static void info(String message, {Map<String, Object?>? data}) {
-    _logger.i(_format(message, data));
+  static void debug(
+    String message, {
+    String name = 'app',
+    Map<String, Object?>? data,
+  }) {
+    _logger.d(_format(name, message, data));
   }
 
-  static void warning(String message, {Map<String, Object?>? data}) {
-    _logger.w(_format(message, data));
+  static void info(
+    String message, {
+    String name = 'app',
+    Map<String, Object?>? data,
+  }) {
+    _logger.i(_format(name, message, data));
+  }
+
+  static void warning(
+    String message, {
+    String name = 'app',
+    Map<String, Object?>? data,
+  }) {
+    _logger.w(_format(name, message, data));
   }
 
   static void error(
-    String message, {
+    String message,
+    {
+    String name = 'app',
     Object? error,
     StackTrace? stackTrace,
     Map<String, Object?>? data,
   }) {
-    _logger.e(_format(message, data), error: error, stackTrace: stackTrace);
+    _logger.e(
+      _format(name, message, data),
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
-  static String _format(String message, Map<String, Object?>? data) {
-    if (data == null || data.isEmpty) return message;
-    return '$message | data=$data';
+  static String _format(
+    String name,
+    String message,
+    Map<String, Object?>? data,
+  ) {
+    final base = '[$name] $message';
+    if (data == null || data.isEmpty) return base;
+    return '$base | data=$data';
   }
 }

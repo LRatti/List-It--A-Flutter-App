@@ -1,6 +1,7 @@
 import 'package:app_code/models/user.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
 import 'package:app_code/services/database/firebase/manage_user.dart';
+import 'package:app_code/utils/auth_logger.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -12,8 +13,16 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<User?> ensureAuthenticated() async {
+    AuthLogger.info('Checking current auth user');
     // Check if a user is already signed in
     if (_firebaseAuth.currentUser != null) {
+      AuthLogger.info(
+        'Existing Firebase user found',
+        data: {
+          'isAnonymous': _firebaseAuth.currentUser!.isAnonymous,
+          'email': AuthLogger.maskEmail(_firebaseAuth.currentUser!.email),
+        },
+      );
       // User is already signed in, return existing user
       return User(
         uid: _firebaseAuth.currentUser!.uid,
@@ -23,24 +32,35 @@ class FirebaseAuthRepository implements AuthRepository {
     }
 
     // No user signed in, sign in anonymously
+    AuthLogger.info('No current user, signing in anonymously');
     return await signInAnonymously();
   }
 
   @override
   Future<User?> signInAnonymously() async {
     try {
+      AuthLogger.info('Attempting anonymous sign-in');
       final firebase_auth.UserCredential credential = await _firebaseAuth
           .signInAnonymously();
 
       if (credential.user != null) {
+        AuthLogger.info(
+          'Anonymous sign-in succeeded',
+          data: {'uid': credential.user!.uid},
+        );
         return User(
           uid: credential.user!.uid,
           isAnonymous: credential.user!.isAnonymous,
         );
       }
+      AuthLogger.warning('Anonymous sign-in returned null user');
       return null;
-    } catch (e) {
-      print('Error signing in anonymously: ${e.toString()}');
+    } catch (e, stackTrace) {
+      AuthLogger.error(
+        'Error signing in anonymously',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
@@ -48,6 +68,10 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<User?> signUp(String email, String password) async {
     try {
+      AuthLogger.info(
+        'Starting email sign-up',
+        data: {'email': AuthLogger.maskEmail(email)},
+      );
       final firebase_auth.UserCredential credential = await _firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password);
 
@@ -64,6 +88,10 @@ class FirebaseAuthRepository implements AuthRepository {
         //   ),
         // );
         
+        AuthLogger.info(
+          'Email sign-up succeeded',
+          data: {'uid': credential.user!.uid},
+        );
         return User(
           uid: credential.user!.uid,
           //uid: uid,
@@ -72,9 +100,15 @@ class FirebaseAuthRepository implements AuthRepository {
           //email: userEmail,
         );
       }
+      AuthLogger.warning('Email sign-up returned null user');
       return null;
-    } catch (e) {
-      print('Error signing up with email and password: ${e.toString()}');
+    } catch (e, stackTrace) {
+      AuthLogger.error(
+        'Error signing up with email and password',
+        error: e,
+        stackTrace: stackTrace,
+        data: {'email': AuthLogger.maskEmail(email)},
+      );
       return null;
     }
   }
@@ -82,6 +116,10 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<User?> signIn(String email, String password) async {
     try {
+      AuthLogger.info(
+        'Starting email sign-in',
+        data: {'email': AuthLogger.maskEmail(email)},
+      );
       final firebase_auth.UserCredential credential = await _firebaseAuth
           .signInWithEmailAndPassword(email: email, password: password);
 
@@ -103,6 +141,10 @@ class FirebaseAuthRepository implements AuthRepository {
         //   ),
         // );
         
+        AuthLogger.info(
+          'Email sign-in succeeded',
+          data: {'uid': credential.user!.uid},
+        );
         return User(
           uid: credential.user!.uid,
           //uid: uid,
@@ -111,9 +153,15 @@ class FirebaseAuthRepository implements AuthRepository {
           //email: userEmail,
         );
       }
+      AuthLogger.warning('Email sign-in returned null user');
       return null;
-    } catch (e) {
-      print('Error signing in with email and password: ${e.toString()}');
+    } catch (e, stackTrace) {
+      AuthLogger.error(
+        'Error signing in with email and password',
+        error: e,
+        stackTrace: stackTrace,
+        data: {'email': AuthLogger.maskEmail(email)},
+      );
       return null;
     }
   }
@@ -121,11 +169,13 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<User?> signInWithGoogle() async {
     try {
+      AuthLogger.info('Starting Google sign-in');
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
       );
 
       // Sign out first to force account selection every time
+      AuthLogger.debug('Signing out of Google to force account selection');
       await googleSignIn.signOut();
 
       // Perform interactive sign-in to let user choose account
@@ -136,14 +186,19 @@ class FirebaseAuthRepository implements AuthRepository {
       } catch (e) {
         // On web, signIn is deprecated and may fail - that's expected
         // Users should authenticate via the Google Sign-In button in index.html
-        print(
-          'Interactive sign-in unavailable (expected on web): ${e.toString()}',
+        AuthLogger.warning(
+          'Interactive Google sign-in unavailable',
+          data: {'error': e.toString()},
         );
         return null;
       }
 
-      if (googleUser == null) return null; // User cancelled
+      if (googleUser == null) {
+        AuthLogger.warning('Google sign-in cancelled by user');
+        return null;
+      }
 
+      AuthLogger.info('Google account selected');
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
@@ -156,11 +211,16 @@ class FirebaseAuthRepository implements AuthRepository {
 
       // If the current user is anonymous, try upgrading by linking first.
       if (currentUser != null && currentUser.isAnonymous) {
+        AuthLogger.info('Attempting anonymous account upgrade with Google');
         try {
           final firebase_auth.UserCredential linked = await currentUser
               .linkWithCredential(credential);
 
           if (linked.user != null) {
+            AuthLogger.info(
+              'Anonymous account upgraded with Google',
+              data: {'uid': linked.user!.uid},
+            );
             await FirebaseUserManager().setUser(
               User(
                 uid: linked.user!.uid,
@@ -174,15 +234,21 @@ class FirebaseAuthRepository implements AuthRepository {
               email: linked.user!.email!,
             );
           }
+          AuthLogger.warning('Anonymous upgrade returned null user');
           return null;
         } on firebase_auth.FirebaseAuthException catch (e) {
           // If this Google credential already belongs to an existing account,
           // sign into that account instead of forcing a registration.
           if (e.code == 'credential-already-in-use') {
+            AuthLogger.warning('Google credential already in use, signing in');
             final firebase_auth.UserCredential signedIn = await _firebaseAuth
                 .signInWithCredential(credential);
 
             if (signedIn.user != null) {
+              AuthLogger.info(
+                'Signed in with existing Google credential',
+                data: {'uid': signedIn.user!.uid},
+              );
               await FirebaseUserManager().setUser(
                 User(
                   uid: signedIn.user!.uid,
@@ -196,11 +262,16 @@ class FirebaseAuthRepository implements AuthRepository {
                 email: signedIn.user!.email!,
               );
             }
+            AuthLogger.warning('Sign-in with existing Google credential failed');
             return null;
           }
 
-        } catch (e) {
-          print('Unexpected error during anonymous upgrade: ${e.toString()}');
+        } catch (e, stackTrace) {
+          AuthLogger.error(
+            'Unexpected error during anonymous upgrade',
+            error: e,
+            stackTrace: stackTrace,
+          );
           return null;
         }
       }
@@ -210,6 +281,10 @@ class FirebaseAuthRepository implements AuthRepository {
           .signInWithCredential(credential);
 
       if (userCredential.user != null) {
+        AuthLogger.info(
+          'Google sign-in with credential succeeded',
+          data: {'uid': userCredential.user!.uid},
+        );
         await FirebaseUserManager().setUser(
           User(
             uid: userCredential.user!.uid,
@@ -223,9 +298,14 @@ class FirebaseAuthRepository implements AuthRepository {
           email: userCredential.user!.email!,
         );
       }
+      AuthLogger.warning('Google sign-in returned null user');
       return null;
-    } catch (e) {
-      print('Error signing in with Google: ${e.toString()}');
+    } catch (e, stackTrace) {
+      AuthLogger.error(
+        'Error signing in with Google',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
@@ -237,6 +317,10 @@ class FirebaseAuthRepository implements AuthRepository {
     String username,
   ) async {
     try {
+      AuthLogger.info(
+        'Linking anonymous user with email and password',
+        data: {'email': AuthLogger.maskEmail(email)},
+      );
       final currentUser = _firebaseAuth.currentUser;
 
       if (currentUser == null || !currentUser.isAnonymous) {
@@ -258,15 +342,25 @@ class FirebaseAuthRepository implements AuthRepository {
         await FirebaseUserManager().setUser(
           User(uid: userCredential.user!.uid, email: email, userName: username),
         );
+        AuthLogger.info(
+          'Anonymous user linked successfully',
+          data: {'uid': userCredential.user!.uid},
+        );
         return User(
           uid: userCredential.user!.uid,
           isAnonymous: userCredential.user!.isAnonymous,
           email: userCredential.user!.email!,
         );
       }
+      AuthLogger.warning('Anonymous linking returned null user');
       return null;
-    } catch (e) {
-      print('Error linking anonymous user: ${e.toString()}');
+    } catch (e, stackTrace) {
+      AuthLogger.error(
+        'Error linking anonymous user',
+        error: e,
+        stackTrace: stackTrace,
+        data: {'email': AuthLogger.maskEmail(email)},
+      );
       return null;
     }
   }
@@ -275,8 +369,10 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
+    AuthLogger.info('Signing out from FirebaseAuthRepository');
     await _firebaseAuth.signOut();
     await signInAnonymously();
+    AuthLogger.info('Sign-out complete, anonymous session started');
   }
 
   @override
@@ -305,10 +401,19 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<void> sendPasswordResetEmail(String email) async {
     try {
+      AuthLogger.info(
+        'Sending password reset email',
+        data: {'email': AuthLogger.maskEmail(email)},
+      );
       await _firebaseAuth.sendPasswordResetEmail(email: email);
+      AuthLogger.info('Password reset email sent');
     } catch (e) {
       // Do not leak details; rethrow a generic error for UI handling if needed
-      print('Error sending password reset email: ${e.toString()}');
+      AuthLogger.error(
+        'Error sending password reset email',
+        error: e,
+        data: {'email': AuthLogger.maskEmail(email)},
+      );
       rethrow;
     }
   }
@@ -397,6 +502,10 @@ class FirebaseAuthRepository implements AuthRepository {
     if (isNewSignup) {
       // For new signup: delete the account and sign in anonymously
       try {
+        AuthLogger.info(
+          'Aborting new signup: deleting user and signing in anonymously',
+          data: {'uid': user.uid},
+        );
         // Delete user from Firestore first
         await FirebaseUserManager().deleteUser(user.uid);
         
@@ -405,8 +514,13 @@ class FirebaseAuthRepository implements AuthRepository {
         
         // Sign in anonymously
         await signInAnonymously();
+        AuthLogger.info('New signup aborted successfully');
       } catch (e) {
-        print('Error aborting new signup: ${e.toString()}');
+        AuthLogger.error(
+          'Error aborting new signup',
+          error: e,
+          data: {'uid': user.uid},
+        );
         throw Exception('Failed to abort signup: $e');
       }
     } else {
@@ -423,6 +537,10 @@ class FirebaseAuthRepository implements AuthRepository {
           userName: existing?.getUserName() ?? '',
         );
         await manager.setUser(updated);
+        AuthLogger.info(
+          'Email verification aborted for existing user',
+          data: {'uid': user.uid},
+        );
     }
   }
 }
