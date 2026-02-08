@@ -23,7 +23,8 @@ class FirebaseUserManager {
     try {
       DocumentSnapshot<Map<String, dynamic>> doc = await _db.doc(uid).get();
       if (doc.exists) {
-        return User.fromDatabase(doc);
+        final usr = User.fromDatabase(doc);
+        return usr;
       } else {
         print("User with uid $uid does not exist.");
         return null;

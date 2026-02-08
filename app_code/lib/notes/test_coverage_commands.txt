@@ -1,8 +1,7 @@
 -----------
 First Run:
 -----------
-cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"
-flutter test --coverage
+flutter test --coverage --concurrency=1
 
 
 ----------------------------------------------

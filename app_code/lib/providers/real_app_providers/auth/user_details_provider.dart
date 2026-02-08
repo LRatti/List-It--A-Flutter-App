@@ -26,7 +26,28 @@ class UserDetailsNotifier extends AsyncNotifier<User?> {
       return null;
     }
     
-    return _userManager.getUserData();
+    final userDetails = await _userManager.getUserData();
+
+    return userDetails;
+    // final authenticatedUser = authUser.value!;
+    
+    // // Try to fetch additional user data from Firestore (e.g., username)
+    // try {
+    //   final firestoreUser = await _userManager.getUserData();
+      
+    //   // If Firestore has user data, use it (it includes username)
+    //   if (firestoreUser != null) {
+    //     return firestoreUser;
+    //   }
+      
+    //   // If no Firestore document exists, return the authenticated user from authProvider
+    //   // This ensures the profile screen still works even without a Firestore document
+    //   return authenticatedUser;
+    // } catch (e) {
+    //   // On error, fallback to the authenticated user data
+    //   print('Error fetching user from Firestore: $e');
+    //   return authenticatedUser;
+    // }
   }
 
   /// Reloads user details from the repository.

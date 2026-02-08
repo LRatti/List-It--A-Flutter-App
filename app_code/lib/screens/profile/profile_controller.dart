@@ -1,6 +1,6 @@
-part of 'settings_screen.dart';
+part of 'profile_screen.dart';
 
-abstract class SettingsController extends ConsumerState<SettingsScreen> {
+abstract class ProfileController extends ConsumerState<ProfileScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _emailController;
   late TextEditingController _confirmEmailController;

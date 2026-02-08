@@ -2,7 +2,7 @@ import 'package:app_code/models/user.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/auth/user_details_provider.dart';
 import 'package:app_code/repositories/abstract/auth_repository.dart';
-import 'package:app_code/screens/profile/settings_screen.dart';
+import 'package:app_code/screens/profile/profile_screen.dart';
 import 'package:app_code/repositories/real_app_repo/database_manager_repository/manage_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,7 +38,7 @@ void main() {
 					authProvider.overrideWith(() => _FakeAuthNotifier(user, repo)),
 			],
 			child: const MaterialApp(
-				home: SettingsScreen(),
+				home: ProfileScreen(),
 			),
 		);
 	}

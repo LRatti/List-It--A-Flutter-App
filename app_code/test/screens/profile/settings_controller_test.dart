@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:app_code/models/user.dart';
-import 'package:app_code/screens/profile/settings_screen.dart';
+import 'package:app_code/screens/profile/profile_screen.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/auth/email_verification_provider.dart';
 import 'package:app_code/providers/real_app_providers/auth/user_details_provider.dart';
@@ -145,7 +145,7 @@ void main() {
               const Scaffold(body: Text('Verification')),
           '/signin': (context) => const Scaffold(body: Text('Sign In Screen')),
         },
-        home: const SettingsScreen(),
+        home: const ProfileScreen(),
         navigatorObservers: [if (observer != null) observer],
       ),
     );
@@ -193,7 +193,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Get context before navigation
-    final settingsContext = tester.element(find.byType(SettingsScreen));
+    final settingsContext = tester.element(find.byType(ProfileScreen));
     final container = ProviderScope.containerOf(settingsContext);
 
     // Tap Update Security Settings button

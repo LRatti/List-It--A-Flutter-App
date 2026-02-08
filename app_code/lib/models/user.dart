@@ -17,7 +17,7 @@ class User {
     String? userName,
     DateTime? lastModified,
     DateTime? createdAt,
-    bool isDeleted = false,
+    //bool isDeleted = false,
   }): 
       _userName = userName,
       uid = uid ?? Helper.generateId(),
@@ -42,7 +42,7 @@ class User {
       userName: json['user_name'],
       lastModified: DateTime.tryParse(json['last_modified'] ?? '') ?? DateTime.now(),
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
-      isDeleted: json['is_deleted'] ?? false,
+      //isDeleted: json['is_deleted'] ?? false,
     );
   }
 
@@ -64,7 +64,7 @@ class User {
       userName: json['user_name'],
       lastModified: DateTime.tryParse(json['lastModified'] ?? '') ?? DateTime.now(),
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-      isDeleted: json['isDeleted'] ?? false,
+      //isDeleted: json['isDeleted'] ?? false,
     );
   }
 

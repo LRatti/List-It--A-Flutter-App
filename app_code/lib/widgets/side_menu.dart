@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/screens/trash/trash_screen_mobile.dart';
-import 'package:app_code/screens/profile/settings_screen.dart';
+import 'package:app_code/screens/profile/profile_screen.dart';
 
 class SideMenu extends StatelessWidget {
   final VoidCallback onClose;
@@ -57,7 +57,7 @@ class SideMenu extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const SettingsScreen(),
+                        builder: (_) => const ProfileScreen(),
                       ),
                     );
                   },

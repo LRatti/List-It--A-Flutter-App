@@ -52,10 +52,24 @@ class FirebaseAuthRepository implements AuthRepository {
           .createUserWithEmailAndPassword(email: email, password: password);
 
       if (credential.user != null) {
+        // final uid = credential.user!.uid;
+        // final userEmail = credential.user!.email;
+        
+        // // Create Firestore document for the new user
+        // await FirebaseUserManager().setUser(
+        //   User(
+        //     uid: uid,
+        //     email: userEmail,
+        //     userName: '', // Empty username, user can set it later
+        //   ),
+        // );
+        
         return User(
           uid: credential.user!.uid,
+          //uid: uid,
           isAnonymous: credential.user!.isAnonymous,
           email: credential.user!.email!,
+          //email: userEmail,
         );
       }
       return null;
@@ -72,10 +86,29 @@ class FirebaseAuthRepository implements AuthRepository {
           .signInWithEmailAndPassword(email: email, password: password);
 
       if (credential.user != null) {
+        // final uid = credential.user!.uid;
+        // final userEmail = credential.user!.email;
+        
+        // // Ensure Firestore document exists for this user
+        // // Fetch existing data to preserve username if it exists
+        // final manager = FirebaseUserManager();
+        // final existingUser = await manager.getUserById(uid);
+        
+        // // Create or update the Firestore document
+        // await manager.setUser(
+        //   User(
+        //     uid: uid,
+        //     email: userEmail,
+        //     userName: existingUser?.getUserName() ?? '',
+        //   ),
+        // );
+        
         return User(
           uid: credential.user!.uid,
+          //uid: uid,
           isAnonymous: credential.user!.isAnonymous,
           email: credential.user!.email!,
+          //email: userEmail,
         );
       }
       return null;
@@ -97,6 +130,7 @@ class FirebaseAuthRepository implements AuthRepository {
 
       // Perform interactive sign-in to let user choose account
       GoogleSignInAccount? googleUser;
+
       try {
         googleUser = await googleSignIn.signIn();
       } catch (e) {
@@ -131,7 +165,7 @@ class FirebaseAuthRepository implements AuthRepository {
               User(
                 uid: linked.user!.uid,
                 email: linked.user!.email!,
-                userName: linked.user!.displayName ?? '',
+                userName: googleUser.displayName ?? '',
               ),
             );
             return User(
@@ -153,7 +187,7 @@ class FirebaseAuthRepository implements AuthRepository {
                 User(
                   uid: signedIn.user!.uid,
                   email: signedIn.user!.email!,
-                  userName: signedIn.user!.displayName ?? '',
+                  userName: googleUser.displayName ?? '',
                 ),
               );
               return User(
@@ -165,7 +199,8 @@ class FirebaseAuthRepository implements AuthRepository {
             return null;
           }
 
-          print('Error upgrading anonymous user with Google: ${e.code}');
+        } catch (e) {
+          print('Unexpected error during anonymous upgrade: ${e.toString()}');
           return null;
         }
       }
@@ -179,7 +214,7 @@ class FirebaseAuthRepository implements AuthRepository {
           User(
             uid: userCredential.user!.uid,
             email: userCredential.user!.email!,
-            userName: userCredential.user!.displayName ?? '',
+            userName: googleUser.displayName ?? '',
           ),
         );
         return User(

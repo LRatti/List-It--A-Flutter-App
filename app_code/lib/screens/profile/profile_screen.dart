@@ -9,16 +9,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/widgets/password_text_field.dart';
 
-part 'settings_controller.dart';
+part 'profile_controller.dart';
 
-class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+class ProfileScreen extends ConsumerStatefulWidget {
+  const ProfileScreen({super.key});
 
   @override
-  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _SettingsScreenState extends SettingsController {
+class _ProfileScreenState extends ProfileController {
   bool _isInitialized = false;
 
   @override
