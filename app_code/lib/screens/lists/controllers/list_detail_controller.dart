@@ -220,7 +220,6 @@ class ListDetailController extends ChangeNotifier {
     final firstIndexInCategory = _products.indexWhere(
       (p) => p.category.id == category.id,
     );
-
     if (firstIndexInCategory != -1) {
       // Insert at the beginning of the category
       _products.insert(firstIndexInCategory, purchasedProduct);
@@ -436,6 +435,13 @@ class ListDetailController extends ChangeNotifier {
       await _persistListMetadata();
       await _flushPendingAssociations();
       _hasChanges = false;
+
+      await _propagateCategoryChangeAcrossLists(
+        productId: _products[index].product.id,
+        supermarketId: _selectedSupermarket?.id,
+        categoryId: newCategory.id,
+        fallbackCategory: newCategory,
+      );
     }
   }
 
@@ -484,7 +490,6 @@ class ListDetailController extends ChangeNotifier {
     // than the category in the supermarket's categories list
     for (var product in _products) {
       final productCategoryId = product.category.id;
-
       // Find matching category in supermarket's categories by ID
       final matchingCategory = categories.firstWhere(
         (cat) => cat.id == productCategoryId,
@@ -522,6 +527,58 @@ class ListDetailController extends ChangeNotifier {
     );
   }
 
+  Future<void> _propagateCategoryChangeAcrossLists({
+    required String productId,
+    required String? supermarketId,
+    required String categoryId,
+    required Category fallbackCategory,
+  }) async {
+    if (supermarketId == null) return;
+
+    final listState = _ref.read(shoppingListsProvider);
+    List<ShoppingList> lists;
+    if (listState.hasValue) {
+      lists = listState.value ?? [];
+    } else {
+      final repository = _ref.read(shoppingListRepositoryProvider);
+      lists = await repository.getAll();
+    }
+
+    if (lists.isEmpty) return;
+
+    final listsNotifier = _ref.read(shoppingListsProvider.notifier);
+
+    for (final list in lists) {
+      if (list.id == _originalList.id) continue;
+
+      final listSupermarket = list.getSupermarket();
+      if (listSupermarket?.id != supermarketId) continue;
+
+      final listProducts = list.getProducts();
+      if (listProducts.isEmpty) continue;
+
+      final matchingCategory = listSupermarket!.getCategories().firstWhere(
+        (cat) => cat.id == categoryId,
+        orElse: () => fallbackCategory,
+      );
+
+      var updated = false;
+      for (final purchasedProduct in listProducts) {
+        if (purchasedProduct.product.id != productId) continue;
+        if (purchasedProduct.category.id == matchingCategory.id) continue;
+
+        purchasedProduct.category = matchingCategory;
+        purchasedProduct.lastModified = DateTime.now();
+        updated = true;
+      }
+
+      if (updated) {
+        list.setPurchasedProducts(listProducts);
+        await listsNotifier.updateList(list);
+      }
+    }
+  }
+
   Future<void> _persistListMetadata() async {
     _originalList.setName(_listName);
     _originalList.setSupermarket(_selectedSupermarket);
@@ -548,7 +605,9 @@ class ListDetailController extends ChangeNotifier {
     );
 
     if (existingProduct != null) {
-      purchasedProduct.product = existingProduct;
+      if (existingProduct.id != purchasedProduct.product.id) {
+        purchasedProduct.product = existingProduct;
+      }
     } else {
       await productsNotifier.addProduct(purchasedProduct.product);
     }
@@ -608,7 +667,10 @@ class ListDetailController extends ChangeNotifier {
 
         if (existingProduct != null) {
           // Product name matches existing product - use existing product reference
-          purchasedProduct.product = existingProduct;
+          // only if it is a different product to avoid losing in-memory associations.
+          if (existingProduct.id != product.id) {
+            purchasedProduct.product = existingProduct;
+          }
         } else {
           // New product
           await productsNotifier.addProduct(product);

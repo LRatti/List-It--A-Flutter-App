@@ -1,5 +1,4 @@
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
-import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +15,6 @@ import 'package:app_code/services/product_search_service.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/widgets/draggable_product_list.dart';
 import 'package:app_code/utils/uncategorized_category_initializer.dart';
-import 'package:riverpod/src/framework.dart';
 import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 
@@ -58,6 +56,14 @@ class _ListDetailScreenMobileState
     _nameController = TextEditingController(
       text: widget.shoppingList.getName(),
     );
+    _nameFieldFocusNode.addListener(() {
+      if (!_nameFieldFocusNode.hasFocus) {
+        final controller = ref.read(
+          listDetailControllerProvider(widget.shoppingList),
+        );
+        controller.updateListName(_nameController.text.trim());
+      }
+    });
     _productSearchController = TextEditingController();
 
     // Initialize controller with favorite supermarket if new list
