@@ -33,13 +33,14 @@ class _VerificationScreenState extends VerificationController {
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+        child: SingleChildScrollView(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 40),
               Icon(
                 Icons.mark_email_unread_outlined,
                 size: 100,
@@ -160,10 +161,12 @@ class _VerificationScreenState extends VerificationController {
                 ),
                 textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
       ),
+    )
     );
   }
 }
