@@ -40,7 +40,7 @@ class _ProfileScreenState extends ProfileController {
           child: userDetailsAsync.when(
             data: (user) {
               if (user == null) {
-                return Center(child: Text(l10n.noUserDataFound));
+                return _buildEmptyState(l10n, colorScheme, textTheme);
               }
 
               if (!_isInitialized || _lastUserId != user.uid) {
@@ -267,6 +267,63 @@ class _ProfileScreenState extends ProfileController {
         const SizedBox(height: 8),
         Container(height: 2, width: 60, color: colorScheme.primary),
       ],
+    );
+  }
+
+  Widget _buildEmptyState(
+    AppLocalizations l10n,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: colorScheme.outlineVariant),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.person_off_outlined,
+                  color: colorScheme.onPrimaryContainer,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.noUserDataFound,
+                textAlign: TextAlign.center,
+                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.signInIntro,
+                textAlign: TextAlign.center,
+                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pushNamed('/signin'),
+                  child: Text(l10n.signInLabel),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
