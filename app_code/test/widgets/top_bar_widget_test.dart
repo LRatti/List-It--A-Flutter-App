@@ -107,7 +107,7 @@ void main() {
   testWidgets('TopBar shows app title', (tester) async {
     await pumpTopBar(tester, isAnonymous: true);
 
-    expect(find.text('DIMA'), findsOneWidget);
+    expect(find.text('List It'), findsOneWidget);
   });
 
   testWidgets('TopBar shows supermarket info bar', (tester) async {

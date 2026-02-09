@@ -234,7 +234,7 @@ void main() {
     expect(signInButton, findsOneWidget);
 
     // Button should be enabled by default
-    final buttonWidget = tester.widget<ElevatedButton>(signInButton);
+    final buttonWidget = tester.widget<FilledButton>(signInButton);
     expect(buttonWidget.onPressed, isNotNull);
   });
 
