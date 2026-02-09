@@ -81,7 +81,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildNotificationsSection(l10n),
         const Divider(),
         _buildThemeSection(themeMode, colorScheme, l10n),
         const Divider(),
@@ -109,7 +108,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
           child: ListView(
             padding: const EdgeInsets.all(24),
             children: [
-              _buildNotificationsSection(l10n),
               const Divider(height: 32),
               _buildThemeSection(themeMode, colorScheme, l10n),
               const Divider(height: 32),
@@ -140,16 +138,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildNotificationsSection(AppLocalizations l10n) {
-    return ListTile(
-      title: Text(l10n.notificationsLabel),
-      trailing: Switch(
-        value: true,
-        onChanged: (value) {},
-      ),
     );
   }
 
