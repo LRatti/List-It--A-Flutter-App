@@ -89,7 +89,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
         const Divider(),
         _buildLanguageSection(l10n),
         const Divider(),
-        _buildAboutSection(l10n),
       ],
     );
   }
@@ -118,7 +117,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
               const Divider(height: 32),
               _buildLanguageSection(l10n),
               const Divider(height: 32),
-              _buildAboutSection(l10n),
             ],
           ),
         ),
@@ -326,36 +324,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
           ),
         ),
         Text(label),
-      ],
-    );
-  }
-
-  Widget _buildAboutSection(AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.aboutSectionTitle,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        ListTile(
-          title: Text(l10n.appVersionLabel),
-          subtitle: const Text('1.0.0'),
-          trailing: const Icon(Icons.info_outline),
-        ),
-        ListTile(
-          title: Text(l10n.privacyPolicyLabel),
-          trailing: const Icon(Icons.open_in_new),
-          onTap: () {},
-        ),
-        ListTile(
-          title: Text(l10n.termsOfServiceLabel),
-          trailing: const Icon(Icons.open_in_new),
-          onTap: () {},
-        ),
       ],
     );
   }
