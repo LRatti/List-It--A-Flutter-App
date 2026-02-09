@@ -939,4 +939,24 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get couldNotSendResetEmail =>
       'Impossibile inviare l\'email di reset. Riprova piu tardi.';
+
+  @override
+  String get goBackLabel => 'Torna indietro';
+
+  @override
+  String get receiptCameraNoCameras => 'Nessuna fotocamera disponibile';
+
+  @override
+  String receiptCameraInitFailed(Object error) {
+    return 'Impossibile inizializzare la fotocamera: $error';
+  }
+
+  @override
+  String receiptCameraErrorTakingPicture(Object error) {
+    return 'Errore durante lo scatto: $error';
+  }
+
+  @override
+  String get receiptCameraExtractingPrices =>
+      'Estrazione di prezzi e quantita...';
 }

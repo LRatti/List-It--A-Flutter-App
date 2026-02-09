@@ -444,5 +444,20 @@
     }
   },
   "recoveryEmailSentSignedOut": "Recovery email sent. You will be signed out.",
-  "couldNotSendResetEmail": "Could not send reset email. Try again later."
+  "couldNotSendResetEmail": "Could not send reset email. Try again later.",
+  "goBackLabel": "Go Back",
+  "receiptCameraNoCameras": "No cameras available",
+  "receiptCameraInitFailed": "Failed to initialize camera: {error}",
+  "receiptCameraErrorTakingPicture": "Error taking picture: {error}",
+  "receiptCameraExtractingPrices": "Extracting prices and quantities...",
+  "@receiptCameraInitFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "@receiptCameraErrorTakingPicture": {
+    "placeholders": {
+      "error": {}
+    }
+  }
 }

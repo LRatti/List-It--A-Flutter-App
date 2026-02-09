@@ -1747,6 +1747,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not send reset email. Try again later.'**
   String get couldNotSendResetEmail;
+
+  /// No description provided for @goBackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Back'**
+  String get goBackLabel;
+
+  /// No description provided for @receiptCameraNoCameras.
+  ///
+  /// In en, this message translates to:
+  /// **'No cameras available'**
+  String get receiptCameraNoCameras;
+
+  /// No description provided for @receiptCameraInitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to initialize camera: {error}'**
+  String receiptCameraInitFailed(Object error);
+
+  /// No description provided for @receiptCameraErrorTakingPicture.
+  ///
+  /// In en, this message translates to:
+  /// **'Error taking picture: {error}'**
+  String receiptCameraErrorTakingPicture(Object error);
+
+  /// No description provided for @receiptCameraExtractingPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting prices and quantities...'**
+  String get receiptCameraExtractingPrices;
 }
 
 class _AppLocalizationsDelegate

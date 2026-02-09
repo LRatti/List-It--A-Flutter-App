@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/receipt_match.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/screens/lists/register-list/register_shopping_list_controller_provider.dart';
@@ -55,10 +56,13 @@ class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
       _cameras = await availableCameras();
       
       if (_cameras == null || _cameras!.isEmpty) {
-        setState(() {
-          _errorMessage = 'No cameras available';
-          _isLoading = false;
-        });
+        if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          setState(() {
+            _errorMessage = l10n.receiptCameraNoCameras;
+            _isLoading = false;
+          });
+        }
         return;
       }
 
@@ -86,8 +90,9 @@ class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = 'Failed to initialize camera: ${e.toString()}';
+          _errorMessage = l10n.receiptCameraInitFailed(e.toString());
           _isLoading = false;
         });
       }
@@ -127,9 +132,10 @@ class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
       });
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error taking picture: ${e.toString()}'),
+            content: Text(l10n.receiptCameraErrorTakingPicture(e.toString())),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -154,6 +160,8 @@ class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
   Future<void> _handleConfirm() async {
     if (_capturedImage == null) return;
 
+    final l10n = AppLocalizations.of(context)!;
+
     // Show progress dialog
     showDialog(
       context: context,
@@ -171,7 +179,7 @@ class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Extracting prices and quantities...',
+                l10n.receiptCameraExtractingPrices,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -220,6 +228,7 @@ class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -253,7 +262,7 @@ class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: _handleBack,
-                            child: const Text('Go Back'),
+                            child: Text(l10n.goBackLabel),
                           ),
                         ],
                       ),
@@ -342,7 +351,6 @@ class _ReceiptCameraScreenState extends ConsumerState<ReceiptCameraScreen> {
 
     // Show camera preview
     final size = MediaQuery.of(context).size;
-    final deviceRatio = size.width / size.height;
     final cameraRatio = _controller!.value.aspectRatio;
 
     return SizedBox.expand(

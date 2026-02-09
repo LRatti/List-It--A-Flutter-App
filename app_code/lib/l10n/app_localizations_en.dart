@@ -931,4 +931,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get couldNotSendResetEmail =>
       'Could not send reset email. Try again later.';
+
+  @override
+  String get goBackLabel => 'Go Back';
+
+  @override
+  String get receiptCameraNoCameras => 'No cameras available';
+
+  @override
+  String receiptCameraInitFailed(Object error) {
+    return 'Failed to initialize camera: $error';
+  }
+
+  @override
+  String receiptCameraErrorTakingPicture(Object error) {
+    return 'Error taking picture: $error';
+  }
+
+  @override
+  String get receiptCameraExtractingPrices =>
+      'Extracting prices and quantities...';
 }

@@ -444,5 +444,20 @@
     }
   },
   "recoveryEmailSentSignedOut": "Email di recupero inviata. Verrai disconnesso.",
-  "couldNotSendResetEmail": "Impossibile inviare l'email di reset. Riprova piu tardi."
+  "couldNotSendResetEmail": "Impossibile inviare l'email di reset. Riprova piu tardi.",
+  "goBackLabel": "Torna indietro",
+  "receiptCameraNoCameras": "Nessuna fotocamera disponibile",
+  "receiptCameraInitFailed": "Impossibile inizializzare la fotocamera: {error}",
+  "receiptCameraErrorTakingPicture": "Errore durante lo scatto: {error}",
+  "receiptCameraExtractingPrices": "Estrazione di prezzi e quantita...",
+  "@receiptCameraInitFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "@receiptCameraErrorTakingPicture": {
+    "placeholders": {
+      "error": {}
+    }
+  }
 }
