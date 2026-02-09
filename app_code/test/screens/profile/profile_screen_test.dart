@@ -14,7 +14,7 @@ import 'package:mocktail/mocktail.dart';
 
 class _FakeAuthNotifier extends AuthNotifier {
 	_FakeAuthNotifier(this.user, this.repository);
-	final User user;
+	final User? user;
 	final AuthRepository repository;
 
 	@override
@@ -38,13 +38,15 @@ void main() {
 				authRepositoryProvider.overrideWithValue(repo),
 				userManagerProvider.overrideWithValue(_FakeUserManager(user)),
 				// Provide auth state so userDetailsProvider can work
-				if (user != null)
-					authProvider.overrideWith(() => _FakeAuthNotifier(user, repo)),
+				authProvider.overrideWith(() => _FakeAuthNotifier(user, repo)),
 			],
 			child: MaterialApp(
 				localizationsDelegates: AppLocalizations.localizationsDelegates,
 				supportedLocales: AppLocalizations.supportedLocales,
 				locale: const Locale('en'),
+				routes: {
+					'/signin': (context) => const Scaffold(body: Text('Sign In Screen')),
+				},
 				home: const ProfileScreen(),
 			),
 		);
@@ -79,6 +81,22 @@ void main() {
 			),
 			findsNothing,
 		);
+	});
+
+	testWidgets('shows empty state and navigates to sign in when user is null', (
+		tester,
+	) async {
+		await tester.pumpWidget(buildScreen(user: null));
+		await tester.pumpAndSettle();
+
+		expect(find.text('No user data found.'), findsOneWidget);
+		expect(find.text('Sign in to your account.'), findsOneWidget);
+		expect(find.text('Sign In'), findsOneWidget);
+
+		await tester.tap(find.text('Sign In'));
+		await tester.pumpAndSettle();
+
+		expect(find.text('Sign In Screen'), findsOneWidget);
 	});
 }
 
