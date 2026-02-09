@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/providers/real_app_providers/app-style/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/font_size_provider.dart';
-import 'package:app_code/providers/locale_provider.dart';
+import 'package:app_code/providers/real_app_providers/locale_provider.dart';
 
 /// Mobile settings screen: single column vertical layout.
 class SettingsScreenMobile extends ConsumerStatefulWidget {
