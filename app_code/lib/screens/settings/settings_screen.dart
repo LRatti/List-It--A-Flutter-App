@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/providers/real_app_providers/app-style/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/font_size_provider.dart';
-import 'package:app_code/providers/locale_provider.dart';
+import 'package:app_code/providers/real_app_providers/locale_provider.dart';
 
 /// Mobile settings screen: single column vertical layout.
 class SettingsScreenMobile extends ConsumerStatefulWidget {
@@ -81,7 +81,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildNotificationsSection(l10n),
         const Divider(),
         _buildThemeSection(themeMode, colorScheme, l10n),
         const Divider(),
@@ -89,7 +88,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
         const Divider(),
         _buildLanguageSection(l10n),
         const Divider(),
-        _buildAboutSection(l10n),
       ],
     );
   }
@@ -110,7 +108,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
           child: ListView(
             padding: const EdgeInsets.all(24),
             children: [
-              _buildNotificationsSection(l10n),
               const Divider(height: 32),
               _buildThemeSection(themeMode, colorScheme, l10n),
               const Divider(height: 32),
@@ -118,7 +115,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
               const Divider(height: 32),
               _buildLanguageSection(l10n),
               const Divider(height: 32),
-              _buildAboutSection(l10n),
             ],
           ),
         ),
@@ -142,16 +138,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildNotificationsSection(AppLocalizations l10n) {
-    return ListTile(
-      title: Text(l10n.notificationsLabel),
-      trailing: Switch(
-        value: true,
-        onChanged: (value) {},
-      ),
     );
   }
 
@@ -326,36 +312,6 @@ abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
           ),
         ),
         Text(label),
-      ],
-    );
-  }
-
-  Widget _buildAboutSection(AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.aboutSectionTitle,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        ListTile(
-          title: Text(l10n.appVersionLabel),
-          subtitle: const Text('1.0.0'),
-          trailing: const Icon(Icons.info_outline),
-        ),
-        ListTile(
-          title: Text(l10n.privacyPolicyLabel),
-          trailing: const Icon(Icons.open_in_new),
-          onTap: () {},
-        ),
-        ListTile(
-          title: Text(l10n.termsOfServiceLabel),
-          trailing: const Icon(Icons.open_in_new),
-          onTap: () {},
-        ),
       ],
     );
   }

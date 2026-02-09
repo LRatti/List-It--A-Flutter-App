@@ -41,6 +41,14 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(covariant ShoppingListCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.shoppingList != widget.shoppingList) {
+      _controller.text = widget.shoppingList.getName();
+    }
+  }
+
   Color _getAccentColor() {
     final colors = [
       Colors.redAccent,
@@ -195,7 +203,10 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
           children: [
             Expanded(
               child: InkWell(
-                onTap: () => setState(() => _editingName = true),
+                onTap: () {
+                  _controller.text = widget.shoppingList.getName();
+                  setState(() => _editingName = true);
+                },
                 child: Text(
                   widget.shoppingList.getName(),
                   textAlign: TextAlign.center,

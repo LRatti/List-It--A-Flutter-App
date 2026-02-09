@@ -33,7 +33,7 @@ import 'package:app_code/utils/uncategorized_category_initializer.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:app_code/utils/category_localizer.dart';
 import 'package:app_code/widgets/app_screen_size_listener.dart';
-import 'package:app_code/providers/locale_provider.dart';
+import 'package:app_code/providers/real_app_providers/locale_provider.dart';
 
 /// Performs all initialization tasks required at app startup.
 /// This includes Firebase setup, mock data seeding, cleanup operations, and sync engine initialization.
