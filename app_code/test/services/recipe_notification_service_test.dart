@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/services/recipe_notification_service.dart';
 import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/models/recipe_response.dart';
@@ -65,6 +66,9 @@ void main() {
         child: MaterialApp(
           navigatorKey: navigatorKey,
           scaffoldMessengerKey: scaffoldMessengerKey,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: const Scaffold(),
         ),
       );
@@ -106,7 +110,8 @@ void main() {
       service.processBackgroundSearches({listId: search});
       await tester.pump();
 
-      expect(find.text('Recipe "Pasta" found!'), findsOneWidget);
+      final l10n = AppLocalizations.of(tester.element(find.byType(Scaffold)))!;
+      expect(find.text(l10n.recipeFound('Pasta')), findsOneWidget);
       expect(notifier.markSeenCalls, 1);
     });
 
@@ -135,7 +140,10 @@ void main() {
       await tester.pump();
 
       expect(
-        find.text('Recipe search completed with issues'),
+        find.text(
+          AppLocalizations.of(tester.element(find.byType(Scaffold)))!
+              .recipeSearchCompletedWithIssues,
+        ),
         findsOneWidget,
       );
       expect(notifier.markSeenCalls, 1);
