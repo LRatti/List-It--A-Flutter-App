@@ -334,7 +334,9 @@ void main() {
     await db.insert('category', {
       'id': 'shared-cat',
       'name': 'Shared Category',
-      'is_default': 0,
+      'is_visible': 1,
+      'created_at': DateTime.now().toIso8601String(),
+      'last_modified': DateTime.now().toIso8601String(),
     });
 
     final product1 = Product(

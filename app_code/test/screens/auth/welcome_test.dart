@@ -20,6 +20,13 @@ void main() {
   });
 
   Future<void> pumpWelcomeScreen(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [authRepositoryProvider.overrideWithValue(repository)],
@@ -41,15 +48,27 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+    await tester.ensureVisible(finder);
+    await tester.pump();
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+  }
+
+  AppLocalizations l10n(WidgetTester tester) {
+    return AppLocalizations.of(tester.element(find.byType(WelcomeScreen)))!;
+  }
+
   testWidgets('renders welcome screen with initial sign up form', (
     tester,
   ) async {
     await pumpWelcomeScreen(tester);
+    final strings = l10n(tester);
 
-    expect(find.text('Authentication'), findsOneWidget);
-    expect(find.text('Welcome.'), findsOneWidget);
+    expect(find.text(strings.authTitle), findsOneWidget);
+    expect(find.text(strings.welcomeMessage), findsOneWidget);
     expect(find.byKey(const Key('sign_up_section')), findsOneWidget);
-    expect(find.text('Sign up for a new account.'), findsOneWidget);
+    expect(find.text(strings.signUpIntro), findsOneWidget);
     expect(find.byKey(const Key('google_sign_in_button')), findsOneWidget);
   });
 
@@ -61,26 +80,24 @@ void main() {
     expect(find.byKey(const Key('sign_in_section')), findsNothing);
 
     // Tap switch to sign in button
-    await tester.tap(find.byKey(const Key('switch_to_sign_in')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('switch_to_sign_in')));
+    final strings = l10n(tester);
 
     // Verify switched to sign in form
     expect(find.byKey(const Key('sign_in_section')), findsOneWidget);
     expect(find.byKey(const Key('sign_up_section')), findsNothing);
-    expect(find.text('Sign in to your account.'), findsOneWidget);
+    expect(find.text(strings.signInIntro), findsOneWidget);
   });
 
   testWidgets('switches from sign in to sign up form', (tester) async {
     await pumpWelcomeScreen(tester);
 
     // Switch to sign in form first
-    await tester.tap(find.byKey(const Key('switch_to_sign_in')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('switch_to_sign_in')));
     expect(find.byKey(const Key('sign_in_section')), findsOneWidget);
 
     // Tap switch to sign up button
-    await tester.tap(find.byKey(const Key('switch_to_sign_up')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('switch_to_sign_up')));
 
     // Verify switched back to sign up form
     expect(find.byKey(const Key('sign_up_section')), findsOneWidget);
@@ -89,34 +106,34 @@ void main() {
 
   testWidgets('shows correct toggle text for each form', (tester) async {
     await pumpWelcomeScreen(tester);
+    final strings = l10n(tester);
 
     // Sign up form shows "Already have an account?"
-    expect(find.text('Already have an account?'), findsOneWidget);
-    expect(find.text('Sign in instead'), findsOneWidget);
+    expect(find.text(strings.alreadyHaveAccount), findsOneWidget);
+    expect(find.text(strings.signInInstead), findsOneWidget);
 
     // Switch to sign in
-    await tester.tap(find.byKey(const Key('switch_to_sign_in')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('switch_to_sign_in')));
 
     // Sign in form shows "Need an account?"
-    expect(find.text('Need an account?'), findsOneWidget);
-    expect(find.text('Sign up instead'), findsOneWidget);
+    expect(find.text(strings.needAccount), findsOneWidget);
+    expect(find.text(strings.signUpInstead), findsOneWidget);
   });
 
   testWidgets('Google sign in button is always visible', (tester) async {
     await pumpWelcomeScreen(tester);
+    final strings = l10n(tester);
 
     // Visible on sign up form
     expect(find.byKey(const Key('google_sign_in_button')), findsOneWidget);
-    expect(find.text('Sign in with Google'), findsOneWidget);
+    expect(find.text(strings.signInWithGoogle), findsOneWidget);
 
     // Switch to sign in form
-    await tester.tap(find.byKey(const Key('switch_to_sign_in')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('switch_to_sign_in')));
 
     // Still visible on sign in form
     expect(find.byKey(const Key('google_sign_in_button')), findsOneWidget);
-    expect(find.text('Sign in with Google'), findsOneWidget);
+    expect(find.text(strings.signInWithGoogle), findsOneWidget);
   });
 
   testWidgets('Google sign in links anonymous user', (tester) async {
@@ -128,8 +145,7 @@ void main() {
     await pumpWelcomeScreen(tester);
 
     // Tap Google sign in button
-    await tester.tap(find.byKey(const Key('google_sign_in_button')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('google_sign_in_button')));
 
     // Verify user is signed in with Google account (new UID)
     final linkedUser = repository.getCurrentUser();
@@ -151,8 +167,7 @@ void main() {
     await pumpWelcomeScreen(tester);
 
     // Tap Google sign in button
-    await tester.tap(find.byKey(const Key('google_sign_in_button')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('google_sign_in_button')));
 
     // Verify Google sign in succeeded
     final user = repository.getCurrentUser();
@@ -182,8 +197,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Submit form
-    await tester.tap(find.byKey(const Key('sign_up_button')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('sign_up_button')));
 
     // Verify user is signed up
     final user = repository.getCurrentUser();
@@ -201,8 +215,7 @@ void main() {
     await pumpWelcomeScreen(tester);
 
     // Switch to sign in form
-    await tester.tap(find.byKey(const Key('switch_to_sign_in')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('switch_to_sign_in')));
 
     // Fill in sign in form
     await tester.enterText(
@@ -216,8 +229,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Submit form
-    await tester.tap(find.byKey(const Key('sign_in_button')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('sign_in_button')));
 
     // Verify user is signed in
     final user = repository.getCurrentUser();
@@ -227,9 +239,10 @@ void main() {
 
   testWidgets('app bar is displayed correctly', (tester) async {
     await pumpWelcomeScreen(tester);
+    final strings = l10n(tester);
 
     expect(find.byType(AppBar), findsOneWidget);
-    expect(find.text('Authentication'), findsOneWidget);
+    expect(find.text(strings.authTitle), findsOneWidget);
   });
 
   testWidgets('app bar has back button', (tester) async {
@@ -240,9 +253,10 @@ void main() {
 
   testWidgets('back button allows aborting authentication', (tester) async {
     await pumpWelcomeScreen(tester);
+    final strings = l10n(tester);
 
     // Verify we're on the welcome screen
-    expect(find.text('Welcome.'), findsOneWidget);
+    expect(find.text(strings.welcomeMessage), findsOneWidget);
 
     // Tap back button
     await tester.tap(find.byIcon(Icons.arrow_back));
@@ -250,7 +264,7 @@ void main() {
 
     // Should navigate back to home screen
     expect(find.text('Home Screen'), findsOneWidget);
-    expect(find.text('Welcome.'), findsNothing);
+    expect(find.text(strings.welcomeMessage), findsNothing);
   });
 
   testWidgets('Google sign in failure keeps user on welcome screen', (
@@ -260,8 +274,7 @@ void main() {
 
     await pumpWelcomeScreen(tester);
 
-    await tester.tap(find.byKey(const Key('google_sign_in_button')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('google_sign_in_button')));
 
     expect(find.text('Home Screen'), findsNothing);
     expect(find.text('Welcome.'), findsOneWidget);

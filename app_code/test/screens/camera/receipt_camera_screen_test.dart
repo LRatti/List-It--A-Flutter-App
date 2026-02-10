@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/screens/camera/receipt_camera_screen.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 /// Tests for ReceiptCameraScreen
 /// 
@@ -11,6 +12,17 @@ import 'package:app_code/screens/camera/receipt_camera_screen.dart';
 /// the widget structure and basic functionality only.
 void main() {
   group('ReceiptCameraScreen', () {
+    Widget buildTestApp(ShoppingList shoppingList) {
+      return ProviderScope(
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: ReceiptCameraScreen(shoppingList: shoppingList),
+        ),
+      );
+    }
+
     testWidgets('should build without errors', (WidgetTester tester) async {
       final shoppingList = ShoppingList(
         name: 'Test List',
@@ -19,11 +31,7 @@ void main() {
 
       // Build the widget
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: ReceiptCameraScreen(shoppingList: shoppingList),
-          ),
-        ),
+        buildTestApp(shoppingList),
       );
 
       // Widget should build (may show error UI if camera not available)
@@ -38,11 +46,7 @@ void main() {
 
       // Build the widget
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: ReceiptCameraScreen(shoppingList: shoppingList),
-          ),
-        ),
+        buildTestApp(shoppingList),
       );
 
       // Should show loading indicator on first frame
@@ -57,11 +61,7 @@ void main() {
 
       // Build the widget
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: ReceiptCameraScreen(shoppingList: shoppingList),
-          ),
-        ),
+        buildTestApp(shoppingList),
       );
 
       // Should have Scaffold

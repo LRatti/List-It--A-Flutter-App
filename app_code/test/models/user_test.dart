@@ -4,10 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('User', () {
-    test('generates uid when not provided and setters work', () {
-      final user = User(userName: 'Alice', email: 'alice@test.com');
+    test('uses provided uid and setters work', () {
+      final user = User(uid: 'u1', userName: 'Alice', email: 'alice@test.com');
 
-      expect(user.uid, isNotNull);
+      expect(user.uid, 'u1');
       expect(user.getUserName(), 'Alice');
       expect(user.isAnonymous, false);
       expect(user.setUserName('Bob'), 1);
@@ -32,10 +32,15 @@ void main() {
 
     test('fromDatabase and fromJson using FakeFirebaseFirestore', () async {
       final firestore = FakeFirebaseFirestore();
+      final now = DateTime.now().toIso8601String();
       final docRef = await firestore.collection('users').add({
         'email': 'd@test.com',
         'user_name': 'Dave',
         'is_anonymous': true,
+        'created_at': now,
+        'last_modified': now,
+        'createdAt': now,
+        'lastModified': now,
       });
 
       final snap = await docRef.get();
