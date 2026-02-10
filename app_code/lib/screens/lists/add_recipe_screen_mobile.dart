@@ -6,7 +6,6 @@ import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
-import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/utils/category_localizer.dart';
