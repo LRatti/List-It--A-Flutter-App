@@ -87,6 +87,7 @@ class ListsScreenTablet extends ConsumerStatefulWidget {
 
 class _ListsScreenTabletViewState extends ConsumerState<ListsScreenTablet> {
   ShoppingList? _selectedList;
+  bool _selectedListIsNew = false;
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +132,10 @@ class _ListsScreenTabletViewState extends ConsumerState<ListsScreenTablet> {
                   emptyMessage: l10n.noListsYet,
                   showRegistered: false,
                   onListTap: (context, list) {
-                    setState(() => _selectedList = list);
+                    setState(() {
+                      _selectedList = list;
+                      _selectedListIsNew = false;
+                    });
                   },
                   floatingActionButton: FloatingActionButton(
                     heroTag: 'addShoppingListFAB_tablet_master',
@@ -139,7 +143,10 @@ class _ListsScreenTabletViewState extends ConsumerState<ListsScreenTablet> {
                       context: context,
                       ref: ref,
                       onListCreated: (newList) {
-                        setState(() => _selectedList = newList);
+                        setState(() {
+                          _selectedList = newList;
+                          _selectedListIsNew = true;
+                        });
                       },
                     ),
                     backgroundColor: Theme.of(context).colorScheme.primary,
@@ -156,6 +163,7 @@ class _ListsScreenTabletViewState extends ConsumerState<ListsScreenTablet> {
                           selectionKey: _selectedList!.id,
                         initialChild: ListDetailScreenMobile(
                           shoppingList: _selectedList!,
+                          isNewList: _selectedListIsNew,
                         ),
                         emptyBuilder: _buildEmptyDetailPane,
                       )
