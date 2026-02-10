@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/l10n/app_localizations.dart';
-import 'package:app_code/screens/home/home_screen_mobile.dart';
+import 'package:app_code/screens/home/home_screen.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_location_repository.dart';
@@ -50,6 +50,7 @@ void main() {
 
   Future<ProviderContainer> pumpHomeScreen(
     WidgetTester tester, {
+    Widget home = const HomeScreenMobileView(),
     Size viewport = const Size(600, 900),
     double devicePixelRatio = 1.0,
   }) async {
@@ -90,7 +91,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
-          home: const MobileHomePage(),
+          home: home,
           routes: {
             '/signin': (context) => const Scaffold(body: Text('Sign In Screen')),
             '/settings': (context) => const Scaffold(body: Text('Settings Screen')),
@@ -104,7 +105,9 @@ void main() {
 
   testWidgets('HomePage switches tabs correctly', (tester) async {
     await pumpHomeScreen(tester);
-    final l10n = AppLocalizations.of(tester.element(find.byType(MobileHomePage)))!;
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomeScreenMobileView)),
+    )!;
 
     // Starts on Lists tab
     expect(find.byKey(const Key('lists_tab')), findsOneWidget);
@@ -134,7 +137,9 @@ void main() {
     tester,
   ) async {
     await pumpHomeScreen(tester);
-    final l10n = AppLocalizations.of(tester.element(find.byType(MobileHomePage)))!;
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomeScreenMobileView)),
+    )!;
 
     // Verify app bar is present
     expect(find.byType(AppBar), findsWidgets);
@@ -170,7 +175,9 @@ void main() {
 
   testWidgets('HomePage shows bottom navigation bar', (tester) async {
     await pumpHomeScreen(tester);
-    final l10n = AppLocalizations.of(tester.element(find.byType(MobileHomePage)))!;
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomeScreenMobileView)),
+    )!;
 
     expect(find.byType(BottomNavigationBar), findsOneWidget);
     expect(find.text(l10n.listsTabLabel), findsOneWidget);
@@ -181,7 +188,9 @@ void main() {
 
   testWidgets('HomePage maintains tab state during navigation', (tester) async {
     await pumpHomeScreen(tester);
-    final l10n = AppLocalizations.of(tester.element(find.byType(MobileHomePage)))!;
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomeScreenMobileView)),
+    )!;
 
     // Navigate to a tab
     await tester.tap(find.text(l10n.supermarketsTabLabel));
@@ -216,15 +225,18 @@ void main() {
     expect(find.byKey(const Key('side_menu')), findsNothing);
   });
 
-  testWidgets('Shows navigation rail in landscape and switches tabs', (tester) async {
+  testWidgets('Shows bottom navigation in landscape and switches tabs', (tester) async {
     await pumpHomeScreen(
       tester,
+      home: const HomeScreenMobileView(),
       viewport: const Size(1000, 600),
     );
-    final l10n = AppLocalizations.of(tester.element(find.byType(MobileHomePage)))!;
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomeScreenMobileView)),
+    )!;
 
-    expect(find.byType(NavigationRail), findsOneWidget);
-    expect(find.byType(BottomNavigationBar), findsNothing);
+    expect(find.byType(NavigationRail), findsNothing);
+    expect(find.byType(BottomNavigationBar), findsOneWidget);
     expect(find.byKey(const Key('lists_tab')), findsOneWidget);
 
     await tester.tap(find.text(l10n.supermarketsTabLabel));

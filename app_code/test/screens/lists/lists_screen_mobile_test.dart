@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
-import 'package:app_code/screens/lists/lists_screen_mobile.dart';
+import 'package:app_code/screens/lists/lists_screen.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
