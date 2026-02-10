@@ -476,6 +476,72 @@ abstract class AppLocalizations {
   /// **'Unable to open map'**
   String get unableToOpenMap;
 
+  /// No description provided for @nearestSupermarketLocating.
+  ///
+  /// In en, this message translates to:
+  /// **'Locating nearby supermarkets...'**
+  String get nearestSupermarketLocating;
+
+  /// No description provided for @nearestSupermarketUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to detect nearby supermarkets'**
+  String get nearestSupermarketUnavailable;
+
+  /// No description provided for @nearestSupermarketEnableLocationServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable location services to find supermarkets'**
+  String get nearestSupermarketEnableLocationServices;
+
+  /// No description provided for @nearestSupermarketPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is required to find supermarkets'**
+  String get nearestSupermarketPermissionRequired;
+
+  /// No description provided for @nearestSupermarketPermissionDeniedForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable location permission in settings to continue'**
+  String get nearestSupermarketPermissionDeniedForever;
+
+  /// No description provided for @nearestSupermarketUnableToGetLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to get your location right now'**
+  String get nearestSupermarketUnableToGetLocation;
+
+  /// No description provided for @nearestSupermarketLowGpsAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Low GPS accuracy. Try moving outdoors.'**
+  String get nearestSupermarketLowGpsAccuracy;
+
+  /// No description provided for @nearestSupermarketNoneWithinDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'No supermarkets found within {distanceKm} km'**
+  String nearestSupermarketNoneWithinDistance(Object distanceKm);
+
+  /// No description provided for @nearestSupermarketNetworkTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Network timeout while finding supermarkets'**
+  String get nearestSupermarketNetworkTimeout;
+
+  /// No description provided for @nearestSupermarketNetworkIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Network issue while finding supermarkets'**
+  String get nearestSupermarketNetworkIssue;
+
+  /// No description provided for @nearestSupermarketResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} - {distance}'**
+  String nearestSupermarketResult(Object name, Object distance);
+
   /// No description provided for @menuLabel.
   ///
   /// In en, this message translates to:
@@ -728,6 +794,12 @@ abstract class AppLocalizations {
   /// **'By category'**
   String get byCategoryTitle;
 
+  /// No description provided for @totalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get totalLabel;
+
   /// No description provided for @categoryBreakdownTitle.
   ///
   /// In en, this message translates to:
@@ -823,6 +895,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recipe'**
   String get recipeLabel;
+
+  /// No description provided for @recipeSearchCompletedWithIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe search completed with issues'**
+  String get recipeSearchCompletedWithIssues;
+
+  /// No description provided for @recipeFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe "{recipeName}" found!'**
+  String recipeFound(Object recipeName);
 
   /// No description provided for @ingredientsCount.
   ///
@@ -1711,6 +1795,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verification email sent to new address!'**
   String get verificationEmailSent;
+
+  /// No description provided for @verificationEmailSentCheckInbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email sent! Please check your inbox.'**
+  String get verificationEmailSentCheckInbox;
+
+  /// No description provided for @verificationEmailResentNewAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email re-sent to your new address.'**
+  String get verificationEmailResentNewAddress;
+
+  /// No description provided for @verificationNewEmailUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot resend: new email not available.'**
+  String get verificationNewEmailUnavailable;
+
+  /// No description provided for @emailVerifiedSignInAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verified. Please sign in again to continue.'**
+  String get emailVerifiedSignInAgain;
+
+  /// No description provided for @emailNotVerifiedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Email not verified yet. Please check your inbox.'**
+  String get emailNotVerifiedYet;
+
+  /// No description provided for @errorCheckingVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Error checking verification: {error}'**
+  String errorCheckingVerification(Object error);
+
+  /// No description provided for @pleaseWaitBeforeResending.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait {seconds}s before resending.'**
+  String pleaseWaitBeforeResending(Object seconds);
+
+  /// No description provided for @noAuthenticatedUserFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No authenticated user found.'**
+  String get noAuthenticatedUserFound;
+
+  /// No description provided for @tooManyRequestsTryLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please wait a few minutes and try again.'**
+  String get tooManyRequestsTryLater;
+
+  /// No description provided for @errorSendingVerificationEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Error sending verification email: {error}'**
+  String errorSendingVerificationEmail(Object error);
+
+  /// No description provided for @accountCreationCancelledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Account creation cancelled. Please sign up again if you wish to create an account.'**
+  String get accountCreationCancelledMessage;
+
+  /// No description provided for @emailVerificationCancelledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verification cancelled. You can update your email again anytime from settings.'**
+  String get emailVerificationCancelledMessage;
+
+  /// No description provided for @errorAbortingOperation.
+  ///
+  /// In en, this message translates to:
+  /// **'Error aborting operation: {error}'**
+  String errorAbortingOperation(Object error);
 
   /// No description provided for @passwordUpdatedSignInAgain.
   ///

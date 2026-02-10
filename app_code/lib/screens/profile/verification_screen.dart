@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/auth/email_verification_provider.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;

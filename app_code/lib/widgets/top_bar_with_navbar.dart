@@ -17,6 +17,46 @@ class TopBarWithNavBar extends ConsumerWidget {
     required this.onMenuToggle,
   });
 
+  String _nearestSupermarketText(
+    AppLocalizations l10n,
+    NearestSupermarketState state,
+  ) {
+    if (state.isLoading) {
+      return l10n.nearestSupermarketLocating;
+    }
+
+    if (state.supermarket != null) {
+      return l10n.nearestSupermarketResult(
+        state.supermarket!.name,
+        state.supermarket!.formattedDistance,
+      );
+    }
+
+    switch (state.errorType) {
+      case NearestSupermarketError.locationServicesDisabled:
+        return l10n.nearestSupermarketEnableLocationServices;
+      case NearestSupermarketError.permissionDenied:
+        return l10n.nearestSupermarketPermissionRequired;
+      case NearestSupermarketError.permissionDeniedForever:
+        return l10n.nearestSupermarketPermissionDeniedForever;
+      case NearestSupermarketError.unableToGetLocation:
+        return l10n.nearestSupermarketUnableToGetLocation;
+      case NearestSupermarketError.lowGpsAccuracy:
+        return l10n.nearestSupermarketLowGpsAccuracy;
+      case NearestSupermarketError.noneWithinDistance:
+        final distanceKm = state.errorDistanceKm ?? 5.0;
+        return l10n.nearestSupermarketNoneWithinDistance(
+          distanceKm.toStringAsFixed(0),
+        );
+      case NearestSupermarketError.networkTimeout:
+        return l10n.nearestSupermarketNetworkTimeout;
+      case NearestSupermarketError.networkIssue:
+        return l10n.nearestSupermarketNetworkIssue;
+      case null:
+        return l10n.nearestSupermarketUnavailable;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
@@ -25,6 +65,10 @@ class TopBarWithNavBar extends ConsumerWidget {
     final mapLauncherService = ref.read(mapLauncherServiceProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final nearestDisplayText = _nearestSupermarketText(
+      l10n,
+      nearestSupermarketState,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -113,7 +157,7 @@ class TopBarWithNavBar extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      nearestSupermarketState.displayText,
+                      nearestDisplayText,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         fontWeight: nearestSupermarketState.hasValidSupermarket
                             ? FontWeight.w500

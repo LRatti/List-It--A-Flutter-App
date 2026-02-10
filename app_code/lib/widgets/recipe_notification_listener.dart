@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/screens/lists/add_recipe_screen_mobile.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 /// Global widget that listens for recipe search completions and shows notifications
 class RecipeNotificationListener extends ConsumerStatefulWidget {
@@ -66,9 +67,10 @@ class _RecipeNotificationListenerState
         final scaffoldMessenger = widget.scaffoldMessengerKey.currentState;
         if (scaffoldMessenger == null) return;
 
+        final l10n = AppLocalizations.of(context)!;
         final message = recipe.hasError
-            ? 'Recipe search completed with issues'
-            : 'Recipe "${recipe.recipeName}" found!';
+          ? l10n.recipeSearchCompletedWithIssues
+          : l10n.recipeFound(recipe.recipeName);
 
         // Mark as seen before showing to handle app closure during display
         ref.read(backgroundRecipeProvider.notifier).markNotificationSeen(search.listId);

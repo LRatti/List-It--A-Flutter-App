@@ -207,6 +207,51 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get unableToOpenMap => 'Unable to open map';
 
+    @override
+    String get nearestSupermarketLocating => 'Locating nearby supermarkets...';
+
+    @override
+    String get nearestSupermarketUnavailable =>
+      'Unable to detect nearby supermarkets';
+
+    @override
+    String get nearestSupermarketEnableLocationServices =>
+      'Please enable location services to find supermarkets';
+
+    @override
+    String get nearestSupermarketPermissionRequired =>
+      'Location permission is required to find supermarkets';
+
+    @override
+    String get nearestSupermarketPermissionDeniedForever =>
+      'Enable location permission in settings to continue';
+
+    @override
+    String get nearestSupermarketUnableToGetLocation =>
+      'Unable to get your location right now';
+
+    @override
+    String get nearestSupermarketLowGpsAccuracy =>
+      'Low GPS accuracy. Try moving outdoors.';
+
+    @override
+    String nearestSupermarketNoneWithinDistance(Object distanceKm) {
+    return 'No supermarkets found within $distanceKm km';
+    }
+
+    @override
+    String get nearestSupermarketNetworkTimeout =>
+      'Network timeout while finding supermarkets';
+
+    @override
+    String get nearestSupermarketNetworkIssue =>
+      'Network issue while finding supermarkets';
+
+    @override
+    String nearestSupermarketResult(Object name, Object distance) {
+    return '$name - $distance';
+    }
+
   @override
   String get menuLabel => 'Menu';
 
@@ -354,6 +399,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get byCategoryTitle => 'By category';
 
   @override
+  String get totalLabel => 'Total';
+
+  @override
   String get categoryBreakdownTitle => 'Category Breakdown';
 
   @override
@@ -404,6 +452,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recipeLabel => 'Recipe';
+
+  @override
+  String get recipeSearchCompletedWithIssues =>
+      'Recipe search completed with issues';
+
+  @override
+  String recipeFound(Object recipeName) {
+    return 'Recipe "$recipeName" found!';
+  }
 
   @override
   String ingredientsCount(Object selected, Object total) {
@@ -906,6 +963,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verificationEmailSent => 'Verification email sent to new address!';
+
+  @override
+  String get verificationEmailSentCheckInbox =>
+      'Verification email sent! Please check your inbox.';
+
+  @override
+  String get verificationEmailResentNewAddress =>
+      'Verification email re-sent to your new address.';
+
+  @override
+  String get verificationNewEmailUnavailable =>
+      'Cannot resend: new email not available.';
+
+  @override
+  String get emailVerifiedSignInAgain =>
+      'Email verified. Please sign in again to continue.';
+
+  @override
+  String get emailNotVerifiedYet =>
+      'Email not verified yet. Please check your inbox.';
+
+  @override
+  String errorCheckingVerification(Object error) {
+    return 'Error checking verification: $error';
+  }
+
+  @override
+  String pleaseWaitBeforeResending(Object seconds) {
+    return 'Please wait ${seconds}s before resending.';
+  }
+
+  @override
+  String get noAuthenticatedUserFound => 'No authenticated user found.';
+
+  @override
+  String get tooManyRequestsTryLater =>
+      'Too many requests. Please wait a few minutes and try again.';
+
+  @override
+  String errorSendingVerificationEmail(Object error) {
+    return 'Error sending verification email: $error';
+  }
+
+  @override
+  String get accountCreationCancelledMessage =>
+      'Account creation cancelled. Please sign up again if you wish to create an account.';
+
+  @override
+  String get emailVerificationCancelledMessage =>
+      'Email verification cancelled. You can update your email again anytime from settings.';
+
+  @override
+  String errorAbortingOperation(Object error) {
+    return 'Error aborting operation: $error';
+  }
 
   @override
   String get passwordUpdatedSignInAgain =>
