@@ -68,7 +68,25 @@ Widget _buildErrorScaffold(BuildContext context, Object error) {
   final l10n = AppLocalizations.of(context)!;
   return Scaffold(
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-    body: Center(child: Text(l10n.errorWithDetails(error.toString()))),
+    body: SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height -
+                     MediaQuery.of(context).padding.top -
+                     MediaQuery.of(context).padding.bottom,
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              l10n.errorWithDetails(error.toString()),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 }
 

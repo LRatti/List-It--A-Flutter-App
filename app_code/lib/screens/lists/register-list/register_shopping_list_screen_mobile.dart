@@ -324,6 +324,10 @@ class _RegisterShoppingListScreenMobileState
     final textTheme = Theme.of(context).textTheme;
     final boughtProducts = controller.getBoughtProducts();
     final l10n = AppLocalizations.of(context)!;
+    final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final shouldResizeToAvoidInset = !(isMobile && isLandscape);
 
     return WillPopScope(
       onWillPop: () async {
@@ -331,7 +335,7 @@ class _RegisterShoppingListScreenMobileState
         return false;
       },
       child: Scaffold(
-        resizeToAvoidBottomInset: true,
+        resizeToAvoidBottomInset: shouldResizeToAvoidInset,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
