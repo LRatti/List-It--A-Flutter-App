@@ -4,6 +4,7 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/providers/real_app_providers/category/categories_notifier.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
+import 'package:app_code/utils/category_localizer.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 
 /// A screen for creating or editing a category in the supermarket section.
@@ -29,9 +30,21 @@ class _CategoryEditingScreenState extends ConsumerState<CategoryEditingScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.categoryToEdit?.getName() ?? '',
-    );
+    // Initialize with empty text; will be set in didChangeDependencies
+    _nameController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set the localized name after context is available
+    if (widget.categoryToEdit != null) {
+      final localizedName = CategoryLocalizer.localize(
+        context,
+        widget.categoryToEdit!.getName(),
+      );
+      _nameController.text = localizedName;
+    }
   }
 
   @override
