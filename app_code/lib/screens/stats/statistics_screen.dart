@@ -3,7 +3,6 @@ import 'package:app_code/utils/statistics_calculator.dart';
 import 'package:app_code/widgets/period_selector.dart';
 import 'package:app_code/widgets/statistics_pie_chart.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
-import 'package:app_code/utils/responsive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/l10n/app_localizations.dart';
