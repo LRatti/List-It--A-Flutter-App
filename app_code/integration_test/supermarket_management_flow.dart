@@ -63,7 +63,7 @@ class TestNearestSupermarketNotifier extends NearestSupermarketNotifier {
   NearestSupermarketState build() {
     return const NearestSupermarketState(
       isLoading: false,
-      errorMessage: 'Location services disabled in test',
+      errorType: null,
     );
   }
 }
@@ -94,7 +94,6 @@ void main() {
   testWidgets(
     'create supermarket add categories reorder set favorite and persist',
     (tester) async {
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
       final supermarketName = 'Test Market';
       final categoryA = 'Bakery';
       final categoryB = 'Meat';
