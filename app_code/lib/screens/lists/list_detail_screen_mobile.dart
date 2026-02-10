@@ -379,10 +379,14 @@ class _ListDetailScreenMobileState
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            l10n.selectSupermarketTitle,
-                            style: Theme.of(context).textTheme.headlineSmall
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                          Expanded(
+                            child: Text(
+                              l10n.selectSupermarketTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
                           ),
                           IconButton(
                             icon: Icon(
@@ -525,6 +529,8 @@ class _ListDetailScreenMobileState
               ),
         title: Text(
           supermarket.getName(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             color: isSelected ? colorScheme.primary : colorScheme.onSurface,
