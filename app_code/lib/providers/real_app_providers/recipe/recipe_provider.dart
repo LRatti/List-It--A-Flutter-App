@@ -58,13 +58,13 @@ final geminiRepositoryProvider = Provider<GeminiRepository>((ref) {
   return GeminiRepositoryReal();
   // Use real repository for actual API calls
   //TODO: switch to real repository when needed. GeminiRepositoryReal()/MockGeminiRepository();
-  // return GeminiRepositoryReal();
+  // return MockGeminiRepository();
 });
 
 /// Provider for recipe cache repository
                                                                                                                                                        // TODO: switch to real repository when needed. RecipeCacheRepositoryReal()/MockRecipeCacheRepository();
 final recipeCacheRepositoryProvider = Provider<RecipeCacheRepository>((ref) {
-  return RecipeCacheRepositoryReal();
+  return MockRecipeCacheRepository();
 });
 
 /// State notifier for recipe queries.
