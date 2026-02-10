@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 /// A donut-style pie chart widget that displays category spending data
 /// Shows total amount in the center with colored segments for each category
@@ -19,6 +20,7 @@ class StatisticsPieChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return CustomPaint(
       painter: PieChartPainter(
@@ -29,7 +31,7 @@ class StatisticsPieChart extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          'Total\nEUR ${total.toStringAsFixed(2)}',
+          '${l10n.totalLabel}\nEUR ${total.toStringAsFixed(2)}',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: FontWeight.bold,

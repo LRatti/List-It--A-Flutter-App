@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/models/purchased_product.dart';
+import 'package:app_code/models/recipe_response.dart';
 import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/utils/category_localizer.dart';
+import 'package:app_code/widgets/app_snackbar.dart';
 
 class AddRecipeScreen extends ConsumerStatefulWidget {
   final ShoppingList shoppingList;
@@ -52,7 +54,11 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
     final recipeName = _recipeNameController.text.trim();
     if (recipeName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.enterRecipeNameError)),
+        buildAppSnackBar(
+          message: l10n.enterRecipeNameError,
+          isError: true,
+          context: context,
+        ),
       );
       return;
     }
@@ -114,6 +120,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
   }
 
   void _addProductsToList() async {
+    final l10n = AppLocalizations.of(context)!;
     final backgroundSearches = ref.read(backgroundRecipeProvider);
     final currentSearch = backgroundSearches[widget.shoppingList.id];
     if (currentSearch == null) return;
@@ -158,9 +165,35 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
 
         ref.read(backgroundRecipeProvider.notifier).clearSearchForList(widget.shoppingList.id);
 
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            buildAppSnackBar(
+              message: l10n.recipeAddedToListMessage,
+              context: context,
+            ),
+          );
+        }
+
         Navigator.pop(context);
       }
     });
+  }
+
+  String _localizedRecipeError(RecipeData recipe, AppLocalizations l10n) {
+    final error = recipe.error.toLowerCase();
+    if (error.contains('not found')) {
+      final name = recipe.recipeName.isNotEmpty
+          ? recipe.recipeName
+          : _recipeNameController.text.trim();
+      return l10n.recipeNotFoundMessage(name.isEmpty ? '-' : name);
+    }
+    if (error.contains('unexpected response')) {
+      return l10n.recipeUnexpectedResponse;
+    }
+    if (error.contains('could not process')) {
+      return l10n.recipeProcessingError;
+    }
+    return l10n.recipeSearchFailedGeneric;
   }
 
   @override
@@ -261,7 +294,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                                     const Icon(Icons.error_outline, size: 48, color: Colors.red),
                                     const SizedBox(height: 16),
                                     Text(
-                                      recipe.error,
+                                      _localizedRecipeError(recipe, l10n),
                                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.red),
                                       textAlign: TextAlign.center,
                                     ),

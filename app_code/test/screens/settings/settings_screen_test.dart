@@ -5,6 +5,7 @@ import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/providers/real_app_providers/app-style/theme_provider.dart';
 import 'package:app_code/providers/real_app_providers/app-style/font_size_provider.dart';
+import 'package:app_code/providers/real_app_providers/locale_provider.dart';
 
 class _FakeThemeNotifier extends ThemeNotifier {
   _FakeThemeNotifier(this.initial);
@@ -37,18 +38,37 @@ class _FakeFontSizeNotifier extends FontSizeNotifier {
   }
 }
 
+class _FakeLocaleNotifier extends LocaleNotifier {
+  _FakeLocaleNotifier(this.initial);
+
+  final Locale initial;
+  Locale? lastSet;
+
+  @override
+  Locale build() => initial;
+
+  @override
+  Future<void> setLocale(Locale newLocale) async {
+    lastSet = newLocale;
+    state = newLocale;
+  }
+}
+
 Future<ProviderContainer> _pumpSettings(
   WidgetTester tester, {
   ThemeMode theme = ThemeMode.light,
   double fontSize = 1.0,
+  Locale locale = const Locale('en'),
 }) async {
   final themeNotifier = _FakeThemeNotifier(theme);
   final fontSizeNotifier = _FakeFontSizeNotifier(fontSize);
+  final localeNotifier = _FakeLocaleNotifier(locale);
 
   final container = ProviderContainer(
     overrides: [
       themeProvider.overrideWith(() => themeNotifier),
       fontSizeProvider.overrideWith(() => fontSizeNotifier),
+      localeProvider.overrideWith(() => localeNotifier),
     ],
   );
 
@@ -60,7 +80,7 @@ Future<ProviderContainer> _pumpSettings(
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('en'),
+        locale: locale,
         home: const SettingsScreenMobile(),
         themeMode: theme,
       ),
@@ -124,5 +144,61 @@ void main() {
     await tester.pumpAndSettle();
     
     expect(notifier.lastSet, closeTo(1.3, 0.01));
+  });
+
+  testWidgets('shows preview and color palette sections', (tester) async {
+    final themeNotifier = _FakeThemeNotifier(ThemeMode.light);
+    final fontSizeNotifier = _FakeFontSizeNotifier(1.0);
+    final localeNotifier = _FakeLocaleNotifier(const Locale('en'));
+
+    final container = ProviderContainer(
+      overrides: [
+        themeProvider.overrideWith(() => themeNotifier),
+        fontSizeProvider.overrideWith(() => fontSizeNotifier),
+        localeProvider.overrideWith(() => localeNotifier),
+      ],
+    );
+
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('en'),
+          home: SettingsScreenTablet(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final l10n = AppLocalizations.of(tester.element(find.byType(SettingsScreenTablet)))!;
+
+    expect(find.text(l10n.textPreviewTitle), findsOneWidget);
+    expect(find.text(l10n.colorPaletteTitle), findsOneWidget);
+    expect(find.text(l10n.colorSwatchPrimary), findsOneWidget);
+    expect(find.text(l10n.colorSwatchSecondary), findsOneWidget);
+  });
+
+  testWidgets('changing language calls notifier', (tester) async {
+    final container = await _pumpSettings(tester, locale: const Locale('en'));
+    final notifier = container.read(localeProvider.notifier) as _FakeLocaleNotifier;
+    final l10n = AppLocalizations.of(tester.element(find.byType(SettingsScreenMobile)))!;
+
+    final languageTile = find.widgetWithText(ListTile, l10n.languageLabel);
+    final dropdown = find.descendant(
+      of: languageTile,
+      matching: find.byType(DropdownButton<Locale>),
+    );
+
+    await tester.tap(dropdown);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(l10n.languageItalianLabel).last);
+    await tester.pumpAndSettle();
+
+    expect(notifier.lastSet, const Locale('it'));
   });
 }

@@ -3,6 +3,7 @@ import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dar
 import 'package:app_code/screens/lists/add_recipe_screen_mobile.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 
 /// Service class dedicated to handling recipe search side effects
 /// Responsible for showing notifications and navigation when recipes are found
@@ -52,11 +53,14 @@ class RecipeNotificationService {
     search.result.whenData((recipe) {
       final scaffoldMessenger = _scaffoldMessengerKey.currentState;
       if (scaffoldMessenger == null) return;
+      final context = _scaffoldMessengerKey.currentContext;
+      if (context == null) return;
+      final l10n = AppLocalizations.of(context)!;
 
       final isError = recipe.hasError;
       final message = isError
-          ? 'Recipe search completed with issues'
-          : 'Recipe "${recipe.recipeName}" found!';
+          ? l10n.recipeSearchCompletedWithIssues
+          : l10n.recipeFound(recipe.recipeName);
 
       // Persist that the notification was shown so it does not reappear
       // Mark as seen BEFORE showing to handle app closure during display

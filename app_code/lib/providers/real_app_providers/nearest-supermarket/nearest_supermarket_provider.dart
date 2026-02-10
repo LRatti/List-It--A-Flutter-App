@@ -6,24 +6,37 @@ import 'package:app_code/providers/real_app_providers/nearest-supermarket/superm
 import 'package:geolocator/geolocator.dart';
 
 /// State for nearest supermarket feature
+enum NearestSupermarketError {
+  locationServicesDisabled,
+  permissionDenied,
+  permissionDeniedForever,
+  unableToGetLocation,
+  lowGpsAccuracy,
+  noneWithinDistance,
+  networkTimeout,
+  networkIssue,
+}
 
 class NearestSupermarketState {
   final NearbySupermarket? supermarket;
   final bool isLoading;
-  final String? errorMessage;
+  final NearestSupermarketError? errorType;
+  final double? errorDistanceKm;
   final Position? currentPosition;
 
   const NearestSupermarketState({
     this.supermarket,
     this.isLoading = false,
-    this.errorMessage,
+    this.errorType,
+    this.errorDistanceKm,
     this.currentPosition,
   });
 
   NearestSupermarketState copyWith({
     NearbySupermarket? supermarket,
     bool? isLoading,
-    String? errorMessage,
+    NearestSupermarketError? errorType,
+    double? errorDistanceKm,
     Position? currentPosition,
     bool clearSupermarket = false,
     bool clearError = false,
@@ -31,26 +44,14 @@ class NearestSupermarketState {
     return NearestSupermarketState(
       supermarket: clearSupermarket ? null : (supermarket ?? this.supermarket),
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      errorType: clearError ? null : (errorType ?? this.errorType),
+      errorDistanceKm:
+          clearError ? null : (errorDistanceKm ?? this.errorDistanceKm),
       currentPosition: currentPosition ?? this.currentPosition,
     );
   }
 
-  /// Get display text for UI
-  String get displayText {
-    if (isLoading) {
-      return 'Locating nearby supermarkets...';
-    }
-    if (supermarket != null) {
-      return '${supermarket!.name} - ${supermarket!.formattedDistance}';
-    }
-    if (errorMessage != null) {
-      return errorMessage!;
-    }
-    return 'Unable to detect nearby supermarkets';
-  }
-
-  bool get hasValidSupermarket => supermarket != null && errorMessage == null;
+  bool get hasValidSupermarket => supermarket != null && errorType == null;
 }
 
 /// Notifier for managing nearest supermarket state
@@ -88,7 +89,7 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
       final serviceEnabled = await locationRepo.isLocationServiceEnabled();
       if (!serviceEnabled) {
         _setError(
-          message: 'Please enable location services to find supermarkets',
+          errorType: NearestSupermarketError.locationServicesDisabled,
         );
         return;
       }
@@ -101,14 +102,14 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
 
       if (permission == LocationPermission.denied) {
         _setError(
-          message: 'Location permission is required to find supermarkets',
+          errorType: NearestSupermarketError.permissionDenied,
         );
         return;
       }
 
       if (permission == LocationPermission.deniedForever) {
         _setError(
-          message: 'Enable location permission in settings to continue',
+          errorType: NearestSupermarketError.permissionDeniedForever,
         );
         return;
       }
@@ -118,7 +119,7 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
 
       if (position == null) {
         _setError(
-          message: 'Unable to get your location right now',
+          errorType: NearestSupermarketError.unableToGetLocation,
         );
         return;
       }
@@ -126,7 +127,7 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
       // Check GPS accuracy
       if (position.accuracy > 100) {
         _setError(
-          message: 'Low GPS accuracy. Try moving outdoors.',
+          errorType: NearestSupermarketError.lowGpsAccuracy,
         );
         return;
       }
@@ -143,7 +144,8 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
 
       if (supermarkets.isEmpty) {
         _setError(
-          message: 'No supermarkets found within 5km',
+          errorType: NearestSupermarketError.noneWithinDistance,
+          errorDistanceKm: 5.0,
           currentPosition: position,
         );
         return;
@@ -164,9 +166,9 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
     } catch (e) {
       final isTimeout = e is TimeoutException;
       _setError(
-        message: isTimeout
-            ? 'Network timeout while finding supermarkets'
-            : 'Network issue while finding supermarkets',
+        errorType: isTimeout
+            ? NearestSupermarketError.networkTimeout
+            : NearestSupermarketError.networkIssue,
       );
     }
   }
@@ -217,12 +219,14 @@ class NearestSupermarketNotifier extends Notifier<NearestSupermarketState> {
   }
 
   void _setError({
-    required String message,
+    required NearestSupermarketError errorType,
+    double? errorDistanceKm,
     Position? currentPosition,
   }) {
     state = state.copyWith(
       isLoading: false,
-      errorMessage: message,
+      errorType: errorType,
+      errorDistanceKm: errorDistanceKm,
       clearSupermarket: true,
       currentPosition: currentPosition ?? state.currentPosition,
     );

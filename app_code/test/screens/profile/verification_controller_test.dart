@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/screens/profile/verification_screen.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/auth/email_verification_provider.dart';
@@ -28,6 +29,9 @@ void main() {
           emailVerificationSessionProvider.overrideWith((ref) => session),
         ],
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           routes: {
             '/': (context) => const Scaffold(body: Text('Home')),
             '/signin': (context) => const Scaffold(body: Text('SignIn')),

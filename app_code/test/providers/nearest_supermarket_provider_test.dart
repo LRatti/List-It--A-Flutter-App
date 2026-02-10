@@ -9,12 +9,12 @@ import 'package:app_code/models/nearby_supermarket.dart';
 
 void main() {
   group('NearestSupermarketState Tests', () {
-    test('displays loading text when isLoading is true', () {
+    test('sets loading state when isLoading is true', () {
       const state = NearestSupermarketState(isLoading: true);
-      expect(state.displayText, 'Locating nearby supermarkets...');
+      expect(state.isLoading, isTrue);
     });
 
-    test('displays supermarket name and distance when available', () {
+    test('stores supermarket data when available', () {
       final supermarket = NearbySupermarket(
         name: 'Tesco Extra',
         latitude: 51.5074,
@@ -22,19 +22,25 @@ void main() {
         distanceInMeters: 250.0,
       );
       final state = NearestSupermarketState(supermarket: supermarket);
-      expect(state.displayText, 'Tesco Extra - 250m');
+      expect(state.supermarket, supermarket);
+      expect(state.hasValidSupermarket, isTrue);
     });
 
-    test('displays error message when error is set', () {
+    test('stores error type when error is set', () {
       const state = NearestSupermarketState(
-        errorMessage: 'Please enable location services',
+        errorType: NearestSupermarketError.locationServicesDisabled,
       );
-      expect(state.displayText, 'Please enable location services');
+      expect(
+        state.errorType,
+        NearestSupermarketError.locationServicesDisabled,
+      );
     });
 
-    test('displays default message when no data available', () {
+    test('defaults to no supermarket and no error', () {
       const state = NearestSupermarketState();
-      expect(state.displayText, 'Unable to detect nearby supermarkets');
+      expect(state.supermarket, isNull);
+      expect(state.errorType, isNull);
+      expect(state.hasValidSupermarket, isFalse);
     });
 
     test('copyWith updates only specified fields', () {
@@ -54,7 +60,7 @@ void main() {
 
       expect(updated.supermarket, supermarket);
       expect(updated.isLoading, isFalse);
-      expect(updated.errorMessage, isNull);
+      expect(updated.errorType, isNull);
     });
 
     test('clearSupermarket removes supermarket while keeping other fields', () {
@@ -71,11 +77,11 @@ void main() {
 
       final cleared = state.copyWith(
         clearSupermarket: true,
-        errorMessage: 'Test error',
+        errorType: NearestSupermarketError.networkIssue,
       );
 
       expect(cleared.supermarket, isNull);
-      expect(cleared.errorMessage, 'Test error');
+      expect(cleared.errorType, NearestSupermarketError.networkIssue);
     });
 
     test('hasValidSupermarket returns true only with supermarket and no error',
@@ -92,7 +98,7 @@ void main() {
 
       final errorState = NearestSupermarketState(
         supermarket: supermarket,
-        errorMessage: 'Some error',
+        errorType: NearestSupermarketError.networkIssue,
       );
       expect(errorState.hasValidSupermarket, isFalse);
 
@@ -128,7 +134,7 @@ void main() {
     test('initializes with loading state', () async {
       final state = container.read(nearestSupermarketProvider);
       expect(state.isLoading, isTrue);
-      expect(state.errorMessage, isNull);
+      expect(state.errorType, isNull);
       
       // Wait for initialization to complete
       await Future.delayed(const Duration(milliseconds: 100));
@@ -160,7 +166,7 @@ void main() {
       expect(state.supermarket, isNotNull);
       expect(state.supermarket!.name, 'Tesco');
       expect(state.supermarket!.distanceInMeters, 250.0);
-      expect(state.errorMessage, isNull);
+      expect(state.errorType, isNull);
     });
 
     test('handles location service disabled error', () async {
@@ -174,8 +180,8 @@ void main() {
       expect(state.isLoading, isFalse);
       expect(state.supermarket, isNull);
       expect(
-        state.errorMessage,
-        'Please enable location services to find supermarkets',
+        state.errorType,
+        NearestSupermarketError.locationServicesDisabled,
       );
     });
 
@@ -190,8 +196,8 @@ void main() {
       expect(state.isLoading, isFalse);
       expect(state.supermarket, isNull);
       expect(
-        state.errorMessage,
-        'Location permission is required to find supermarkets',
+        state.errorType,
+        NearestSupermarketError.permissionDenied,
       );
     });
 
@@ -204,8 +210,8 @@ void main() {
 
       final state = container.read(nearestSupermarketProvider);
       expect(
-        state.errorMessage,
-        'Enable location permission in settings to continue',
+        state.errorType,
+        NearestSupermarketError.permissionDeniedForever,
       );
     });
 
@@ -219,7 +225,10 @@ void main() {
       final state = container.read(nearestSupermarketProvider);
       expect(state.isLoading, isFalse);
       expect(state.supermarket, isNull);
-      expect(state.errorMessage, 'Unable to get your location right now');
+      expect(
+        state.errorType,
+        NearestSupermarketError.unableToGetLocation,
+      );
     });
 
     test('handles low GPS accuracy error', () async {
@@ -244,7 +253,7 @@ void main() {
       await notifier.fetchNearestSupermarket();
 
       final state = container.read(nearestSupermarketProvider);
-      expect(state.errorMessage, 'Low GPS accuracy. Try moving outdoors.');
+      expect(state.errorType, NearestSupermarketError.lowGpsAccuracy);
     });
 
     test('handles no supermarket found error', () async {
@@ -255,7 +264,8 @@ void main() {
       await notifier.fetchNearestSupermarket();
 
       final state = container.read(nearestSupermarketProvider);
-      expect(state.errorMessage, 'No supermarkets found within 5km');
+      expect(state.errorType, NearestSupermarketError.noneWithinDistance);
+      expect(state.errorDistanceKm, 5.0);
     });
 
     test('handles network timeout error', () async {
@@ -279,7 +289,7 @@ void main() {
       await notifier.fetchNearestSupermarket();
 
       final state = container.read(nearestSupermarketProvider);
-      expect(state.errorMessage, 'Network issue while finding supermarkets');
+      expect(state.errorType, NearestSupermarketError.networkIssue);
     });
 
     test('sorts supermarkets by distance and returns nearest', () async {

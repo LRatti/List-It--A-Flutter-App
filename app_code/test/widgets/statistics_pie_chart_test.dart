@@ -1,4 +1,5 @@
 import 'package:app_code/widgets/statistics_pie_chart.dart';
+import 'package:app_code/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,6 +13,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: Center(
               child: SizedBox(
@@ -29,7 +33,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Total'), findsOneWidget);
+      final l10n = AppLocalizations.of(tester.element(find.byType(Scaffold)))!;
+      expect(find.textContaining(l10n.totalLabel), findsOneWidget);
       expect(find.textContaining('EUR 30.00'), findsOneWidget);
 
       final painted = tester

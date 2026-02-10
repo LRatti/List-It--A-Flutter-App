@@ -7,7 +7,6 @@ import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
-import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
@@ -140,6 +139,94 @@ void main() {
         expect(find.byType(ListDetailScreenMobile), findsOneWidget);
       },
     );
+
+    testWidgets('renders header and action buttons', (tester) async {
+      final shoppingList = createShoppingList('list-1', 'Groceries');
+
+      await tester.pumpWidget(createTestWidget(shoppingList));
+      await tester.pumpAndSettle();
+
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(ListDetailScreenMobile)),
+      )!;
+
+      final nameField = tester
+          .widgetList<TextField>(find.byType(TextField))
+          .firstWhere(
+            (field) => field.decoration?.hintText == l10n.listNameHint,
+          );
+
+      expect(nameField.controller?.text, 'Groceries');
+      expect(find.byIcon(Icons.shopping_cart), findsOneWidget);
+      expect(find.byIcon(Icons.restaurant_menu), findsOneWidget);
+      expect(find.byIcon(Icons.send), findsOneWidget);
+      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+    });
+
+    testWidgets('shows supermarket prompt when none available', (tester) async {
+      final shoppingList = createShoppingList('list-1', 'Groceries');
+
+      await tester.pumpWidget(createTestWidget(shoppingList));
+      await tester.pumpAndSettle();
+
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(ListDetailScreenMobile)),
+      )!;
+
+      expect(find.text(l10n.createSupermarketPrompt), findsOneWidget);
+    });
+
+    testWidgets('shows selected supermarket and categories count', (tester) async {
+      final categories = [
+        createCategory('cat-1', 'Dairy'),
+        createCategory('cat-2', 'Meat'),
+      ];
+      final supermarket = createSupermarket(
+        'sm-1',
+        'Store A',
+        categories: categories,
+      );
+      final shoppingList = createShoppingList(
+        'list-1',
+        'Groceries',
+        supermarket: supermarket,
+      );
+
+      await tester.pumpWidget(
+        createTestWidget(
+          shoppingList,
+          availableSupermarkets: [supermarket],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(ListDetailScreenMobile)),
+      )!;
+
+      expect(find.text('Store A'), findsOneWidget);
+      expect(find.text(l10n.categoriesCountLabel(2)), findsOneWidget);
+    });
+
+    testWidgets('opens supermarket selection sheet', (tester) async {
+      final shoppingList = createShoppingList('list-1', 'Groceries');
+
+      await tester.pumpWidget(createTestWidget(shoppingList));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.store));
+      await tester.pumpAndSettle();
+
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(ListDetailScreenMobile)),
+      )!;
+
+      expect(find.text(l10n.selectSupermarketTitle), findsOneWidget);
+      expect(find.text(l10n.createNewLabel), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+    });
 
     testWidgets(
       'selecting newly created supermarket after returning from creation mode',

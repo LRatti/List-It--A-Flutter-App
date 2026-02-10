@@ -459,5 +459,78 @@
     "placeholders": {
       "error": {}
     }
-  }
+  },
+  "nearestSupermarketLocating": "Ricerca supermercati vicini...",
+  "nearestSupermarketUnavailable": "Impossibile rilevare supermercati vicini",
+  "nearestSupermarketEnableLocationServices": "Attiva i servizi di localizzazione per trovare supermercati",
+  "nearestSupermarketPermissionRequired": "Autorizzazione alla posizione necessaria per trovare supermercati",
+  "nearestSupermarketPermissionDeniedForever": "Abilita il permesso di posizione nelle impostazioni per continuare",
+  "nearestSupermarketUnableToGetLocation": "Impossibile ottenere la tua posizione al momento",
+  "nearestSupermarketLowGpsAccuracy": "Bassa precisione GPS. Prova all'aperto.",
+  "nearestSupermarketNoneWithinDistance": "Nessun supermercato trovato entro {distanceKm} km",
+  "@nearestSupermarketNoneWithinDistance": {
+    "placeholders": {
+      "distanceKm": {}
+    }
+  },
+  "nearestSupermarketNetworkTimeout": "Timeout di rete durante la ricerca dei supermercati",
+  "nearestSupermarketNetworkIssue": "Problema di rete durante la ricerca dei supermercati",
+  "nearestSupermarketResult": "{name} - {distance}",
+  "@nearestSupermarketResult": {
+    "placeholders": {
+      "name": {},
+      "distance": {}
+    }
+  },
+  "totalLabel": "Totale",
+  "recipeSearchCompletedWithIssues": "Ricerca ricetta completata con problemi",
+  "recipeFound": "Ricetta \"{recipeName}\" trovata!",
+  "@recipeFound": {
+    "placeholders": {
+      "recipeName": {}
+    }
+  },
+  "emailVerifiedSignInAgain": "Email verificata. Accedi di nuovo per continuare.",
+  "emailNotVerifiedYet": "Email non ancora verificata. Controlla la posta.",
+  "errorCheckingVerification": "Errore durante la verifica: {error}",
+  "@errorCheckingVerification": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "pleaseWaitBeforeResending": "Attendi {seconds}s prima di reinviare.",
+  "@pleaseWaitBeforeResending": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "noAuthenticatedUserFound": "Nessun utente autenticato trovato.",
+  "verificationEmailSentCheckInbox": "Email di verifica inviata. Controlla la posta.",
+  "verificationEmailResentNewAddress": "Email di verifica reinviata al tuo nuovo indirizzo.",
+  "verificationNewEmailUnavailable": "Impossibile reinviare: nuova email non disponibile.",
+  "tooManyRequestsTryLater": "Troppe richieste. Attendi qualche minuto e riprova.",
+  "errorSendingVerificationEmail": "Errore durante l'invio dell'email di verifica: {error}",
+  "@errorSendingVerificationEmail": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "accountCreationCancelledMessage": "Creazione account annullata. Registrati di nuovo se vuoi creare un account.",
+  "emailVerificationCancelledMessage": "Verifica email annullata. Puoi aggiornare di nuovo l'email in qualsiasi momento dalle impostazioni.",
+  "errorAbortingOperation": "Errore durante l'annullamento dell'operazione: {error}",
+  "@errorAbortingOperation": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "recipeAddedToListMessage": "Elementi della ricetta aggiunti alla lista.",
+  "recipeNotFoundMessage": "\"{recipeName}\" non trovata. Riprova.",
+  "@recipeNotFoundMessage": {
+    "placeholders": {
+      "recipeName": {}
+    }
+  },
+  "recipeUnexpectedResponse": "Il servizio ricette ha restituito una risposta inattesa. Riprova.",
+  "recipeProcessingError": "Impossibile elaborare la ricetta. Riprova.",
+  "recipeSearchFailedGeneric": "Ricerca ricetta non riuscita. Riprova."
 }

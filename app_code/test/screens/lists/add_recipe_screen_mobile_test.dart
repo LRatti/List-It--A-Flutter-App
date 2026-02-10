@@ -295,7 +295,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('Recipe not found'), findsOneWidget);
+      final l10n = AppLocalizations.of(tester.element(find.byType(AddRecipeScreen)))!;
+      final expectedMessage = l10n.recipeNotFoundMessage('-');
+
+      expect(find.text(expectedMessage), findsOneWidget);
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
     },
   );

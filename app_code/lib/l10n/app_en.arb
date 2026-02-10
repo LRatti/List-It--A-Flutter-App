@@ -459,5 +459,78 @@
     "placeholders": {
       "error": {}
     }
-  }
+  },
+  "nearestSupermarketLocating": "Locating nearby supermarkets...",
+  "nearestSupermarketUnavailable": "Unable to detect nearby supermarkets",
+  "nearestSupermarketEnableLocationServices": "Please enable location services to find supermarkets",
+  "nearestSupermarketPermissionRequired": "Location permission is required to find supermarkets",
+  "nearestSupermarketPermissionDeniedForever": "Enable location permission in settings to continue",
+  "nearestSupermarketUnableToGetLocation": "Unable to get your location right now",
+  "nearestSupermarketLowGpsAccuracy": "Low GPS accuracy. Try moving outdoors.",
+  "nearestSupermarketNoneWithinDistance": "No supermarkets found within {distanceKm} km",
+  "@nearestSupermarketNoneWithinDistance": {
+    "placeholders": {
+      "distanceKm": {}
+    }
+  },
+  "nearestSupermarketNetworkTimeout": "Network timeout while finding supermarkets",
+  "nearestSupermarketNetworkIssue": "Network issue while finding supermarkets",
+  "nearestSupermarketResult": "{name} - {distance}",
+  "@nearestSupermarketResult": {
+    "placeholders": {
+      "name": {},
+      "distance": {}
+    }
+  },
+  "totalLabel": "Total",
+  "recipeSearchCompletedWithIssues": "Recipe search completed with issues",
+  "recipeFound": "Recipe \"{recipeName}\" found!",
+  "@recipeFound": {
+    "placeholders": {
+      "recipeName": {}
+    }
+  },
+  "emailVerifiedSignInAgain": "Email verified. Please sign in again to continue.",
+  "emailNotVerifiedYet": "Email not verified yet. Please check your inbox.",
+  "errorCheckingVerification": "Error checking verification: {error}",
+  "@errorCheckingVerification": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "pleaseWaitBeforeResending": "Please wait {seconds}s before resending.",
+  "@pleaseWaitBeforeResending": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "noAuthenticatedUserFound": "No authenticated user found.",
+  "verificationEmailSentCheckInbox": "Verification email sent! Please check your inbox.",
+  "verificationEmailResentNewAddress": "Verification email re-sent to your new address.",
+  "verificationNewEmailUnavailable": "Cannot resend: new email not available.",
+  "tooManyRequestsTryLater": "Too many requests. Please wait a few minutes and try again.",
+  "errorSendingVerificationEmail": "Error sending verification email: {error}",
+  "@errorSendingVerificationEmail": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "accountCreationCancelledMessage": "Account creation cancelled. Please sign up again if you wish to create an account.",
+  "emailVerificationCancelledMessage": "Email verification cancelled. You can update your email again anytime from settings.",
+  "errorAbortingOperation": "Error aborting operation: {error}",
+  "@errorAbortingOperation": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "recipeAddedToListMessage": "Recipe items added to the list.",
+  "recipeNotFoundMessage": "\"{recipeName}\" not found. Try again.",
+  "@recipeNotFoundMessage": {
+    "placeholders": {
+      "recipeName": {}
+    }
+  },
+  "recipeUnexpectedResponse": "Recipe service returned an unexpected response. Please try again.",
+  "recipeProcessingError": "Could not process the recipe. Please try again.",
+  "recipeSearchFailedGeneric": "Recipe search failed. Please try again."
 }

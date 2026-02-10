@@ -35,6 +35,7 @@ abstract class VerificationController
     if (_isCheckingVerification) return;
 
     setState(() => _isCheckingVerification = true);
+    final l10n = AppLocalizations.of(context)!;
 
     try {
       // Get verification session first to know the context
@@ -70,9 +71,7 @@ abstract class VerificationController
                 // Clear session
                 ref.read(emailVerificationSessionProvider.notifier).state =
                     null;
-                showSnackBar(
-                  'Email verified. Please sign in again to continue.',
-                );
+                showSnackBar(l10n.emailVerifiedSignInAgain);
                 Navigator.of(
                   context,
                 ).pushNamedAndRemoveUntil('/signin', (route) => false);
@@ -86,7 +85,7 @@ abstract class VerificationController
             final authNotifier = ref.read(authProvider.notifier);
             await authNotifier.signOut();
             ref.read(emailVerificationSessionProvider.notifier).state = null;
-            showSnackBar('Email verified. Please sign in again to continue.');
+            showSnackBar(l10n.emailVerifiedSignInAgain);
             Navigator.of(
               context,
             ).pushNamedAndRemoveUntil('/signin', (route) => false);
@@ -99,7 +98,7 @@ abstract class VerificationController
           final authNotifier = ref.read(authProvider.notifier);
           await authNotifier.signOut();
           ref.read(emailVerificationSessionProvider.notifier).state = null;
-          showSnackBar('Email verified. Please sign in again to continue.');
+          showSnackBar(l10n.emailVerifiedSignInAgain);
           Navigator.of(
             context,
           ).pushNamedAndRemoveUntil('/signin', (route) => false);
@@ -115,7 +114,7 @@ abstract class VerificationController
           final authNotifier = ref.read(authProvider.notifier);
           await authNotifier.signOut();
           ref.read(emailVerificationSessionProvider.notifier).state = null;
-          showSnackBar('Email verified. Please sign in again to continue.');
+          showSnackBar(l10n.emailVerifiedSignInAgain);
           Navigator.of(
             context,
           ).pushNamedAndRemoveUntil('/signin', (route) => false);
@@ -133,6 +132,7 @@ abstract class VerificationController
   /// Manually check and continue if verified
   Future<void> checkAndContinue() async {
     setState(() => _isCheckingVerification = true);
+    final l10n = AppLocalizations.of(context)!;
 
     try {
       // Get verification session to determine if this is email update or new signup
@@ -167,9 +167,7 @@ abstract class VerificationController
                 await authNotifier.signOut();
                 ref.read(emailVerificationSessionProvider.notifier).state =
                     null;
-                showSnackBar(
-                  'Email verified. Please sign in again to continue.',
-                );
+                showSnackBar(l10n.emailVerifiedSignInAgain);
                 Navigator.of(
                   context,
                 ).pushNamedAndRemoveUntil('/signin', (route) => false);
@@ -177,10 +175,7 @@ abstract class VerificationController
             }
           } else {
             if (mounted) {
-              showSnackBar(
-                'Email not verified yet. Please check your inbox.',
-                isError: true,
-              );
+              showSnackBar(l10n.emailNotVerifiedYet, isError: true);
             }
           }
         } else if (!isNewSignup) {
@@ -190,7 +185,7 @@ abstract class VerificationController
             final authNotifier = ref.read(authProvider.notifier);
             await authNotifier.signOut();
             ref.read(emailVerificationSessionProvider.notifier).state = null;
-            showSnackBar('Email verified. Please sign in again to continue.');
+            showSnackBar(l10n.emailVerifiedSignInAgain);
             Navigator.of(
               context,
             ).pushNamedAndRemoveUntil('/signin', (route) => false);
@@ -203,7 +198,7 @@ abstract class VerificationController
           final authNotifier = ref.read(authProvider.notifier);
           await authNotifier.signOut();
           ref.read(emailVerificationSessionProvider.notifier).state = null;
-          showSnackBar('Email verified. Please sign in again to continue.');
+          showSnackBar(l10n.emailVerifiedSignInAgain);
           Navigator.of(
             context,
           ).pushNamedAndRemoveUntil('/signin', (route) => false);
@@ -219,12 +214,15 @@ abstract class VerificationController
           final authNotifier = ref.read(authProvider.notifier);
           await authNotifier.signOut();
           ref.read(emailVerificationSessionProvider.notifier).state = null;
-          showSnackBar('Email verified. Please sign in again to continue.');
+          showSnackBar(l10n.emailVerifiedSignInAgain);
           Navigator.of(
             context,
           ).pushNamedAndRemoveUntil('/signin', (route) => false);
         } else {
-          showSnackBar('Error checking verification: $e', isError: true);
+          showSnackBar(
+            l10n.errorCheckingVerification(e.toString()),
+            isError: true,
+          );
         }
       }
     } finally {
@@ -238,12 +236,13 @@ abstract class VerificationController
   Future<void> resendVerificationEmail() async {
     // Local cooldown to avoid Firebase rate limiting
     const cooldown = Duration(seconds: 60);
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     if (_lastResendAt != null && now.difference(_lastResendAt!) < cooldown) {
       final remaining = cooldown - now.difference(_lastResendAt!);
       if (mounted) {
         showSnackBar(
-          'Please wait ${remaining.inSeconds}s before resending.',
+          l10n.pleaseWaitBeforeResending(remaining.inSeconds),
           isError: true,
         );
       }
@@ -261,7 +260,7 @@ abstract class VerificationController
       final currentUser = firebase_auth.FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
         if (mounted) {
-          showSnackBar('No authenticated user found.', isError: true);
+          showSnackBar(l10n.noAuthenticatedUserFound, isError: true);
         }
         return;
       }
@@ -270,7 +269,7 @@ abstract class VerificationController
         // New signup: resend to the current user's email if not verified yet
         await currentUser.sendEmailVerification();
         if (mounted) {
-          showSnackBar('Verification email sent! Please check your inbox.');
+          showSnackBar(l10n.verificationEmailSentCheckInbox);
         }
         _lastResendAt = DateTime.now();
       } else {
@@ -278,7 +277,7 @@ abstract class VerificationController
         if (newEmail == null || newEmail.isEmpty) {
           if (mounted) {
             showSnackBar(
-              'Cannot resend: new email not available.',
+              l10n.verificationNewEmailUnavailable,
               isError: true,
             );
           }
@@ -286,7 +285,7 @@ abstract class VerificationController
         }
         await currentUser.verifyBeforeUpdateEmail(newEmail);
         if (mounted) {
-          showSnackBar('Verification email re-sent to your new address.');
+          showSnackBar(l10n.verificationEmailResentNewAddress);
         }
         _lastResendAt = DateTime.now();
       }
@@ -295,11 +294,14 @@ abstract class VerificationController
         if (e is firebase_auth.FirebaseAuthException &&
             e.code == 'too-many-requests') {
           showSnackBar(
-            'Too many requests. Please wait a few minutes and try again.',
+            l10n.tooManyRequestsTryLater,
             isError: true,
           );
         } else {
-          showSnackBar('Error sending verification email: $e', isError: true);
+          showSnackBar(
+            l10n.errorSendingVerificationEmail(e.toString()),
+            isError: true,
+          );
         }
       }
     } finally {
@@ -317,6 +319,7 @@ abstract class VerificationController
 
     final authNotifier = ref.read(authProvider.notifier);
     final verificationSession = ref.read(emailVerificationSessionProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     final isNewSignup = verificationSession?.isNewSignup ?? false;
 
@@ -329,7 +332,7 @@ abstract class VerificationController
         if (isNewSignup) {
           // For new signup: redirect to signup page
           showSnackBar(
-            'Account creation cancelled. Please sign up again if you wish to create an account.',
+            l10n.accountCreationCancelledMessage,
           );
           Navigator.of(
             context,
@@ -337,14 +340,17 @@ abstract class VerificationController
         } else {
           // For email update: return to home without signing out
           showSnackBar(
-            'Email verification cancelled. You can update your email again anytime from settings.',
+            l10n.emailVerificationCancelledMessage,
           );
           Navigator.of(context).pop();
         }
       }
     } catch (e) {
       if (mounted) {
-        showSnackBar('Error aborting operation: $e', isError: true);
+        showSnackBar(
+          l10n.errorAbortingOperation(e.toString()),
+          isError: true,
+        );
       }
       print('Error aborting email verification: $e');
     } finally {
