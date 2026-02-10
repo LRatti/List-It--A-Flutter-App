@@ -41,6 +41,10 @@ import 'package:app_code/providers/real_app_providers/screen_size_provider.dart'
 Future<void> _runStartupTasks() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // TO BE UNCOMMENTED 
+  // final view = WidgetsBinding.instance.platformDispatcher.views.first;
+  // final size = view.physicalSize / view.devicePixelRatio;
+  // ScreenSize.initializeDeviceTypeFromWidth(size.width);
   // NOTE: Screen size detection removed from startup to avoid race conditions.
   // Early view.physicalSize measurements are unreliable in release mode.
   // Screen size is now detected reactively by AppScreenSizeListener after
@@ -93,6 +97,10 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
+    //ADDITION
+    ScreenSize.initializeDeviceTypeFromWidth(MediaQuery.of(context).size.width);
+
     final scaffoldMessengerKey = ref.watch(scaffoldMessengerKeyProvider);
     final navigatorKey = ref.watch(navigatorKeyProvider);
     final currentLocale = ref.watch(localeProvider);
@@ -120,6 +128,9 @@ class MyApp extends ConsumerWidget {
     // Watch font size and theme mode for reactive updates
     final fontSizeMultiplier = ref.watch(fontSizeValueProvider);
     final themeMode = ref.watch(themeModeValueProvider);
+
+    //ADDITION
+    final isTablet = ScreenSize.isTabletAtLaunch ?? false;
 
     final theme = ThemeData(
       useMaterial3: true,
@@ -150,7 +161,17 @@ class MyApp extends ConsumerWidget {
     );
 
     return AppScreenSizeListener(
-      child: ResponsiveShellSelector(
+      child: isTablet
+          ? TabletAppShell(
+              scaffoldMessengerKey: scaffoldMessengerKey,
+              navigatorKey: navigatorKey,
+              themeMode: themeMode,
+              theme: theme,
+              darkTheme: darkTheme,
+              locale: currentLocale,
+            )
+          : MobileAppShell(
+      //child: ResponsiveShellSelector(
         scaffoldMessengerKey: scaffoldMessengerKey,
         navigatorKey: navigatorKey,
         themeMode: themeMode,
@@ -158,66 +179,66 @@ class MyApp extends ConsumerWidget {
         darkTheme: darkTheme,
         locale: currentLocale,
       ),
-    );
-  }
-}
+//     );
+//   }
+// }
 
-/// Responsive shell selector that dynamically chooses between Mobile and Tablet shells
-/// based on the actual measured screen size from the provider.
-///
-/// This ensures the correct shell is shown regardless of when the app starts,
-/// avoiding race conditions between early view measurements and actual screen size.
-class ResponsiveShellSelector extends ConsumerWidget {
-  const ResponsiveShellSelector({
-    super.key,
-    required this.scaffoldMessengerKey,
-    required this.navigatorKey,
-    required this.themeMode,
-    required this.theme,
-    required this.darkTheme,
-    required this.locale,
-  });
+// /// Responsive shell selector that dynamically chooses between Mobile and Tablet shells
+// /// based on the actual measured screen size from the provider.
+// ///
+// /// This ensures the correct shell is shown regardless of when the app starts,
+// /// avoiding race conditions between early view measurements and actual screen size.
+// class ResponsiveShellSelector extends ConsumerWidget {
+//   const ResponsiveShellSelector({
+//     super.key,
+//     required this.scaffoldMessengerKey,
+//     required this.navigatorKey,
+//     required this.themeMode,
+//     required this.theme,
+//     required this.darkTheme,
+//     required this.locale,
+//   });
 
-  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
-  final GlobalKey<NavigatorState> navigatorKey;
-  final ThemeMode themeMode;
-  final ThemeData theme;
-  final ThemeData darkTheme;
-  final Locale locale;
+//   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
+//   final GlobalKey<NavigatorState> navigatorKey;
+//   final ThemeMode themeMode;
+//   final ThemeData theme;
+//   final ThemeData darkTheme;
+//   final Locale locale;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Watch the screen size provider for reactive updates
-    final screenClassification = ref.watch(screenSizeProvider);
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     // Watch the screen size provider for reactive updates
+//     final screenClassification = ref.watch(screenSizeProvider);
 
-    // Determine if we should use tablet layout
-    // Tablet, Desktop, and Large Desktop all use the tablet shell
-    final useTabletShell = screenClassification == ScreenClassification.tablet ||
-        screenClassification == ScreenClassification.desktop ||
-        screenClassification == ScreenClassification.largeDesktop;
+//     // Determine if we should use tablet layout
+//     // Tablet, Desktop, and Large Desktop all use the tablet shell
+//     final useTabletShell = screenClassification == ScreenClassification.tablet ||
+//         screenClassification == ScreenClassification.desktop ||
+//         screenClassification == ScreenClassification.largeDesktop;
 
-    // On first frame (unknown), default to mobile to avoid flash
-    // AppScreenSizeListener will update this immediately on first build
-    if (screenClassification == ScreenClassification.unknown) {
-      return const SizedBox.shrink(); // Show nothing until classification is known
-    }
+//     // On first frame (unknown), default to mobile to avoid flash
+//     // AppScreenSizeListener will update this immediately on first build
+//     if (screenClassification == ScreenClassification.unknown) {
+//       return const SizedBox.shrink(); // Show nothing until classification is known
+//     }
 
-    return useTabletShell
-        ? TabletAppShell(
-            scaffoldMessengerKey: scaffoldMessengerKey,
-            navigatorKey: navigatorKey,
-            themeMode: themeMode,
-            theme: theme,
-            darkTheme: darkTheme,
-            locale: locale,
-          )
-        : MobileAppShell(
-            scaffoldMessengerKey: scaffoldMessengerKey,
-            navigatorKey: navigatorKey,
-            themeMode: themeMode,
-            theme: theme,
-            darkTheme: darkTheme,
-            locale: locale,
+//     return useTabletShell
+//         ? TabletAppShell(
+//             scaffoldMessengerKey: scaffoldMessengerKey,
+//             navigatorKey: navigatorKey,
+//             themeMode: themeMode,
+//             theme: theme,
+//             darkTheme: darkTheme,
+//             locale: locale,
+//           )
+//         : MobileAppShell(
+//             scaffoldMessengerKey: scaffoldMessengerKey,
+//             navigatorKey: navigatorKey,
+//             themeMode: themeMode,
+//             theme: theme,
+//             darkTheme: darkTheme,
+//             locale: locale,
           );
   }
 }
