@@ -23,7 +23,7 @@ class TestNearestSupermarketNotifier extends NearestSupermarketNotifier {
     // Return a simple state without initializing timers or location services
     return const NearestSupermarketState(
       isLoading: false,
-      errorMessage: 'Location services disabled in test',
+      errorType: NearestSupermarketError.locationServicesDisabled,
     );
   }
 }

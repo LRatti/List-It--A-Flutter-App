@@ -207,51 +207,6 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get unableToOpenMap => 'Impossibile aprire la mappa';
 
-    @override
-    String get nearestSupermarketLocating => 'Ricerca supermercati vicini...';
-
-    @override
-    String get nearestSupermarketUnavailable =>
-      'Impossibile rilevare supermercati vicini';
-
-    @override
-    String get nearestSupermarketEnableLocationServices =>
-      'Attiva i servizi di localizzazione per trovare supermercati';
-
-    @override
-    String get nearestSupermarketPermissionRequired =>
-      'Autorizzazione alla posizione necessaria per trovare supermercati';
-
-    @override
-    String get nearestSupermarketPermissionDeniedForever =>
-      'Abilita il permesso di posizione nelle impostazioni per continuare';
-
-    @override
-    String get nearestSupermarketUnableToGetLocation =>
-      'Impossibile ottenere la tua posizione al momento';
-
-    @override
-    String get nearestSupermarketLowGpsAccuracy =>
-      'Bassa precisione GPS. Prova all\'aperto.';
-
-    @override
-    String nearestSupermarketNoneWithinDistance(Object distanceKm) {
-    return 'Nessun supermercato trovato entro $distanceKm km';
-    }
-
-    @override
-    String get nearestSupermarketNetworkTimeout =>
-      'Timeout di rete durante la ricerca dei supermercati';
-
-    @override
-    String get nearestSupermarketNetworkIssue =>
-      'Problema di rete durante la ricerca dei supermercati';
-
-    @override
-    String nearestSupermarketResult(Object name, Object distance) {
-    return '$name - $distance';
-    }
-
   @override
   String get menuLabel => 'Menu';
 
@@ -400,9 +355,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get byCategoryTitle => 'Per categoria';
 
   @override
-  String get totalLabel => 'Totale';
-
-  @override
   String get categoryBreakdownTitle => 'Dettaglio categorie';
 
   @override
@@ -455,15 +407,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get recipeLabel => 'Ricetta';
-
-  @override
-  String get recipeSearchCompletedWithIssues =>
-      'Ricerca ricetta completata con problemi';
-
-  @override
-  String recipeFound(Object recipeName) {
-    return 'Ricetta "$recipeName" trovata!';
-  }
 
   @override
   String ingredientsCount(Object selected, Object total) {
@@ -973,61 +916,6 @@ class AppLocalizationsIt extends AppLocalizations {
       'Email di verifica inviata al nuovo indirizzo!';
 
   @override
-  String get verificationEmailSentCheckInbox =>
-      'Email di verifica inviata. Controlla la posta.';
-
-  @override
-  String get verificationEmailResentNewAddress =>
-      'Email di verifica reinviata al tuo nuovo indirizzo.';
-
-  @override
-  String get verificationNewEmailUnavailable =>
-      'Impossibile reinviare: nuova email non disponibile.';
-
-  @override
-  String get emailVerifiedSignInAgain =>
-      'Email verificata. Accedi di nuovo per continuare.';
-
-  @override
-  String get emailNotVerifiedYet =>
-      'Email non ancora verificata. Controlla la posta.';
-
-  @override
-  String errorCheckingVerification(Object error) {
-    return 'Errore durante la verifica: $error';
-  }
-
-  @override
-  String pleaseWaitBeforeResending(Object seconds) {
-    return 'Attendi ${seconds}s prima di reinviare.';
-  }
-
-  @override
-  String get noAuthenticatedUserFound => 'Nessun utente autenticato trovato.';
-
-  @override
-  String get tooManyRequestsTryLater =>
-      'Troppe richieste. Attendi qualche minuto e riprova.';
-
-  @override
-  String errorSendingVerificationEmail(Object error) {
-    return 'Errore durante l\'invio dell\'email di verifica: $error';
-  }
-
-  @override
-  String get accountCreationCancelledMessage =>
-      'Creazione account annullata. Registrati di nuovo se vuoi creare un account.';
-
-  @override
-  String get emailVerificationCancelledMessage =>
-      'Verifica email annullata. Puoi aggiornare di nuovo l\'email in qualsiasi momento dalle impostazioni.';
-
-  @override
-  String errorAbortingOperation(Object error) {
-    return 'Errore durante l\'annullamento dell\'operazione: $error';
-  }
-
-  @override
   String get passwordUpdatedSignInAgain =>
       'Password aggiornata. Accedi di nuovo.';
 
@@ -1071,4 +959,137 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get receiptCameraExtractingPrices =>
       'Estrazione di prezzi e quantita...';
+
+  @override
+  String get nearestSupermarketLocating => 'Ricerca supermercati vicini...';
+
+  @override
+  String get nearestSupermarketUnavailable =>
+      'Impossibile rilevare supermercati vicini';
+
+  @override
+  String get nearestSupermarketEnableLocationServices =>
+      'Attiva i servizi di localizzazione per trovare supermercati';
+
+  @override
+  String get nearestSupermarketPermissionRequired =>
+      'Autorizzazione alla posizione necessaria per trovare supermercati';
+
+  @override
+  String get nearestSupermarketPermissionDeniedForever =>
+      'Abilita il permesso di posizione nelle impostazioni per continuare';
+
+  @override
+  String get nearestSupermarketUnableToGetLocation =>
+      'Impossibile ottenere la tua posizione al momento';
+
+  @override
+  String get nearestSupermarketLowGpsAccuracy =>
+      'Bassa precisione GPS. Prova all\'aperto.';
+
+  @override
+  String nearestSupermarketNoneWithinDistance(Object distanceKm) {
+    return 'Nessun supermercato trovato entro $distanceKm km';
+  }
+
+  @override
+  String get nearestSupermarketNetworkTimeout =>
+      'Timeout di rete durante la ricerca dei supermercati';
+
+  @override
+  String get nearestSupermarketNetworkIssue =>
+      'Problema di rete durante la ricerca dei supermercati';
+
+  @override
+  String nearestSupermarketResult(Object name, Object distance) {
+    return '$name - $distance';
+  }
+
+  @override
+  String get totalLabel => 'Totale';
+
+  @override
+  String get recipeSearchCompletedWithIssues =>
+      'Ricerca ricetta completata con problemi';
+
+  @override
+  String recipeFound(Object recipeName) {
+    return 'Ricetta \"$recipeName\" trovata!';
+  }
+
+  @override
+  String get emailVerifiedSignInAgain =>
+      'Email verificata. Accedi di nuovo per continuare.';
+
+  @override
+  String get emailNotVerifiedYet =>
+      'Email non ancora verificata. Controlla la posta.';
+
+  @override
+  String errorCheckingVerification(Object error) {
+    return 'Errore durante la verifica: $error';
+  }
+
+  @override
+  String pleaseWaitBeforeResending(Object seconds) {
+    return 'Attendi ${seconds}s prima di reinviare.';
+  }
+
+  @override
+  String get noAuthenticatedUserFound => 'Nessun utente autenticato trovato.';
+
+  @override
+  String get verificationEmailSentCheckInbox =>
+      'Email di verifica inviata. Controlla la posta.';
+
+  @override
+  String get verificationEmailResentNewAddress =>
+      'Email di verifica reinviata al tuo nuovo indirizzo.';
+
+  @override
+  String get verificationNewEmailUnavailable =>
+      'Impossibile reinviare: nuova email non disponibile.';
+
+  @override
+  String get tooManyRequestsTryLater =>
+      'Troppe richieste. Attendi qualche minuto e riprova.';
+
+  @override
+  String errorSendingVerificationEmail(Object error) {
+    return 'Errore durante l\'invio dell\'email di verifica: $error';
+  }
+
+  @override
+  String get accountCreationCancelledMessage =>
+      'Creazione account annullata. Registrati di nuovo se vuoi creare un account.';
+
+  @override
+  String get emailVerificationCancelledMessage =>
+      'Verifica email annullata. Puoi aggiornare di nuovo l\'email in qualsiasi momento dalle impostazioni.';
+
+  @override
+  String errorAbortingOperation(Object error) {
+    return 'Errore durante l\'annullamento dell\'operazione: $error';
+  }
+
+  @override
+  String get recipeAddedToListMessage =>
+      'Elementi della ricetta aggiunti alla lista.';
+
+  @override
+  String recipeNotFoundMessage(Object recipeName) {
+    return '\"$recipeName\" non trovata. Riprova.';
+  }
+
+  @override
+  String get recipeUnexpectedResponse =>
+      'Il servizio ricette ha restituito una risposta inattesa. Riprova.';
+
+  @override
+  String get recipeProcessingError =>
+      'Impossibile elaborare la ricetta. Riprova.';
+
+  @override
+  String get recipeSearchFailedGeneric =>
+      'Ricerca ricetta non riuscita. Riprova.';
 }

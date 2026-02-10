@@ -522,5 +522,15 @@
     "placeholders": {
       "error": {}
     }
-  }
+  },
+  "recipeAddedToListMessage": "Recipe items added to the list.",
+  "recipeNotFoundMessage": "\"{recipeName}\" not found. Try again.",
+  "@recipeNotFoundMessage": {
+    "placeholders": {
+      "recipeName": {}
+    }
+  },
+  "recipeUnexpectedResponse": "Recipe service returned an unexpected response. Please try again.",
+  "recipeProcessingError": "Could not process the recipe. Please try again.",
+  "recipeSearchFailedGeneric": "Recipe search failed. Please try again."
 }

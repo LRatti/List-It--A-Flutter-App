@@ -15,7 +15,7 @@ class TestNearestSupermarketNotifier extends NearestSupermarketNotifier {
   NearestSupermarketState build() {
     return const NearestSupermarketState(
       isLoading: false,
-      errorMessage: 'internet not available',
+      errorType: NearestSupermarketError.networkIssue,
     );
   }
 }
@@ -114,7 +114,7 @@ void main() {
     await pumpTopBar(tester, isAnonymous: true);
 
     expect(
-      find.text('internet not available'),
+      find.text('Network issue while finding supermarkets'),
       findsOneWidget,
     );
   });

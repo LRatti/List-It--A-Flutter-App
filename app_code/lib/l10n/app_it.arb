@@ -522,5 +522,15 @@
     "placeholders": {
       "error": {}
     }
-  }
+  },
+  "recipeAddedToListMessage": "Elementi della ricetta aggiunti alla lista.",
+  "recipeNotFoundMessage": "\"{recipeName}\" non trovata. Riprova.",
+  "@recipeNotFoundMessage": {
+    "placeholders": {
+      "recipeName": {}
+    }
+  },
+  "recipeUnexpectedResponse": "Il servizio ricette ha restituito una risposta inattesa. Riprova.",
+  "recipeProcessingError": "Impossibile elaborare la ricetta. Riprova.",
+  "recipeSearchFailedGeneric": "Ricerca ricetta non riuscita. Riprova."
 }

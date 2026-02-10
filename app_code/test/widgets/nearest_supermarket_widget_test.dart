@@ -21,9 +21,9 @@ void main() {
       expect(supermarket.name, 'Tesco Extra');
     });
 
-    test('NearestSupermarketState provides correct display text', () {
+    test('NearestSupermarketState stores supermarket and error data', () {
       const loadingState = NearestSupermarketState(isLoading: true);
-      expect(loadingState.displayText, 'Locating nearby supermarkets...');
+      expect(loadingState.isLoading, isTrue);
 
       final successState = NearestSupermarketState(
         supermarket: NearbySupermarket(
@@ -33,12 +33,17 @@ void main() {
           distanceInMeters: 300.0,
         ),
       );
-      expect(successState.displayText, 'Tesco - 300m');
+      expect(successState.supermarket, isNotNull);
+      expect(successState.hasValidSupermarket, isTrue);
 
       const errorState = NearestSupermarketState(
-        errorMessage: 'Location services disabled',
+        errorType: NearestSupermarketError.locationServicesDisabled,
       );
-      expect(errorState.displayText, 'Location services disabled');
+      expect(
+        errorState.errorType,
+        NearestSupermarketError.locationServicesDisabled,
+      );
+      expect(errorState.hasValidSupermarket, isFalse);
     });
 
     test('NearestSupermarketState copyWith works correctly', () {
@@ -57,7 +62,7 @@ void main() {
 
       expect(updated.isLoading, isFalse);
       expect(updated.supermarket, supermarket);
-      expect(updated.displayText, 'Sainsbury\'s - 450m');
+      expect(updated.hasValidSupermarket, isTrue);
     });
 
     test('NearestSupermarketState hasValidSupermarket check', () {
@@ -72,7 +77,7 @@ void main() {
       expect(validState.hasValidSupermarket, isTrue);
 
       const errorState = NearestSupermarketState(
-        errorMessage: 'Error occurred',
+        errorType: NearestSupermarketError.networkIssue,
       );
       expect(errorState.hasValidSupermarket, isFalse);
 
