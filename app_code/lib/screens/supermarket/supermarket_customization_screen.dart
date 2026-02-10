@@ -246,6 +246,7 @@ class _SupermarketCustomizationScreenState
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text(
             widget.isCreationMode
@@ -268,25 +269,30 @@ class _SupermarketCustomizationScreenState
           elevation: 0,
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         ),
-        body: Column(
-          children: [
-            // Name editing section
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: l10n.enterSupermarketNameLabel,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Name editing section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: l10n.enterSupermarketNameLabel,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    prefixIcon: const Icon(Icons.store),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
                   ),
-                  prefixIcon: const Icon(Icons.store),
                 ),
               ),
-            ),
-            // Categories list section
-            Expanded(
-              child: visibleCategories.isEmpty
+              // Categories list section (scrollable)
+              Expanded(
+                child: visibleCategories.isEmpty
                   ? LayoutBuilder(
                       builder: (context, constraints) {
                         return SingleChildScrollView(
@@ -337,9 +343,10 @@ class _SupermarketCustomizationScreenState
                           _buildCategoryTile(i, visibleCategories[i]),
                       ],
                     ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              ),
+              // Bottom button bar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Row(
                 children: [
                   // Delete button (or cancel in creation mode)
@@ -394,6 +401,7 @@ class _SupermarketCustomizationScreenState
           ],
         ),
       ),
+      )
     );
   }
 
