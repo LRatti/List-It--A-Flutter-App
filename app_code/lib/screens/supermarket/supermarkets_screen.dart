@@ -1,4 +1,5 @@
 import 'package:app_code/l10n/app_localizations.dart';
+import 'package:app_code/models/category.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
@@ -34,10 +35,17 @@ Future<Supermarket> _createNewSupermarket(WidgetRef ref) async {
   final uncategorized =
       await UncategorizedCategoryInitializer.getUncategorized();
 
-  final templateCategories = lastSupermarket?.getCategories() ?? [];
+  final templateCategories = List<Category>.from(
+    lastSupermarket?.getCategories() ?? [],
+  );
   final hasUncategorized = templateCategories.any(
     (cat) => cat.id == uncategorized.id,
   );
+
+  if (hasUncategorized) {
+    templateCategories.removeWhere((cat) => cat.id == uncategorized.id);
+    templateCategories.insert(0, uncategorized);
+  }
 
   return Supermarket(
     name: '',
@@ -207,6 +215,7 @@ class _SupermarketsScreenTabletState
       child: selection != null
           ? DetailPaneNavigator(
               key: ValueKey(selection.id),
+              selectionKey: selection.id,
               initialChild: SupermarketCustomizationScreen(
                 supermarket: selection,
                 isCreationMode: selection.getName().isEmpty ),

@@ -77,6 +77,9 @@ class _SupermarketCustomizationScreenState
 
     if (!_categories.any((cat) => cat.id == uncategorized.id)) {
       _categories.insert(0, uncategorized);
+    } else {
+      _categories.removeWhere((cat) => cat.id == uncategorized.id);
+      _categories.insert(0, uncategorized);
     }
 
     widget.supermarket.setName(name);

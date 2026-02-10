@@ -137,6 +137,7 @@ class _HistoryScreenTabletViewState extends ConsumerState<HistoryScreenTablet> {
       child: selection != null
           ? DetailPaneNavigator(
               key: ValueKey(selection.id),
+              selectionKey: selection.id,
               initialChild: RegisterShoppingListScreenMobile(
                 shoppingListId: selection.id,
                 initialShoppingList: selection,

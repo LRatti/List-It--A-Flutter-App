@@ -14,11 +14,13 @@ import 'package:flutter/material.dart';
 class DetailPaneNavigator extends StatefulWidget {
   final Widget initialChild;
   final Widget Function(BuildContext) emptyBuilder;
+  final Object? selectionKey;
 
   const DetailPaneNavigator({
     super.key,
     required this.initialChild,
     required this.emptyBuilder,
+    this.selectionKey,
   });
 
   @override
@@ -31,10 +33,12 @@ class _DetailPaneNavigatorState extends State<DetailPaneNavigator> {
   @override
   void didUpdateWidget(DetailPaneNavigator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
-    // When the initialChild changes (different list selected), 
-    // clear the navigation stack and push the new child
-    if (oldWidget.initialChild != widget.initialChild) {
+
+    final previousKey = oldWidget.selectionKey ?? oldWidget.initialChild.key;
+    final nextKey = widget.selectionKey ?? widget.initialChild.key;
+
+    // When the selection changes, clear the navigation stack and push the new child
+    if (previousKey != nextKey) {
       _navigatorKey.currentState?.popUntil((route) => route.isFirst);
       _navigatorKey.currentState?.push(
         MaterialPageRoute(

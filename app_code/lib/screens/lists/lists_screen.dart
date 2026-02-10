@@ -153,6 +153,7 @@ class _ListsScreenTabletViewState extends ConsumerState<ListsScreenTablet> {
                 child: _selectedList != null
                     ? DetailPaneNavigator(
                         key: ValueKey(_selectedList!.id),
+                          selectionKey: _selectedList!.id,
                         initialChild: ListDetailScreenMobile(
                           shoppingList: _selectedList!,
                         ),
