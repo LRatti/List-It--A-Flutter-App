@@ -141,7 +141,7 @@ abstract class _HomeScreenBaseState<T extends ConsumerStatefulWidget>
     AppLocalizations l10n,
   ) {
     return Container(
-      width: 80,
+      width: 140,
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
@@ -153,7 +153,7 @@ abstract class _HomeScreenBaseState<T extends ConsumerStatefulWidget>
       ),
       child: NavigationRail(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        minWidth: 72,
+        minWidth: 132,
         labelType: NavigationRailLabelType.all,
         selectedIndex: selectedIndex,
         scrollable: true,

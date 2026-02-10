@@ -317,6 +317,7 @@ class _ResponsiveNavigationLayoutState extends State<ResponsiveNavigationLayout>
       body: Row(
         children: [
           NavigationRail(
+            minWidth: 132,
             destinations: widget.destinations
                 .map((d) => NavigationRailDestination(
                   icon: d.icon,
