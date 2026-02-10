@@ -172,7 +172,7 @@ Write-Host "========================================`n" -ForegroundColor Cyan
 
 
 ------------------------------------------
-Open summary HTML:
+Open summary HTML by file:
 ------------------------------------------
 cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"
 $lcov = Get-Content coverage\lcov.info
@@ -204,6 +204,102 @@ $rows
 </table></body></html>
 "@
 $out = "lib/notes/coverage_report.html"
+$html | Set-Content $out -Encoding UTF8
+Start-Process $out
+
+
+------------------------------------------
+Open summary HTML by folder:
+------------------------------------------
+cd "c:\Users\leona\LR\UNI\ANNO VI\DIMA\Project\app\DIMA\app_code"
+
+$lcov = Get-Content coverage\lcov.info
+
+$stats = @{}
+$currentFile = ""
+$currentFolder = ""
+$total = 0
+
+foreach ($line in $lcov) {
+
+    if ($line -match "^SF:(.*)") {
+        $currentFile = $matches[1]
+
+        # Normalize path + extract lib/<folder>
+        if ($currentFile -match "lib[\\/](.*?)[\\/]") {
+            $currentFolder = "lib/" + $matches[1]
+        } else {
+            $currentFolder = "lib/root"
+        }
+
+        if (-not $stats.ContainsKey($currentFolder)) {
+            $stats[$currentFolder] = @{
+                Covered = 0
+                Total   = 0
+            }
+        }
+    }
+    elseif ($line -match "^LF:(\d+)") {
+        $total = [int]$matches[1]
+    }
+    elseif ($line -match "^LH:(\d+)") {
+        $covered = [int]$matches[1]
+
+        $stats[$currentFolder].Total   += $total
+        $stats[$currentFolder].Covered += $covered
+    }
+}
+
+# Build HTML rows
+$rows = foreach ($folder in $stats.Keys | Sort-Object) {
+    $covered = $stats[$folder].Covered
+    $total   = $stats[$folder].Total
+    $pct     = if ($total) { [math]::Round(($covered / $total) * 100, 2) } else { 0 }
+
+@"
+<tr>
+  <td>$folder</td>
+  <td>$covered</td>
+  <td>$total</td>
+  <td>
+    <div style='background:#eee;border-radius:6px;height:14px;'>
+      <div style='width:${pct}%;background:#4caf50;height:14px;border-radius:6px;'></div>
+    </div>
+    <div style='font-size:12px;color:#555;'>$pct%</div>
+  </td>
+</tr>
+"@
+}
+
+# Final HTML
+$html = @"
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Folder Coverage</title>
+<style>
+body { font-family: Segoe UI, sans-serif; padding: 20px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ddd; padding: 8px; }
+th { background: #f5f5f5; }
+</style>
+</head>
+<body>
+<h2>Coverage by Folder</h2>
+<table>
+<tr>
+  <th>Folder</th>
+  <th>Covered Lines</th>
+  <th>Total Lines</th>
+  <th>Coverage</th>
+</tr>
+$rows
+</table>
+</body>
+</html>
+"@
+
+$out = "lib/notes/coverage_by_folder.html"
 $html | Set-Content $out -Encoding UTF8
 Start-Process $out
 
