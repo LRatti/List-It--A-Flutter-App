@@ -11,6 +11,8 @@ import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dar
 import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
+import 'package:app_code/widgets/shopping_list_widget.dart';
 
 /// Fake supermarkets notifier to avoid DB access in ListDetailScreenMobile
 class _TestSupermarketsNotifier extends SupermarketsNotifier {
@@ -44,6 +46,7 @@ void main() {
         overrides: [
           shoppingListRepositoryProvider.overrideWithValue(mockRepo),
           recipeCacheRepositoryProvider.overrideWithValue(mockRecipeCache),
+          geminiRepositoryProvider.overrideWithValue(MockGeminiRepository()),
           supermarketsProvider.overrideWith(() => _TestSupermarketsNotifier()),
         ],
         child: const MaterialApp(
@@ -228,6 +231,7 @@ void main() {
         overrides: [
           shoppingListRepositoryProvider.overrideWithValue(failingRepo),
           recipeCacheRepositoryProvider.overrideWithValue(mockRecipeCache),
+          geminiRepositoryProvider.overrideWithValue(MockGeminiRepository()),
           supermarketsProvider.overrideWith(() => _TestSupermarketsNotifier()),
         ],
         child: const MaterialApp(
@@ -258,6 +262,59 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(FloatingActionButton), findsOneWidget);
+    });
+
+    testWidgets('search filters lists and shows empty state when no match', (tester) async {
+      final lists = [
+        createList('list-1', 'Groceries'),
+        createList('list-2', 'Hardware'),
+      ];
+
+      await tester.pumpWidget(createTestWidget(initialLists: lists));
+      await tester.pumpAndSettle();
+
+      final l10n = AppLocalizations.of(tester.element(find.byType(ListsScreenMobile)))!;
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Hard');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hardware'), findsOneWidget);
+      expect(find.text('Groceries'), findsNothing);
+
+      await tester.enterText(find.byType(TextField), 'NoMatch');
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.noListsFoundMatching('NoMatch')), findsOneWidget);
+    });
+
+    testWidgets('selection mode delete moves list to trash', (tester) async {
+      final lists = [
+        createList('list-1', 'Groceries'),
+        createList('list-2', 'Hardware'),
+      ];
+
+      await tester.pumpWidget(createTestWidget(initialLists: lists));
+      await tester.pumpAndSettle();
+
+      final l10n = AppLocalizations.of(tester.element(find.byType(ListsScreenMobile)))!;
+
+      await tester.longPress(find.byType(ShoppingListCard).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.selectedItemsCount(1)), findsOneWidget);
+      expect(find.byIcon(Icons.delete), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.delete));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(l10n.deleteLabel));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Groceries'), findsNothing);
+      expect(find.text('Hardware'), findsOneWidget);
     });
   });
 }

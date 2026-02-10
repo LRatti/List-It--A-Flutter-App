@@ -6,6 +6,9 @@ import 'package:app_code/screens/history/history_screen.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
+import 'package:app_code/providers/real_app_providers/register_shopping_list_navigation_provider.dart';
+import 'package:app_code/screens/lists/register-list/register_shopping_list_screen_mobile.dart';
+import 'package:app_code/widgets/shopping_list_widget.dart';
 
 class _ThrowingShoppingListRepository extends MockShoppingListRepository {
   @override
@@ -113,5 +116,53 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.text('No registered lists yet.'), findsOneWidget);
+  });
+
+  testWidgets('orders registered lists by newest first', (tester) async {
+    final lists = [
+      _list('Older', createdAt: DateTime(2024, 1, 10)),
+      _list('Newest', createdAt: DateTime(2024, 6, 10)),
+      _list('Middle', createdAt: DateTime(2024, 3, 10)),
+    ];
+
+    await _pumpHistory(
+      tester,
+      seedLists: lists,
+    );
+
+    await tester.pumpAndSettle();
+
+    final cards = tester
+        .widgetList<ShoppingListCard>(find.byType(ShoppingListCard))
+        .toList();
+
+    expect(cards.length, 3);
+    expect(cards[0].shoppingList.getName(), 'Newest');
+    expect(cards[1].shoppingList.getName(), 'Middle');
+    expect(cards[2].shoppingList.getName(), 'Older');
+  });
+
+  testWidgets('tap list opens register screen and sets source', (tester) async {
+    final lists = [
+      _list('List To Open', createdAt: DateTime(2024, 2, 2)),
+    ];
+
+    final container = await _pumpHistory(
+      tester,
+      seedLists: lists,
+    );
+
+    await tester.pumpAndSettle();
+
+    final cardFinder = find.byType(ShoppingListCard).first;
+    expect(cardFinder, findsOneWidget);
+    await tester.tap(cardFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RegisterShoppingListScreenMobile), findsOneWidget);
+    expect(
+      container.read(registerShoppingListSourceProvider),
+      RegisterShoppingListSource.history,
+    );
   });
 }

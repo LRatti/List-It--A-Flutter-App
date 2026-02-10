@@ -15,6 +15,7 @@ import 'package:app_code/providers/real_app_providers/nearest-supermarket/neares
 import 'package:app_code/providers/real_app_providers/nearest-supermarket/map_launcher_service_provider.dart';
 import 'package:app_code/providers/test_providers/test_auth_provider.dart';
 import 'package:app_code/services/map_launcher_service.dart';
+import 'package:app_code/providers/real_app_providers/navigation_provider.dart' as nav;
 
 /// Test notifier for nearest supermarket that doesn't create timers
 class TestNearestSupermarketNotifier extends NearestSupermarketNotifier {
@@ -150,15 +151,6 @@ void main() {
     expect(find.text(l10n.signInLabel), findsOneWidget);
   });
 
-  testWidgets('HomePage displays auth buttons in TopBar for anonymous user', (
-    tester,
-  ) async {
-    await pumpHomeScreen(tester);
-
-    // Verify anonymous user sees Sign In button
-    expect(find.byKey(const Key('sign_in_button')), findsOneWidget);
-  });
-
   testWidgets(
     'HomePage displays auth buttons in TopBar for authenticated user',
     (tester) async {
@@ -225,6 +217,23 @@ void main() {
     expect(find.byKey(const Key('side_menu')), findsNothing);
   });
 
+  testWidgets('Side menu closes when switching tabs', (tester) async {
+    await pumpHomeScreen(tester);
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomeScreenMobileView)),
+    )!;
+
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('side_menu')), findsOneWidget);
+
+    await tester.tap(find.text(l10n.historyTabLabel));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('side_menu')), findsNothing);
+    expect(find.byKey(const Key('history_tab')), findsOneWidget);
+  });
+
   testWidgets('Shows bottom navigation in landscape and switches tabs', (tester) async {
     await pumpHomeScreen(
       tester,
@@ -243,5 +252,23 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('supermarkets_tab')), findsOneWidget);
+  });
+
+  testWidgets('HomePage shows navigation rail on tablet view', (tester) async {
+    await pumpHomeScreen(
+      tester,
+      home: const HomeScreenTabletView(),
+      viewport: const Size(1200, 900),
+    );
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomeScreenTabletView)),
+    )!;
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(BottomNavigationBar), findsNothing);
+
+    await tester.tap(find.text(l10n.statisticsTabLabel));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('statistics_tab')), findsOneWidget);
   });
 }
