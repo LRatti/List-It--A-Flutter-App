@@ -12,6 +12,7 @@ import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/utils/category_localizer.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 
+/// Screen for adding a recipe's ingredients to a shopping list.
 class AddRecipeScreen extends ConsumerStatefulWidget {
   final ShoppingList shoppingList;
   final List<Category> availableCategories;
@@ -104,9 +105,6 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
         );
       },
     );
-    // Note: If you still get errors in tests, remove the manual .dispose() 
-    // or wrap it in a small delay. In tests, the garbage collector 
-    // will eventually catch the controller.
   }
 
   void _handleSave(BuildContext dialogContext, int index, String value, String originalName) {

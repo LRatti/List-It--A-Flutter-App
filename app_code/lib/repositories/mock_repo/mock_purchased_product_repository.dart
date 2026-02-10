@@ -70,7 +70,6 @@ class MockPurchasedProductRepository
   @override
   Future<void> applyRemoteUpdate(Map<String, dynamic> data) async {}
 
-  @override
   Future<void> applyRemoteDelete(Map<String, dynamic> data) async {}
 
   @override
@@ -80,11 +79,11 @@ class MockPurchasedProductRepository
   Future<bool> isEntityDirty(String entityId, String entityType) async =>
       false;
 
-  @override
+  
   Future<List<Map<String, dynamic>>> getRemoteDeletes(String sinceTimestamp) async =>
       [];
 
-  @override
+  
   Future<List<Map<String, dynamic>>> getRemoteUpserts(String sinceTimestamp) async =>
       [];
 
@@ -102,7 +101,7 @@ class MockPurchasedProductRepository
     DateTime timestamp,
   ) async {}
 
-  @override
+  
   Future<void> clearSyncBox() async {}
 
   @override

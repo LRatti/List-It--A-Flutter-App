@@ -10,7 +10,6 @@ import 'package:app_code/providers/real_app_providers/purchased_products/purchas
 import 'package:app_code/providers/real_app_providers/associations/associations_notifier.dart';
 import 'package:app_code/services/database/sqlite/manage_product.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
-import 'package:app_code/screens/lists/controllers/purchased_product_update_handler.dart';
 import 'package:flutter/foundation.dart' hide Category;
 
 /// State for products being categorized (in buffer zone)
@@ -61,10 +60,10 @@ class ListDetailController extends ChangeNotifier {
        _selectedSupermarket =
            initialSupermarket ?? shoppingList.getSupermarket(),
        _products = List.from(
-         initialProducts ?? shoppingList.getProducts() ?? [],
+         initialProducts ?? shoppingList.getProducts(),
        ),
        _originalProducts = List.from(
-         initialProducts ?? shoppingList.getProducts() ?? [],
+         initialProducts ?? shoppingList.getProducts(),
        );
 
   // Getters
@@ -379,9 +378,8 @@ class ListDetailController extends ChangeNotifier {
   /// - List A has PurchasedProduct1 -> Product "Apple"
   /// - List B has PurchasedProduct2 -> Product "Apple" (same object reference!)
   /// - User renames PurchasedProduct1 to "Red Apple"
-  /// - OLD BUG: Both products become "Red Apple" because they share the same object
-  /// - NEW FIX: PurchasedProduct1 -> Product "Red Apple" (new product)
-  ///           PurchasedProduct2 -> Product "Apple" (unchanged)
+  /// - PurchasedProduct1 -> Product "Red Apple" (new product)
+  /// - PurchasedProduct2 -> Product "Apple" (unchanged)
   Future<void> updatePurchasedProductName(
     PurchasedProduct purchasedProduct,
     String newName,
@@ -404,8 +402,6 @@ class ListDetailController extends ChangeNotifier {
       // Update the purchased product's category
       _products[index].category = newCategory;
 
-      // CRITICAL FIX: Update the category reference on the product parameter as well
-      // This ensures the PurchasedProduct model holds the correct category
       product.category = newCategory;
 
       // Update product association for current supermarket
@@ -424,9 +420,6 @@ class ListDetailController extends ChangeNotifier {
         );
       }
 
-      // CRITICAL FIX: Update the PurchasedProduct's lastModified timestamp
-      // This ensures the purchased_product row will be updated in the database
-      // with the new category_id when save() is called
       _products[index].lastModified = DateTime.now();
 
       _hasChanges = true;
@@ -458,12 +451,9 @@ class ListDetailController extends ChangeNotifier {
 
   /// Get products grouped by category for the current supermarket
   ///
-  /// NEW BEHAVIOR: Always returns ALL categories from the selected supermarket,
+  /// Always returns ALL categories from the selected supermarket,
   /// even if they have no products. This allows users to see all available
   /// categories upfront and drag products to any category.
-  ///
-  /// CRITICAL: Categories are matched by ID (not object reference) to handle
-  /// the case where the same category is loaded as different object instances.
   Map<Category, List<PurchasedProduct>> getProductsByCategory() {
     if (_selectedSupermarket == null) {
       final fallback =
@@ -485,7 +475,7 @@ class ListDetailController extends ChangeNotifier {
     }
 
     // Distribute products into their respective categories
-    // CRITICAL FIX: Match by category ID instead of object reference
+    // Match by category ID instead of object reference
     // This handles the case where product.category is a different instance
     // than the category in the supermarket's categories list
     for (var product in _products) {

@@ -6,6 +6,7 @@ import 'package:app_code/services/database/sqlite/database_helper.dart';
 import 'package:app_code/services/database/sqlite/manage_product.dart';
 import 'package:app_code/services/database/sqlite/manage_category.dart';
 
+/// Manages CRUD operations for PurchasedProduct entities in the SQLite database.
 class ManagePurchasedProduct {
   static Future<void> addPurchasedProduct(PurchasedProduct item) async {
   final db = await DatabaseHelper.database;
@@ -38,8 +39,6 @@ class ManagePurchasedProduct {
     for (final row in rows) {
       final productId = row['p_id'] as String;
       
-      // CRITICAL FIX: Load product associations from the associations table
-      // This ensures products have correct supermarket->category mappings
       final associationRows = await db.query(
         'associations',
         where: 'product_id = ?',
@@ -81,7 +80,6 @@ class ManagePurchasedProduct {
     final row = rows.first;
     final productId = row['p_id'] as String;
     
-    // CRITICAL FIX: Load product associations from the associations table
     final associationRows = await db.query(
       'associations',
       where: 'product_id = ?',
@@ -140,7 +138,6 @@ class ManagePurchasedProduct {
     final row = rows.first;
     final productId = row['p_id'] as String;
     
-    // CRITICAL FIX: Load product associations from the associations table
     final associationRows = await db.query(
       'associations',
       where: 'product_id = ?',

@@ -1,5 +1,6 @@
 part of 'verification_screen.dart';
 
+/// Controller for handling email verification logic in the VerificationScreen
 abstract class VerificationController
     extends ConsumerState<VerificationScreen> {
   Timer? _pollTimer;

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:app_code/utils/helper.dart';
 
+// Represents a user with properties such as uid, email, username, 
+//and timestamps for creation and last modification.
 class User {
 
   String? uid;

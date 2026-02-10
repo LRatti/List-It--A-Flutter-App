@@ -5,6 +5,8 @@ import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/widgets/supermarkets_grid_view.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 
+/// A reusable widget that displays a list of supermarkets with built-in 
+/// search and deletion modes.
 class SearchableSupermarketsView extends ConsumerStatefulWidget {
   final List<Supermarket> supermarkets;
   final String emptyMessage;

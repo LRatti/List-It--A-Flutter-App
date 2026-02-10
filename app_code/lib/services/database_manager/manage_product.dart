@@ -1,6 +1,8 @@
 import 'package:app_code/models/product.dart';
 import 'package:app_code/services/database/sqlite/manage_product.dart' as sqlite_manage_product;
 
+/// This class serves as a high-level interface for managing products 
+/// in the database.
 class ManageProduct {
   static Future<void> addProduct(Product product) {
     return sqlite_manage_product.ManageProduct.addProduct(product) ;

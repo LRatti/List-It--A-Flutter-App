@@ -155,7 +155,7 @@ class _DraggableProductListState extends State<DraggableProductList> {
             final category = entry.key;
             final products = entry.value;
 
-            // NEW BEHAVIOR: Always show category headers, even if empty
+            // Always show category headers, even if empty
             // This allows users to see all available categories upfront
             // and drag products to any category
             return Column(

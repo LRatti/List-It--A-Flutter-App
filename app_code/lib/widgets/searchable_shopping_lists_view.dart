@@ -5,6 +5,8 @@ import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/widgets/shopping_lists_grid_view.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 
+/// A widget that displays a list of shopping lists with built-in search 
+/// functionality.
 class SearchableShoppingListsView extends ConsumerStatefulWidget {
   final List<ShoppingList> lists;
   final String emptyMessage;

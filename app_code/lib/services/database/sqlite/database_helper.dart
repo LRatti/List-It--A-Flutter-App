@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+/// Helper class to manage SQLite database connection and initialization
 class DatabaseHelper {
   static Database? _database;
 

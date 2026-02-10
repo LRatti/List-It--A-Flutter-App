@@ -4,6 +4,8 @@ import 'package:app_code/models/category.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
+/// A service class to manage categories in Firebase Firestore for 
+/// the authenticated user.
 class FirebaseCategoryManager {
 
   FirebaseCategoryManager({

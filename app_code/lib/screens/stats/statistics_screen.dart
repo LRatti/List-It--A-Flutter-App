@@ -26,6 +26,8 @@ class StatisticsScreenTablet extends ConsumerStatefulWidget {
       _StatisticsScreenTabletViewState();
 }
 
+/// Base state class for statistics screen, containing shared logic 
+/// and UI components.
 abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
     extends ConsumerState<T> {
   StatsPeriodType _period = StatsPeriodType.all;
@@ -60,7 +62,6 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
       a.isAfter(DateTime(b.year, b.month, b.day, 23, 59, 59));
 
   String _formatCurrency(double amount) {
-    // Changed to EUR to match your screenshot
     return 'EUR ${amount.toStringAsFixed(2)}';
   }
 
@@ -233,9 +234,7 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
   }
 
   Widget _buildStatisticsChart(List<MapEntry<String, double>> entries, double total) {
-    // FIX: Wrapping with AspectRatio ensures the CustomPaint knows its dimensions
-    // and doesn't collapse, which was causing the overlapping text in your image.
-    return AspectRatio(
+      return AspectRatio(
       aspectRatio: 1, 
       child: StatisticsPieChart(
         entries: entries,
@@ -348,11 +347,11 @@ abstract class _StatisticsScreenBaseState<T extends ConsumerStatefulWidget>
     final themeColors = [
       colorScheme.primary,
       colorScheme.secondary,
-      colorScheme.tertiary ?? colorScheme.primaryContainer,
+      colorScheme.tertiary,
       colorScheme.error,
       colorScheme.primaryContainer,
       colorScheme.secondaryContainer,
-      colorScheme.tertiaryContainer ?? colorScheme.secondaryContainer,
+      colorScheme.tertiaryContainer,
     ];
 
     return themeColors[index % themeColors.length];

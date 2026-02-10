@@ -23,6 +23,8 @@ class SettingsScreenTablet extends ConsumerStatefulWidget {
       _SettingsScreenTabletViewState();
 }
 
+/// Base state class for settings screen, containing shared logic 
+/// and UI components.
 abstract class _SettingsScreenBaseState<T extends ConsumerStatefulWidget>
     extends ConsumerState<T> {
   late double _tempFontSize;

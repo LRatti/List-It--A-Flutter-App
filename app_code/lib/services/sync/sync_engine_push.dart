@@ -213,17 +213,6 @@ class SyncEnginePush {
           );
         }
       }
-      // else if (entityType == ENTITY_TYPE_SUPERMARKET) {
-      //   // Supermarket depends on Categories (all associated categories must exist in Firestore)
-      //   final categoryIds = localData['categoryIds'] as List<String>? ?? [];
-      //   for (final categoryId in categoryIds) {
-      //     await _pushDependency(
-      //       categoryId,
-      //       ENTITY_TYPE_CATEGORY,
-      //       userId,
-      //     );
-      //   }
-      // }
     } catch (e) {
       _logger.w('SyncEngine: Error pushing dependencies for $entityType', error: e);
       // Continue even if dependency push fails - main entity will still be pushed

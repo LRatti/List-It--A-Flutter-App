@@ -3,6 +3,7 @@ import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
 
+/// Manages CRUD operations for Supermarket entities in the SQLite database.
 class ManageSupermarket {
   static Future<void> addSupermarket(Supermarket market) async {
     final db = await DatabaseHelper.database;

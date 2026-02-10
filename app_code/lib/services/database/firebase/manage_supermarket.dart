@@ -4,6 +4,8 @@ import 'package:app_code/utils/app_logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
+/// Manages supermarket data in Firebase Firestore, including adding, 
+/// retrieving, and updating supermarkets.
 class FirebaseSupermarketManager {
 
   FirebaseSupermarketManager({

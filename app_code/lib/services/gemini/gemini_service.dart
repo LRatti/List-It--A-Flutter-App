@@ -9,6 +9,8 @@ import 'package:app_code/services/gemini/gemini_response_parser.dart';
 import 'package:app_code/services/receipt/receipt_response_parser.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
+/// Service class that interacts with the Gemini API to handle recipe queries,
+/// product categorization, and receipt processing.
 class GeminiService {
   // Read the API key from environment. Must be provided via compile-time define.
   static const String _apiKey = String.fromEnvironment('GEMINI_API_KEY');
@@ -110,7 +112,7 @@ class GeminiService {
 
       return ReceiptResponseParser.parse(responseText);
     } on GenerativeAIException catch (e) {
-      final msg = e.message ?? e.toString();
+      final msg = e.message;
       final lowerMsg = msg.toLowerCase();
 
       if (lowerMsg.contains('quota') ||

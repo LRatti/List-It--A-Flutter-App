@@ -1,5 +1,7 @@
 import 'package:app_code/models/category.dart';
 
+/// Utility class for handling the "Uncategorized" category, which is a 
+/// special case in the app.
 class UncategorizedCategoryUtils {
   static const String name = 'Uncategorized';
 

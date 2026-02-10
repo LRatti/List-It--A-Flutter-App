@@ -1,5 +1,7 @@
 part of 'forgot_password.dart';
 
+/// Controller for the Forgot Password screen, 
+/// handling form state, validation, and submission logic.
 abstract class ForgotPasswordController extends ConsumerState<ForgotPasswordScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late final TextEditingController emailController;

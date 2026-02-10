@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// Builds a SnackBar with a consistent style for the app, supporting both
+/// success and error messages, as well as an optional tap action.
 SnackBar buildAppSnackBar({
   required String message,
   bool isError = false,

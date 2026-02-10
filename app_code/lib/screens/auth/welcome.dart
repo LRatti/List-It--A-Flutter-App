@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 
+/// Welcome screen that allows users to choose between signing up, 
+/// signing in, or using Google sign-in.
 class WelcomeScreen extends ConsumerStatefulWidget {
   final dynamic authNotifier; // Keep for backward compatibility with tests
 

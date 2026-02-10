@@ -28,8 +28,8 @@ class InitialScreen extends ConsumerWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                colorScheme.primaryContainer, // semantic lighter primary
-                colorScheme.primary,          // main primary
+                colorScheme.primaryContainer, 
+                colorScheme.primary,          
               ],
             ),
           ),
@@ -77,8 +77,8 @@ class InitialScreen extends ConsumerWidget {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.onPrimary, // white/contrast
-                    foregroundColor: colorScheme.primary,    // primary color text
+                    backgroundColor: colorScheme.onPrimary, 
+                    foregroundColor: colorScheme.primary, 
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

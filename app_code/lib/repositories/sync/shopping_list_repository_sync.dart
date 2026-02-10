@@ -4,7 +4,6 @@ import 'package:app_code/repositories/sync/sync_repository.dart';
 import 'package:app_code/repositories/sync/sync_repository_mixin.dart';
 import 'package:app_code/repositories/sync/purchased_product_repository_sync.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
-import 'package:app_code/services/database/sqlite/manage_shopping_list.dart';
 import 'package:app_code/services/database/sqlite/manage_purchased_product.dart';
 import 'package:app_code/services/database/sqlite/manage_supermarket.dart';
 import 'package:app_code/utils/monotonic_timestamp.dart';

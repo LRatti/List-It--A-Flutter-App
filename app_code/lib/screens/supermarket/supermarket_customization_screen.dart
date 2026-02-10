@@ -11,6 +11,8 @@ import 'package:app_code/utils/uncategorized_category_initializer.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/utils/category_localizer.dart';
 
+/// Screen for creating or customizing a supermarket, allowing name editing, 
+/// category management, and favorite marking
 class SupermarketCustomizationScreen extends ConsumerStatefulWidget {
   final Supermarket supermarket;
   final bool isCreationMode;

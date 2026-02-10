@@ -1,6 +1,7 @@
 import 'package:app_code/models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Manages user data in Firebase Firestore.
 class FirebaseUserManager {
   FirebaseUserManager({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;

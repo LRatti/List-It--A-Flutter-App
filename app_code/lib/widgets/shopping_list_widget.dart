@@ -3,6 +3,8 @@ import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
+/// A card widget representing a shopping list, showing its name, 
+/// creation date, and products.
 class ShoppingListCard extends StatefulWidget {
   final ShoppingList shoppingList;
   final VoidCallback onTap;
@@ -188,11 +190,8 @@ class _ShoppingListCardState extends State<ShoppingListCard> {
 
   Widget _buildFooter(ColorScheme colorScheme) {
     final date = widget.shoppingList.createdAt;
-    final l10n = AppLocalizations.of(context)!;
-    final formatted = date != null
-      ? DateFormat('d MMM yyyy', Localizations.localeOf(context).toString())
-        .format(date)
-      : l10n.dateNotAvailable;
+    final formatted = DateFormat('d MMM yyyy', Localizations.localeOf(context).toString())
+        .format(date);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

@@ -365,8 +365,6 @@ class FirebaseAuthRepository implements AuthRepository {
     }
   }
 
-  // Removed: linkAnonymousWithGoogle(). Anonymous upgrade is handled inside signInWithGoogle.
-
   @override
   Future<void> signOut() async {
     AuthLogger.info('Signing out from FirebaseAuthRepository');
@@ -456,8 +454,6 @@ class FirebaseAuthRepository implements AuthRepository {
       userName: existing?.getUserName() ?? '',
     );
     await manager.setUser(updated);
-
-    // Do NOT sign out - user will be navigated to verification screen
   }
 
   @override

@@ -5,6 +5,10 @@ import 'package:app_code/services/database/firebase/manage_purchased_product.dar
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
+/// This class manages shopping lists in the Firebase database, including 
+/// creating, retrieving, and deleting shopping lists. 
+/// It also handles the association of shopping lists with supermarkets 
+/// and purchased products.
 class FirebaseShoppingListManager {
   // Class implementation
 

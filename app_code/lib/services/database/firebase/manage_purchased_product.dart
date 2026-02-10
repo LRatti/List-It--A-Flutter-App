@@ -4,6 +4,8 @@ import 'package:app_code/models/purchased_product.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
+/// A class to manage purchased products in Firebase Firestore, 
+/// including adding, updating, retrieving, and deleting purchased products.
 class FirebasePurchasedProductManager {
   // Implementation for managing purchased products in Firebase
 

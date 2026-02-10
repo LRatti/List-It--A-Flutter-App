@@ -5,6 +5,7 @@ import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/utils/helper.dart';
 
+// This file defines the ShoppingList model, which represents a shopping list in the app.
 class ShoppingList {
  
   final String id;
@@ -102,7 +103,7 @@ class ShoppingList {
     return {
       'id': id,
       'name': _name,
-      'created_at': createdAt?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
       'supermarket_id': _supermarket?.id,
       'total_price': _totalPrice,
       'image': image,
@@ -134,7 +135,7 @@ class ShoppingList {
     return {
       'id': id,
       'name': _name,
-      'created_at': createdAt?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
       'supermarket_id': _supermarket?.id,
       'total_price': _totalPrice,
       'image': image,

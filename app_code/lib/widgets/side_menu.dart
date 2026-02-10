@@ -4,6 +4,8 @@ import 'package:app_code/screens/settings/settings_screen.dart';
 import 'package:app_code/screens/trash/trash_screen_mobile.dart';
 import 'package:app_code/screens/profile/profile_screen.dart';
 
+/// A side menu widget for mobile view, providing navigation to profile, 
+/// settings, and trash screens.
 class SideMenu extends StatelessWidget {
   final VoidCallback onClose;
 

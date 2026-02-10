@@ -11,6 +11,8 @@ import 'package:app_code/widgets/password_text_field.dart';
 
 part 'profile_controller.dart';
 
+/// Main screen widget for user profile management, allowing users to 
+/// view and edit their profile information and credentials.
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 

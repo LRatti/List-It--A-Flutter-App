@@ -6,6 +6,10 @@ import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_n
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';
 
+/// A grid view widget that displays a list of supermarkets with support for 
+/// selection, deletion, and navigation to customization screen.
+/// Shows an empty state message when there are no supermarkets, and a 
+/// floating action button for adding new supermarkets.
 class SupermarketsGridView extends ConsumerStatefulWidget {
   final List<Supermarket> supermarkets;
   final String emptyMessage;

@@ -1,4 +1,3 @@
-import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:app_code/models/recipe_response.dart';
@@ -6,7 +5,6 @@ import 'package:app_code/models/category.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/repositories/abstract/gemini_repository.dart';
 import 'package:app_code/repositories/real_app_repo/gemini_repository_real.dart';
-import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
 import 'package:app_code/repositories/abstract/recipe_cache_repository.dart';
 import 'package:app_code/repositories/real_app_repo/recipe_cache_repository_real.dart';
 

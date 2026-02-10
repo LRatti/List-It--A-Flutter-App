@@ -130,7 +130,7 @@ class SupermarketsScreenMobile extends ConsumerWidget {
 // Tablet Screen
 // ============================================================================
 
-/// Tablet/Desktop supermarkets screen: master-detail split view.
+/// Tablet supermarkets screen: master-detail split view.
 class SupermarketsScreenTablet extends ConsumerStatefulWidget {
   const SupermarketsScreenTablet({super.key});
 

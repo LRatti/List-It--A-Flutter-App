@@ -1,4 +1,3 @@
-import 'package:app_code/models/category.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/repositories/sync/sync_repository.dart';
 import 'package:app_code/repositories/sync/sync_repository_mixin.dart';
@@ -232,53 +231,5 @@ class SupermarketRepositoryWithSync
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
-  }
-
-  Future<void> _upsertCategory(Database db, Map<dynamic, dynamic> rawData) async {
-    final data = _cleanCategoryData(rawData);
-    if (data['id'] == null || data['name'] == null) return;
-
-    await db.insert(
-      'category',
-      data,
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Map<String, dynamic> _cleanCategoryData(Map<dynamic, dynamic> rawData) {
-    final cleaned = <String, dynamic>{};
-
-    if (rawData['id'] != null) cleaned['id'] = rawData['id'];
-    if (rawData['name'] != null) cleaned['name'] = rawData['name'];
-
-    if (rawData.containsKey('isDefault')) {
-      cleaned['is_default'] = rawData['isDefault'] == true ? 1 : 0;
-    } else if (rawData.containsKey('is_default')) {
-      cleaned['is_default'] = rawData['is_default'] == true ? 1 : 0;
-    } else {
-      cleaned['is_default'] = 0;
-    }
-
-    if (rawData.containsKey('createdAt')) {
-      final parsed = _parseTimestamp(rawData['createdAt']);
-      cleaned['created_at'] = parsed?.toIso8601String() ?? DateTime.now().toIso8601String();
-    } else if (rawData.containsKey('created_at')) {
-      final parsed = _parseTimestamp(rawData['created_at']);
-      cleaned['created_at'] = parsed?.toIso8601String() ?? DateTime.now().toIso8601String();
-    } else {
-      cleaned['created_at'] = DateTime.now().toIso8601String();
-    }
-
-    if (rawData.containsKey('lastModified')) {
-      final parsed = _parseTimestamp(rawData['lastModified']);
-      cleaned['last_modified'] = parsed?.toIso8601String() ?? DateTime.now().toIso8601String();
-    } else if (rawData.containsKey('last_modified')) {
-      final parsed = _parseTimestamp(rawData['last_modified']);
-      cleaned['last_modified'] = parsed?.toIso8601String() ?? DateTime.now().toIso8601String();
-    } else {
-      cleaned['last_modified'] = DateTime.now().toIso8601String();
-    }
-
-    return cleaned;
   }
 }

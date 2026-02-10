@@ -9,6 +9,8 @@ import 'package:app_code/screens/history/history_screen.dart';
 import 'package:app_code/screens/stats/statistics_screen.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 
+/// Home screen with responsive layout: bottom navigation bar on mobile, 
+/// navigation rail on tablet.
 class HomeScreenMobileView extends ConsumerStatefulWidget {
   const HomeScreenMobileView({super.key});
 
@@ -16,6 +18,8 @@ class HomeScreenMobileView extends ConsumerStatefulWidget {
   ConsumerState<HomeScreenMobileView> createState() => _HomeScreenMobileViewState();
 }
 
+/// Home screen with responsive layout: bottom navigation bar on mobile, 
+/// navigation rail on tablet.
 class HomeScreenTabletView extends ConsumerStatefulWidget {
   const HomeScreenTabletView({super.key});
 
@@ -23,6 +27,7 @@ class HomeScreenTabletView extends ConsumerStatefulWidget {
   ConsumerState<HomeScreenTabletView> createState() => _HomeScreenTabletViewState();
 }
 
+/// Base state class for home screen, shared by both mobile and tablet layouts. 
 abstract class _HomeScreenBaseState<T extends ConsumerStatefulWidget>
     extends ConsumerState<T> {
   bool _isMenuOpen = false;
@@ -194,6 +199,7 @@ abstract class _HomeScreenBaseState<T extends ConsumerStatefulWidget>
   }
 }
 
+/// Mobile layout: single pane with bottom navigation
 class _HomeScreenMobileViewState
     extends _HomeScreenBaseState<HomeScreenMobileView> {
   @override
@@ -269,6 +275,7 @@ class _HomeScreenMobileViewState
   }
 }
 
+/// Tablet layout: master-detail split view with navigation rail
 class _HomeScreenTabletViewState
     extends _HomeScreenBaseState<HomeScreenTabletView> {
   @override

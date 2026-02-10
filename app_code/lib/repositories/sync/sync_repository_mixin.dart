@@ -1,7 +1,6 @@
 import 'package:app_code/models/sync/local_sync_entry.dart';
 import 'package:app_code/models/sync/sync_operation.dart';
 import 'package:app_code/services/database/sqlite/manage_sync_box.dart';
-import 'package:app_code/utils/monotonic_timestamp.dart';
 
 /// Mixin for repositories that support synchronization
 /// Provides helper methods for managing sync_box entries and timestamps

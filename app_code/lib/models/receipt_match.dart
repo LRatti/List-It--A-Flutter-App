@@ -1,3 +1,4 @@
+// A model representing a matched receipt item with product details.
 class ReceiptMatch {
   final String? productId;
   final String? productName;

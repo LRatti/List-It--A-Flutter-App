@@ -5,6 +5,7 @@ import 'package:app_code/providers/real_app_providers/auth/email_verification_pr
 import 'package:app_code/widgets/password_text_field.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 
+/// Sign-up form for new users
 class SignUpForm extends ConsumerStatefulWidget {
   final dynamic authNotifier; // keep for backward compatibility
 

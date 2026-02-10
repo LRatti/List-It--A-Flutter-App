@@ -1,5 +1,7 @@
 import 'package:app_code/utils/app_logger.dart';
 
+/// A specialized logger for authentication-related events, providing a consistent
+/// interface and additional functionality for masking sensitive information
 class AuthLogger {
   static const String _name = 'auth';
 

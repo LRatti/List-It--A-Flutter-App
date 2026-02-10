@@ -97,11 +97,11 @@ class PieChartPainter extends CustomPainter {
     final themeColors = [
       colorScheme.primary,
       colorScheme.secondary,
-      colorScheme.tertiary ?? colorScheme.primaryContainer,
+      colorScheme.tertiary,
       colorScheme.error,
       colorScheme.primaryContainer,
       colorScheme.secondaryContainer,
-      colorScheme.tertiaryContainer ?? colorScheme.secondaryContainer,
+      colorScheme.tertiaryContainer,
     ];
     return themeColors[index % themeColors.length];
   }

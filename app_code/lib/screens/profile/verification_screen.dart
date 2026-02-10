@@ -9,6 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 part 'verification_controller.dart';
 
+/// A screen that prompts the user to verify their email address 
+/// after registration or when required.
 class VerificationScreen extends ConsumerStatefulWidget {
   const VerificationScreen({super.key});
 

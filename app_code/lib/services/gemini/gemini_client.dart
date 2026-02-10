@@ -24,6 +24,10 @@ class RealGeminiClient implements GeminiClient {
     }
   }
 
+  /// Sends a text [prompt] to the Gemini AI model and returns the generated response.
+  /// 
+  /// This method encapsulates the network call to the Generative AI service.
+  /// Returns the model's text output, or an empty string if the generation fails.
   @override
   Future<String> generateText(String prompt) async {
     if (_apiKey.isEmpty) {

@@ -2,6 +2,8 @@ import 'package:app_code/models/product.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
+/// A class to manage products in Firebase Firestore, including adding, 
+/// updating, and retrieving products.
 class FirebaseProductManager {
   
   // Methods to manage products in Firebase

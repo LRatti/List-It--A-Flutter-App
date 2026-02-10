@@ -4,6 +4,7 @@ import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/widgets/password_text_field.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 
+/// Sign-in form for existing users
 class SignInForm extends ConsumerStatefulWidget {
   final dynamic authNotifier; // keep for backward compatibility
 

@@ -8,6 +8,7 @@ import 'package:app_code/utils/uncategorized_category_utils.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/utils/category_localizer.dart';
 
+/// Screen for selecting categories to add to a supermarket
 class CategorySelectionScreen extends ConsumerStatefulWidget {
   final String supermarketId;
   final List<Category> currentCategories;

@@ -1,5 +1,7 @@
 part of 'profile_screen.dart';
 
+/// Controller for ProfileScreen, managing state and logic for user 
+/// profile editing.
 abstract class ProfileController extends ConsumerState<ProfileScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _emailController;

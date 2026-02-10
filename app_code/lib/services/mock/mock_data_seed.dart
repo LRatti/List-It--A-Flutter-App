@@ -4,7 +4,6 @@ import 'package:app_code/models/purchased_product.dart';
 import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/services/database/sqlite/manage_shopping_list.dart';
-import 'package:app_code/services/database/sqlite/manage_supermarket.dart';
 import 'package:app_code/repositories/sync/category_repository_sync.dart';
 import 'package:app_code/repositories/sync/supermarket_repository_sync.dart';
 import 'package:app_code/utils/default_categories_loader.dart';
@@ -211,6 +210,52 @@ Future<void> seedMockDataIfEmpty() async {
     print('📦 Mock data seed completed successfully!');
   } catch (e, stackTrace) {
     print('❌ Error seeding mock data: $e');
+    print('Stack trace: $stackTrace');
+  }
+}
+
+/// Seeds local SQLite with only the default supermarket (and its default categories)
+/// if there are no shopping lists yet.
+Future<void> seedDefaultSupermarketIfEmpty() async {
+  try {
+    print('📦 Checking for existing shopping lists...');
+    final existing = await ManageShoppingList.getAllShoppingLists();
+    print('📦 Found ${existing.length} existing lists');
+
+    if (existing.isNotEmpty) {
+      print('📦 Database already has data, skipping seed');
+      return;
+    }
+
+    print('📦 Starting default supermarket seed...');
+
+    // ===== SEED DEFAULT CATEGORIES AND SUPERMARKET =====
+    print('📦 Loading default categories from JSON...');
+    final defaultCategories = await DefaultCategoriesLoader.loadDefaultCategories();
+    print('📦 Loaded ${defaultCategories.length} default categories');
+
+    // Save default categories to database using sync-aware repository
+    // This ensures they are queued in sync_box and will be synced to Firestore
+    final categoryRepo = CategoryRepositoryWithSync();
+    for (final category in defaultCategories) {
+      await categoryRepo.add(category);
+    }
+    print('📦 Added ${defaultCategories.length} default categories to database (queued for Firestore sync)');
+
+    // Create default supermarket with these categories using sync-aware repository
+    // This ensures the supermarket is queued in sync_box and will be synced to Firestore
+    final supermarketRepo = SupermarketRepositoryWithSync();
+    final defaultSupermarket = Supermarket(
+      name: 'Supermarket',
+      categories: defaultCategories,
+      isVisible: true,
+      isFavorite: true, // Set as favorite on first app usage
+      isDefault: true,
+    );
+    await supermarketRepo.add(defaultSupermarket);
+    print('📦 Created default supermarket with ${defaultCategories.length} categories (queued for Firestore sync)');
+  } catch (e, stackTrace) {
+    print('❌ Error seeding default supermarket: $e');
     print('Stack trace: $stackTrace');
   }
 }

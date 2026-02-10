@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
 
+/// Service class to manage CRUD operations for Category in SQLite database
 class ManageCategory {
   static Future<void> addCategory(Category category) async {
     final db = await DatabaseHelper.database;

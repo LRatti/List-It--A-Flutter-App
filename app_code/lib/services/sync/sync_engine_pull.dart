@@ -264,10 +264,6 @@ class SyncEnginePull {
         return;
       }
 
-      // CRITICAL: Check if entity is dirty (exists in sync_box)
-      // If entity has pending changes waiting to be synced, IGNORE the incoming remote update
-      // to preserve local changes that haven't been pushed yet.
-      // This prevents the pull from overwriting items created while offline before they can be pushed.
       final isDirty = await ManageSyncBox.isEntityDirty(entityId, entityType);
       if (isDirty) {
         _logger.d('SyncEnginePull: Entity $entityType/$entityId is dirty (pending sync), ignoring remote update to preserve local changes');

@@ -15,6 +15,9 @@ import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/utils/category_localizer.dart';
 
+/// Screen for registering (archiving) a shopping list on mobile devices.
+/// This screen is shown after the user clicks "Register" from 
+/// the list detail screen.
 class RegisterShoppingListScreenMobile extends ConsumerStatefulWidget {
   final String shoppingListId;
   final ShoppingList? initialShoppingList;

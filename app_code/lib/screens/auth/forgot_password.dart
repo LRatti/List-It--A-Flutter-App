@@ -9,6 +9,7 @@ import 'package:app_code/l10n/app_localizations.dart';
 
 part 'forgot_password_controller.dart';
 
+/// The Forgot Password screen allows users to request a password reset email.
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 

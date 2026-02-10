@@ -5,6 +5,8 @@ import 'package:app_code/models/shopping_list.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 
+/// Mobile screen for managing trashed shopping lists, 
+/// allowing restore or permanent deletion.
 class TrashScreenMobile extends ConsumerWidget {
   const TrashScreenMobile({super.key});
 
@@ -104,9 +106,9 @@ class TrashScreenMobile extends ConsumerWidget {
         final trashedLists = lists.where((l) => l.getIsInTheTrash()).toList()
           ..sort((a, b) {
             final ad =
-                a.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+                a.getCreatedAt();
             final bd =
-                b.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+                b.getCreatedAt();
             return bd.compareTo(ad); // newest first
           });
 

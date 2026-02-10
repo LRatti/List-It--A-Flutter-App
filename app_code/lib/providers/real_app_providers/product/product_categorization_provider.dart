@@ -1,4 +1,3 @@
-import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/models/category.dart';
 import 'package:app_code/repositories/abstract/gemini_repository.dart';
@@ -103,7 +102,6 @@ class BackgroundProductCategorizationNotifier
 }
 
 /// Provides the Gemini repository for product categorization
-/// TODO: switch to real repository from MockGeminiRepository() to GeminiRepositoryReal() when needed
 final productCategorizationRepositoryProvider =
     Provider<GeminiRepository>((ref) {
   return GeminiRepositoryReal();

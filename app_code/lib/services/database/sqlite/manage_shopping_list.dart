@@ -4,6 +4,7 @@ import 'package:app_code/services/database/sqlite/database_helper.dart';
 import 'package:app_code/services/database/sqlite/manage_purchased_product.dart';
 import 'package:app_code/services/database/sqlite/manage_supermarket.dart';
 
+/// Manages CRUD operations for ShoppingList entities in the SQLite database.
 class ManageShoppingList {
   static Future<void> addShoppingList(ShoppingList list) async {
     final db = await DatabaseHelper.database;

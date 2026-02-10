@@ -27,6 +27,7 @@ final listDetailControllerProvider =
       return ListDetailController(shoppingList: shoppingList, ref: ref);
     });
 
+/// Mobile screen for shopping list details
 class ListDetailScreenMobile extends ConsumerStatefulWidget {
   final ShoppingList shoppingList;
   final bool isNewList;
@@ -625,9 +626,6 @@ class _ListDetailScreenMobileState
     // Only update the selected supermarket if changes were saved
     // If user cancelled (updatedSupermarket == null), keep the current selection
     if (updatedSupermarket != null) {
-      // CRITICAL: Wait for supermarketsProvider to finish refreshing
-      // This ensures the newly created/edited supermarket is loaded
-      // before we try to select it in the controller
       await ref.read(supermarketsProvider.future);
 
       if (mounted) {

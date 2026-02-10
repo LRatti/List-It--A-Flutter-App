@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 
 import 'package:app_code/utils/uncategorized_category_utils.dart';
 
+/// A utility class to localize category names based on a JSON file 
+/// containing localized labels.
 class CategoryLocalizer {
   static const String _defaultCategoriesPath =
       'assets/data/default_categories.json';

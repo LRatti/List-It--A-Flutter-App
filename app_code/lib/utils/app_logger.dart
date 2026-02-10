@@ -1,5 +1,7 @@
 import 'package:logger/logger.dart';
 
+/// A simple wrapper around the `logger` package to provide a consistent 
+/// logging interface
 class AppLogger {
   AppLogger._();
 

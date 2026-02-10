@@ -29,7 +29,6 @@ class SyncManager {
 
   // Configuration
   static const Duration _periodicSyncInterval = Duration(seconds: 10);
-  static const Duration _retryDelay = Duration(seconds: 5);
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -67,9 +66,6 @@ class SyncManager {
 
       _logger.i('SyncManager: Initializing...');
 
-      // CRITICAL FIX: Reset lastSyncedAt for each initialization
-      // This ensures a clean cold-start sync when the user logs in/out or switches accounts.
-      // Without this, the sync engine would use stale timestamps from previous user sessions.
       _prefs.remove('lastSyncedAt');
       _logger.i('SyncManager: Reset lastSyncedAt to enable full cold-start sync');
 

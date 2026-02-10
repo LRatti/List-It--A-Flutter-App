@@ -5,7 +5,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 class GeminiExceptionHandler {
   /// Converts a GenerativeAIException to a user-friendly RecipeData error.
   static RecipeData handleGenerativeAIException(GenerativeAIException e) {
-    final msg = e.message ?? e.toString();
+    final msg = e.message;
     final lowerMsg = msg.toLowerCase();
 
     // Check for invalid/not found recipe

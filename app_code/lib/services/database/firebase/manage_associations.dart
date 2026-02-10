@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
+/// This class manages associations between products, supermarkets 
+/// and categories in Firebase
 class FirebaseManageAssociations {
   // This class manages associations between products, supermarkets and categories in Firebase
   FirebaseManageAssociations({

@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:app_code/models/product.dart';
 import 'package:app_code/services/database/sqlite/database_helper.dart';
 
+/// Service class to manage CRUD operations for Product in SQLite database
 class ManageProduct {
   static Future<void> addProduct(Product product) async {
     final db = await DatabaseHelper.database;

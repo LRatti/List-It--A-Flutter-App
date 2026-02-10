@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 
+/// A custom text field widget for password input, with a toggle 
+/// to show/hide the password.
 class PasswordTextField extends StatefulWidget {
   const PasswordTextField({
     super.key,

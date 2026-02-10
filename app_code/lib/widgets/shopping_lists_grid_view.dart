@@ -6,6 +6,8 @@ import 'package:app_code/widgets/shopping_list_widget.dart';
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 
+/// A grid view widget for displaying shopping lists with selection 
+/// and deletion capabilities.
 class ShoppingListsGridView extends ConsumerStatefulWidget {
   final List<ShoppingList> lists;
   final String emptyMessage;

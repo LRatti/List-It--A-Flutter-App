@@ -1,6 +1,9 @@
 import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/services/database/sqlite/manage_supermarket.dart' as sqlite_manage_supermarket;
 
+/// This class provides methods to manage supermarkets in the database. 
+/// It acts as a bridge between the application and the SQLite database,
+/// allowing for adding, deleting, updating, and retrieving supermarkets.
 class ManageSupermarket {
   static Future<void> addSupermarket(Supermarket supermarket) {
     return sqlite_manage_supermarket.ManageSupermarket.addSupermarket(supermarket);

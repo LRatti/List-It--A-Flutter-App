@@ -7,6 +7,9 @@ import 'package:app_code/providers/real_app_providers/nearest-supermarket/map_la
 import 'package:app_code/providers/real_app_providers/navigation_provider.dart';
 import 'package:app_code/widgets/app_snackbar.dart';
 
+/// A combined widget that includes the top app bar with title and 
+/// authentication actions, as well as a secondary info bar that shows 
+/// the nearest supermarket information.
 class TopBarWithNavBar extends ConsumerWidget {
   final bool isMenuOpen;
   final VoidCallback onMenuToggle;

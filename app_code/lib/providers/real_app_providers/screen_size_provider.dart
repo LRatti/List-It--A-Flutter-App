@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_code/utils/screen_size_helper.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -31,20 +30,6 @@ class ScreenSizeNotifier extends StateNotifier<ScreenClassification> {
 /// 
 /// Widgets can watch this provider to automatically rebuild when the screen
 /// size changes (orientation, rotation, tablet/mobile transitions, etc.).
-/// 
-/// Usage:
-/// ```dart
-/// // In a Widget's build method:
-/// final screenSize = ref.watch(screenSizeProvider);
-/// 
-/// if (screenSize == ScreenClassification.mobile) {
-///   // Mobile layout
-/// } else if (screenSize == ScreenClassification.tablet) {
-///   // Tablet layout
-/// } else {
-///   // Desktop layout
-/// }
-/// ```
 final screenSizeProvider = StateNotifierProvider<ScreenSizeNotifier, ScreenClassification>(
   (ref) => ScreenSizeNotifier(),
 );
@@ -58,21 +43,18 @@ final screenClassificationProvider = Provider<ScreenClassification>((ref) {
 });
 
 /// Check if currently in mobile view
-/// Use this instead of ScreenSize.isMobile(context) for reactive rebuilds
 final isMobileProvider = Provider<bool>((ref) {
   final classification = ref.watch(screenSizeProvider);
   return classification == ScreenClassification.mobile;
 });
 
 /// Check if currently in tablet view
-/// Use this instead of ScreenSize.isTablet(context) for reactive rebuilds
 final isTabletProvider = Provider<bool>((ref) {
   final classification = ref.watch(screenSizeProvider);
   return classification == ScreenClassification.tablet;
 });
 
 /// Check if currently in desktop view
-/// Use this instead of ScreenSize.isDesktop(context) for reactive rebuilds
 final isDesktopProvider = Provider<bool>((ref) {
   final classification = ref.watch(screenSizeProvider);
   return classification == ScreenClassification.desktop ||

@@ -6,6 +6,7 @@ import 'package:app_code/widgets/app_snackbar.dart';
 import 'package:app_code/utils/uncategorized_category_utils.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 
+/// A screen for creating or editing a category in the supermarket section.
 class CategoryEditingScreen extends ConsumerStatefulWidget {
   final Category? categoryToEdit;
   final Function(Category)? onCategoryCreated;

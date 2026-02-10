@@ -31,8 +31,8 @@ class HistoryScreenMobile extends ConsumerWidget {
             .where((l) => l.getIsRegistered() && !l.getIsInTheTrash())
             .toList()
           ..sort((a, b) {
-            final ad = a.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
-            final bd = b.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final ad = a.getCreatedAt();
+            final bd = b.getCreatedAt();
             return bd.compareTo(ad); // newest first
           });
 
@@ -91,8 +91,8 @@ class _HistoryScreenTabletViewState extends ConsumerState<HistoryScreenTablet> {
             .where((l) => l.getIsRegistered() && !l.getIsInTheTrash())
             .toList()
           ..sort((a, b) {
-            final ad = a.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
-            final bd = b.getCreatedAt() ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final ad = a.getCreatedAt();
+            final bd = b.getCreatedAt();
             return bd.compareTo(ad); // newest first
           });
 
