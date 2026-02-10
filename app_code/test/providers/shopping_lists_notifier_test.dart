@@ -3,6 +3,7 @@ import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lis
 import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,6 +32,8 @@ void main() {
         overrides: [
           shoppingListRepositoryProvider.overrideWithValue(mockRepo),
           recipeCacheRepositoryProvider.overrideWithValue(mockRecipeCache),
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
           // Override with fixed date for testing
           currentDateTimeProvider.overrideWithValue(DateTime(2025, 1, 15)),
         ],
@@ -90,6 +93,8 @@ void main() {
         overrides: [
           shoppingListRepositoryProvider.overrideWithValue(mockRepo),
           recipeCacheRepositoryProvider.overrideWithValue(mockRecipeCache),
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
         ],
       );
 
@@ -248,6 +253,8 @@ void main() {
         overrides: [
           shoppingListRepositoryProvider.overrideWithValue(mockRepo),
           recipeCacheRepositoryProvider.overrideWithValue(mockRecipeCache),
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
           currentDateTimeProvider.overrideWithValue(DateTime(2025, 3, 1)), // March 1st
         ],
       );
@@ -373,6 +380,8 @@ void main() {
         overrides: [
           shoppingListRepositoryProvider.overrideWithValue(failingRepo),
           recipeCacheRepositoryProvider.overrideWithValue(mockRecipeCache),
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
         ],
       );
 

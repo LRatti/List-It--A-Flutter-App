@@ -4,6 +4,7 @@ import 'package:app_code/providers/real_app_providers/recipe/recipe_provider.dar
 import 'package:app_code/providers/real_app_providers/shopping_list/shopping_lists_notifier.dart';
 import 'package:app_code/repositories/mock_repo/mock_recipe_cache_repository.dart';
 import 'package:app_code/repositories/mock_repo/mock_shopping_list_repository.dart';
+import 'package:app_code/repositories/mock_repo/mock_gemini_repository.dart';
 import 'package:app_code/widgets/shopping_lists_grid_view.dart';
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,8 @@ void main() {
           recipeCacheRepositoryProvider.overrideWithValue(
             MockRecipeCacheRepository(),
           ),
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
         ],
       );
       addTearDown(container.dispose);

@@ -47,7 +47,12 @@ class RecipeCacheRepositorySpy extends MockRecipeCacheRepository {
 void main() {
   group('RecipeNotifier', () {
     test('initial state is empty RecipeData', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
+        ],
+      );
 
       final state = container.read(recipeProvider);
 
@@ -86,7 +91,12 @@ void main() {
 
   group('BackgroundRecipeNotifier', () {
     test('initial state is empty', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
+        ],
+      );
 
       final state = container.read(backgroundRecipeProvider);
 
@@ -94,7 +104,12 @@ void main() {
     });
 
     test('getSearchForList returns null for unknown list', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
+        ],
+      );
 
       final notifier = container.read(backgroundRecipeProvider.notifier);
 
@@ -106,6 +121,8 @@ void main() {
 
       final container = ProviderContainer(
         overrides: [
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
           recipeCacheRepositoryProvider.overrideWithValue(cacheRepo),
         ],
       );
@@ -163,6 +180,8 @@ void main() {
 
       final container = ProviderContainer(
         overrides: [
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
           recipeCacheRepositoryProvider.overrideWithValue(cacheRepo),
         ],
       );
@@ -185,7 +204,12 @@ void main() {
     });
 
     test('markNotificationSeen updates state only', () async {
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
+        ],
+      );
 
       final notifier = container.read(backgroundRecipeProvider.notifier);
 
@@ -211,6 +235,8 @@ void main() {
 
       final container = ProviderContainer(
         overrides: [
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
           recipeCacheRepositoryProvider.overrideWithValue(cacheRepo),
         ],
       );
@@ -237,6 +263,8 @@ void main() {
 
       final container = ProviderContainer(
         overrides: [
+          geminiRepositoryProvider
+              .overrideWithValue(MockGeminiRepository()),
           recipeCacheRepositoryProvider.overrideWithValue(cacheRepo),
         ],
       );
