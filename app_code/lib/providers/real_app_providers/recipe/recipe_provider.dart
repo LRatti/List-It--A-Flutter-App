@@ -55,7 +55,7 @@ class BackgroundRecipeSearch {
 /// Using Provider is correct for dependency injection.
 final geminiRepositoryProvider = Provider<GeminiRepository>((ref) {
   // Use test repository for mock data
-  return GeminiRepositoryReal();
+  return MockGeminiRepository();
   // Use real repository for actual API calls
   //TODO: switch to real repository when needed. GeminiRepositoryReal()/MockGeminiRepository();
   // return MockGeminiRepository();
