@@ -646,12 +646,15 @@ class _ListDetailScreenMobileState
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isMobile = ScreenSize.isPhoneAtLaunch ?? ScreenSize.isMobile(context);
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final shouldResizeToAvoidInset = !(isMobile && isLandscape);
     final l10n = AppLocalizations.of(context)!;
 
     return WillPopScope(
       onWillPop: _handleBack,
       child: Scaffold(
-        resizeToAvoidBottomInset: true,
+        resizeToAvoidBottomInset: shouldResizeToAvoidInset,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           title: TextField(
