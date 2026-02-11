@@ -43,7 +43,7 @@ class InitialScreen extends ConsumerWidget {
 
               // App Title
               Text(
-                'My Shopping App',
+                'List It',
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: colorScheme.onPrimary,
