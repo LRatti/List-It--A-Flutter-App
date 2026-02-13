@@ -19,11 +19,11 @@ class CategoryRepositoryWithSync
   Future<void> add(Category category) async {
     category.createdAt = DateTime.now();
     category.lastModified = category.createdAt;
-    bool isPresent = await ManageCategory.getCategoryByName(category.getName()) != null;
+    // bool isPresent = await ManageCategory.getCategoryByName(category.getName()) != null;
 
-    if (isPresent) {
-      return;
-    }
+    // if (isPresent) {
+    //   return;
+    // }
 
     await ManageCategory.addCategory(category);
 
