@@ -1,11 +1,9 @@
 import 'package:app_code/l10n/app_localizations.dart';
 import 'package:app_code/models/category.dart';
-import 'package:app_code/models/supermarket.dart';
 import 'package:app_code/models/user.dart';
 import 'package:app_code/providers/real_app_providers/auth/auth_provider.dart';
 import 'package:app_code/providers/real_app_providers/nearest-supermarket/map_launcher_service_provider.dart';
 import 'package:app_code/providers/real_app_providers/nearest-supermarket/nearest_supermarket_provider.dart';
-import 'package:app_code/providers/real_app_providers/supermarket/supermarkets_notifier.dart';
 import 'package:app_code/repositories/mock_repo/mock_auth_repository.dart';
 import 'package:app_code/screens/home/home_screen.dart';
 import 'package:app_code/screens/supermarket/supermarket_customization_screen.dart';

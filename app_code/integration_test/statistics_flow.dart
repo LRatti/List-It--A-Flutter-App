@@ -11,7 +11,6 @@ import 'package:app_code/screens/home/home_screen.dart';
 import 'package:app_code/screens/lists/list_detail_screen_mobile.dart';
 import 'package:app_code/screens/lists/register-list/register_shopping_list_screen_mobile.dart';
 import 'package:app_code/services/map_launcher_service.dart';
-import 'package:app_code/widgets/shopping_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

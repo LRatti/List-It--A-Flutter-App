@@ -76,49 +76,48 @@ class RegisterShoppingListController extends ChangeNotifier {
   /// Update quantity for a product
   void updateQuantity(String productId, int quantity) {
     if (quantity < 0) return;
-    
-    // Check if this is actually a change from the original
-    final boughtProduct = _originalList.getProducts().firstWhere(
-      (pp) => pp.id == productId && pp.isBought,
-      orElse: () => null as dynamic,
-    );
-    
-    if (boughtProduct != null && quantity != (boughtProduct as PurchasedProduct).quantity) {
-      _quantityUpdates[productId] = quantity;
+
+    _quantityUpdates[productId] = quantity;
       _hasChanges = true;
       notifyListeners();
-    } else if (boughtProduct == null && _quantityUpdates.containsKey(productId)) {
-      // If no original product found, track the update
-      _quantityUpdates[productId] = quantity;
-      _hasChanges = true;
-      notifyListeners();
-    }
+    
+    // if (boughtProduct != null && quantity != (boughtProduct as PurchasedProduct).quantity) {
+    //   _quantityUpdates[productId] = quantity;
+    //   _hasChanges = true;
+    //   notifyListeners();
+    // } else if (boughtProduct == null && _quantityUpdates.containsKey(productId)) {
+    //   // If no original product found, track the update
+    //   _quantityUpdates[productId] = quantity;
+    //   _hasChanges = true;
+    //   notifyListeners();
+    // }
   }
 
   /// Update price for a product
   void updatePrice(String productId, double price) {
     if (price < 0) return;
-    
-    final boughtProduct = _originalList.getProducts().firstWhere(
-      (pp) => pp.id == productId && pp.isBought,
-      orElse: () => null as dynamic,
-    );
-    
-    if (boughtProduct != null && price != (boughtProduct as PurchasedProduct).price) {
-      _priceUpdates[productId] = price;
+
+     _priceUpdates[productId] = price;
       _hasChanges = true;
       notifyListeners();
-    } else if (boughtProduct == null && _priceUpdates.containsKey(productId)) {
-      _priceUpdates[productId] = price;
-      _hasChanges = true;
-      notifyListeners();
-    }
+
+
+    // Variable can't be null. The correct code has been reported above.
+    // if (boughtProduct != null && price != (boughtProduct as PurchasedProduct).price) {
+    //   _priceUpdates[productId] = price;
+    //   _hasChanges = true;
+    //   notifyListeners();
+    // } else if (boughtProduct == null && _priceUpdates.containsKey(productId)) {
+    //   _priceUpdates[productId] = price;
+    //   _hasChanges = true;
+    //   notifyListeners();
+    // }
   }
 
   /// Persist all changes (quantity and price) to the database
   /// This is called when back button, check button, or pencil button are pressed
   Future<void> persistChanges() async {
-    final repository = _ref.watch(shoppingListRepositoryProvider);
+    _ref.watch(shoppingListRepositoryProvider);
     final purchasedProductsNotifier = 
         _ref.read(purchasedProductsProvider.notifier);
     
