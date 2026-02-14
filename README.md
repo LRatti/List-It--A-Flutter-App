@@ -6,7 +6,7 @@
   <img src="assets/images/app_logo.png" alt="WellPlate Logo" width="200" height="200"/>
   
   [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev/)
-  [![Dart](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://dart.dev/)
+  [![Dart](https://img.shields.io/badge/Dart-3.9.2-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev/)
   [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/?_gl=1*1som8j*_up*MQ..&gclid=CjwKCAiAtLvMBhB_EiwA1u6_Pg4fqRTGb7QH1aNcPyIUfjXRpmRlNDXXJ9n7DhN59HPhoy2GkEMRZRoCjL0QAvD_BwE&gclsrc=aw.ds)
   [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
   [![Riverpod](https://img.shields.io/badge/State-Riverpod-purple?style=for-the-badge)](https://riverpod.dev/)
