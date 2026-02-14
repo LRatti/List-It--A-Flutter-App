@@ -76,7 +76,6 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
 #### ☁️ Backend & Data
 *   **Cloud Backend:** Firebase (Firestore, Auth)
 *   **Local Database:** [sqflite](https://pub.dev/packages/sqflite) (SQLite)
-*   **Data Object Mapping:** [Isar](https://isar.dev/) annotations (adapted for SQLite usage)
 
 #### 🤖 AI & External Services
 *   **Generative AI:** [Google Generative AI](https://pub.dev/packages/google_generative_ai) (Gemini Flash 2.5)
@@ -97,6 +96,22 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
 ## 📱 Screenshots
 
 <div align="center">
+
+<h3 align="center">Main Home Tabs</h3>
+
+  <table align="center">
+    <tr>
+      <td align="center">
+        <h4>Home Screen - Dark Themed</h4>
+        <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Themed" width="200"/>
+      </td>
+      <td align="center">
+        <h4>Stats Screen - Light Themed</h4>
+        <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="200"/>
+      </td>
+    </tr>
+  </table>
+
   <h3>Home Screen - Dark Themed</h3>
   <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Themed" width="200"/>
   
