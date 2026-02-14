@@ -72,13 +72,13 @@ The app implements a **Repository Pattern** with a custom sync layer.
 
 <div align="center">
   <h3>Home Screen - Dark Themed</h3>
-  <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Theme" width="300"/>
+  <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Themed" width="300"/>
   
-  <h3>Stats Screen - Light Theme</h3>
-  <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Theme" width="300"/>
+  <h3>Stats Screen - Light Themed</h3>
+  <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="300"/>
   
-  <h3>Home Screen Tablet View with List Detail Screen Open</h3>
-  <img src="app_code/assets/images/tablet_view.png" alt="WellPlate User Meal Plans Interface" width="300"/>
+  <h3>Home Screen Tablet View with List Detail Screen</h3>
+  <img src="app_code/assets/images/tablet_view.png" alt="List It - Tablet View" width="300"/>
 </div>
 
 ### Showcased Features 
