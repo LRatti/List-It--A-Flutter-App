@@ -25,7 +25,7 @@
 
 Grocery shopping is often inefficient due to disorganized lists and difficult expense tracking. **List It** solves these problems by:
 1.  **Automating Organization:** Automatically categorizing products to match supermarket aisles using AI.
-2.  **Tracking Expenses:** extracting prices from receipts via OCR and AI to provide detailed spending statistics.
+2.  **Tracking Expenses:** Extracting prices from receipts via OCR and AI to provide detailed spending statistics.
 
 ## ✨ Key Features
 
@@ -109,7 +109,7 @@ The application primarily uses **SQLite** for local storage, which mirrors the s
 | **RecipeCache** | Caches AI-generated recipes to improve performance and reduce API calls. |
 | **SyncBox** | A queue table storing local changes (Upserts/Deletes) waiting to be pushed to the cloud. |
 
-Report to the Design Document for further details.
+Refer to the Design Document for further details.
 
 
 ## 🔧 Project Structure
@@ -171,7 +171,7 @@ Report to the Design Document for further details.
       <td align="center">
         <h4>Large Font Size</h4>
         <img src="app_code/assets/images/max_text_dim.jpeg"
-             alt="List It Settings Screen - Large Font"
+             alt="List It Settings Screen - Large Font"\
              width="200"/>
       </td>
     </tr>
@@ -191,7 +191,7 @@ Report to the Design Document for further details.
 ## 🔐 Security & Privacy
 
 - **Authentication**: Supports Anonymous login, Email/Password, and Google Sign-In via Firebase Auth.
-- **Verification**: Users signing up are requestd to verify their emails through a link sent to their inboxes.
+- **Verification**: Users signing up are requested to verify their emails through a link sent to their inboxes.
 - **Credential Recovery**: Users can recover their forgotten passwords through a recovery link.
 - **Data Privacy**: Anonymous users keep data locally until account linking. Receipt processing happens on-device (OCR) before secure AI processing.
 
@@ -214,12 +214,12 @@ The application supports multiple languages through Flutter's internationalizati
 ## 🧪 Testing
 
 The project maintains a high standard of quality assurance with approximately **70% code coverage**. 
-The uncovered percentages are due to: complex widgets/animations, rare branches, interaction with external services and platform specific, generated and boilerplpate code. 
+The uncovered percentages are due to: complex widgets/animations, rare branches, interaction with external services and platform specific, generated and boilerplate code. 
 
 ### Libraries Used
 
 - Testing is mainly performed by  `flutter_test` library. 
-- Testing environemets were dsigned by mocking calls to Local/Remote Services for dependency isolation. Mocked interactions were designed by the usage of custom mocked classes and the `mocktail` library.
+- Testing environments were designed by mocking calls to Local/Remote Services for dependency isolation. Mocked interactions were implemented using custom mocked classes and the `mocktail` library.
 - Integration tests were performed by the usage of the `integration_test` library.
 
 ### Tests
@@ -233,7 +233,7 @@ The uncovered percentages are due to: complex widgets/animations, rare branches,
     4.  Supermarket Management.
     5.  Statistics Updates.
     6.  Category Persistence.
- - **User Tests**: A user was given the possibility to test the application for 48h. Afterwars, the user was submitted a structured questionnaire to return feedback. The user's answers are reported in the Design Document. The feedback was  positive.
+ - **User Tests**: A user was given the possibility to test the application for 48h. Afterwars, the user was asked to complete a questionnaire to return feedback. The user's answers are reported in the Design Document. The feedback was  positive.
 
 ## 🚀 Getting Started
 
@@ -277,7 +277,7 @@ We welcome contributions to improve List It! Please follow these steps:
 2.  **Create a feature/chore/fix branch** (`e.g. git checkout -b feature/x`)
 3.  **Commit your changes** (`e.g. git commit -m 'Commit message'`)
 4.  **Push to the branch** (`e.g. git push origin feature/x`)
-5.  **Open a Pull Request** to merge changes in main branch.
+5.  **Open a Pull Request** to merge changes into the main branch.
 
 ### Development Guidelines
 
