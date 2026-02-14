@@ -72,10 +72,10 @@ The app implements a **Repository Pattern** with a custom sync layer.
 
 <div align="center">
   <h3>Home Screen - Dark Themed</h3>
-  <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Themed" width="300"/>
+  <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Themed" width="00"/>
   
   <h3>Stats Screen - Light Themed</h3>
-  <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="300"/>
+  <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="00"/>
 
   <h3>Settings Screen - Font Size Comparison</h3>
 
@@ -83,16 +83,16 @@ The app implements a **Repository Pattern** with a custom sync layer.
 
   <div style="text-align: center;">
     <h4>Small Font Size</h4>
-    <img src="app_code/assets/images/min_text_dim.png"
+    <img src="app_code/assets/images/min_text_dim.jpg"
          alt="List It Settings Screen - Small Font"
-         width="300"/>
+         width="200"/>
   </div>
 
   <div style="text-align: center;">
     <h4>Large Font Size</h4>
-    <img src="app_code/assets/images/max_text_dim.png"
+    <img src="app_code/assets/images/max_text_dim.jpg"
          alt="List It Settings Screen - Large Font"
-         width="300"/>
+         width="200"/>
   </div>
 
 </div>
