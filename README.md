@@ -107,11 +107,11 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
       </td>
       <td align="center">
         <h4>History Tab - Light Themed</h4>
-        <img src="app_code/assets/images/history_tab.jpeg" alt="List It History Tab - Light Themed" width="200"/>
+        <img src="app_code/assets/images/history tab.jpeg" alt="List It History Tab - Light Themed" width="200"/>
       </td>
       <td align="center">
         <h4>Supermarket Tab - Light Themed</h4>
-        <img src="app_code/assets/images/sup_view.jpeg" alt="List It Supermarket Tab - Light Themed" width="200"/>
+        <img src="app_code/assets/images/sup view.jpeg" alt="List It Supermarket Tab - Light Themed" width="200"/>
       </td>
       <td align="center">
         <h4>Stats Tab - Light Themed</h4>
