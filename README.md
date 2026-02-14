@@ -233,7 +233,7 @@ The uncovered percentages are due to: complex widgets/animations, rare branches,
     4.  Supermarket Management.
     5.  Statistics Updates.
     6.  Category Persistence.
- - **User Tests**: A user was given the possibility to test the application for 48h. Afterwars, th user was submitted a structured questioneer to return feedback. The user's answers are reported in the Design Document. The feedback positive.
+ - **User Tests**: A user was given the possibility to test the application for 48h. Afterwars, the user was submitted a structured questionnaire to return feedback. The user's answers are reported in the Design Document. The feedback was  positive.
 
 ## 🚀 Getting Started
 
