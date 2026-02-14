@@ -78,7 +78,7 @@ The app implements a **Repository Pattern** with a custom sync layer.
   <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="300"/>
   
   <h3>Home Screen Tablet View with List Detail Screen</h3>
-  <img src="app_code/assets/images/tablet_view.jpg" alt="List It - Tablet View" width="300"/>
+  <img src="app_code/assets/images/tablet_view.jpg" alt="List It - Tablet View" width="500"/>
 </div>
 
 ### Showcased Features 
