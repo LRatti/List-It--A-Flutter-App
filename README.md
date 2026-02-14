@@ -111,7 +111,7 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
       </td>
       <td align="center">
         <h4>Supermarket Tab - Light Themed</h4>
-        <img src="app_code/assets/images/sup view.jpeg" alt="List It Supermarket Tab - Light Themed" width="200"/>
+        <img src="app_code/assets/images/sup view.jpeg" alt="List It Supermarkets Tab - Light Themed" width="200"/>
       </td>
       <td align="center">
         <h4>Stats Tab - Light Themed</h4>
@@ -120,7 +120,7 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
     </tr>
   </table>
   
-  <h3>Home Screen Tablet View with List Detail Screen</h3>
+  <h3>Home Tab Tablet View with List Detail Screen</h3>
   <img src="app_code/assets/images/tablet_view.jpg" alt="List It - Tablet View" width="500"/>
 
   <h3 align="center">Settings Screen - Font Size Comparison</h3>
@@ -145,7 +145,7 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
 
 ### Showcased Features 
 
-- **Lists Home Tab**: Interface for the creation of new shopping lists.
+- **Home Screens**: Home interfaces to interact with the app and its main features.
 - **Theme Support**: Both light and dark mode available.
 - **Statistics Tab**: Intuitive interface for the management and analysis of historical purchases through time.
 - **List Edit Screen**: The tablet screen shows the interface to automatically add products in a list. The list edit screen reserves its layout on both mobile and tablet devices.
