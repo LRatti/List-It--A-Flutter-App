@@ -214,8 +214,8 @@ The application supports multiple languages through Flutter's internationalizati
 The project maintains a high standard of quality assurance with approximately **70% code coverage**. 
 The uncovered percentages are due to: complex widgets/animations, rare branches, interaction with external services and platform specific, generated and boilerplpate code. 
 
-Testing environemets were dsigned by mocking calls to Local/Remote Services for dependency isolation.
-Testing is mainly performed by the `flutter_test` library. Mocked interactions were designed by the usage of custom mocked classes and the `mocktail` library.
+Testing is mainly performed by the `flutter_test` library. 
+Testing environemets were dsigned by mocking calls to Local/Remote Services for dependency isolation. Mocked interactions were designed by the usage of custom mocked classes and the `mocktail` library.
 Integration tests were performed by the usage of the `integration_test` library.
 
 - **Unit Tests**: Validate models, repositories, and the synchronization logic.
