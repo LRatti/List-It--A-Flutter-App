@@ -49,38 +49,67 @@ Grocery shopping is often inefficient due to disorganized lists and difficult ex
 
 The application follows a clean, layered architecture to ensure separation of concerns and testability.
 
-### Core Technologies
-*   **Framework:** Flutter
-*   **State Management:** [Riverpod](https://riverpod.dev/)
-*   **Local Database:** [sqflite](https://pub.dev/packages/sqflite) (SQLite)
-*   **Remote Backend:** Firebase (Auth, Firestore)
-*   **AI & ML:** [google_generative_ai](https://pub.dev/packages/google_generative_ai), [google_mlkit_text_recognition](https://pub.dev/packages/google_mlkit_text_recognition)
-*   **Location:** [geolocator](https://pub.dev/packages/geolocator)
-*   **Camera:** [camera](https://pub.dev/packages/camera)
-
 ### High-Level Architecture
-The app implements a **Repository Pattern** with a custom sync layer:
+The app implements a **Repository Pattern** with a custom sync layer.
 
 `UI` ↔ `UI Controllers` ↔  `Notifiers (Riverpod)` ↔ `Repositories` ↔ `Data Sources (Local/Remote Services)`
 
 1.  **Offline-First Strategy:** All reads/writes happen against the local SQLite database.
 2.  **Sync Engine:** A background process monitors a local `sync_box` table. It pushes changes to Firestore and pulls remote updates using a "Last Write Wins" conflict resolution strategy.
+3. **Soft Deletes**: Data is marked as deleted (`isDeleted`) rather than immediately removed to ensure sync consistency.
 
-## 🔧 Project Structure
+### Core Technologies
+*   **Framework:** Flutter
+*   **State Management:** [Riverpod](https://riverpod.dev/)
+*   **Local Database:** [sqflite](https://pub.dev/packages/sqflite) (SQLite) for offline persistance
+*   **Remote Backend:** [Firebase (Auth, Firestore)](https://firebase.google.com/?_gl=1*1som8j*_up*MQ..&gclid=CjwKCAiAtLvMBhB_EiwA1u6_Pg4fqRTGb7QH1aNcPyIUfjXRpmRlNDXXJ9n7DhN59HPhoy2GkEMRZRoCjL0QAvD_BwE&gclsrc=aw.ds) 
+*   **AI & ML:** [Google Gemini](https://pub.dev/packages/google_generative_ai), [Google ML Kit](https://pub.dev/packages/google_mlkit_text_recognition)
+*   **Maps**: [OpenStreetMap](https://www.openstreetmap.org/#map=6/42.09/12.56) via [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API)
+*   **Location:** [geolocator](https://pub.dev/packages/geolocator)
+*   **Camera:** [camera](https://pub.dev/packages/camera)
 
-```text
-/lib
-├── l10n/          # Multi-language support (English/Italian).
-├── models/        # Core data entities (ShoppingList, Product, User, etc.).
-├── providers/     # Riverpod state management classes.
-├── repositories/  # Abstractions for data access (Mock & Real implementations).
-├── screens/       # UI Views and adaptive layouts.
-├── services/      # External API clients (Gemini, OCR, Location).
-├── styles/        # Theme, color, and style definitions.
-├── utils/         # Helper functions and utilities.
-├── widgets/       # Reusable UI components and custom widgets.
-└── main.dart      # Application entry point.
-```
+## 📱 Screenshots
+
+<div align="center">
+  <h3>Home Screen - Dark Themed</h3>
+  <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Theme" width="300"/>
+  
+  <h3>Stats Screen - Light Theme</h3>
+  <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Theme" width="300"/>
+  
+  <h3>Home Screen Tablet View with List Detail Screen Open</h3>
+  <img src="app_code/assets/images/tablet_view.png" alt="WellPlate User Meal Plans Interface" width="300"/>
+</div>
+
+### Showcased Features 
+
+- **User Dashboard**: Clean, intuitive interface for meal planning
+- **Theme Support**: Both light and dark mode available
+- **Meal Plan Management**: Easy-to-use interface for viewing and managing meal plans
+- **Progress Tracking**: Visual indicators for meal completion status
+
+## 🔐 Security & Privacy
+
+- **Authentication**: Supports Anonymous login, Email/Password, and Google Sign-In via Firebase Auth.
+- **Verification**: Users signing up are requestd to vrify their emails through a verification link sent to them.
+- **Credential Recovery**: Users can recover their forgotten passwords through a recovery link.
+- **Data Privacy**: Anonymous users keep data locally until account linking. Receipt processing happens on-device (OCR) before secure AI processing.
+
+## 📊 AI Integration Details
+
+| Feature | AI Model | Description |
+| :--- | :--- | :--- |
+| **Product Categorization** | Gemini 2.5 Flash | Assigns category (e.g., "Dairy") based on product name. |
+| **Recipe Generation** | Gemini 2.5 Flash | Generates ingredient lists and quantities from a recipe name. |
+| **Receipt Scanning** | ML Kit + Gemini | ML Kit extracts text; Gemini parses the unstructured text into JSON (Product, Price, Quantity). |
+
+## 🌐 Internationalization
+
+The application supports multiple languages through Flutter's internationalization system:
+
+- English (default)
+- Italian
+- Additional languages can be added via ARB files
 
 ## 🧪 Testing
 
@@ -103,15 +132,17 @@ Testing is mainly performed by the `flutter_test` library. Mocked interactions w
 ## 🚀 Getting Started
 
 ### Prerequisites
-The application environment is configured for the following versions:
-- **Flutter SDK**: `3.19.x` (Stable Channel)
-- **Dart SDK**: `^3.9.2`
+
+- **Flutter SDK** 3.22.0 or higher
+- **Dart SDK** 3.9.2 or higher
+- **Google Gemini API Key**
+- **Firebase Project Configuration**
 
 ### Installation
 
 1.  **Clone the Repository**
     ```bash
-    git clone https://github.com/YOUR_USERNAME/List-It.git
+    git clone <repository-url>
     cd app_code
     ```
 
@@ -121,22 +152,32 @@ The application environment is configured for the following versions:
     ```
 
 3.  **Environment Configuration**
-    The app requires a Gemini API key. Pass it as a dart-define during build/run:
-    ```bash
-    flutter run --dart-define=GEMINI_API_KEY=your_api_key_here
-    ```
+    *   Ensure `firebase_options.dart` is present in `lib/` (configured via `flutterfire configure`).
+    *   The app requires a Gemini API key passed at compile time.
 
-4.  **Firebase Setup**
-    Ensure `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) are placed in their respective directories (`android/app` and `ios/Runner`) to connect to the backend.
+### Running the Application
 
-## 📸 Screenshots
+To run the app, you must provide the Gemini API key using the `--dart-define` flag:
 
-<div align="center">
-  <!-- You can upload your screenshots to an 'assets/screenshots' folder or link them here -->
-  <img src="assets/images/app_logo.png" width="200" alt="Lists Screen" />
-  <img src="assets/images/app_logo.png" width="200" alt="Recipe AI" />
-  <img src="assets/images/app_logo.png" width="200" alt="Statistics" />
-</div>
+```bash
+flutter run --dart-define=GEMINI_API_KEY=your_actual_api_key_here
+```
+
+## 🔧 Project Structure
+
+```text
+/lib
+├── l10n/          # Multi-language support (English/Italian).
+├── models/        # Core data entities (ShoppingList, Product, User, etc.).
+├── providers/     # Riverpod state management classes.
+├── repositories/  # Abstractions for data access (Mock & Real implementations).
+├── screens/       # UI Views and adaptive layouts.
+├── services/      # External API clients (Gemini, OCR, Location).
+├── styles/        # Theme, color, and style definitions.
+├── utils/         # Helper functions and utilities.
+├── widgets/       # Reusable UI components and custom widgets.
+└── main.dart      # Application entry point.
+```
 
 ## 👥 Authors
 
