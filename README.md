@@ -289,10 +289,12 @@ We welcome contributions to improve List It! Please follow these steps:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+--- 
+
 <div align="center">
   <p>List It, A Flutter App.</p>
 </div>
-```
+
 
 
 
