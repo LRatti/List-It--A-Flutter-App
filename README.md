@@ -83,14 +83,14 @@ The app implements a **Repository Pattern** with a custom sync layer.
 
   <div style="text-align: center;">
     <h4>Small Font Size</h4>
-    <img src="app_code/assets/images/min_text_dim.jpg"
+    <img src="app_code/assets/images/min_text_dim.jpeg"
          alt="List It Settings Screen - Small Font"
          width="200"/>
   </div>
 
   <div style="text-align: center;">
     <h4>Large Font Size</h4>
-    <img src="app_code/assets/images/max_text_dim.jpg"
+    <img src="app_code/assets/images/max_text_dim.jpeg"
          alt="List It Settings Screen - Large Font"
          width="200"/>
   </div>
