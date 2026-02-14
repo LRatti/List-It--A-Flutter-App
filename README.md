@@ -76,6 +76,26 @@ The app implements a **Repository Pattern** with a custom sync layer.
   
   <h3>Stats Screen - Light Themed</h3>
   <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="300"/>
+
+  <h3>Settings Screen - Font Size Comparison</h3>
+
+<div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
+
+  <div style="text-align: center;">
+    <h4>Small Font Size</h4>
+    <img src="app_code/assets/images/min_text_dim.png"
+         alt="List It Settings Screen - Small Font"
+         width="300"/>
+  </div>
+
+  <div style="text-align: center;">
+    <h4>Large Font Size</h4>
+    <img src="app_code/assets/images/max_text_dim.png"
+         alt="List It Settings Screen - Large Font"
+         width="300"/>
+  </div>
+
+</div>
   
   <h3>Home Screen Tablet View with List Detail Screen</h3>
   <img src="app_code/assets/images/tablet_view.jpg" alt="List It - Tablet View" width="500"/>
@@ -83,10 +103,11 @@ The app implements a **Repository Pattern** with a custom sync layer.
 
 ### Showcased Features 
 
-- **User Dashboard**: Clean, intuitive interface for meal planning
-- **Theme Support**: Both light and dark mode available
-- **Meal Plan Management**: Easy-to-use interface for viewing and managing meal plans
-- **Progress Tracking**: Visual indicators for meal completion status
+- **Lists Home Tab**: Interface for the creation of new shopping lists.
+- **Theme Support**: Both light and dark mode available.
+- **Statistics Tab**: Intuitive interface for the management and analysis of historical purchases through time.
+- **List Edit Screen**: The tablet screen shows the interface to automatically add products in a list. The list edit screen reserves its layout on both mobile and tablet devices.
+
 
 ## 🔐 Security & Privacy
 
