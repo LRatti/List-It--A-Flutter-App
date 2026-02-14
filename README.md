@@ -9,13 +9,10 @@
   <!-- UI & Language: Dark Blue -> Medium Blue -->
   [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev/)
   [![Dart](https://img.shields.io/badge/Dart-3.9.2-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev/)
-  
   <!-- Local Data: Navy Blue -->
   [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
-  
   <!-- State Management: Cyan (Matches App Logo) -->
   [![Riverpod](https://img.shields.io/badge/State-Riverpod-00BCD4?style=for-the-badge&logo=flutter&logoColor=white)](https://riverpod.dev/)
-  
   <!-- Backend: Amber (Accent Pop) -->
   [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
 </div>
