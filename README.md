@@ -4,12 +4,20 @@
 
 <div align="center">
   <img src="app_code/assets/images/app_logo.png" alt="List It Logo" width="200" height="200"/>
+  <br>
   
+  <!-- UI & Language: Dark Blue -> Medium Blue -->
   [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev/)
   [![Dart](https://img.shields.io/badge/Dart-3.9.2-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev/)
-  [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/?_gl=1*1som8j*_up*MQ..&gclid=CjwKCAiAtLvMBhB_EiwA1u6_Pg4fqRTGb7QH1aNcPyIUfjXRpmRlNDXXJ9n7DhN59HPhoy2GkEMRZRoCjL0QAvD_BwE&gclsrc=aw.ds)
+  
+  <!-- Local Data: Navy Blue -->
   [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
-  [![Riverpod](https://img.shields.io/badge/State-Riverpod-purple?style=for-the-badge)](https://riverpod.dev/)
+  
+  <!-- State Management: Cyan (Matches App Logo) -->
+  [![Riverpod](https://img.shields.io/badge/State-Riverpod-00BCD4?style=for-the-badge&logo=flutter&logoColor=white)](https://riverpod.dev/)
+  
+  <!-- Backend: Amber (Accent Pop) -->
+  [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
 </div>
 
 > **Course:** Design and Implementation of Mobile Applications (DIMA)  
@@ -93,7 +101,7 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
 *   **Utilities:** `logger` (debugging), `uuid` (unique IDs), `shared_preferences` (settings).
 *   **UI Components:** `flutter_staggered_grid_view`.
 
-#### Database Schema
+### 💾 Database Schema
 The application primarily uses **SQLite** for local storage, which mirrors the structure in **Firebase Firestore**.
 
 | Entity | Description |
