@@ -97,26 +97,28 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
 
 <div align="center">
 
-<h3 align="center">Main Home Tabs</h3>
+<h3 align="center">Main Home Screens</h3>
 
   <table align="center">
     <tr>
       <td align="center">
-        <h4>Home Screen - Dark Themed</h4>
+        <h4>Lists Tab - Dark Themed</h4>
         <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Themed" width="200"/>
       </td>
       <td align="center">
-        <h4>Stats Screen - Light Themed</h4>
-        <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="200"/>
+        <h4>History Tab - Light Themed</h4>
+        <img src="app_code/assets/images/history_tab.jpeg" alt="List It History Tab - Light Themed" width="200"/>
+      </td>
+      <td align="center">
+        <h4>Supermarket Tab - Light Themed</h4>
+        <img src="app_code/assets/images/sup_view.jpeg" alt="List It Supermarket Tab - Light Themed" width="200"/>
+      </td>
+      <td align="center">
+        <h4>Stats Tab - Light Themed</h4>
+        <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Tab - Light Themed" width="200"/>
       </td>
     </tr>
   </table>
-
-  <h3>Home Screen - Dark Themed</h3>
-  <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Themed" width="200"/>
-  
-  <h3>Stats Screen - Light Themed</h3>
-  <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="200"/>
   
   <h3>Home Screen Tablet View with List Detail Screen</h3>
   <img src="app_code/assets/images/tablet_view.jpg" alt="List It - Tablet View" width="500"/>
