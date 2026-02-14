@@ -64,7 +64,7 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
 *   **Repository Pattern:** This pattern decouples the business logic from the data sources. The app uses **Abstract Repositories** to define contracts, with two concrete implementations:
     *   **Real Repositories:** Interact with SQLite, Firebase, and APIs.
     *   **Mock Repositories:** In-memory implementations used strictly for testing.
-*   **Offline-First Sync Engine:** A custom mechanism that intercepts data writes. It saves data immediately to **SQLite** and queues the operation in a local `sync_box`. A background process then pushes these changes to **Firestore** when online, resolving conflicts via a "Last Write Wins" strategy.
+*   **Offline-First Sync Engine:** A custom mechanism that intercepts data writes. It saves data immediately to **SQLite** and queues the operation in a local `sync_box`. A background process then pushes these changes to **Firestore** periodically when online, resolving conflicts via a "Last Write Wins" strategy.
 
 ### 💻 Tech Stack
 
@@ -92,6 +92,39 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
 *   **Testing:** `flutter_test`, `mocktail`, `integration_test`.
 *   **Utilities:** `logger` (debugging), `uuid` (unique IDs), `shared_preferences` (settings).
 *   **UI Components:** `flutter_staggered_grid_view`.
+
+#### Database Schema
+The application primarily uses **SQLite** for local storage, which mirrors the structure in **Firebase Firestore**.
+
+| Entity | Description |
+| :--- | :--- |
+| **ShoppingList** | Represents a user's shopping list. Stores name, creation date, registered status, and trash status. |
+| **Product** | The global catalog of items. Stores the name and visibility status. |
+| **PurchasedProduct** | The central entity linking a `ShoppingList` to a `Product`. Stores specific instance data like **quantity**, **price**, and **category**. |
+| **Category** | Represents supermarket aisles (e.g., Dairy, Bakery). Contains name and localized labels. |
+| **Supermarket** | Stores user-created or downloaded supermarkets. Contains name, favorite status, and ordered list of categories. |
+| **Associations** | A mapping table that learns where specific products are located within specific supermarkets to automate categorization. |
+| **RecipeCache** | Caches AI-generated recipes to improve performance and reduce API calls. |
+| **SyncBox** | A queue table storing local changes (Upserts/Deletes) waiting to be pushed to the cloud. |
+
+Report to the Design Document for further details.
+
+
+## 🔧 Project Structure
+
+```text
+/lib
+├── l10n/          # Multi-language support (English/Italian).
+├── models/        # Core data entities (ShoppingList, Product, User, etc.).
+├── providers/     # Riverpod state management classes.
+├── repositories/  # Abstractions for data access (Mock & Real implementations).
+├── screens/       # UI Views and adaptive layouts.
+├── services/      # External API clients (Gemini, OCR, Location).
+├── styles/        # Theme, color, and style definitions.
+├── utils/         # Helper functions and utilities.
+├── widgets/       # Reusable UI components and custom widgets.
+└── main.dart      # Application entry point.
+```
 
 ## 📱 Screenshots
 
@@ -145,17 +178,18 @@ The app's logic is divided into three distinct layers, facilitating a unidirecti
 
 ### Showcased Features 
 
-- **Home Screens**: Home interfaces to interact with the app and its main features.
-- **Theme Support**: Both light and dark mode available.
-- **Statistics Tab**: Intuitive interface for the management and analysis of historical purchases through time.
-- **List Edit Screen**: The tablet screen shows the interface to automatically add products in a list. The list edit screen reserves its layout on both mobile and tablet devices.
-- **Font Size**: The app can be adaptd to the user preferences and needs by enlarging or shrinking the font size.
-
+- **Lists Home Tab**: Interface for the creation of new shopping lists.
+- **History Tab**: Interface to access registered shopping lists.
+- **Supermarkets Tab**: Interface to create/edit/delete and manage supermarkets and their categroies.
+- **Statistics Tab**: Intuitive interface for the management and analysis of historical expenses through time.
+- **Theme Support**: Both light and dark modes are available.
+- **List Edit Screen**: The tablet view shows the interface to add and automatically categorize products in a list. The list edit screen preserves its layout on both mobile and tablet devices.
+- **Font Size Adaptation**: The app can be adapted to the user preferences and needs by enlarging or shrinking the font size.
 
 ## 🔐 Security & Privacy
 
 - **Authentication**: Supports Anonymous login, Email/Password, and Google Sign-In via Firebase Auth.
-- **Verification**: Users signing up are requestd to vrify their emails through a verification link sent to them.
+- **Verification**: Users signing up are requestd to verify their emails through a link sent to their inboxes.
 - **Credential Recovery**: Users can recover their forgotten passwords through a recovery link.
 - **Data Privacy**: Anonymous users keep data locally until account linking. Receipt processing happens on-device (OCR) before secure AI processing.
 
@@ -177,10 +211,12 @@ The application supports multiple languages through Flutter's internationalizati
 
 ## 🧪 Testing
 
-The project maintains a high standard of quality assurance with approximately **70% code coverage**.
+The project maintains a high standard of quality assurance with approximately **70% code coverage**. 
+The uncovered percentages are due to: complex widgets/animations, rare branches, interaction with external services and platform specific, generated and boilerplpate code. 
 
 Testing environemets were dsigned by mocking calls to Local/Remote Services for dependency isolation.
-Testing is mainly performed by the `flutter_test` library. Mocked interactions were built by the usage of custom mocked classes and the `mocktail` library
+Testing is mainly performed by the `flutter_test` library. Mocked interactions were designed by the usage of custom mocked classes and the `mocktail` library.
+Integration tests were performed by the usage of the `integration_test` library.
 
 - **Unit Tests**: Validate models, repositories, and the synchronization logic.
 - **Widget Tests**: Verify UI components and screen interactions.
@@ -227,21 +263,22 @@ To run the app, you must provide the Gemini API key using the `--dart-define` fl
 flutter run --dart-define=GEMINI_API_KEY=your_actual_api_key_here
 ```
 
-## 🔧 Project Structure
+## 🤝 Contributing
 
-```text
-/lib
-├── l10n/          # Multi-language support (English/Italian).
-├── models/        # Core data entities (ShoppingList, Product, User, etc.).
-├── providers/     # Riverpod state management classes.
-├── repositories/  # Abstractions for data access (Mock & Real implementations).
-├── screens/       # UI Views and adaptive layouts.
-├── services/      # External API clients (Gemini, OCR, Location).
-├── styles/        # Theme, color, and style definitions.
-├── utils/         # Helper functions and utilities.
-├── widgets/       # Reusable UI components and custom widgets.
-└── main.dart      # Application entry point.
-```
+We welcome contributions to improve List It! Please follow these steps:
+
+1.  **Fork the repository**
+2.  **Create a feature/chore/fix branch** (`e.g. git checkout -b feature/x`)
+3.  **Commit your changes** (`e.g. git commit -m 'Commit message'`)
+4.  **Push to the branch** (`e.g. git push origin feature/x`)
+5.  **Open a Pull Request** to merge changes in main branch.
+
+### Development Guidelines
+
+-   **Style**: Follow standard [Flutter/Dart style guidelines](https://dart.dev/guides/language/effective-dart/style).
+-   **Architecture**: Maintain the Repository Pattern. UI logic should stay in Controllers/Notifiers, not in the Widget tree.
+-   **Testing**: New features must include Unit and Widget tests. Ensure existing tests pass before submitting a PR.
+-   **Localization**: All user-facing strings must be added to the ARB files in `lib/l10n/` to support internationalization.
 
 ## 👥 Authors
 
@@ -251,4 +288,11 @@ flutter run --dart-define=GEMINI_API_KEY=your_actual_api_key_here
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+<div align="center">
+  <p>List It, A Flutter App.</p>
+</div>
 ```
+
+
+
