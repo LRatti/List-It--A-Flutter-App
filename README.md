@@ -47,46 +47,108 @@ Grocery shopping is often inefficient due to disorganized lists and difficult ex
 
 ## 🛠️ Architecture & Tech Stack
 
-The application follows a clean, layered architecture to ensure separation of concerns and testability.
+The application follows a clean, **Layered Architecture** to ensure separation of concerns, scalability, and testability.
 
-### High-Level Architecture
-The app implements a **Repository Pattern** with a custom sync layer.
+### 🏗️ Architecture Design
 
-`UI` ↔ `UI Controllers` ↔  `Notifiers (Riverpod)` ↔ `Repositories` ↔ `Data Sources (Local/Remote Services)`
+The app's logic is divided into three distinct layers, facilitating a unidirectional data flow and easy mocking for tests.
 
-1.  **Offline-First Strategy:** All reads/writes happen against the local SQLite database.
-2.  **Sync Engine:** A background process monitors a local `sync_box` table. It pushes changes to Firestore and pulls remote updates using a "Last Write Wins" conflict resolution strategy.
-3. **Soft Deletes**: Data is marked as deleted (`isDeleted`) rather than immediately removed to ensure sync consistency.
+**1. Presentation Layer (UI)**
+*   **Widgets & Screens:** Responsible only for rendering the UI and listening to user input.
+*   **Responsiveness:** Adapts layout strategies based on device type (Mobile vs Tablet).
 
-### Core Technologies
-*   **Framework:** Flutter
-*   **State Management:** [Riverpod](https://riverpod.dev/)
-*   **Local Database:** [sqflite](https://pub.dev/packages/sqflite) (SQLite) for offline persistance
-*   **Remote Backend:** [Firebase (Auth, Firestore)](https://firebase.google.com/?_gl=1*1som8j*_up*MQ..&gclid=CjwKCAiAtLvMBhB_EiwA1u6_Pg4fqRTGb7QH1aNcPyIUfjXRpmRlNDXXJ9n7DhN59HPhoy2GkEMRZRoCjL0QAvD_BwE&gclsrc=aw.ds) 
-*   **AI & ML:** [Google Gemini](https://pub.dev/packages/google_generative_ai), [Google ML Kit](https://pub.dev/packages/google_mlkit_text_recognition)
-*   **Maps**: [OpenStreetMap](https://www.openstreetmap.org/#map=6/42.09/12.56) via [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API)
-*   **Location:** [geolocator](https://pub.dev/packages/geolocator)
-*   **Camera:** [camera](https://pub.dev/packages/camera)
+**2. Application Layer (State Management)**
+*   **Riverpod Providers & Notifiers:** Acts as the bridge between the UI and the Data layer. It holds the transient state, handles business logic (like counting total prices), and triggers side effects.
+
+**3. Data Layer (Repositories & Sources)**
+*   **Repository Pattern:** This pattern decouples the business logic from the data sources. The app uses **Abstract Repositories** to define contracts, with two concrete implementations:
+    *   **Real Repositories:** Interact with SQLite, Firebase, and APIs.
+    *   **Mock Repositories:** In-memory implementations used strictly for testing.
+*   **Offline-First Sync Engine:** A custom mechanism that intercepts data writes. It saves data immediately to **SQLite** and queues the operation in a local `sync_box`. A background process then pushes these changes to **Firestore** when online, resolving conflicts via a "Last Write Wins" strategy.
+
+### 💻 Tech Stack
+
+#### 🎨 Frontend
+*   **Framework:** Flutter (Dart)
+*   **State Management:** [Riverpod](https://riverpod.dev/) (AsyncNotifier/Provider)
+*   **Localization:** `flutter_localizations` & `intl` (ARB files)
+
+#### ☁️ Backend & Data
+*   **Cloud Backend:** Firebase (Firestore, Auth)
+*   **Local Database:** [sqflite](https://pub.dev/packages/sqflite) (SQLite)
+
+#### 🤖 AI & External Services
+*   **Generative AI:** [Google Generative AI](https://pub.dev/packages/google_generative_ai) (Gemini Flash 2.5)
+*   **Machine Learning:** [Google ML Kit](https://pub.dev/packages/google_mlkit_text_recognition) (On-device OCR)
+*   **Maps API:** [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) (OpenStreetMap data)
+
+#### 📱 Device Services (Drivers/Plugins)
+*   **Camera:** `camera` package for capturing receipts.
+*   **Location:** `geolocator` for GPS coordinates.
+*   **Connectivity:** `connectivity_plus` to monitor network status for sync.
+*   **Linking:** `url_launcher` to open external map applications.
+
+#### 📚 Key Libraries
+*   **Testing:** `flutter_test`, `mocktail`, `integration_test`.
+*   **Utilities:** `logger` (debugging), `uuid` (unique IDs), `shared_preferences` (settings).
+*   **UI Components:** `flutter_staggered_grid_view`.
 
 ## 📱 Screenshots
 
 <div align="center">
+
+<h3 align="center">Main Home Tabs</h3>
+
+  <table align="center">
+    <tr>
+      <td align="center">
+        <h4>Home Screen - Dark Themed</h4>
+        <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Themed" width="200"/>
+      </td>
+      <td align="center">
+        <h4>Stats Screen - Light Themed</h4>
+        <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="200"/>
+      </td>
+    </tr>
+  </table>
+
   <h3>Home Screen - Dark Themed</h3>
-  <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Themed" width="300"/>
+  <img src="app_code/assets/images/home_screen_dark_themed.png" alt="List It Home Screen - Dark Themed" width="200"/>
   
   <h3>Stats Screen - Light Themed</h3>
-  <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="300"/>
+  <img src="app_code/assets/images/statistics_tab.png" alt="List It Stats Screen - Light Themed" width="200"/>
   
   <h3>Home Screen Tablet View with List Detail Screen</h3>
   <img src="app_code/assets/images/tablet_view.jpg" alt="List It - Tablet View" width="500"/>
+
+  <h3 align="center">Settings Screen - Font Size Comparison</h3>
+
+  <table align="center">
+    <tr>
+      <td align="center">
+        <h4>Small Font Size</h4>
+        <img src="app_code/assets/images/min_text_dim.jpeg"
+             alt="List It Settings Screen - Small Font"
+             width="200"/>
+      </td>
+      <td align="center">
+        <h4>Large Font Size</h4>
+        <img src="app_code/assets/images/max_text_dim.jpeg"
+             alt="List It Settings Screen - Large Font"
+             width="200"/>
+      </td>
+    </tr>
+  </table>
 </div>
 
 ### Showcased Features 
 
-- **User Dashboard**: Clean, intuitive interface for meal planning
-- **Theme Support**: Both light and dark mode available
-- **Meal Plan Management**: Easy-to-use interface for viewing and managing meal plans
-- **Progress Tracking**: Visual indicators for meal completion status
+- **Lists Home Tab**: Interface for the creation of new shopping lists.
+- **Theme Support**: Both light and dark mode available.
+- **Statistics Tab**: Intuitive interface for the management and analysis of historical purchases through time.
+- **List Edit Screen**: The tablet screen shows the interface to automatically add products in a list. The list edit screen reserves its layout on both mobile and tablet devices.
+- **Font Size**: The app can be adaptd to the user preferences and needs by enlarging or shrinking the font size.
+
 
 ## 🔐 Security & Privacy
 
