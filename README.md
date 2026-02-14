@@ -24,7 +24,6 @@
 Grocery shopping is often inefficient due to disorganized lists and difficult expense tracking. **List It** solves these problems by:
 1.  **Automating Organization:** Automatically categorizing products to match supermarket aisles using AI.
 2.  **Tracking Expenses:** extracting prices from receipts via OCR and AI to provide detailed spending statistics.
-3.  **Syncing Everywhere:** Implementing a custom **offline-first** synchronization engine to keep data consistent across devices.
 
 ## ✨ Key Features
 
@@ -35,7 +34,6 @@ Grocery shopping is often inefficient due to disorganized lists and difficult ex
 
 ### 📍 Location & Context
 -   **Supermarket Awareness:** Retrieves the nearest supermarkets using **OpenStreetMap (Overpass API)**.
--   **Custom Layouts:** Reorder categories per supermarket to match the physical aisle layout.
 
 ### 📊 Data & Sync
 -   **Offline-First:** Works entirely without an internet connection using a local SQLite database.
@@ -43,7 +41,7 @@ Grocery shopping is often inefficient due to disorganized lists and difficult ex
 -   **Statistics:** Aggregated expense charts by time period and category.
 
 ### 📱 User Experience
--   **Cross-Platform:** Android & iOS.
+-   **Cross-Platform:** Android 5+ & iOS 3+, iPadOS 13+.
 -   **Adaptive UI:** Optimized layouts for both **Smartphones** and **Tablets** (Master-Detail view).
 -   **Accessibility:** Dark Mode, Font Size Scaling, and Localization (English/Italian).
 
@@ -58,11 +56,12 @@ The application follows a clean, layered architecture to ensure separation of co
 *   **Remote Backend:** Firebase (Auth, Firestore)
 *   **AI & ML:** [google_generative_ai](https://pub.dev/packages/google_generative_ai), [google_mlkit_text_recognition](https://pub.dev/packages/google_mlkit_text_recognition)
 *   **Location:** [geolocator](https://pub.dev/packages/geolocator)
+*   **Camera:** [camera](https://pub.dev/packages/camera)
 
 ### High-Level Architecture
 The app implements a **Repository Pattern** with a custom sync layer:
 
-`UI` ↔ `UI Controllers` ↔  `Notifiers (Riverpod)` ↔ `Repositories` ↔ `Data Sources (Local/Remote)`
+`UI` ↔ `UI Controllers` ↔  `Notifiers (Riverpod)` ↔ `Repositories` ↔ `Data Sources (Local/Remote Services)`
 
 1.  **Offline-First Strategy:** All reads/writes happen against the local SQLite database.
 2.  **Sync Engine:** A background process monitors a local `sync_box` table. It pushes changes to Firestore and pulls remote updates using a "Last Write Wins" conflict resolution strategy.
@@ -87,8 +86,11 @@ The app implements a **Repository Pattern** with a custom sync layer:
 
 The project maintains a high standard of quality assurance with approximately **70% code coverage**.
 
+Testing environemets were dsigned by mocking calls to Local/Remote Services for dependency isolation.
+Testing is mainly performed by the `flutter_test` library. Mocked interactions were built by the usage of custom mocked classes and the `mocktail` library
+
 - **Unit Tests**: Validate models, repositories, and the synchronization logic.
-- **Widget Tests**: Verify UI components and screen interactions using `mocktail` for dependency isolation.
+- **Widget Tests**: Verify UI components and screen interactions.
 - **Integration Tests**: Cover 6 critical user flows:
     1.  Authentication Flow.
     2.  List Registration & Persistence.
@@ -96,6 +98,7 @@ The project maintains a high standard of quality assurance with approximately **
     4.  Supermarket Management.
     5.  Statistics Updates.
     6.  Category Persistence.
+ - **User Tests**: A user was given the possibility to test the application for 48h. Afterwars, th user was submitted a structured questioneer to return feedback. The user's answers are reported in the Design Document. The feedback positive.
 
 ## 🚀 Getting Started
 
