@@ -3,7 +3,7 @@
 **List It** is a smart, offline-first grocery shopping assistant designed to make the shopping process efficient and insightful. Built with **Flutter**, it leverages Generative AI and on-device Machine Learning to automate list organization and track spending habits.
 
 <div align="center">
-  <img src="assets/images/app_logo.png" alt="WellPlate Logo" width="200" height="200"/>
+  <img src="app_code/assets/images/app_logo.png" alt="List It Logo" width="200" height="200"/>
   
   [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev/)
   [![Dart](https://img.shields.io/badge/Dart-3.9.2-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev/)
